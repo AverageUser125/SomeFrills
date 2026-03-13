@@ -2,8 +2,11 @@
 **/build/
 !src/**/build/
 gradle-app.setting
-!gradle-wrapper.jar
-!gradle-wrapper.properties
+# explicitly allow Gradle wrapper files
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+!gradlew
+!gradlew.bat
 .gradletasknamecache
 .project
 .classpath
