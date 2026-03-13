@@ -6,7 +6,8 @@
   "mixins": [
     "CreeperEntityMixin",
     "CreeperEntityRenderStateMixin",
-    "MinecraftClientMixin"
+    "MinecraftClientMixin",
+    "ConnectionMixin"
   ]
 }
 
