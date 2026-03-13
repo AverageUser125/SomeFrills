@@ -8,6 +8,7 @@ public class ExampleModClient implements ClientModInitializer {
     private ExperimentIntegration experimentIntegration;
     private ChocolateFactory chocolateFactory;
     private RNGMeterDisplay rngMeterDisplay;
+
     @Override
     public void onInitializeClient() {
         glowPlayerCommand = new GlowPlayerCommand();

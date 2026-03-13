@@ -23,7 +23,7 @@ public class ConnectionMixin {
         if (packet instanceof CustomPayloadC2SPacket customPayloadPacket) {
             CustomPayload payload = customPayloadPacket.payload();
             CustomPayload.Id<?> type = payload.getId();
-            if(type == null) return;
+            if (type == null) return;
             String typeId = type.id().toString();
             if (typeId.equals("firmament:mod_list")) {
                 glowplayer$LOGGER.info("Blocked Firmament mod announcer packet (evil)");

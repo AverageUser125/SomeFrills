@@ -88,7 +88,7 @@ public class RNGMeterDisplay {
      * Sets custom tooltips with formatted RNG data.
      * This is called every tick to keep tooltips up-to-date.
      *
-     * @param stack The item stack to analyze
+     * @param stack    The item stack to analyze
      * @param loreText The full lore text from the item
      */
     private void analyzeRngItem(ItemStack stack, String loreText) {

@@ -3,14 +3,11 @@ package com.example;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-
-import java.util.List;
 
 /**
  * Fabric 1.21.10 port of the Kotlin ChocolateFactory module.
@@ -65,7 +62,7 @@ public class ChocolateFactory {
             // Check if this is a claimable item (CLICK ME! or Golden Rabbit)
             if (displayName.contains("Golden Rabbit")) {
                 // Check click delay
-                if (System.currentTimeMillis() - nextClaimTime < AllConfig.claimDelay*100) return;
+                if (System.currentTimeMillis() - nextClaimTime < AllConfig.claimDelay * 100) return;
                 sendClickPacket(handler, slot.getIndex());
                 nextClaimTime = System.currentTimeMillis();
                 return; // Only click one per tick
