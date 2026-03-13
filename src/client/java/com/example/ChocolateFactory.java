@@ -19,7 +19,7 @@ import java.util.List;
 public class ChocolateFactory {
     private static final String CHOCOLATE_FACTORY_TITLE = "Chocolate Factory";
 
-    private long lastClaimTime = 0;
+    private long nextClaimTime = 0;
 
     public ChocolateFactory() {
         ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
@@ -44,8 +44,6 @@ public class ChocolateFactory {
         // Check if we're in the Chocolate Factory menu
         if (!title.equals(CHOCOLATE_FACTORY_TITLE)) return;
 
-        // Check click delay
-        if (System.currentTimeMillis() - lastClaimTime < AllConfig.claimDelay) return;
 
         // Scan for claimable items
         for (Slot slot : handler.slots) {
@@ -54,23 +52,22 @@ public class ChocolateFactory {
 
             String displayName = stack.getName().getString();
 
+
             // Check if this is a claimable item (CLICK ME! or Golden Rabbit)
-            if (displayName.contains("CLICK ME!") || displayName.contains("Golden Rabbit")) {
+            if (displayName.contains("CLICK ME!")) {
+                // Check click delay
+                if (System.currentTimeMillis() - nextClaimTime < AllConfig.claimDelay) return;
                 sendClickPacket(handler, slot.getIndex());
-                lastClaimTime = System.currentTimeMillis();
+                nextClaimTime = System.currentTimeMillis();
                 return; // Only click one per tick
             }
-            // convert to string
-            List<Text> loreLines = stack.getComponents().get(DataComponentTypes.LORE).lines();
-            if (loreLines == null) continue;
-            String loreName = loreLines
-                    .stream()
-                    .map(Text::getString)
-                    .reduce((a, b) -> a + "\n" + b)
-                    .orElse("");
-            if (loreName.contains("does not stop it from being")) {
+
+            // Check if this is a claimable item (CLICK ME! or Golden Rabbit)
+            if (displayName.contains("Golden Rabbit")) {
+                // Check click delay
+                if (System.currentTimeMillis() - nextClaimTime < AllConfig.claimDelay*100) return;
                 sendClickPacket(handler, slot.getIndex());
-                lastClaimTime = System.currentTimeMillis();
+                nextClaimTime = System.currentTimeMillis();
                 return; // Only click one per tick
             }
         }
