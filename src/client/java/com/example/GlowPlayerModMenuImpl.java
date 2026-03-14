@@ -222,6 +222,23 @@ public class GlowPlayerModMenuImpl implements ModMenuApi {
                         .build()
         );
 
+        // ===== Fixes Category =====
+        ConfigCategory fixesCategory =
+                builder.getOrCreateCategory(Text.literal("Fixes"));
+
+        // Gemstone Dsync Fix
+        fixesCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Gemstone Dsync Fix"),
+                                AllConfig.gemstoneDsyncFix
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.gemstoneDsyncFix = value)
+                        .setTooltip(Text.literal("Fix desynchronization issues with gemstone drops"))
+                        .build()
+        );
+
         return builder.build();
     }
 

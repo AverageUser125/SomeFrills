@@ -20,8 +20,7 @@ public class ConnectionMixin {
 
     @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void glowplayer$interceptPackets(Packet<?> packet, CallbackInfo ci) {
-        if (packet instanceof CustomPayloadC2SPacket customPayloadPacket) {
-            CustomPayload payload = customPayloadPacket.payload();
+        if (packet instanceof CustomPayloadC2SPacket(CustomPayload payload)) {
             CustomPayload.Id<?> type = payload.getId();
             if (type == null) return;
             String typeId = type.id().toString();
