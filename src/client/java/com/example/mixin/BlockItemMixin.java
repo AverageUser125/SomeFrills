@@ -1,7 +1,7 @@
 package com.example.mixin;
 
-import com.example.AllConfig;
-import com.example.NoAbilityPlace;
+import com.example.tweaks.NoAbilityPlace;
+import com.example.utils.AllConfig;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;

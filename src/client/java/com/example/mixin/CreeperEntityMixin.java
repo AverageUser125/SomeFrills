@@ -1,6 +1,6 @@
 package com.example.mixin;
 
-import com.example.AllConfig;
+import com.example.utils.AllConfig;
 import net.minecraft.client.render.entity.feature.CreeperChargeFeatureRenderer;
 import net.minecraft.client.render.entity.state.CreeperEntityRenderState;
 import org.spongepowered.asm.mixin.Mixin;

@@ -1,5 +1,6 @@
-package com.example;
+package com.example.tweaks;
 
+import com.example.utils.Utils;
 import com.google.common.collect.Sets;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;

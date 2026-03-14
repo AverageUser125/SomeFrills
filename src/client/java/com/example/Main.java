@@ -1,5 +1,9 @@
 package com.example;
 
+import com.example.features.ChocolateFactory;
+import com.example.features.ExperimentIntegration;
+import com.example.features.GlowPlayerCommand;
+import com.example.features.RNGMeterDisplay;
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.MinecraftClient;
 

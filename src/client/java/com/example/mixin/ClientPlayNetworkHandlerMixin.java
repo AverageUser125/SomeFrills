@@ -1,8 +1,8 @@
 package com.example.mixin;
 
 
-import com.example.AllConfig;
-import com.example.BreakResetFix;
+import com.example.tweaks.BreakResetFix;
+import com.example.utils.AllConfig;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;

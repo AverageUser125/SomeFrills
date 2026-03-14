@@ -1,8 +1,8 @@
 package com.example.mixin;
 
 
-import com.example.AllConfig;
-import com.example.MiddleClickOverride;
+import com.example.tweaks.MiddleClickOverride;
+import com.example.utils.AllConfig;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;

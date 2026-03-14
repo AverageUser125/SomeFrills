@@ -1,4 +1,4 @@
-package com.example;
+package com.example.utils;
 
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;

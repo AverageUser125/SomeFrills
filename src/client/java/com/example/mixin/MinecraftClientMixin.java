@@ -1,8 +1,8 @@
 package com.example.mixin;
 
-import com.example.AllConfig;
-import com.example.DoubleUseFix;
-import com.example.GlowManager;
+import com.example.tweaks.DoubleUseFix;
+import com.example.utils.AllConfig;
+import com.example.utils.GlowManager;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.world.LevelLoadingScreen;
 import net.minecraft.client.network.AbstractClientPlayerEntity;

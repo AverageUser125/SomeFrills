@@ -1,5 +1,6 @@
-package com.example;
+package com.example.tweaks;
 
+import com.example.utils.AllConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.StainedGlassBlock;

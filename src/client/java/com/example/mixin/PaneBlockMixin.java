@@ -1,7 +1,7 @@
 package com.example.mixin;
 
-import com.example.AllConfig;
-import com.example.GemstoneDesyncFix;
+import com.example.tweaks.GemstoneDesyncFix;
+import com.example.utils.AllConfig;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PaneBlock;

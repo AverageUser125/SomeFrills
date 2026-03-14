@@ -1,6 +1,6 @@
 package com.example.mixin;
 
-import com.example.AllConfig;
+import com.example.utils.AllConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.text.Text;

@@ -1,5 +1,7 @@
-package com.example;
+package com.example.features;
 
+import com.example.utils.GlowManager;
+import com.example.utils.GlowTeamManager;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;

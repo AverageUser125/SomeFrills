@@ -1,5 +1,7 @@
-package com.example;
+package com.example.tweaks;
 
+import com.example.utils.AllConfig;
+import com.example.utils.Utils;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;

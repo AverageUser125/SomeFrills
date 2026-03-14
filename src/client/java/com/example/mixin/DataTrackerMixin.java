@@ -1,6 +1,6 @@
 package com.example.mixin;
 
-import com.example.AllConfig;
+import com.example.utils.AllConfig;
 import net.minecraft.entity.data.DataTracker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

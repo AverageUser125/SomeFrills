@@ -1,6 +1,7 @@
-package com.example;
+package com.example.tweaks;
 
 import com.example.mixin.ClientPlayerInteractionManagerAccessor;
+import com.example.utils.AllConfig;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 

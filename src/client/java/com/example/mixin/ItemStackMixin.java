@@ -1,7 +1,7 @@
 package com.example.mixin;
 
 
-import com.example.AllConfig;
+import com.example.utils.AllConfig;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;

@@ -1,6 +1,6 @@
 package com.example.mixin;
 
-import com.example.GemstoneDesyncFix;
+import com.example.tweaks.GemstoneDesyncFix;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
