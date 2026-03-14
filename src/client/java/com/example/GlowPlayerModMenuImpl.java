@@ -223,11 +223,11 @@ public class GlowPlayerModMenuImpl implements ModMenuApi {
         );
 
         // ===== Fixes Category =====
-        ConfigCategory fixesCategory =
-                builder.getOrCreateCategory(Text.literal("Fixes"));
+        ConfigCategory tweaksCategory =
+                builder.getOrCreateCategory(Text.literal("Tweaks and Fixes"));
 
         // Gemstone Dsync Fix
-        fixesCategory.addEntry(
+        tweaksCategory.addEntry(
                 builder.entryBuilder()
                         .startBooleanToggle(
                                 Text.literal("Gemstone Dsync Fix"),
@@ -240,7 +240,7 @@ public class GlowPlayerModMenuImpl implements ModMenuApi {
         );
 
         // Break Reset Fix
-        fixesCategory.addEntry(
+        tweaksCategory.addEntry(
                 builder.entryBuilder()
                         .startBooleanToggle(
                                 Text.literal("Break Reset Fix"),
@@ -249,6 +249,110 @@ public class GlowPlayerModMenuImpl implements ModMenuApi {
                         .setDefaultValue(true)
                         .setSaveConsumer(value -> AllConfig.breakResetFix = value)
                         .setTooltip(Text.literal("Fix issues with block break state resets"))
+                        .build()
+        );
+
+        // Item Count Fix
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Item Count Fix"),
+                                AllConfig.itemCountFix
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.itemCountFix = value)
+                        .setTooltip(Text.literal("Fix item count display issues"))
+                        .build()
+        );
+
+        // No Pearl Cooldown
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("No Pearl Cooldown"),
+                                AllConfig.noPearlCooldown
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.noPearlCooldown = value)
+                        .setTooltip(Text.literal("Remove cooldown from pearl usage"))
+                        .build()
+        );
+
+        // Middle Click Fix
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Middle Click Fix"),
+                                AllConfig.middleClickFix
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.middleClickFix = value)
+                        .setTooltip(Text.literal("Fix middle click interaction issues"))
+                        .build()
+        );
+
+        // Double Use Fix
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Double Use Fix"),
+                                AllConfig.doubleUseFix
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.doubleUseFix = value)
+                        .setTooltip(Text.literal("Fix issues with double item usage"))
+                        .build()
+        );
+
+        // Middle Click Override
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Middle Click Override"),
+                                AllConfig.middleClickOverride
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.middleClickOverride = value)
+                        .setTooltip(Text.literal("Replace left click with middle click where possible to improve user experience"))
+                        .build()
+        );
+
+        // No Loading Screen
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("No Loading Screen"),
+                                AllConfig.noLoadingScreen
+                        )
+                        .setDefaultValue(false)
+                        .setSaveConsumer(value -> AllConfig.noLoadingScreen = value)
+                        .setTooltip(Text.literal("Skip loading screens"))
+                        .build()
+        );
+
+        // Disconnect Fix
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Disconnect Fix"),
+                                AllConfig.disconnectFix
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.disconnectFix = value)
+                        .setTooltip(Text.literal("Fix disconnection issues"))
+                        .build()
+        );
+
+        // Animations Fix
+        tweaksCategory.addEntry(
+                builder.entryBuilder()
+                        .startBooleanToggle(
+                                Text.literal("Animations Fix"),
+                                AllConfig.animationsFix
+                        )
+                        .setDefaultValue(true)
+                        .setSaveConsumer(value -> AllConfig.animationsFix = value)
+                        .setTooltip(Text.literal("Fixes the sneaking/swimming animations being able to play twice."))
                         .build()
         );
 

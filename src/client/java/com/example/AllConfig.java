@@ -42,6 +42,15 @@ public class AllConfig {
     public static boolean debugRngDisplay = false;     // enable debug output for RNG display
     public static boolean gemstoneDsyncFix = true;
     public static boolean breakResetFix = true;
+    public static boolean itemCountFix = true;
+    public static boolean noPearlCooldown = true;
+    public static boolean middleClickFix = true;
+    public static boolean doubleUseFix = true;
+    public static boolean middleClickOverride = true;
+    public static boolean noLoadingScreen = false;
+    public static boolean disconnectFix = true;
+    public static boolean animationsFix = true;
+    public static boolean animationsFix = true;
 
     static {
         load();

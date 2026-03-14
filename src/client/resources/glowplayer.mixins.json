@@ -11,7 +11,10 @@
     "PaneBlockMixin",
     "WorldMixin",
     "ClientPlayerInteractionManagerAccessor",
-    "ClientPlayNetworkHandlerMixin"
+    "ClientPlayNetworkHandlerMixin",
+    "ItemStackMixin",
+    "HandledScreenMixin",
+    "DataTrackerMixin"
   ]
 }
 
