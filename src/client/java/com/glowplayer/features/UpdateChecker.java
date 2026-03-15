@@ -13,6 +13,7 @@ import static net.fabricmc.loader.impl.FabricLoaderImpl.MOD_ID;
 
 public class UpdateChecker {
     private static boolean hasChecked = false;
+
     public static void checkUpdate() {
         if (hasChecked) return;
         hasChecked = true;

@@ -41,6 +41,7 @@ public class ClientPlayNetworkHandlerMixin {
             }
         }
     }
+
     @Inject(method = "onGameJoin", at = @At("TAIL"))
     private void onJoinGame(GameJoinS2CPacket packet, CallbackInfo ci) {
         UpdateChecker.checkUpdate();

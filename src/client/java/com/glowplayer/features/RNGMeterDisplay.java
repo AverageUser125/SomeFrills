@@ -1,23 +1,22 @@
 package com.glowplayer.features;
 
 import com.glowplayer.utils.AllConfig;
+import com.glowplayer.utils.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.glowplayer.Main.mc;
 
 /**
  * Fabric 1.21.10 RNG Meter Display feature.
@@ -26,15 +25,15 @@ import static com.glowplayer.Main.mc;
  */
 public class RNGMeterDisplay {
     private static final String RNG_METER_SUFFIX = "RNG Meter";
+    private static final String ORIGINAL_LORE_NBT_KEY = "GlowPlayer_OriginalLore";
     // Pattern to match both single and dual percentage formats
     // Handles formatting codes like §8§m (dark gray + strikethrough), §o (italic), §l (bold), etc.
     // Matches: "Odds: TEXT (0.005%)" or "Odds: TEXT (§8§m0.005%§r 0.104%)"
     private static final Pattern ODDS_PATTERN = Pattern.compile("Odds: (.+?) \\(([§\\w.0-9]+)%([^)]*?)\\)");
-    private static final Pattern RUNS_PATTERN = Pattern.compile("(Dungeon Score|Slayer XP): ([0-9,]+)/([0-9,]+)");
-    private static final Pattern PROGRESS_PATTERN = Pattern.compile("Progress: ([0-9.]+)%\\s+([0-9,]+)/([0-9,.a-z]+)");
 
-    private boolean showFractions = false;
-    private boolean pressedShiftLast = false;
+    private boolean wasShiftPressed = false;
+    // Keep track of original lore lines in memory to preserve styling
+    private final java.util.Map<String, List<Text>> storedLoreMap = new java.util.HashMap<>();
 
     public RNGMeterDisplay() {
         ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
@@ -60,6 +59,8 @@ public class RNGMeterDisplay {
             return;
         }
 
+        boolean shiftPressed = Utils.isShiftKeyPressed();
+
         // Scan for RNG meter items with valuable lore
         for (Slot slot : handler.slots) {
             ItemStack stack = slot.getStack();
@@ -79,52 +80,45 @@ public class RNGMeterDisplay {
 
             // Check if this item contains RNG odds information
             if (loreText.contains("Odds:")) {
-                analyzeRngItem(stack, loreText);
+                if (shiftPressed) {
+                    // Shift is pressed - convert to fractions
+                    analyzeRngItem(stack, loreText, loreLines);
+                } else if (wasShiftPressed) {
+                    // Shift was released - restore original lore
+                    restoreOriginalLore(stack);
+                }
             }
         }
 
+        wasShiftPressed = shiftPressed;
     }
 
     /**
      * Analyzes an RNG meter item and extracts relevant information from lore.
-     * Looks for odds, chance percentages, and progress information.
-     * Sets custom tooltips with formatted RNG data.
-     * This is called every tick to keep tooltips up-to-date.
+     * Stores original lore before modifying, so it can be restored later.
      *
-     * @param stack    The item stack to analyze
-     * @param loreText The full lore text from the item
+     * @param stack     The item stack to analyze
+     * @param loreText  The full lore text from the item
+     * @param loreLines The original lore lines
      */
-    private void analyzeRngItem(ItemStack stack, String loreText) {
-        List<Text> tooltipLines = new ArrayList<>();
-
-        // Handle shift key toggle for fraction display
-        boolean shiftPressed = isShiftKeyPressed();
-        if (!pressedShiftLast && shiftPressed) {
-            showFractions = !showFractions;
-            debug("SHIFT PRESSED - Toggled to: " + (showFractions ? "FRACTIONS" : "PERCENTAGES"));
-            // Force update by removing marker so tooltip gets reapplied immediately
-            loreText = loreText.replace("§6§lRNG Info:", "REMOVED_MARKER");
+    private void analyzeRngItem(ItemStack stack, String loreText, List<Text> loreLines) {
+        // Store original lore if not already stored
+        if (!hasStoredOriginalLore(stack)) {
+            storeOriginalLore(stack, loreLines);
+            debug("Stored original lore for item: " + stack.getName().getString());
         }
-        pressedShiftLast = shiftPressed;
-
-        // Skip if we've already applied our tooltip to this item
-        if (loreText.contains("§6§lRNG Info:")) {
-            return;
-        }
-
-        debug("===== ANALYZING ITEM =====");
-        debug("Item: " + stack.getName().getString());
-        debug("Lore text length: " + loreText.length());
-        debug("ACTUAL LORE:\n" + loreText);
 
         // Parse odds pattern
         Matcher oddsMatcher = ODDS_PATTERN.matcher(loreText);
 
+        debug("===== ANALYZING ITEM =====");
+        debug("Item: " + stack.getName().getString());
         debug("Checking ODDS_PATTERN...");
+
         if (oddsMatcher.find()) {
             debug("✓ ODDS_PATTERN matched!");
-            String odds = oddsMatcher.group(1);
-            String percentage1 = cleanFormatting(oddsMatcher.group(2)); // Strip formatting codes
+            String fullMatch = oddsMatcher.group(0);  // Full: "Odds: Text (5%)"
+            String percentage1 = Utils.cleanFormatting(oddsMatcher.group(2)); // Strip formatting codes
             String percentage2 = null;
 
             String remaining = oddsMatcher.group(3); // The rest after first percentage
@@ -136,151 +130,120 @@ public class RNGMeterDisplay {
                 }
             }
 
-            addOddsTooltip(tooltipLines, odds, percentage1, percentage2);
+            // Create the fraction replacement text with preserved formatting
+            Text replacementText = createOddsFractionText(fullMatch, percentage1, percentage2);
+
+            // Replace the Odds line in the lore using utility function
+            boolean replaced = Utils.replaceLoreLine(stack, "Odds:", replacementText);
+            if (replaced) {
+                debug("SUCCESS - Replaced Odds line");
+            } else {
+                debug("FAILED - Could not find Odds line to replace");
+            }
         } else {
             debug("✗ ODDS_PATTERN did not match");
         }
+    }
 
-        // Parse progress pattern - try both formats
-        Matcher runsMatcher = RUNS_PATTERN.matcher(loreText);
-        Matcher progressMatcher = PROGRESS_PATTERN.matcher(loreText);
+    /**
+     * Creates a Text object with odds displayed as a fraction only.
+     * Preserves the original formatting and text between Odds and percentage.
+     */
+    private Text createOddsFractionText(String fullOddsMatch, String percentage1, String percentage2) {
+        int chance1 = calculateChance(percentage1);
+        String frac1 = Utils.formatNumberWithCommas(chance1);
 
-        debug("Checking RUNS_PATTERN...");
-        if (runsMatcher.find()) {
-            debug("✓ RUNS_PATTERN matched!");
-            String type = runsMatcher.group(1);
-            String having = runsMatcher.group(2);
-            String needed = runsMatcher.group(3);
-            addProgressTooltip(tooltipLines, type, having, needed);
+        // Extract everything between "Odds: " and the opening parenthesis
+        // This preserves all formatting codes and text in the middle
+        Pattern beforePercentPattern = Pattern.compile("Odds: (.+?) \\(");
+        Matcher matcher = beforePercentPattern.matcher(fullOddsMatch);
+        String beforeParen = "";
+        if (matcher.find()) {
+            beforeParen = matcher.group(1);
+        }
+
+        if (percentage2 != null) {
+            // Dual format: show strikethrough first, then second
+            int chance2 = calculateChance(percentage2);
+            String frac2 = Utils.formatNumberWithCommas(chance2);
+            // Create the replacement with proper formatting
+            String replacement = "Odds: " + beforeParen + " (§8§m1/" + frac1 + "§r §71/" + frac2 + ")";
+            return Text.literal(replacement);
         } else {
-            debug("✗ RUNS_PATTERN did not match");
-            debug("Checking PROGRESS_PATTERN...");
-            if (progressMatcher.find()) {
-                debug("✓ PROGRESS_PATTERN matched!");
-                String progressPercent = progressMatcher.group(1);
-                String having = progressMatcher.group(2);
-                String needed = progressMatcher.group(3);
-                addProgressTooltip(tooltipLines, progressPercent, having, needed);
-            } else {
-                debug("✗ PROGRESS_PATTERN did not match");
-            }
-        }
-
-        debug("Tooltip lines collected: " + tooltipLines.size());
-
-        // Set the tooltip if we found any RNG information
-        if (!tooltipLines.isEmpty()) {
-            debug("ATTEMPTING to set tooltip with " + tooltipLines.size() + " lines");
-
-            try {
-                // Get the existing lore component
-                var loreComponent = stack.getComponents().get(DataComponentTypes.LORE);
-                List<Text> allLines = new ArrayList<>();
-
-                if (loreComponent != null) {
-                    // Start with existing lore
-                    allLines.addAll(loreComponent.lines());
-                    debug("Added " + loreComponent.lines().size() + " existing lore lines");
-                }
-
-                // Add a separator and our RNG info
-                allLines.add(Text.literal(""));
-                allLines.addAll(tooltipLines);
-
-                debug("Total lines before creating component: " + allLines.size());
-
-                // Create new lore component
-                LoreComponent newLoreComponent = new LoreComponent(allLines);
-                debug("LoreComponent created successfully");
-
-                // Attempt to set it
-                stack.set(DataComponentTypes.LORE, newLoreComponent);
-                debug("stack.set() called");
-                debug("SUCCESS - Set tooltip with " + tooltipLines.size() + " info lines");
-            } catch (Exception e) {
-                // Log the full exception with stack trace
-                System.err.println("[RNGMeter] FAILED to set tooltip on ItemStack");
-                System.err.println("[RNGMeter] Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-                e.printStackTrace();
-            }
+            // Single format - preserve original text exactly as it was
+            String replacement = "Odds: " + beforeParen + " (1/" + frac1 + ")";
+            return Text.literal(replacement);
         }
     }
 
-
     /**
-     * Adds odds information to tooltip, with support for fraction display toggle.
-     * Handles both single percentage "Odds: TEXT (5%)" and dual percentage "Odds: TEXT (5% 10%)" formats.
+     * Stores the original lore component in memory.
+     * This preserves all styling and formatting codes without any loss.
      */
-    private void addOddsTooltip(List<Text> tooltipLines, String odds, String percentage1, String percentage2) {
-        tooltipLines.add(Text.literal("§6§lRNG Info:"));
+    private void storeOriginalLore(ItemStack stack, List<Text> loreLines) {
+        String itemKey = getItemKey(stack);
+        // Create a copy of the lore lines to store in memory
+        storedLoreMap.put(itemKey, new ArrayList<>(loreLines));
 
-        if (showFractions) {
-            // Show as fractions
-            int chance1 = calculateChance(percentage1);
-            String frac1 = formatNumber(chance1);
+        // Also mark in NBT so we can detect if lore was modified
+        var customDataComponent = stack.getComponents().get(DataComponentTypes.CUSTOM_DATA);
+        NbtCompound nbt;
 
-            if (percentage2 != null) {
-                // Dual format: show strikethrough first, then second
-                int chance2 = calculateChance(percentage2);
-                String frac2 = formatNumber(chance2);
-                tooltipLines.add(Text.literal("§7Odds: §b" + odds + " §7(§8§m1/" + frac1 + "§r §71/" + frac2 + ")"));
-            } else {
-                // Single format
-                tooltipLines.add(Text.literal("§7Odds: §b" + odds + " §7(§b1/" + frac1 + ")"));
-            }
+        if (customDataComponent != null) {
+            nbt = customDataComponent.copyNbt();
         } else {
-            // Show as percentages
-            if (percentage2 != null) {
-                // Dual format: show strikethrough first, then second
-                tooltipLines.add(Text.literal("§7Odds: §b" + odds + " §7(§8§m" + percentage1 + "%§r §7" + percentage2 + "%§7)"));
+            nbt = new NbtCompound();
+        }
+
+        nbt.putBoolean(ORIGINAL_LORE_NBT_KEY, true);
+        stack.set(DataComponentTypes.CUSTOM_DATA, net.minecraft.component.type.NbtComponent.of(nbt));
+    }
+
+    /**
+     * Gets a unique key for an item based on its name and NBT hash.
+     */
+    private String getItemKey(ItemStack stack) {
+        return stack.getName().getString() + "_" + Integer.toHexString(stack.hashCode());
+    }
+
+    /**
+     * Checks if original lore has been stored.
+     */
+    private boolean hasStoredOriginalLore(ItemStack stack) {
+        NbtCompound customData = Utils.getCustomData(stack);
+        return customData != null && customData.contains(ORIGINAL_LORE_NBT_KEY);
+    }
+
+    /**
+     * Restores the original lore from the in-memory storage.
+     * This restores the exact Text objects with all their styling intact.
+     */
+    private void restoreOriginalLore(ItemStack stack) {
+        String itemKey = getItemKey(stack);
+        List<Text> originalLore = storedLoreMap.get(itemKey);
+
+        if (originalLore == null) {
+            return;
+        }
+
+        // Restore the original lore component directly
+        stack.set(DataComponentTypes.LORE, new LoreComponent(originalLore));
+        debug("Restored original lore for item: " + stack.getName().getString());
+
+        // Clean up the stored NBT data
+        var customDataComponent = stack.getComponents().get(DataComponentTypes.CUSTOM_DATA);
+        if (customDataComponent != null) {
+            NbtCompound nbt = customDataComponent.copyNbt();
+            nbt.remove(ORIGINAL_LORE_NBT_KEY);
+            if (!nbt.isEmpty()) {
+                stack.set(DataComponentTypes.CUSTOM_DATA, net.minecraft.component.type.NbtComponent.of(nbt));
             } else {
-                // Single format
-                tooltipLines.add(Text.literal("§7Odds: §b" + odds + " §7(§e" + percentage1 + "%§7)"));
+                stack.remove(DataComponentTypes.CUSTOM_DATA);
             }
         }
-    }
 
-    /**
-     * Adds progress information to tooltip with runs/bosses needed calculation.
-     * Can handle both "Dungeon Score: X/Y" format and "Progress: X%" format.
-     * Both display the same way - just showing the amounts.
-     */
-    private void addProgressTooltip(List<Text> tooltipLines, String typeOrPercent, String having, String needed) {
-        tooltipLines.add(Text.literal("§6§lProgress:"));
-
-        // Display the same way regardless of format - just show the amount as XP
-        tooltipLines.add(Text.literal("§7XP: §d" + having + "§7/§d" + needed));
-
-        try {
-            int havingVal = parseInt(having);
-            int neededVal = parseInt(needed);
-            if (havingVal >= 0 && neededVal > 0) {
-                int remaining = neededVal - havingVal;
-                tooltipLines.add(Text.literal("§7Remaining: §c" + formatNumber(remaining)));
-            }
-        } catch (NumberFormatException e) {
-            // Could not parse numbers
-        }
-    }
-
-    /**
-     * Checks if shift key is currently pressed using GLFW.
-     */
-    private boolean isShiftKeyPressed() {
-        try {
-            if (mc.getWindow() == null) return false;
-
-            long window = mc.getWindow().getHandle();
-            int shiftLeft = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_LEFT_SHIFT);
-            int shiftRight = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
-
-            return shiftLeft == GLFW.GLFW_PRESS || shiftRight == GLFW.GLFW_PRESS;
-        } catch (Exception e) {
-            if (AllConfig.debugRngDisplay) {
-                System.err.println("[RNGMeter] FAILED - Error checking shift key: " + e.getMessage());
-            }
-            return false;
-        }
+        // Clean up memory
+        storedLoreMap.remove(itemKey);
     }
 
     /**
@@ -300,38 +263,6 @@ public class RNGMeterDisplay {
     }
 
     /**
-     * Formats a number with thousand separators.
-     * E.g., 1234 -> "1,234"
-     */
-    private String formatNumber(int number) {
-        return String.format("%,d", number);
-    }
-
-    /**
-     * Safely parses a number string that may contain commas and/or 'k' suffix.
-     * E.g., "1,234" -> 1234, "918.6k" -> 918600, "1.5m" -> 1500000
-     */
-    private int parseInt(String value) {
-        // Remove commas first
-        value = value.replace(",", "").toLowerCase().trim();
-
-        // Handle 'k' suffix (thousands)
-        if (value.endsWith("k")) {
-            double num = Double.parseDouble(value.substring(0, value.length() - 1));
-            return (int) (num * 1000);
-        }
-
-        // Handle 'm' suffix (millions)
-        if (value.endsWith("m")) {
-            double num = Double.parseDouble(value.substring(0, value.length() - 1));
-            return (int) (num * 1000000);
-        }
-
-        // Regular number
-        return Integer.parseInt(value);
-    }
-
-    /**
      * Debug print utility - only prints if AllConfig.debugRngDisplay is enabled.
      */
     private void debug(String message) {
@@ -339,17 +270,7 @@ public class RNGMeterDisplay {
             System.out.println("[RNGMeter] " + message);
         }
     }
-
-    /**
-     * Removes Minecraft formatting codes (§X) from a string.
-     * E.g., "§8§m0.005§r" -> "0.005"
-     * Matches any character after § (color codes, modifiers, reset, etc.)
-     */
-    private String cleanFormatting(String text) {
-        return text.replaceAll("§.", "");
-    }
 }
-
 
 
 
