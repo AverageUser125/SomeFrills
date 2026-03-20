@@ -5,6 +5,7 @@ import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.OverlayMsgEvent;
 import com.somefrills.events.PartyChatMsgEvent;
 import com.somefrills.features.farming.*;
+import com.somefrills.features.solvers.*;
 import com.somefrills.features.tweaks.*;
 import com.somefrills.features.mining.*;
 import com.somefrills.hud.ClickGui;
@@ -75,6 +76,8 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(DoubleUseFix.class);
         eventBus.subscribe(GemstoneDesyncFix.class);
         eventBus.subscribe(GhostVision.class);
+        eventBus.subscribe(ChocolateFactory.class);
+        eventBus.subscribe(ExperimentSolver.class);
 
         LOGGER.info("It's time to get real, NoFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }

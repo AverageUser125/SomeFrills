@@ -1,6 +1,7 @@
 package com.somefrills.mixin;
 
 import com.somefrills.events.HudRenderEvent;
+import com.somefrills.events.HudTickEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.TitleRendering;
 import net.minecraft.client.MinecraftClient;
@@ -54,6 +55,8 @@ public abstract class InGameHudMixin implements TitleRendering {
         if (titleTicks > 0) {
             titleTicks--;
         }
+        // Post a HUD tick event so modules can run logic tied to HUD ticks
+        eventBus.post(new HudTickEvent());
     }
 
     @Inject(method = "render", at = @At("TAIL"))

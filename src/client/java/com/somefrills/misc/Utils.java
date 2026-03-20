@@ -40,6 +40,7 @@ import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
@@ -91,7 +92,19 @@ public class Utils {
             "Dungeon Hub",
             "Crimson Isle"
     );
+    public static void clickSlot(int slotIdx) {
+        if (mc.interactionManager == null || mc.player == null) {
+            return;
+        }
 
+        mc.interactionManager.clickSlot(
+                mc.player.currentScreenHandler.syncId,
+                slotIdx,
+                0,
+                SlotActionType.PICKUP,
+                mc.player
+        );
+    }
     public static void showTitle(String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
         mc.inGameHud.setTitle(Text.of(title));
         mc.inGameHud.setSubtitle(Text.of(subtitle));
