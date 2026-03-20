@@ -153,6 +153,39 @@ public class Utils {
         }
     }
 
+    // Helper data and utilities for player/name validation and color parsing
+    private static final java.util.Set<String> EXTRA_DISPLAY_NPC_BY_NAME = java.util.Set.of(
+            "Guy ",
+            "vswiblxdxg",
+            "anrrtqytsl"
+    );
+
+    private static final Pattern DISPLAY_NPC_COMPRESSED_NAME_PATTERN = Pattern.compile("[a-z0-9]{10}");
+
+    public static Formatting parseColor(String input) {
+        if (input == null) return null;
+        Formatting f = Formatting.byName(input.toLowerCase());
+        return (f != null && f.isColor()) ? f : null;
+    }
+
+    /**
+     * Checks if the provided client player entity is a real player and not an NPC.
+     * This mirrors checks used by GlowPlayerCommand's suggestions and matching.
+     */
+    public static boolean isRealPlayer(net.minecraft.client.network.AbstractClientPlayerEntity player) {
+        if (player == null) return false;
+
+        java.util.UUID uuid = player.getUuid();
+        if (uuid == null || uuid.version() != 4) return false;
+
+        String name = player.getName().getString();
+        if (name.isEmpty()) return false;
+
+        if (name.charAt(0) == '§' || name.charAt(0) == '!') return false;
+        if (DISPLAY_NPC_COMPRESSED_NAME_PATTERN.matcher(name).matches()) return false;
+        return !EXTRA_DISPLAY_NPC_BY_NAME.contains(name);
+    }
+
     public static void refillItem(String refill_query, int amount) {
         int total = 0;
         PlayerInventory inv = mc.player.getInventory();

@@ -2,9 +2,9 @@ package com.somefrills.features.solvers;
 import com.somefrills.config.Feature;
 import com.somefrills.config.SettingBool;
 import com.somefrills.config.SettingInt;
+import com.somefrills.events.HudRenderEvent;
 import com.somefrills.misc.Utils;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -43,19 +43,16 @@ public class ExperimentSolver {
     private int lastAdded = 0;
     private int clicks = 0;
 
-    public ExperimentSolver() {
-        ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
-    }
-
-    private void onTick(MinecraftClient client) {
-        if (client == null || client.player == null) return;
-        ClientPlayerEntity player = client.player;
+    @EventHandler
+    private void onHudTick(HudRenderEvent event) {
+        if (mc == null || mc.player == null) return;
+        ClientPlayerEntity player = mc.player;
         ScreenHandler handler = player.currentScreenHandler;
         if (handler == null) return;
 
         String title = "";
-        if (client.currentScreen != null) {
-            Text txt = client.currentScreen.getTitle();
+        if (mc.currentScreen != null) {
+            Text txt = mc.currentScreen.getTitle();
             if (txt != null) title = txt.getString();
         }
 

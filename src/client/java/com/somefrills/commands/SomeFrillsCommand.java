@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class FarmHelperCommand {
+public class SomeFrillsCommand {
     public static final ModCommand[] commands = {
             new ModCommand("settings", "Opens the settings GUI.",
                     ClientCommandManager.literal("settings")
@@ -77,13 +77,13 @@ public class FarmHelperCommand {
                 });
 
         LiteralArgumentBuilder<FabricClientCommandSource> commandMain =
-                ClientCommandManager.literal("farmhelper").executes(context -> {
+                ClientCommandManager.literal("somefrills").executes(context -> {
                     Utils.setScreen(new ClickGui());
                     return SINGLE_SUCCESS;
                 });
 
         LiteralArgumentBuilder<FabricClientCommandSource> commandShort =
-                ClientCommandManager.literal("fh").executes(context -> {
+                ClientCommandManager.literal("sf").executes(context -> {
                     Utils.setScreen(new ClickGui());
                     return SINGLE_SUCCESS;
                 });
@@ -100,8 +100,14 @@ public class FarmHelperCommand {
         commandMain.then(queueCommandBuilder);
         commandShort.then(queueCommandBuilder);
 
+        // Register glowplayer as a subcommand and also as a top-level alias
+        commandMain.then(GlowPlayerCommand.getBuilder());
+        commandShort.then(GlowPlayerCommand.getBuilder());
         dispatcher.register(commandMain);
         dispatcher.register(commandShort);
+
+        // Top-level registration for /glowplayer
+        dispatcher.register(GlowPlayerCommand.getBuilder());
     }
 
     public static class ModCommand {

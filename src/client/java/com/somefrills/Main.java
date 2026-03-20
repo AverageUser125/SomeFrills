@@ -2,6 +2,7 @@ package com.somefrills;
 
 import com.somefrills.config.Config;
 import com.somefrills.events.ChatMsgEvent;
+import com.somefrills.events.ClientDisconnectEvent;
 import com.somefrills.events.OverlayMsgEvent;
 import com.somefrills.events.PartyChatMsgEvent;
 import com.somefrills.features.farming.*;
@@ -11,7 +12,8 @@ import com.somefrills.features.mining.*;
 import com.somefrills.hud.ClickGui;
 import com.somefrills.misc.Utils;
 import com.mojang.brigadier.CommandDispatcher;
-import com.somefrills.commands.FarmHelperCommand;
+import com.somefrills.commands.SomeFrillsCommand;
+import com.somefrills.features.solvers.GlowPlayer;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
@@ -19,6 +21,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.Util;
@@ -35,7 +38,7 @@ public class Main implements ClientModInitializer {
     public static IEventBus eventBus = new EventBus();
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
-        FarmHelperCommand.init(dispatcher);
+        SomeFrillsCommand.init(dispatcher);
     }
 
     @Override
@@ -58,11 +61,14 @@ public class Main implements ClientModInitializer {
             boolean cancelled = eventBus.post(new ChatMsgEvent(message, msg)).isCancelled();
             if (msg.startsWith("Party > ") && msg.contains(": ")) {
                 int nameStart = msg.contains("]") && msg.indexOf("]") < msg.indexOf(":") ? msg.indexOf("]") : msg.indexOf(">");
-                String[] clean = msg.replace(msg.substring(0, nameStart + 1), "").split(":", 2);
+                String[] clean = msg.replace(msg.substring(0, nameStart + 1), "").split(":" , 2);
                 String author = clean[0].trim(), content = clean[1].trim();
                 cancelled = eventBus.post(new PartyChatMsgEvent(content, author)).isCancelled() || cancelled;
             }
             return !cancelled;
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            eventBus.post(new ClientDisconnectEvent());
         });
 
         eventBus.registerLambdaFactory("com.somefrills",
@@ -78,6 +84,8 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(GhostVision.class);
         eventBus.subscribe(ChocolateFactory.class);
         eventBus.subscribe(ExperimentSolver.class);
+        eventBus.subscribe(GlowPlayer.class);
+
 
         LOGGER.info("It's time to get real, NoFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }
