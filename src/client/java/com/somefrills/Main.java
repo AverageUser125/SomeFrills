@@ -1,6 +1,7 @@
 package com.somefrills;
 
 import com.somefrills.config.Config;
+import com.somefrills.config.FeatureRegistry;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ClientDisconnectEvent;
 import com.somefrills.events.OverlayMsgEvent;
@@ -67,14 +68,12 @@ public class Main implements ClientModInitializer {
             }
             return !cancelled;
         });
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            eventBus.post(new ClientDisconnectEvent());
-        });
 
         eventBus.registerLambdaFactory("com.somefrills",
                 (lookupInMethod, klass) -> (MethodHandles.Lookup)
                         lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
+        // subscribe some individual ones retained for earlier static usage
         eventBus.subscribe(SpaceFarmer.class);
         eventBus.subscribe(Rewarp.class);
         eventBus.subscribe(MiddleClickOverride.class);
@@ -86,6 +85,13 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(ExperimentSolver.class);
         eventBus.subscribe(GlowPlayer.class);
 
+        // initialize reflection-based registry which also subscribes discovered features
+        FeatureRegistry.init();
+
+        // Post ClientDisconnectEvent on Fabric disconnect
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            eventBus.post(new ClientDisconnectEvent());
+        });
 
         LOGGER.info("It's time to get real, NoFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }

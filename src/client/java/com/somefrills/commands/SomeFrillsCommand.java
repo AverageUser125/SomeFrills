@@ -31,32 +31,18 @@ public class SomeFrillsCommand {
                                 return SINGLE_SUCCESS;
                             }))
             ),
-            new ModCommand("warp", "Warps to the saved location.",
+            new ModCommand("warp", "Manage simple saved waypoints.",
                     ClientCommandManager.literal("warp")
-                            .then(ClientCommandManager.literal("add")
-                                    .then(ClientCommandManager.argument("name", StringArgumentType.greedyString())
-                                            .executes(context -> {
-                                                String name = StringArgumentType.getString(context, "name");
-                                                Rewarp.addWarp(name);
-                                                return SINGLE_SUCCESS;
-                                            })))
-                            .then(ClientCommandManager.literal("remove")
-                                    .then(ClientCommandManager.argument("name", StringArgumentType.greedyString())
-                                            .suggests((context, builder) -> {
-                                                com.google.gson.JsonObject data = Rewarp.warps.value();
-                                                if (data == null) return builder.buildFuture();
-                                                for (java.util.Map.Entry<String, com.google.gson.JsonElement> entry : data.entrySet()) {
-                                                    builder.suggest(entry.getKey());
-                                                }
-                                                return builder.buildFuture();
-                                            })
-                                            .executes(context -> {
-                                                String name = StringArgumentType.getString(context, "name");
-                                                Rewarp.removeWarp(name);
-                                                return SINGLE_SUCCESS;
-                                            })))
-                            .then(ClientCommandManager.literal("removeall").executes(context -> {
-                                Rewarp.clearWarps();
+                            .then(ClientCommandManager.literal("add").executes(context -> {
+                                Rewarp.addWaypoint();
+                                return SINGLE_SUCCESS;
+                            }))
+                            .then(ClientCommandManager.literal("remove").executes(context -> {
+                                Rewarp.removeLastWaypoint();
+                                return SINGLE_SUCCESS;
+                            }))
+                            .then(ClientCommandManager.literal("clear").executes(context -> {
+                                Rewarp.clearWaypoints();
                                 return SINGLE_SUCCESS;
                             }))
             )

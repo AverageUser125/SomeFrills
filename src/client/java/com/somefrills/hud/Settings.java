@@ -397,6 +397,62 @@ public class Settings extends BaseOwoScreen<FlowLayout> {
         }
     }
 
+    // Numeric text input for integer settings (no slider)
+    public static class NumberInputInt extends FlowLayout {
+        public SettingInt setting;
+
+        public NumberInputInt(String name, SettingInt setting, String tooltip) {
+            super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
+            this.padding(Insets.of(5));
+            this.horizontalAlignment(HorizontalAlignment.LEFT);
+            this.setting = setting;
+            PlainLabel label = new PlainLabel(Text.literal(name).withColor(0xffffff));
+            FlatTextbox text = new FlatTextbox(Sizing.fixed(150));
+            label.verticalTextAlignment(VerticalAlignment.CENTER).margins(Insets.of(0, 0, 0, 5)).verticalSizing(Sizing.fixed(20));
+            label.tooltip(Text.literal(tooltip));
+            text.onChanged().subscribe(change -> {
+                java.util.Optional<Integer> value = Utils.parseInt(text.getText());
+                if (value.isPresent()) {
+                    this.setting.set(value.get());
+                }
+            });
+            text.text(String.valueOf(this.setting.value()));
+            this.child(label);
+            this.child(text);
+            this.child(buildResetButton(btn -> {
+                this.setting.reset();
+                text.setText(String.valueOf(this.setting.value()));
+            }));
+        }
+    }
+
+    // Numeric text input for double settings (allows decimal input)
+    public static class NumberInputDouble extends FlowLayout {
+        public SettingDouble setting;
+
+        public NumberInputDouble(String name, SettingDouble setting, String tooltip) {
+            super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
+            this.padding(Insets.of(5));
+            this.horizontalAlignment(HorizontalAlignment.LEFT);
+            this.setting = setting;
+            PlainLabel label = new PlainLabel(Text.literal(name).withColor(0xffffff));
+            FlatTextbox text = new FlatTextbox(Sizing.fixed(150));
+            label.verticalTextAlignment(VerticalAlignment.CENTER).margins(Insets.of(0, 0, 0, 5)).verticalSizing(Sizing.fixed(20));
+            label.tooltip(Text.literal(tooltip));
+            text.onChanged().subscribe(change -> {
+                java.util.Optional<Double> value = Utils.parseDouble(text.getText());
+                value.ifPresent(aDouble -> this.setting.set(aDouble));
+            });
+            text.text(String.valueOf(roundDouble(this.setting.value())));
+            this.child(label);
+            this.child(text);
+            this.child(buildResetButton(btn -> {
+                this.setting.reset();
+                text.setText(String.valueOf(roundDouble(this.setting.value())));
+            }));
+        }
+    }
+
     public static class Keybind extends FlowLayout {
         public SettingKeybind setting;
         public KeybindButton button;

@@ -2,6 +2,7 @@ package com.somefrills.features.solvers;
 import com.somefrills.config.Feature;
 import com.somefrills.config.SettingBool;
 import com.somefrills.config.SettingInt;
+import com.somefrills.config.SettingDescription;
 import com.somefrills.events.HudRenderEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -22,12 +23,24 @@ import static com.somefrills.Main.mc;
 
 public class ExperimentSolver {
     public static final Feature instance = new Feature("experimentSolver");
-    public static final SettingBool enableChronomatron = new SettingBool(true, "enableChronomatron", instance.key());
-    public static final SettingBool enableUltrasequencer = new SettingBool(true, "enableUltrasequencer", instance.key());
-    public static final SettingBool getMaxXp = new SettingBool(false, "getMaxXp", instance.key());
-    public static final SettingBool autoClose = new SettingBool(true, "autoClose", instance.key());
-    public static final SettingInt serumCount = new SettingInt(3, "serumCount", instance.key());
-    public static final SettingInt clickDelay = new SettingInt(100, "clickDelay", instance.key());
+
+    @SettingDescription("Enable automatic solving of Chronomatron experiments")
+    public static final SettingBool enableChronomatron = new SettingBool(true);
+
+    @SettingDescription("Enable automatic solving of Ultrasequencer experiments")
+    public static final SettingBool enableUltrasequencer = new SettingBool(true);
+
+    @SettingDescription("Try to maximize XP when solving experiments")
+    public static final SettingBool getMaxXp = new SettingBool(false);
+
+    @SettingDescription("Automatically close the experiment screen when conditions are met")
+    public static final SettingBool autoClose = new SettingBool(true);
+
+    @SettingDescription("Number of serum items to keep in Chronomatron")
+    public static final com.somefrills.config.SettingIntSlider serumCount = new com.somefrills.config.SettingIntSlider(3, 0, 3);
+
+    @SettingDescription("Delay between automated clicks (ms)")
+    public static final SettingInt clickDelay = new SettingInt(100);
 
     // Regex pattern for experiment table detection
     // Matches: Superpairs, Chronomatron, Ultrasequencer with optional suffixes like (Metaphysical), ➜ Stakes, Rewards

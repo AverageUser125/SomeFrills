@@ -1,26 +1,22 @@
 package com.somefrills.config;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.util.function.Consumer;
-
 public class SettingJson extends SettingGeneric {
-
-    public SettingJson(JsonObject defaultValue, String key, String parentKey) {
-        super(defaultValue, key, parentKey);
-    }
-
-    public SettingJson(JsonObject defaultValue, String key, Feature instance) {
-        this(defaultValue, key, instance.key());
+    public SettingJson(JsonObject defaultValue) {
+        super(defaultValue);
     }
 
     public JsonObject value() {
-        return this.get().getAsJsonObject();
+        JsonElement e = this.get();
+        return e == null || e.isJsonNull() ? null : e.getAsJsonObject();
     }
 
-    public void edit(Consumer<JsonObject> lambda) {
-        JsonObject value = this.value();
-        lambda.accept(value);
-        this.set(value, false);
+    public void edit(java.util.function.Consumer<JsonObject> editor) {
+        JsonObject obj = value();
+        if (obj == null) obj = new JsonObject();
+        editor.accept(obj);
+        this.set(obj);
     }
 }

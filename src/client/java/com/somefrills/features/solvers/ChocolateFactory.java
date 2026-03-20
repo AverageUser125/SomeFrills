@@ -3,6 +3,7 @@ package com.somefrills.features.solvers;
 import com.somefrills.config.Feature;
 import com.somefrills.config.SettingBool;
 import com.somefrills.config.SettingInt;
+import com.somefrills.config.SettingDescription;
 import com.somefrills.events.HudRenderEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -19,8 +20,10 @@ import net.minecraft.text.Text;
  */
 public class ChocolateFactory {
     public static final Feature instance = new Feature("chocolateFactory");
-    public static SettingBool claimStray = new SettingBool(true, "claimStray", instance.key());
-    public static SettingInt claimDelay = new SettingInt(100, "claimDelay", instance.key());
+    @SettingDescription("Automatically claim stray items in Chocolate Factory menu")
+    public static SettingBool claimStray = new SettingBool(true);
+    @SettingDescription("Delay between claim attempts in milliseconds")
+    public static SettingInt claimDelay = new SettingInt(100);
     private static final String CHOCOLATE_FACTORY_TITLE = "Chocolate Factory";
 
     private static long lastClaimTime = 0;

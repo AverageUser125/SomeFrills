@@ -1,6 +1,7 @@
 package com.somefrills.features.tweaks;
 import com.somefrills.config.Feature;
 import com.somefrills.config.SettingBool;
+import com.somefrills.config.SettingDescription;
 import com.somefrills.events.InteractBlockEvent;
 import com.somefrills.events.InteractItemEvent;
 import com.somefrills.misc.Utils;
@@ -15,8 +16,11 @@ import static com.somefrills.Main.mc;
 public class DoubleUseFix {
     public static final Feature instance = new Feature("doubleUseFix");
 
-    public static final SettingBool skyblockCheck = new SettingBool(false, "skyblockCheck", instance.key());
-    public static final SettingBool modernCheck = new SettingBool(false, "modernCheck", instance.key());
+    @SettingDescription("Only enable double-use fix while in Skyblock")
+    public static final SettingBool skyblockCheck = new SettingBool(false);
+
+    @SettingDescription("Only enable double-use fix on modern islands")
+    public static final SettingBool modernCheck = new SettingBool(false);
 
     private static type getDisableType() {
         ItemStack held = Utils.getHeldItem();

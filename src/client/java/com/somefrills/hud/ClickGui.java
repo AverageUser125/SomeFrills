@@ -2,7 +2,17 @@ package com.somefrills.hud;
 
 import com.google.common.collect.Lists;
 import com.somefrills.config.Config;
-import com.somefrills.features.farming.SpaceFarmer;
+import com.somefrills.config.FeatureRegistry;
+import com.somefrills.config.SettingBool;
+import com.somefrills.config.SettingInt;
+import com.somefrills.config.SettingDouble;
+import com.somefrills.config.SettingColor;
+import com.somefrills.config.SettingEnum;
+import com.somefrills.config.SettingString;
+import com.somefrills.config.SettingKeybind;
+import com.somefrills.config.SettingJson;
+import java.util.Map;
+import java.util.LinkedHashMap;
 import com.somefrills.hud.components.FlatTextbox;
 import com.somefrills.hud.components.PlainLabel;
 import com.somefrills.misc.RenderColor;
@@ -77,11 +87,43 @@ public class ClickGui extends BaseOwoScreen<FlowLayout> {
     protected void build(FlowLayout root) {
         root.surface(Surface.VANILLA_TRANSLUCENT);
         FlowLayout parent = Containers.horizontalFlow(Sizing.content(), Sizing.content());
-        this.categories = Lists.newArrayList(
-                new Category("Farming", List.of(
-                        new Module("Space Farmer", SpaceFarmer.instance, "Allows you to farm by holding space bar, sneak and press space to activate.\nThis feature will also lock your view once you start holding space."),
-                        new Module("Rewarp", SpaceFarmer.instance, "Warps to the start of the farm when done.")
-                )));
+        // build categories automatically from the discovered feature classes (grouped by package segment)
+        this.categories = Lists.newArrayList();
+        this.categories.addAll(buildCategoriesFromRegistry());
+
+        // Add the Rewarp module separately (we don't want to list the raw JSON in the settings UI).
+        // Place it under the 'Farming' category if present, otherwise create that category.
+        try {
+            Settings rewarpSettings = new Settings(
+                    new Settings.BigButton("Add waypoint", btn -> com.somefrills.features.farming.Rewarp.addWaypoint()),
+                    new Settings.BigButton("Remove last waypoint", btn -> com.somefrills.features.farming.Rewarp.removeLastWaypoint()),
+                    new Settings.BigButton("Clear waypoints", btn -> com.somefrills.features.farming.Rewarp.clearWaypoints())
+            );
+            Module rewarpModule = new Module("Rewarp", com.somefrills.features.farming.Rewarp.instance, "Rewarp waypoints", rewarpSettings);
+
+            // Try to find an existing Farming category by title
+            Category farming = null;
+            for (Category c : this.categories) {
+                if (c != null && "Farming".equals(c.title)) {
+                    farming = c;
+                    break;
+                }
+            }
+
+            if (farming != null) {
+                // add to the category's feature list and UI
+                farming.features.add(rewarpModule);
+                rewarpModule.horizontalSizing(Sizing.fixed(farming.categoryWidth));
+                farming.scroll.child().child(rewarpModule);
+            } else {
+                // create a new Farming category containing the rewarp module
+                this.categories.add(new Category("Farming", List.of(rewarpModule)));
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // keep an empty Misc category for miscellaneous items
+        this.categories.add(new Category("Misc", List.of()));
 
         this.categories.getLast().margins(Insets.of(5, 0, 3, 3));
         for (Category category : this.categories) {
@@ -107,24 +149,7 @@ public class ClickGui extends BaseOwoScreen<FlowLayout> {
             } else {
                 searchBox.setSuggestion("");
                 for (Category category : this.categories) {
-                    List<Module> features = new ArrayList<>(category.features);
-                    features.removeIf(feature -> {
-                        if (matchSearch(feature.label.getText(), value) || matchSearch(feature.label.getTooltip(), value)) {
-                            return false;
-                        }
-                        if (feature.options != null) {
-                            for (FlowLayout setting : feature.options.settings) {
-                                for (Component child : setting.children()) {
-                                    if (child instanceof PlainLabel label) {
-                                        if (matchSearch(label.getText(), value) || matchSearch(label.getTooltip(), value)) {
-                                            return false;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        return true;
-                    });
+                    List<Module> features = getModules(value, category);
                     category.scroll.child().clearChildren();
                     for (Module module : features) {
                         module.horizontalSizing(Sizing.fixed(category.categoryWidth));
@@ -134,6 +159,90 @@ public class ClickGui extends BaseOwoScreen<FlowLayout> {
             }
         });
         root.child(searchBox);
+    }
+
+    private @NotNull List<Module> getModules(String value, Category category) {
+        List<Module> features = new ArrayList<>(category.features);
+        features.removeIf(feature -> {
+            if (matchSearch(feature.label.getText(), value) || matchSearch(feature.label.getTooltip(), value)) {
+                return false;
+            }
+            if (feature.options != null) {
+                for (FlowLayout setting : feature.options.settings) {
+                    for (Component child : setting.children()) {
+                        if (child instanceof PlainLabel label) {
+                            if (matchSearch(label.getText(), value) || matchSearch(label.getTooltip(), value)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        });
+        return features;
+    }
+
+    /**
+     * Build categories automatically by grouping features according to the package
+     * segment under `com.somefrills.features` (e.g. com.somefrills.features.farming -> "Farming").
+     */
+    private List<Category> buildCategoriesFromRegistry() {
+        Map<String, List<Module>> groups = new LinkedHashMap<>();
+        String prefix = "com.somefrills.features.";
+
+        for (FeatureRegistry.FeatureInfo info : FeatureRegistry.getFeatures()) {
+             String pkg = info.clazz.getPackageName();
+             String group = "Other";
+             if (pkg != null && pkg.startsWith(prefix)) {
+                 String tail = pkg.substring(prefix.length());
+                 if (tail.contains(".")) tail = tail.substring(0, tail.indexOf('.'));
+                 group = tail;
+             }
+             String pretty = group.substring(0, 1).toUpperCase() + group.substring(1);
+
+            // create module for this feature
+            List<FlowLayout> optionLayouts = new ArrayList<>();
+
+            for (var entry : info.settings.entrySet()) {
+                  java.lang.reflect.Field field = entry.getKey();
+                  Object setting = entry.getValue();
+                  String settingName = field.getName();
+                  String desc = info.descriptions.getOrDefault(field, "");
+                  if (setting instanceof SettingBool sb) {
+                     optionLayouts.add(new Settings.Toggle(settingName, sb, desc));
+                 } else if (setting instanceof com.somefrills.config.SettingIntSlider sis) {
+                     optionLayouts.add(new Settings.SliderInt(settingName, sis.min(), sis.max(), 1, sis, desc));
+                 } else if (setting instanceof SettingInt si) {
+                     optionLayouts.add(new Settings.NumberInputInt(settingName, si, desc));
+                 } else if (setting instanceof SettingDouble sd) {
+                     optionLayouts.add(new Settings.NumberInputDouble(settingName, sd, desc));
+                 } else if (setting instanceof SettingColor sc) {
+                     optionLayouts.add(new Settings.ColorPicker(settingName, sc, desc));
+                 } else if (setting instanceof SettingEnum<?> se) {
+                     optionLayouts.add(new Settings.Dropdown<>(settingName, se, desc));
+                 } else if (setting instanceof SettingString ss) {
+                     optionLayouts.add(new Settings.TextInput(settingName, ss, desc));
+                 } else if (setting instanceof SettingKeybind sk) {
+                     optionLayouts.add(new Settings.Keybind(settingName, sk, desc));
+                 } else if (setting instanceof SettingJson) {
+                     optionLayouts.add(new Settings.Description(settingName, "This setting contains JSON-managed data (use commands or config to edit)."));
+                 } else {
+                     optionLayouts.add(new Settings.Description(settingName, "Unsupported setting type in UI."));
+                 }
+            }
+
+            Settings settingsScreen = optionLayouts.isEmpty() ? null : new Settings(optionLayouts);
+
+            Module module = new Module(info.featureInstance.key().substring(0,1).toUpperCase() + info.featureInstance.key().substring(1), info.featureInstance, "Feature: " + info.featureInstance.key(), settingsScreen);
+            groups.computeIfAbsent(pretty, k -> new ArrayList<>()).add(module);
+        }
+
+        List<Category> cats = new ArrayList<>();
+        for (var e : groups.entrySet()) {
+            cats.add(new Category(e.getKey(), e.getValue()));
+        }
+        return cats;
     }
 
     @Override

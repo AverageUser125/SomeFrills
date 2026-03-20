@@ -7,21 +7,18 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 
 public class SettingGeneric {
-    private final String key;
-    private final String parent;
+    private String key;
+    private String parent;
     private final JsonElement defaultValue;
     private JsonElement value;
     private int hash = 0;
 
-    public SettingGeneric(Object defaultValue, String key, String parentKey) {
-        this.key = key;
-        this.parent = parentKey;
+    // Only default constructor: keys/parents are assigned by the registry using reflection
+    public SettingGeneric(Object defaultValue) {
+        this.key = "";
+        this.parent = "";
         this.defaultValue = this.parse(defaultValue);
         this.value = this.get();
-    }
-
-    public SettingGeneric(Object defaultValue, String key, Feature instance) {
-        this(defaultValue, key, instance.key());
     }
 
     public JsonElement parse(Object value) {
@@ -75,5 +72,22 @@ public class SettingGeneric {
 
     public void reset() {
         this.set(this.defaultValue);
+    }
+
+    // helper methods for reflection-based registry
+    public void overrideKey(String newKey) {
+        this.key = newKey;
+    }
+
+    public void overrideParent(String newParent) {
+        this.parent = newParent;
+    }
+
+    public String getKey() {
+        return this.key;
+    }
+
+    public String getParent() {
+        return this.parent;
     }
 }

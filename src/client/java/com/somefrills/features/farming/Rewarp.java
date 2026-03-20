@@ -2,8 +2,10 @@ package com.somefrills.features.farming;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 import com.somefrills.config.Feature;
 import com.somefrills.config.SettingJson;
+import com.somefrills.config.SettingDescription;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Rendering;
@@ -18,54 +20,64 @@ import static com.somefrills.Main.mc;
 public class Rewarp {
     public static final Feature instance = new Feature("rewarp");
     // Use the feature key as the parent so settings are grouped under the feature
-    public static SettingJson warps = new SettingJson(new JsonObject(), "warps", instance);
+    @SettingDescription("Stored rewarp points (edited with commands)")
+    public static SettingJson warps = new SettingJson(new JsonObject());
 
-    public static void addWarp(String name) {
+    // Add current player position as a waypoint (x,y,z)
+    public static void addWaypoint() {
         if (mc.player == null) return;
         BlockPos pos = mc.player.getBlockPos();
         warps.edit(data -> {
-            data.addProperty(name, pos.getX() + "," + pos.getY() + "," + pos.getZ());
+            JsonArray arr = data.has("waypoints") ? data.getAsJsonArray("waypoints") : new JsonArray();
+            JsonObject obj = new JsonObject();
+            obj.addProperty("x", pos.getX());
+            obj.addProperty("y", pos.getY());
+            obj.addProperty("z", pos.getZ());
+            arr.add(obj);
+            data.add("waypoints", arr);
         });
-        Utils.infoFormat("Added rewarp '{}' at {},{},{}.", name, pos.getX(), pos.getY(), pos.getZ());
+        Utils.infoFormat("Added waypoint at {},{},{}.", pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public static void removeWarp(String name) {
-        com.google.gson.JsonObject data = warps.value();
-        if (data == null || !data.has(name)) {
-            Utils.infoFormat("No rewarp named '{}' found.", name);
-            return;
-        }
-        warps.edit(d -> d.remove(name));
-        Utils.infoFormat("Removed rewarp '{}'.", name);
+    // Remove the last waypoint (if any)
+    public static void removeLastWaypoint() {
+        warps.edit(data -> {
+            if (!data.has("waypoints")) return;
+            JsonArray arr = data.getAsJsonArray("waypoints");
+            if (arr.size() == 0) return;
+            arr.remove(arr.size() - 1);
+            data.add("waypoints", arr);
+        });
+        Utils.info("Removed last waypoint.");
     }
 
-    public static void clearWarps() {
-        // Replace the whole object with an empty one to clear all entries
-        warps.set(new com.google.gson.JsonObject());
-        Utils.info("Cleared all rewarp points.");
+    public static void clearWaypoints() {
+        warps.edit(d -> d.add("waypoints", new JsonArray()));
+        Utils.info("Cleared all waypoints.");
     }
 
     @EventHandler
     public static void onWorldRender(WorldRenderEvent event) {
-        // Only render in the garden
+        // Only render if player exists
         if (mc.player == null) return;
 
-        com.google.gson.JsonObject data = warps.value();
-        if (data == null) return;
+        JsonObject data = warps.value();
+        if (data == null || !data.has("waypoints")) return;
+
+        JsonArray arr = data.getAsJsonArray("waypoints");
+        if (arr == null) return;
 
         RenderColor cyan = RenderColor.fromHex(0x00FFFF, 0.4f);
 
-        for (java.util.Map.Entry<String, JsonElement> entry : data.entrySet()) {
+        for (JsonElement e : arr) {
             try {
-                String[] parts = entry.getValue().getAsString().split(",");
-                if (parts.length != 3) continue;
-                int x = Integer.parseInt(parts[0].trim());
-                int y = Integer.parseInt(parts[1].trim());
-                int z = Integer.parseInt(parts[2].trim());
-                // center the box on the block
+                if (!e.isJsonObject()) continue;
+                JsonObject obj = e.getAsJsonObject();
+                int x = obj.get("x").getAsInt();
+                int y = obj.get("y").getAsInt();
+                int z = obj.get("z").getAsInt();
                 Vec3d center = new Vec3d(x + 0.5, y + 0.5, z + 0.5);
                 Box box = Box.of(center, 0.5, 0.5, 0.5);
-                // throughWalls = true to see through walls; use Rendering directly
                 Rendering.drawFilled(event.matrices, event.consumer, event.camera, box, true, cyan);
             } catch (Exception ignored) {
             }

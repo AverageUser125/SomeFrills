@@ -15,12 +15,14 @@ import java.util.List;
 import static com.somefrills.Main.mc;
 
 public class Category extends FlowLayout {
+    public String title; // expose the title so UI builders can find categories by name
     public List<Module> features;
     public ScrollContainer<FlowLayout> scroll;
     public int categoryWidth = 0;
 
     protected Category(String title, List<Module> children) {
         super(Sizing.content(), Sizing.content(), Algorithm.VERTICAL);
+        this.title = title;
         this.margins(Insets.of(5, 0, 3, 0));
         Color color = Color.ofArgb(0xff5ca0bf);
         Color textColor = Color.ofArgb(0xffffffff);
