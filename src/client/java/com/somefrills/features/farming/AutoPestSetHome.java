@@ -39,11 +39,11 @@ public class AutoPestSetHome {
         if (now - lastServerJoinTime < IGNORE_WINDOW_MS) {
             return;
         }
-        if (!Utils.isInGarden()) return;
+        if (!Utils.isOnGardenPlot()) return;
 
         if (mc.player != null && mc.player.networkHandler != null) {
             try {
-                mc.player.networkHandler.sendChatCommand("sethome");
+                Utils.runCommand("sethome");
                 Utils.info("AutoPestSetHome: executed /sethome");
             } catch (Throwable t) {
                 // swallow — non-fatal

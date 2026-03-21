@@ -1038,6 +1038,10 @@ public class Utils {
         mc.send(() -> mc.setScreen(screen));
     }
 
+    public static void runCommand(String string) {
+        mc.player.networkHandler.sendChatCommand(string);
+    }
+
     public static class Symbols {
         public static String zone = "⏣";
         public static String zoneRift = "ф";
