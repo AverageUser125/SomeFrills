@@ -14,14 +14,12 @@ import static com.somefrills.Main.mc;
 
 public class AutoPestSetHome {
     public static final Feature instance = new Feature("autoPestSetHome");
-
-    private static long lastServerJoinTime = 0L;
     private static final long IGNORE_WINDOW_MS = 10_000L;
-
     private static final Pattern PEST_SPAWN_PATTERN = Pattern.compile(
             "\\bPest[s]?\\b.*?spawn(?:ed)?\\b.*?Plot\\s*-?\\s*\\d+",
             Pattern.CASE_INSENSITIVE
     );
+    private static long lastServerJoinTime = 0L;
 
     @EventHandler
     private static void onServerJoin(ServerJoinEvent event) {

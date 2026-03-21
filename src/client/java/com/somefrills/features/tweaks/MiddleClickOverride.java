@@ -2,9 +2,7 @@ package com.somefrills.features.tweaks;
 
 import com.google.common.collect.Sets;
 import com.somefrills.config.Feature;
-import com.somefrills.events.SlotClickEvent;
 import com.somefrills.misc.Utils;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
