@@ -6,6 +6,8 @@ import com.somefrills.config.Config;
 import com.somefrills.config.FeatureRegistry;
 import com.somefrills.events.*;
 import com.somefrills.hud.clickgui.ClickGui;
+import com.somefrills.misc.EntityCache;
+import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
 import io.wispforest.owo.config.ui.ConfigScreenProviders;
 import meteordevelopment.orbit.EventBus;
@@ -85,6 +87,8 @@ public class Main implements ClientModInitializer {
                 (lookupInMethod, klass) -> (MethodHandles.Lookup)
                         lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
+        eventBus.subscribe(SkyblockData.class);
+        eventBus.subscribe(EntityCache.class);
         // initialize reflection-based registry which also subscribes discovered features
         FeatureRegistry.init();
 
