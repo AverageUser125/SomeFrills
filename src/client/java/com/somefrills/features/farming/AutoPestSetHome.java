@@ -25,7 +25,6 @@ public class AutoPestSetHome {
 
     @EventHandler
     private static void onServerJoin(ServerJoinEvent event) {
-        if (!instance.isActive()) return;
         lastServerJoinTime = System.currentTimeMillis();
     }
 
