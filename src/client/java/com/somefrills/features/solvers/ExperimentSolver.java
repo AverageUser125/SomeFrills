@@ -49,15 +49,15 @@ public class ExperimentSolver {
             "(?:Superpairs|Chronomatron|Ultrasequencer) ?(?:\\(.+\\)|➜ Stakes|Rewards)|Experiment(?:ation Tabl| [Oo]v)er?",
             Pattern.CASE_INSENSITIVE
     );
-    private final Map<Integer, Integer> ultrasequencerOrder = new HashMap<>();
-    private final List<Integer> chronomatronOrder = new ArrayList<>();
-    private long lastClickTime = 0;
-    private boolean hasAdded = false;
-    private int lastAdded = 0;
-    private int clicks = 0;
+    private static final Map<Integer, Integer> ultrasequencerOrder = new HashMap<>();
+    private static final List<Integer> chronomatronOrder = new ArrayList<>();
+    private static long lastClickTime = 0;
+    private static boolean hasAdded = false;
+    private static int lastAdded = 0;
+    private static int clicks = 0;
 
     @EventHandler
-    private void onHudTick(HudTickEvent event) {
+    private static void onHudTick(HudTickEvent event) {
         if (mc == null || mc.player == null) return;
         ClientPlayerEntity player = mc.player;
         ScreenHandler handler = player.currentScreenHandler;
@@ -85,7 +85,7 @@ public class ExperimentSolver {
         }
     }
 
-    private void solveChronomatron(ScreenHandler handler) {
+    private static void solveChronomatron(ScreenHandler handler) {
         List<Slot> invSlots = handler.slots;
         int maxChronomatron = getMaxXp.value() ? 15 : (11 - serumCount.value());
 
@@ -147,7 +147,7 @@ public class ExperimentSolver {
         }
     }
 
-    private void solveUltraSequencer(ScreenHandler handler) {
+    private static void solveUltraSequencer(ScreenHandler handler) {
         List<Slot> invSlots = handler.slots;
         int maxUltraSequencer = getMaxXp.value() ? 20 : (9 - serumCount.value());
 
@@ -196,7 +196,7 @@ public class ExperimentSolver {
         }
     }
 
-    private boolean isItem(ItemStack stack, String itemId) {
+    private static boolean isItem(ItemStack stack, String itemId) {
         if (stack == null || stack.isEmpty()) return false;
         String actualId = Registries.ITEM.getId(stack.getItem()).toString();
 
@@ -213,13 +213,13 @@ public class ExperimentSolver {
         return actualId.equals(itemId);
     }
 
-    private boolean isEnchanted(ItemStack stack) {
+    private static boolean isEnchanted(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
         // Check for both actual enchantments AND the enchanted glint effect
         return stack.hasEnchantments() || stack.hasGlint();
     }
 
-    private void reset() {
+    private static void reset() {
         ultrasequencerOrder.clear();
         chronomatronOrder.clear();
         hasAdded = false;

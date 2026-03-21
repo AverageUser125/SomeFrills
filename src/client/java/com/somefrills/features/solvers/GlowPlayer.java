@@ -16,7 +16,7 @@ public class GlowPlayer {
     public static final Feature instance = new Feature("glowPlayer", true);
 
     @EventHandler
-    public void onWorldTick(EndTickEvent event) {
+    public static void onWorldTick(EndTickEvent event) {
         if (!instance.isActive()) return;
         if (mc.world == null) return;
         GlowTeamManager.init();
@@ -29,7 +29,7 @@ public class GlowPlayer {
     }
 
     @EventHandler
-    public void onDisconnect(ClientDisconnectEvent event) {
+    public static void onDisconnect(ClientDisconnectEvent event) {
         if (!instance.isActive()) return;
         GlowManager.clear();
         GlowTeamManager.clear();
