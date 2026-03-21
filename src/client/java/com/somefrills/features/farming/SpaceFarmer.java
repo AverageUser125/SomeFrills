@@ -15,25 +15,26 @@ public class SpaceFarmer {
 
     @EventHandler
     public static void onKey(InputEvent event) {
-        if (instance.isActive() && event.key == GLFW.GLFW_KEY_SPACE) {
-            if (mc.currentScreen != null && spaceHeld) {
-                spaceHeld = false;
+        if (!instance.isActive() || event.key != GLFW.GLFW_KEY_SPACE) {
+            return;
+        }
+        if (mc.currentScreen != null && spaceHeld) {
+            spaceHeld = false;
+            mc.options.attackKey.setPressed(false);
+            return;
+        }
+        if (event.action == GLFW.GLFW_PRESS && mc.options.sneakKey.isPressed() && Utils.isOnGardenPlot()) {
+            spaceHeld = true;
+            mc.options.attackKey.setPressed(true);
+            event.cancel();
+        } else if (event.action == GLFW.GLFW_RELEASE && spaceHeld) {
+            spaceHeld = false;
+            if (mc.options.attackKey.isPressed()) {
                 mc.options.attackKey.setPressed(false);
-                return;
             }
-            if (event.action == GLFW.GLFW_PRESS && mc.options.sneakKey.isPressed() && Utils.isOnGardenPlot()) {
-                spaceHeld = true;
-                mc.options.attackKey.setPressed(true);
-                event.cancel();
-            } else if (event.action == GLFW.GLFW_RELEASE && spaceHeld) {
-                spaceHeld = false;
-                if (mc.options.attackKey.isPressed()) {
-                    mc.options.attackKey.setPressed(false);
-                }
-                event.cancel();
-            } else if (spaceHeld) {
-                event.cancel();
-            }
+            event.cancel();
+        } else if (spaceHeld) {
+            event.cancel();
         }
     }
 
