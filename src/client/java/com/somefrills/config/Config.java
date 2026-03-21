@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.somefrills.Main;
 import com.somefrills.misc.Utils;
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -35,6 +36,8 @@ public class Config {
             save();
         }
         computeHash();
+        // After loading config, subscribe all features that are enabled in the config
+        reconcileFeatureSubscriptions();
     }
 
     public static void save() {
@@ -81,5 +84,21 @@ public class Config {
 
     public static JsonObject get() {
         return data;
+    }
+
+    private static void reconcileFeatureSubscriptions() {
+        for (FeatureRegistry.FeatureInfo info : FeatureRegistry.getFeatures()) {
+            try {
+                Feature feat = info.featureInstance;
+                if (feat == null) continue;
+                if (feat.isActive()) {
+                    Main.eventBus.subscribe(info.clazz);
+                } else {
+                    Main.eventBus.unsubscribe(info.clazz);
+                }
+            } catch (Throwable t) {
+                LOGGER.debug("Error reconciling feature {}: {}", info.clazz.getName(), t.toString());
+            }
+        }
     }
 }

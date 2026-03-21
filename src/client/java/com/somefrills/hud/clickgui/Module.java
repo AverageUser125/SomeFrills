@@ -1,6 +1,7 @@
 package com.somefrills.hud.clickgui;
 
 import com.somefrills.config.Feature;
+import com.somefrills.config.FeatureRegistry;
 import com.somefrills.hud.clickgui.components.PlainLabel;
 import io.wispforest.owo.ui.container.FlowLayout;
 import io.wispforest.owo.ui.core.*;
@@ -62,6 +63,9 @@ public class Module extends FlowLayout {
             this.label.text(this.inactiveText);
         }
         this.feature.setActive(active);
+        // apply immediately: subscribe/unsubscribe on click
+        if (active) FeatureRegistry.subscribeFeature(this.feature);
+        else FeatureRegistry.unsubscribeFeature(this.feature);
         this.active = active;
     }
 }

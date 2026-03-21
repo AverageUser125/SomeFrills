@@ -78,19 +78,40 @@ public class FeatureRegistry {
                 }
             }
 
-            // subscribe found feature classes to event bus (class subscription registers static handlers)
-            for (FeatureInfo info : FEATURES) {
-                try {
-                    Main.eventBus.subscribe(info.clazz);
-                } catch (Throwable t) {
-                    Main.LOGGER.debug("Failed to subscribe feature {}: {}", info.clazz.getName(), t.toString());
-                }
-            }
+            // NOTE: subscription/unsubscription of feature classes is intentionally NOT performed here.
+            // The Config.save() method performs subscription reconciliation so that enabling/disabling
+            // features only takes effect on explicit config saves, per user request.
 
             Main.LOGGER.info("FeatureRegistry: discovered {} feature(s)", FEATURES.size());
         } catch (IOException e) {
             Main.LOGGER.error("Error scanning features package", e);
         }
+    }
+
+    // Return the FeatureInfo for a given Feature instance, or null if not found
+    public static FeatureInfo getInfoForFeature(Feature feature) {
+        if (feature == null) return null;
+        for (FeatureInfo info : FEATURES) {
+            if (info.featureInstance == feature) return info;
+        }
+        return null;
+    }
+
+    // Subscribe a single feature's class on the event bus
+    public static void subscribeFeature(Feature feature) {
+        FeatureInfo info = getInfoForFeature(feature);
+        if (info == null) return;
+        try {
+            Main.eventBus.subscribe(info.clazz);
+        } catch (Throwable t) {
+            Main.LOGGER.debug("Failed to subscribe feature class {}: {}", info.clazz.getName(), t.toString());
+        }
+    }
+
+    public static void unsubscribeFeature(Feature feature) {
+        FeatureInfo info = getInfoForFeature(feature);
+        if (info == null) return;
+        Main.eventBus.unsubscribe(info.clazz);
     }
 
     private static List<Class<?>> getClasses(String packageName) throws IOException {
