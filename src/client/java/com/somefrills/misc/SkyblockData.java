@@ -1,9 +1,6 @@
 package com.somefrills.misc;
 
-import com.somefrills.events.ChatMsgEvent;
-import com.somefrills.events.ReceivePacketEvent;
-import com.somefrills.events.ServerJoinEvent;
-import com.somefrills.events.WorldTickEvent;
+import com.somefrills.events.*;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.network.PlayerListEntry;
@@ -16,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.somefrills.Main.eventBus;
 import static com.somefrills.Main.mc;
 
 public class SkyblockData {
@@ -119,6 +117,7 @@ public class SkyblockData {
         if (tabListDirty) {
             updateTabListIfDirty();
             tabListDirty = false;
+            eventBus.post(new TabListUpdateEvent(tabListLines));
         }
     }
 

@@ -1,49 +1,57 @@
 package com.somefrills.features.farming;
 
 import com.somefrills.config.Feature;
-import com.somefrills.events.WorldTickEvent;
 import com.somefrills.events.ServerJoinEvent;
-import com.somefrills.misc.SkyblockData;
+import com.somefrills.events.TabListUpdateEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
+
+import java.util.List;
 
 public class AutoWarpHome {
     public static final Feature instance = new Feature("autoWarpHome");
 
-    // Keep the last observed 'Alive' count from the tab list; -1 means unknown/not observed yet
-    private static boolean wasZero = false;
-
-    // Track last server join to implement a cooldown for automatic /home
-    private static long lastServerJoinTime = 0L;
-    private static final long JOIN_COOLDOWN_MS = 10_000L; // 10 seconds default
+    private static PestStatus lastStatus = PestStatus.UNKNOWN; // -1 = unknown
 
     @EventHandler
-    private static void onWorldTick(WorldTickEvent event) {
-        if (!instance.isActive() && Utils.isOnGardenPlot()) {
+    private static void onWorldTick(TabListUpdateEvent event) {
+        if (!instance.isActive()) return;
+        if (!Utils.isOnGardenPlot()) return;
+
+        PestStatus status = checkAliveState(event.lines);
+        if (status == PestStatus.UNKNOWN) return;
+
+        // First valid reading → just store it
+        if (lastStatus == PestStatus.UNKNOWN) {
+            lastStatus = status;
             return;
         }
-        boolean tabDead = checkIfAliveIsZero();
-        if (tabDead) {
-            // Trigger only when count transitioned from >0 to 0
-            if (!wasZero) {
-                long now = System.currentTimeMillis();
-                if (now - lastServerJoinTime > JOIN_COOLDOWN_MS) {
-                    Utils.info("AutoWarpHome: transition >0->0 detected, running /home");
-                    Utils.runCommand("home");
-                }
-            }
-            wasZero = true;
-        } else {
-            wasZero = false;
+
+        // Trigger only on transition >0 → 0
+        if (status == PestStatus.CLEARED && lastStatus == PestStatus.PRESENT) {
+            Utils.info("AutoWarpHome: >0 → 0 detected, running /home");
+            Utils.runCommand("home");
         }
+
+        lastStatus = status;
     }
 
     @EventHandler
     private static void onJoin(ServerJoinEvent event) {
-        lastServerJoinTime = System.currentTimeMillis();
+        lastStatus = PestStatus.UNKNOWN;
     }
 
-    private static boolean checkIfAliveIsZero() {
-        return SkyblockData.getTabListLines().stream().anyMatch(line -> line.contains("Alive:") && line.contains("0"));
+
+    private static PestStatus checkAliveState(List<String> tabListLines) {
+        for (String line : tabListLines) {
+            if (line.contains("Alive")) {
+                return line.contains("0") ? PestStatus.CLEARED : PestStatus.PRESENT;
+            }
+        }
+        return PestStatus.UNKNOWN;
+    }
+
+    public enum PestStatus {
+        UNKNOWN, PRESENT, CLEARED
     }
 }
