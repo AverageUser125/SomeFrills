@@ -1,6 +1,8 @@
 package com.somefrills.mixin;
 
 import com.somefrills.features.mining.GhostVision;
+import com.somefrills.features.misc.GlowPlayer;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.text.Text;
@@ -62,6 +64,18 @@ public class EntityMixin {
                         .append(Text.literal("❤").styled(style -> style.withColor(Formatting.RED)));
 
                 cir.setReturnValue(healthDisplay);
+            }
+        }
+    }
+    @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
+    public void onGetTeamColor(CallbackInfoReturnable<Integer> cir) {
+        if(!GlowPlayer.instance.isActive()) return;
+        Entity self = (Entity)(Object)this;
+        if (self instanceof AbstractClientPlayerEntity player) {
+            String pure = GlowPlayer.convertToPureName(player.getName().getString());
+            Integer color = GlowPlayer.getColorAsInt(pure);
+            if(color != null) {
+                cir.setReturnValue(color);
             }
         }
     }
