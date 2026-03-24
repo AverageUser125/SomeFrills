@@ -5,6 +5,7 @@ import com.somefrills.config.SettingBool;
 import com.somefrills.config.SettingDescription;
 import com.somefrills.config.SettingInt;
 import com.somefrills.events.HudRenderEvent;
+import com.somefrills.events.HudTickEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -58,7 +59,7 @@ public class ExperimentSolver {
     private static int clicks = 0;
 
     @EventHandler
-    private static void onHudTick(HudRenderEvent event) {
+    private static void onHudTick(HudTickEvent event) {
         if (mc == null || mc.player == null) return;
         ClientPlayerEntity player = mc.player;
         ScreenHandler handler = player.currentScreenHandler;
