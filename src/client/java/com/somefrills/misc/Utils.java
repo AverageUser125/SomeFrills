@@ -737,12 +737,12 @@ public class Utils {
     /**
      * Tries to find the entity that the provided Armor Stand belongs to, based on horizontal distance.
      */
-    public static Entity findNametagOwner(Entity armorStand, List<Entity> otherEntities) {
+    public static Entity findNametagOwner(Entity ArmorStandEntity, List<Entity> otherEntities) {
         Entity entity = null;
         float lowestDist = 2.0f;
-        double maxY = armorStand.getEntityPos().getY();
+        double maxY = ArmorStandEntity.getEntityPos().getY();
         for (Entity ent : otherEntities) {
-            float dist = horizontalDistance(ent.getEntityPos(), armorStand.getEntityPos());
+            float dist = horizontalDistance(ent.getEntityPos(), ArmorStandEntity.getEntityPos());
             if (!(ent instanceof ArmorStandEntity) && ent.getEntityPos().getY() < maxY && dist < lowestDist) {
                 entity = ent;
                 lowestDist = dist;
