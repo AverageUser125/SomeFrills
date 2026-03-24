@@ -125,11 +125,11 @@ public class ClickGui extends BaseOwoScreen<FlowLayout> {
                 if (setting instanceof SettingBool sb) {
                     optionLayouts.add(new Settings.Toggle(name, sb, tooltip));
                 } else if (setting instanceof SettingDouble sd) {
-                    optionLayouts.add(new Settings.SliderDouble(name, 0.0, 100.0, 0.1, sd, tooltip));
+                    optionLayouts.add(new Settings.DoubleInput(name, sd, tooltip));
                 } else if (setting instanceof SettingIntSlider sis) {
                     optionLayouts.add(new Settings.SliderInt(name, sis.min(), sis.max(), 1, sis, tooltip));
                 } else if (setting instanceof SettingInt si) {
-                    optionLayouts.add(new Settings.SliderInt(name, 0, 100, 1, si, tooltip));
+                    optionLayouts.add(new Settings.NumberInputInt(name, si, tooltip));
                 } else if (setting instanceof SettingEnum<?> se) {
                     optionLayouts.add(new Settings.Dropdown<>(name, se, tooltip));
                 } else if (setting instanceof SettingColor sc) {

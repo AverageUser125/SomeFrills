@@ -277,6 +277,65 @@ public class Settings extends BaseOwoScreen<FlowLayout> {
         }
     }
 
+    public static class NumberInputDouble extends FlowLayout {
+        public SettingDouble setting;
+
+        public NumberInputDouble(String name, SettingDouble setting, String tooltip) {
+            super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
+            this.padding(Insets.of(5));
+            this.horizontalAlignment(HorizontalAlignment.LEFT);
+            this.setting = setting;
+            PlainLabel label = new PlainLabel(Text.literal(name).withColor(0xffffff));
+            FlatTextbox text = new FlatTextbox(Sizing.fixed(80));
+            label.verticalTextAlignment(VerticalAlignment.CENTER).margins(Insets.of(0, 0, 0, 5)).verticalSizing(Sizing.fixed(20));
+            label.tooltip(Text.literal(tooltip));
+            text.onChanged().subscribe(change -> {
+                Optional<Double> value = Utils.parseDouble(text.getText());
+                if (value.isPresent()) {
+                    double v = roundDouble(value.get());
+                    this.setting.set(v);
+                    text.setText(String.valueOf(v));
+                }
+            });
+            text.text(String.valueOf(roundDouble(this.setting.value())));
+            this.child(label);
+            this.child(text);
+            this.child(buildResetButton(btn -> {
+                this.setting.reset();
+                text.setText(String.valueOf(roundDouble(this.setting.value())));
+            }));
+        }
+    }
+
+    public static class NumberInputInt extends FlowLayout {
+        public SettingInt setting;
+
+        public NumberInputInt(String name, SettingInt setting, String tooltip) {
+            super(Sizing.content(), Sizing.content(), Algorithm.HORIZONTAL);
+            this.padding(Insets.of(5));
+            this.horizontalAlignment(HorizontalAlignment.LEFT);
+            this.setting = setting;
+            PlainLabel label = new PlainLabel(Text.literal(name).withColor(0xffffff));
+            FlatTextbox text = new FlatTextbox(Sizing.fixed(80));
+            label.verticalTextAlignment(VerticalAlignment.CENTER).margins(Insets.of(0, 0, 0, 5)).verticalSizing(Sizing.fixed(20));
+            label.tooltip(Text.literal(tooltip));
+            text.onChanged().subscribe(change -> {
+                Optional<Integer> value = Utils.parseInt(text.getText());
+                if (value.isPresent()) {
+                    this.setting.set(value.get());
+                    text.setText(String.valueOf(value.get()));
+                }
+            });
+            text.text(String.valueOf(this.setting.value()));
+            this.child(label);
+            this.child(text);
+            this.child(buildResetButton(btn -> {
+                this.setting.reset();
+                text.setText(String.valueOf(this.setting.value()));
+            }));
+        }
+    }
+
     public static class Dropdown<T extends Enum<T>> extends FlowLayout {
         public SettingEnum<T> setting;
 
