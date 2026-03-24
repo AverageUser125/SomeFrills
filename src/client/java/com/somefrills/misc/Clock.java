@@ -54,8 +54,4 @@ public final class Clock {
         }
         return false;
     }
-
-    public void clear() {
-        this.begin = 0L;
-    }
 }

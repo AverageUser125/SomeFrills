@@ -3,7 +3,6 @@ package com.somefrills.features.farming;
 import com.somefrills.config.Feature;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ServerJoinEvent;
-import com.somefrills.misc.Clock;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.Formatting;
@@ -20,11 +19,11 @@ public class AutoPestSetHome {
             "\\bPest[s]?\\b.*?spawn(?:ed)?\\b.*?Plot\\s*-?\\s*\\d+",
             Pattern.CASE_INSENSITIVE
     );
-    private static final Clock joinClock = new Clock(IGNORE_WINDOW_MS);
+    private static long lastServerJoinTime = 0L;
 
     @EventHandler
     private static void onServerJoin(ServerJoinEvent event) {
-        joinClock.update();
+        lastServerJoinTime = System.currentTimeMillis();
     }
 
     @EventHandler
@@ -40,8 +39,8 @@ public class AutoPestSetHome {
         Matcher m = PEST_SPAWN_PATTERN.matcher(stripped);
         if (!m.find()) return;
 
-        // Ignore messages that occur within the IGNORE_WINDOW_MS after joining the server
-        if (!joinClock.ended()) return;
+        long now = System.currentTimeMillis();
+        if (now - lastServerJoinTime < IGNORE_WINDOW_MS) return;
 
         if (mc.player == null || mc.player.networkHandler == null) return;
 

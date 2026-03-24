@@ -49,7 +49,7 @@ public final class AutoFish {
     // runtime state (moved to top)
     private static ItemStack heldItem = ItemStack.EMPTY;
     private static boolean heldRod = false;
-    private static final Clock waitingForHookClock = new Clock();
+    private static long waitingForHookSince = 0;
     private static boolean waitingForHookCast = false;
     private static int hookId = -1; // -1 means none
 
@@ -60,9 +60,9 @@ public final class AutoFish {
     private static Clock throwFirstClock = new Clock();
     private static boolean doneRightClickThisTick = false;
     // Fault detection / anti-infinite-recast (runtime trackers)
-    private static final Clock lastUserInteractClock = new Clock(); // last time user (or any interact event) occurred
+    private static long lastUserInteractTime = 0; // last time user (or any interact event) occurred
     private static int recastAttempts = 0; // current consecutive auto recast attempts
-    private static final Clock lastRecastClock = new Clock(); // last auto recast timestamp
+    private static long lastRecastTime = 0; // last auto recast timestamp
 
     static void reset() {
         heldItem = ItemStack.EMPTY;
@@ -74,11 +74,10 @@ public final class AutoFish {
         hookWaitingState = HookWaitingState.NONE;
         hookId = -1;
         // reset fault detection
-        waitingForHookClock.clear();
+        waitingForHookSince = 0;
         waitingForHookCast = false;
         recastAttempts = 0;
-        lastRecastClock.clear();
-        lastUserInteractClock.clear();
+        lastRecastTime = 0;
     }
 
     @EventHandler
@@ -117,7 +116,7 @@ public final class AutoFish {
                 doneRightClickThisTick = false;
                 hookWaitingState = HookWaitingState.NONE;
                 hookId = -1;
-                waitingForHookClock.clear();
+                waitingForHookSince = 0;
                 waitingForHookCast = false;
                 recastAttempts = 0;
                 return;
@@ -135,37 +134,38 @@ public final class AutoFish {
         }
         // If we are waiting for a hook after cast,
         // and it's been more than HOOK_WAIT_TIMEOUT_MS, consider recasting
-        if (faultDetectionEnabled.value() && waitingForHookCast && hookId == -1) {
-            if (waitingForHookClock.ended(hookWaitTimeoutMs.value())) {
+        if (faultDetectionEnabled.value() && waitingForHookCast && waitingForHookSince > 0 && hookId == -1) {
+            long now = System.currentTimeMillis();
+            if (now - waitingForHookSince > hookWaitTimeoutMs.value()) {
                 // If user interacted recently, assume user caused the change and bail out
-                if (!lastUserInteractClock.ended(500)) {
+                if (now - lastUserInteractTime < 500) {
                     chat("User interaction detected; skipping recast");
-                    waitingForHookClock.clear();
+                    waitingForHookSince = 0;
                     waitingForHookCast = false;
                     recastAttempts = 0;
                 } else if (recastAttempts >= maxRecastAttempts.value()) {
                     chat("Max recast attempts reached; not recasting automatically");
-                    waitingForHookClock.clear();
+                    waitingForHookSince = 0;
                     waitingForHookCast = false;
                     recastAttempts = 0;
-                } else if (!lastRecastClock.ended(recastCooldownMs.value())) {
+                } else if (now - lastRecastTime < recastCooldownMs.value()) {
                     // too soon since last recast, skip this tick (cooldown)
-                    chat("Recast cooldown active: {}ms left", Math.max(0, recastCooldownMs.value() - lastRecastClock.getTimePassed()));
+                    chat("Recast cooldown active: {}ms left", Math.max(0, recastCooldownMs.value() - (now - lastRecastTime)));
                 } else {
-                    chat("No hook detected after {}ms — recasting (attempt)", waitingForHookClock.getTimePassed());
+                    chat("No hook detected after {}ms — recasting (attempt)", now - waitingForHookSince);
                     doRightClick();
                     recastAttempts++;
-                    lastRecastClock.update();
+                    lastRecastTime = now;
                     // reset the waiting timer to allow some time for the hook to appear
-                    waitingForHookClock.update();
+                    waitingForHookSince = now;
                 }
             }
         }
         if (hookId != -1) {
-            waitingForHookClock.clear(); // reset if hook appears
+            waitingForHookSince = 0; // reset if hook appears
             waitingForHookCast = false;
             recastAttempts = 0;
-            lastRecastClock.clear();
+            lastRecastTime = 0;
         }
         if (instance.isActive()) doThrow();
     }
@@ -174,7 +174,7 @@ public final class AutoFish {
     public static void onInteractItem(InteractItemEvent event) {
         // mark that we did a right-click this tick
         doneRightClickThisTick = true;
-        lastUserInteractClock.update();
+        lastUserInteractTime = System.currentTimeMillis();
     }
 
     public static boolean matchFishingTimer(String str) {
@@ -202,11 +202,11 @@ public final class AutoFish {
         }
         hookId = hook.getId();
         hookWaitingState = HookWaitingState.NONE;
-        waitingForHookClock.clear(); // reset waiting when hook joins
+        waitingForHookSince = 0; // reset waiting when hook joins
         waitingForHookCast = false;
         // reset fault/detection
         recastAttempts = 0;
-        lastRecastClock.clear();
+        lastRecastTime = 0;
     }
 
     @EventHandler
@@ -253,7 +253,7 @@ public final class AutoFish {
         throwClock.update();
         AutoFishAntiAfk.trigger();
         // Reset waiting for hook creation after reel
-        waitingForHookClock.clear();
+        waitingForHookSince = 0;
         waitingForHookCast = false;
     }
 
@@ -272,11 +272,11 @@ public final class AutoFish {
         hookWaitingState = HookWaitingState.WAITING_JOIN;
         catchClock.update();
         // Start waiting for hook creation after cast
-        waitingForHookClock.update();
+        waitingForHookSince = System.currentTimeMillis();
         waitingForHookCast = true;
         // fault-detection bookkeeping
         recastAttempts = 0;
-        lastRecastClock.clear();
+        lastRecastTime = 0;
     }
 
     private static void chat(String str) {
