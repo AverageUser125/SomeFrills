@@ -87,6 +87,14 @@ public class Config {
     }
 
     private static void reconcileFeatureSubscriptions() {
+        try {
+            if (FeatureRegistry.getFeatures().isEmpty()) {
+                FeatureRegistry.init();
+            }
+        } catch (Exception e) {
+            LOGGER.debug("FeatureRegistry.init() failed during reconcile: {}", e.toString());
+        }
+
         for (FeatureRegistry.FeatureInfo info : FeatureRegistry.getFeatures()) {
             try {
                 Feature feat = info.featureInstance;

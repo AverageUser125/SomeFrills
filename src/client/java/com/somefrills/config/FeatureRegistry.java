@@ -23,6 +23,8 @@ public class FeatureRegistry {
     public static final List<FeatureInfo> FEATURES = new ArrayList<>();
 
     public static void init() {
+        FEATURES.clear();
+
         try {
             List<Class<?>> classes = getClasses("com.somefrills.features");
             for (Class<?> cls : classes) {
