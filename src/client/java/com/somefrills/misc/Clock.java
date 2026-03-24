@@ -14,6 +14,7 @@ public final class Clock {
     }
 
     public long getTimePassed() {
+        if (this.begin == 0L) return 0L;
         return System.currentTimeMillis() - begin;
     }
 
@@ -22,10 +23,12 @@ public final class Clock {
     }
 
     public boolean ended() {
+        if (this.begin == 0L) return false;
         return getTimePassed() >= delay;
     }
 
     public boolean ended(boolean reset) {
+        if (this.begin == 0L) return false;
         long curr;
         if ((curr = System.currentTimeMillis()) - begin >= delay) {
             if (reset) begin = curr;
@@ -35,6 +38,7 @@ public final class Clock {
     }
 
     public boolean ended(long delay) {
+        if (this.begin == 0L) return false;
         return getTimePassed() >= delay;
     }
 
@@ -42,6 +46,7 @@ public final class Clock {
             long delay,
             boolean reset
     ) {
+        if (this.begin == 0L) return false;
         long curr;
         if ((curr = System.currentTimeMillis()) - begin >= delay) {
             if (reset) begin = curr;

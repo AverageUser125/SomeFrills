@@ -1,7 +1,7 @@
 package com.somefrills.features.solvers;
 
 import com.somefrills.config.*;
-import com.somefrills.events.HudTickEvent;
+import com.somefrills.events.HudRenderEvent;
 import com.somefrills.misc.Clock;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -48,7 +48,8 @@ public class ExperimentSolver {
             "(?:Superpairs|Chronomatron|Ultrasequencer) ?(?:\\(.+\\)|➜ Stakes|Rewards)|Experiment(?:ation Tabl| [Oo]v)er?",
             Pattern.CASE_INSENSITIVE
     );
-    private static final Map<Integer, Integer> ultrasequencerOrder = new HashMap<>();
+    // Use a deterministic ordered list for ultrasequencer to avoid nondeterministic misclicks
+    private static final List<Integer> ultrasequencerOrder = new ArrayList<>();
     private static final List<Integer> chronomatronOrder = new ArrayList<>();
     private static final Clock lastClickClock = new Clock();
     private static boolean hasAdded = false;
@@ -56,7 +57,7 @@ public class ExperimentSolver {
     private static int clicks = 0;
 
     @EventHandler
-    private static void onHudTick(HudTickEvent event) {
+    private static void onHudTick(HudRenderEvent event) {
         if (mc == null || mc.player == null) return;
         ClientPlayerEntity player = mc.player;
         ScreenHandler handler = player.currentScreenHandler;
@@ -109,6 +110,7 @@ public class ExperimentSolver {
             // Each color appears in 2 rows (row height = 9), so skip slots that are 9 apart (same color)
 
             int lastSlotAdded = -1;
+            chronomatronOrder.clear();
             for (int i = 11; i < 57; i++) { // Scan the colored glass/terracotta area (slots 11-56)
                 Slot s = invSlots.get(i);
                 if (s.getStack() != null && !s.getStack().isEmpty() && isEnchanted(s.getStack())) {
@@ -130,9 +132,10 @@ public class ExperimentSolver {
             }
 
             if (!chronomatronOrder.isEmpty()) {
-                lastAdded = chronomatronOrder.getLast();
+                lastAdded = chronomatronOrder.get(chronomatronOrder.size() - 1);
                 hasAdded = true;
                 clicks = 0;
+                lastClickClock.update();
             }
         }
 
@@ -148,7 +151,7 @@ public class ExperimentSolver {
 
     private static void solveUltraSequencer(ScreenHandler handler) {
         List<Slot> invSlots = handler.slots;
-        int maxUltraSequencer = getMaxXp.value() ? 20 : (9 - serumCount.value());
+        int maxUltraSequencer = getMaxXp.value() ? 20 : (10 - serumCount.value());
 
         // Reset when slot 49 becomes clock (new round)
         Slot slot49 = invSlots.get(49);
@@ -158,23 +161,41 @@ public class ExperimentSolver {
 
         // Detect and rebuild map when slot 49 becomes glowstone
         if (!hasAdded && slot49.getStack() != null && isItem(slot49.getStack(), "minecraft:glowstone")) {
-            ultrasequencerOrder.clear();
-
-            for (int i = 0; i < invSlots.size(); i++) {
+            // Build a deterministic ordered list by grouping slots by their stack count and choosing
+            // the first unused slot for each count (left-to-right). This avoids nondeterministic
+            // behavior when multiple slots share the same stack count.
+            Map<Integer, List<Integer>> groups = new HashMap<>();
+            int maxCount = 0;
+            int start = 11;
+            int end = Math.min(57, invSlots.size());
+            for (int i = start; i < end; i++) {
                 Slot s = invSlots.get(i);
                 if (s.getStack() != null && !s.getStack().isEmpty()) {
-                    int stackSize = s.getStack().getCount();
                     boolean isDye = isItem(s.getStack(), "minecraft:dye");
-
                     if (isDye) {
-                        int idx = stackSize - 1;
-                        ultrasequencerOrder.put(idx, i);
+                        int cnt = s.getStack().getCount();
+                        groups.computeIfAbsent(cnt, k -> new ArrayList<>()).add(i);
+                        if (cnt > maxCount) maxCount = cnt;
                     }
+                }
+            }
+
+            ultrasequencerOrder.clear();
+            // Build ordered list for counts 1..maxCount
+            for (int c = 1; c <= maxCount; c++) {
+                List<Integer> list = groups.get(c);
+                if (list != null && !list.isEmpty()) {
+                    // pick the first unused slot (left-to-right)
+                    ultrasequencerOrder.add(list.remove(0));
+                } else {
+                    // missing entry for this count — stop building the order
+                    break;
                 }
             }
 
             hasAdded = true;
             clicks = 0;
+            lastClickClock.update();
 
             if (ultrasequencerOrder.size() > maxUltraSequencer && autoClose.value()) {
                 if (mc.player != null) {
@@ -185,7 +206,7 @@ public class ExperimentSolver {
 
         // Perform clicking: slot 49 is clock AND we have dyes to click
         if (slot49.getStack() != null && isItem(slot49.getStack(), "minecraft:clock")
-                && ultrasequencerOrder.containsKey(clicks) && lastClickClock.ended(clickDelay.value())) {
+                && ultrasequencerOrder.size() > clicks && lastClickClock.ended(clickDelay.value())) {
             Integer slotToClick = ultrasequencerOrder.get(clicks);
             if (slotToClick != null) {
                 Utils.clickSlot(slotToClick);
@@ -224,6 +245,7 @@ public class ExperimentSolver {
         hasAdded = false;
         lastAdded = 0;
         clicks = 0;
+        // keep clock uninitialized (begin==0) until we explicitly update() it when a round starts
         lastClickClock.clear();
     }
 }
