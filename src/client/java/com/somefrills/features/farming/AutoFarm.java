@@ -19,14 +19,8 @@ import static com.somefrills.Main.mc;
 
 public class AutoFarm {
     public static final Feature instance = new Feature("autoFarm");
-
     @SettingDescription("Toggle AutoFarm on/off")
     public static SettingKeybind toggleKey = new SettingKeybind(GLFW.GLFW_KEY_GRAVE_ACCENT);
-
-    // runtime state: whether we've reached the target facing already
-    private static boolean applied = false;
-    // last computed target yaw so we can re-apply when it changes
-    private static float lastTargetYaw = Float.NaN;
 
     // tuning: yaw/pitch speed bounds (per tick)
     private static final float MIN_YAW_SPEED = 2.0f;   // slowest per-tick movement
@@ -34,20 +28,20 @@ public class AutoFarm {
     private static final float MIN_PITCH_SPEED = 1.0f;
     private static final float MAX_PITCH_SPEED = 4.0f;
     private static final float REACHED_EPSILON = 1.0f; // considered at target when within this many degrees
-
     private static final Random RAND = new Random();
-
-    // Zig-zag movement state machine
-    private enum MoveState { DIAG_RIGHT, FORWARD, DIAG_LEFT }
-    private static MoveState moveState = MoveState.DIAG_RIGHT;
-    // preference toggle for alternating sides when forward is blocked
-    private static boolean preferRight = true;
-
-    // timestamps to debounce state switches
-    private static long lastStateChangeMs = 0;
     private static final long STATE_COOLDOWN_MS = 150; // 150ms debounce
     // velocity threshold to consider we're blocked on an axis
     private static final double BLOCK_VELOCITY_EPS = 0.02; // small horizontal speed considered blocked
+    // runtime state: whether we've reached the target facing already
+    private static boolean applied = false;
+    // last computed target yaw so we can re-apply when it changes
+    private static float lastTargetYaw = Float.NaN;
+    private static MoveState moveState = MoveState.DIAG_RIGHT;
+    // preference toggle for alternating sides when forward is blocked
+    private static boolean preferRight = true;
+    // timestamps to debounce state switches
+    private static long lastStateChangeMs = 0;
+    private static boolean isActive = false;
 
     @EventHandler
     private static void onServerJoin(ServerJoinEvent event) {
@@ -59,23 +53,25 @@ public class AutoFarm {
     public static void onWorldTick(WorldTickEvent event) {
         var player = mc.player;
         if (player == null) return;
-        // only run on garden plots
+        if(!isActive) return;
         if (!Utils.isOnGardenPlot()) return;
 
-        // require feature active and correct held item
-        boolean isHoldingWheatHoe = Utils.getSkyblockId(Utils.getHeldItem()).contains("wheat");
-        if (!instance.isActive() || !isHoldingWheatHoe) {
-            applied = false;
-            lastTargetYaw = Float.NaN;
-            // release all keys explicitly
-            setMovementKeys(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
-            return;
+        {
+            String skyblockId = Utils.getSkyblockId(Utils.getHeldItem()).toUpperCase();
+            if (!skyblockId.contains("WHEAT") || !skyblockId.contains("HOE")) {
+                applied = false;
+                lastTargetYaw = Float.NaN;
+                // release all keys explicitly
+                setMovementKeys(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+                return;
+            }
         }
 
         // compact mc.options checks (requested)
         if (mc.options == null) return;
         var options = mc.options;
-        if (options.attackKey == null || options.forwardKey == null || options.rightKey == null || options.leftKey == null) return;
+        if (options.attackKey == null || options.forwardKey == null || options.rightKey == null || options.leftKey == null)
+            return;
 
         float targetYaw = getTargetYaw(player);
         // If target changed significantly, mark not applied so we interpolate to new target
@@ -153,7 +149,8 @@ public class AutoFarm {
     private static void setMovementKeys(Boolean forward, Boolean right, Boolean left, Boolean attack) {
         if (mc.options == null) return;
         var options = mc.options;
-        if (options.attackKey == null || options.forwardKey == null || options.rightKey == null || options.leftKey == null) return;
+        if (options.attackKey == null || options.forwardKey == null || options.rightKey == null || options.leftKey == null)
+            return;
         if (forward != null) options.forwardKey.setPressed(forward);
         if (right != null) options.rightKey.setPressed(right);
         if (left != null) options.leftKey.setPressed(left);
@@ -237,17 +234,21 @@ public class AutoFarm {
     @EventHandler
     public static void onKey(InputEvent event) {
         // toggle key handling: on press, toggle feature enabled state
-        if (event.isKeyboard && toggleKey.isKey(event.key) && event.action == GLFW.GLFW_PRESS) {
-            boolean newState = !instance.isActive();
-            instance.setActive(newState);
-            if (!newState) {
-                // disabled -> clear applied and release keys
-                applied = false;
-                lastTargetYaw = Float.NaN;
-                setMovementKeys(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
-            }
-            Utils.infoFormat("AutoFarm {}", newState ? "enabled" : "disabled");
-            event.cancel();
+        if (!(event.isKeyboard && toggleKey.isKey(event.key) && event.action == GLFW.GLFW_PRESS)) {
+            return;
         }
+        boolean newState = !isActive;
+        isActive = newState;
+        if (!newState) {
+            // disabled -> clear applied and release keys
+            applied = false;
+            lastTargetYaw = Float.NaN;
+            setMovementKeys(Boolean.FALSE, Boolean.FALSE, Boolean.FALSE, Boolean.FALSE);
+        }
+        Utils.infoFormat("AutoFarm {}", newState ? "enabled" : "disabled");
+        event.cancel();
     }
+
+    // Zig-zag movement state machine
+    private enum MoveState {DIAG_RIGHT, FORWARD, DIAG_LEFT}
 }
