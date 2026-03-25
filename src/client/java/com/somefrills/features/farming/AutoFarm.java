@@ -11,8 +11,6 @@ import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import org.lwjgl.glfw.GLFW;
 
 import static com.somefrills.Main.mc;
@@ -36,26 +34,16 @@ public class AutoFarm {
     private static boolean applied = false;
     private static float lastTargetYaw = Float.NaN;
 
-    private static MoveState moveState = MoveState.DIAG_RIGHT;
+    private static Direction moveState = Direction.RIGHT;
     private static long lastStateChangeMs = 0;
 
     private static boolean isActive = false;
+    private static Direction lastExit = Direction.NONE;
 
     @EventHandler
     private static void onServerJoin(ServerJoinEvent event) {
         applied = false;
         lastTargetYaw = Float.NaN;
-    }
-    private static BlockPos getBlockOffset(ClientPlayerEntity player, double angleDegrees) {
-        double yawRad = Math.toRadians(player.getYaw() + angleDegrees);
-        int offsetX = (int)Math.round(Math.cos(yawRad));
-        int offsetZ = (int)Math.round(Math.sin(yawRad));
-        return player.getBlockPos().add(offsetX, 0, offsetZ);
-    }
-    private static boolean isSolidBlockAt(BlockPos pos) {
-        var state = mc.world.getBlockState(pos);
-        if(state == null) return false;
-        return state.isLiquid();
     }
 
     @EventHandler
@@ -65,16 +53,12 @@ public class AutoFarm {
         if (!Utils.isOnGardenPlot()) return;
 
         // --- check held item ---
-        String skyblockId = Utils.getSkyblockId(Utils.getHeldItem()).toUpperCase();
-        if (!skyblockId.contains("WHEAT") || !skyblockId.contains("HOE")) {
+        if (!isHoldingHoe()) {
             reset();
             return;
         }
 
         if (mc.options == null) return;
-        var options = mc.options;
-        if (options.attackKey == null || options.forwardKey == null ||
-                options.rightKey == null || options.leftKey == null) return;
 
         // --- facing interpolation ---
         float targetYaw = getTargetYaw(player);
@@ -86,83 +70,123 @@ public class AutoFarm {
         if (!applied) {
             if (interpolateFacing(player, targetYaw)) {
                 applied = true;
-                moveState = MoveState.DIAG_RIGHT;
+                moveState = Direction.RIGHT;
                 lastStateChangeMs = System.currentTimeMillis();
+                lastExit = Direction.NONE;
             }
-            return; // still orienting
+            return;
         }
 
         long now = System.currentTimeMillis();
 
-        // --- compute block positions relative to player ---
-        BlockPos diagRightPos = getBlockOffset(player, 45);
-        BlockPos diagLeftPos  = getBlockOffset(player, -135);
-        BlockPos forwardPos   = getBlockOffset(player, -45);
-        BlockPos behindPos    = getBlockOffset(player, 135); // for RETURN
+        // --- block detection ---
+        BlockPos forwardPos = player.getBlockPos().add(1, 0, 0);
+        BlockPos rightPos   = player.getBlockPos().add(0, 0, 1);  // DIAG_RIGHT
+        BlockPos leftPos    = player.getBlockPos().add(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
+        BlockPos behindPos  = player.getBlockPos().add(-1, 0, 0); // for RETURN
 
-        // --- collision detection ---
-        boolean diagRightBlocked = isSolidBlockAt(diagRightPos);
-        boolean diagLeftBlocked  = isSolidBlockAt(diagLeftPos);
+        boolean diagRightBlocked = isSolidBlockAt(rightPos);
+        boolean diagLeftBlocked = isSolidBlockAt(leftPos);
         boolean diagForwardBlocked = isSolidBlockAt(forwardPos);
         boolean behindBlocked = isSolidBlockAt(behindPos);
 
-        // --- movement state machine ---
+        // --- call extracted state handler ---
+        updateMovementState(diagRightBlocked, diagLeftBlocked, diagForwardBlocked, behindBlocked, now);
+    }
+    private static void updateMovementState(boolean diagRightBlocked,
+                                             boolean diagLeftBlocked,
+                                             boolean diagForwardBlocked,
+                                             boolean behindBlocked,
+                                             long now) {
         boolean pressForward = false;
         boolean pressRight = false;
         boolean pressLeft = false;
 
         switch (moveState) {
-            case DIAG_RIGHT -> {
+            case RIGHT -> {
                 pressForward = true;
                 pressRight = true;
 
                 if (diagRightBlocked && diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
-                    moveState = MoveState.DIAG_LEFT;
+                    moveState = Direction.LEFT;
                     lastStateChangeMs = now;
-                    Utils.infoFormat("State -> DIAG_LEFT (forward & right blocked)");
+                    lastExit = Direction.RIGHT;
+                    Utils.infoFormat("State -> DIAG_LEFT (corner: forward+right blocked)");
+                } else if (diagRightBlocked && !diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                    moveState = Direction.FORWARD;
+                    lastStateChangeMs = now;
+                    lastExit = Direction.RIGHT;
+                    Utils.infoFormat("State -> FORWARD (right blocked, forward free)");
                 }
             }
 
-            case DIAG_LEFT -> {
-                pressForward = false; // ONLY LEFT
-                pressRight = false;
+            case FORWARD -> {
+                pressForward = true;
+
+                if (diagRightBlocked && diagForwardBlocked && lastExit != Direction.LEFT && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                    moveState = Direction.LEFT;
+                    lastStateChangeMs = now;
+                    lastExit = Direction.FORWARD;
+                    Utils.infoFormat("State -> DIAG_LEFT (right blocked, forward free)");
+                } else if (diagLeftBlocked && diagForwardBlocked && lastExit != Direction.RIGHT && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                    moveState = Direction.RIGHT;
+                    lastStateChangeMs = now;
+                    lastExit = Direction.FORWARD;
+                    Utils.infoFormat("State -> DIAG_RIGHT (left blocked, forward free)");
+                }
+            }
+
+            case LEFT -> {
                 pressLeft = true;
 
-                if (diagLeftBlocked && !diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
-                    moveState = MoveState.DIAG_RIGHT;
+                if (diagLeftBlocked && !diagForwardBlocked && lastExit != Direction.RIGHT && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                    moveState = Direction.FORWARD;
                     lastStateChangeMs = now;
-                    Utils.infoFormat("State -> DIAG_RIGHT (left blocked, forward free)");
+                    lastExit = Direction.LEFT;
+                    Utils.infoFormat("State -> FORWARD (left blocked, forward free)");
                 } else if (diagLeftBlocked && diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
-                    moveState = MoveState.RETURN;
+                    moveState = Direction.RETURN;
                     lastStateChangeMs = now;
-                    Utils.infoFormat("State -> RETURN (left + forward blocked, stuck in corner)");
+                    lastExit = Direction.LEFT;
+                    Utils.infoFormat("State -> RETURN (left+forward blocked, corner)");
                 }
             }
 
             case RETURN -> {
-                // backward + right
-                pressForward = false; // backwards is implied by not pressing forward
-                pressRight = true;
+                pressRight = true; // backwards + right
+                pressForward = false;
                 pressLeft = false;
 
                 if (behindBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
-                    moveState = MoveState.DIAG_RIGHT;
+                    moveState = Direction.RIGHT;
                     lastStateChangeMs = now;
-                    Utils.infoFormat("State -> DIAG_RIGHT (return trip finished, hit wall behind)");
+                    lastExit = Direction.RETURN;
+                    Utils.infoFormat("State -> DIAG_RIGHT (return finished, hit wall behind)");
                 }
             }
         }
 
-        // --- smooth key presses ---
+        // --- apply smooth key presses ---
         forwardPress += ((pressForward ? 1f : 0f) - forwardPress) * 0.25f;
         float targetSide = pressRight ? 1f : (pressLeft ? -1f : 0f);
         sidePress += (targetSide - sidePress) * 0.25f;
 
-        options.forwardKey.setPressed(forwardPress > 0.1f);
-        options.rightKey.setPressed(sidePress > 0.1f);
-        options.leftKey.setPressed(sidePress < -0.1f);
-        options.attackKey.setPressed(true);
+        if (mc.options != null) {
+            var options = mc.options;
+            options.forwardKey.setPressed(forwardPress > 0.1f);
+            options.rightKey.setPressed(sidePress > 0.1f);
+            options.leftKey.setPressed(sidePress < -0.1f);
+            options.attackKey.setPressed(true);
+        }
     }
+
+    // --- helper: solid block check, ignores air but treats water as free ---
+    private static boolean isSolidBlockAt(BlockPos pos) {
+        var state = mc.world.getBlockState(pos);
+        if (state == null) return false;
+        return !state.isLiquid();
+    }
+
     private static void reset() {
         applied = false;
         lastTargetYaw = Float.NaN;
@@ -226,6 +250,10 @@ public class AutoFarm {
         while (diff > 180f) diff -= 360f;
         return diff;
     }
+    private static boolean isHoldingHoe() {
+        String skyblockId = Utils.getSkyblockId(Utils.getHeldItem()).toUpperCase();
+        return skyblockId.contains("WHEAT") && skyblockId.contains("HOE");
+    }
 
     @EventHandler
     public static void onScreenOpen(ScreenOpenEvent event) {
@@ -235,7 +263,10 @@ public class AutoFarm {
     @EventHandler
     public static void onKey(InputEvent event) {
         if (!(event.isKeyboard && toggleKey.isKey(event.key) && event.action == GLFW.GLFW_PRESS)) return;
-
+        if(!isHoldingHoe()){
+            Utils.infoFormat("AutoFarm can only be toggled while holding a hoe");
+            return;
+        }
         isActive = !isActive;
 
         if (!isActive) reset();
@@ -243,8 +274,7 @@ public class AutoFarm {
         Utils.infoFormat("AutoFarm {}", isActive ? "enabled" : "disabled");
         event.cancel();
     }
-
-    private enum MoveState {
-        DIAG_RIGHT, DIAG_LEFT, RETURN
+    private enum Direction {
+        NONE, RIGHT, LEFT, FORWARD, RETURN
     }
 }
