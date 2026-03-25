@@ -28,14 +28,7 @@ public class AutoFarm {
     private static final float MIN_PITCH_SPEED = 1.0f;
     private static final float MAX_PITCH_SPEED = 4.0f;
     private static final float REACHED_EPSILON = 1.0f;
-
     private static final long STATE_COOLDOWN_MS = 150;
-
-    // --- smoothing ---
-    private static double smoothForwardVel = 0;
-    private static double smoothRightVel = 0;
-    private static final double SMOOTHING = 0.2;
-
     // --- smooth key press ---
     private static float forwardPress = 0f;
     private static float sidePress = 0f;
@@ -101,13 +94,17 @@ public class AutoFarm {
 
         long now = System.currentTimeMillis();
 
+        // --- compute block positions relative to player ---
         BlockPos diagRightPos = getBlockOffset(player, 45);
-        BlockPos diagLeftPos = getBlockOffset(player, -135);
-        BlockPos forwardPos = getBlockOffset(player, -45);
-        // --- collision detection using BlockPos ---
+        BlockPos diagLeftPos  = getBlockOffset(player, -135);
+        BlockPos forwardPos   = getBlockOffset(player, -45);
+        BlockPos behindPos    = getBlockOffset(player, 135); // for RETURN
+
+        // --- collision detection ---
         boolean diagRightBlocked = isSolidBlockAt(diagRightPos);
         boolean diagLeftBlocked  = isSolidBlockAt(diagLeftPos);
         boolean diagForwardBlocked = isSolidBlockAt(forwardPos);
+        boolean behindBlocked = isSolidBlockAt(behindPos);
 
         // --- movement state machine ---
         boolean pressForward = false;
@@ -122,18 +119,36 @@ public class AutoFarm {
                 if (diagRightBlocked && diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
                     moveState = MoveState.DIAG_LEFT;
                     lastStateChangeMs = now;
-                    Utils.infoFormat("State -> DIAG_LEFT (blocked)");
+                    Utils.infoFormat("State -> DIAG_LEFT (forward & right blocked)");
                 }
             }
+
             case DIAG_LEFT -> {
                 pressForward = false; // ONLY LEFT
                 pressRight = false;
                 pressLeft = true;
 
-                if (diagLeftBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                if (diagLeftBlocked && !diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
                     moveState = MoveState.DIAG_RIGHT;
                     lastStateChangeMs = now;
-                    Utils.infoFormat("State -> DIAG_RIGHT (blocked)");
+                    Utils.infoFormat("State -> DIAG_RIGHT (left blocked, forward free)");
+                } else if (diagLeftBlocked && diagForwardBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                    moveState = MoveState.RETURN;
+                    lastStateChangeMs = now;
+                    Utils.infoFormat("State -> RETURN (left + forward blocked, stuck in corner)");
+                }
+            }
+
+            case RETURN -> {
+                // backward + right
+                pressForward = false; // backwards is implied by not pressing forward
+                pressRight = true;
+                pressLeft = false;
+
+                if (behindBlocked && now - lastStateChangeMs > STATE_COOLDOWN_MS) {
+                    moveState = MoveState.DIAG_RIGHT;
+                    lastStateChangeMs = now;
+                    Utils.infoFormat("State -> DIAG_RIGHT (return trip finished, hit wall behind)");
                 }
             }
         }
@@ -151,8 +166,6 @@ public class AutoFarm {
     private static void reset() {
         applied = false;
         lastTargetYaw = Float.NaN;
-        smoothForwardVel = 0;
-        smoothRightVel = 0;
         forwardPress = 0;
         sidePress = 0;
         if (mc.options == null) return;
@@ -232,6 +245,6 @@ public class AutoFarm {
     }
 
     private enum MoveState {
-        DIAG_RIGHT, DIAG_LEFT
+        DIAG_RIGHT, DIAG_LEFT, RETURN
     }
 }
