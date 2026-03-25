@@ -122,25 +122,37 @@ public class ClickGui extends BaseOwoScreen<FlowLayout> {
                 String name = humanize(f.getName());
                 String tooltip = info.descriptions.getOrDefault(f, "");
 
-                if (setting instanceof SettingBool sb) {
+                // Use exact class checks and explicit casts instead of 'instanceof',
+                // due to SettingKeybind being a subclass of SettingInt and SettingEnum having many anonymous subclasses.
+                // This ensures the correct component is used for each setting type.
+                if (setting.getClass().equals(SettingBool.class)) {
+                    SettingBool sb = (SettingBool) setting;
                     optionLayouts.add(new Settings.Toggle(name, sb, tooltip));
-                } else if (setting instanceof SettingDouble sd) {
+                } else if (setting.getClass().equals(SettingDouble.class)) {
+                    SettingDouble sd = (SettingDouble) setting;
                     optionLayouts.add(new Settings.DoubleInput(name, sd, tooltip));
-                } else if (setting instanceof SettingIntSlider sis) {
+                } else if (setting.getClass().equals(SettingIntSlider.class)) {
+                    SettingIntSlider sis = (SettingIntSlider) setting;
                     optionLayouts.add(new Settings.SliderInt(name, sis.min(), sis.max(), 1, sis, tooltip));
-                } else if (setting instanceof SettingKeybind sk) { // must be before SettingInt
+                } else if (setting.getClass().equals(SettingKeybind.class)) { // must be before SettingInt
+                    SettingKeybind sk = (SettingKeybind) setting;
                     optionLayouts.add(new Settings.Keybind(name, sk, tooltip));
-                } else if (setting instanceof SettingInt si) {
+                } else if (setting.getClass().equals(SettingInt.class)) {
+                    SettingInt si = (SettingInt) setting;
                     optionLayouts.add(new Settings.NumberInputInt(name, si, tooltip));
-                } else if (setting instanceof SettingEnum<?> se) {
+                } else if (setting.getClass().equals(SettingEnum.class) || setting.getClass().getSuperclass() == SettingEnum.class) {
+                    SettingEnum<?> se = (SettingEnum<?>) setting;
                     optionLayouts.add(new Settings.Dropdown<>(name, se, tooltip));
-                } else if (setting instanceof SettingColor sc) {
+                } else if (setting.getClass().equals(SettingColor.class)) {
+                    SettingColor sc = (SettingColor) setting;
                     optionLayouts.add(new Settings.ColorPicker(name, sc, tooltip));
-                } else if (setting instanceof SettingString ss) {
+                } else if (setting.getClass().equals(SettingString.class)) {
+                    SettingString ss = (SettingString) setting;
                     optionLayouts.add(new Settings.TextInput(name, ss, tooltip));
-                } else if (setting instanceof SettingJson sj) {
+                } else if (setting.getClass().equals(SettingJson.class)) {
                     optionLayouts.add(new Settings.Description(name, tooltip != null ? tooltip : "JSON setting"));
-                } else if (setting instanceof SettingBlockPosList sbl) {
+                } else if (setting.getClass().equals(com.somefrills.config.SettingBlockPosList.class)) {
+                    com.somefrills.config.SettingBlockPosList sbl = (com.somefrills.config.SettingBlockPosList) setting;
                     optionLayouts.add(new Settings.BlockPosList(name, sbl, tooltip));
                 } else {
                     // fallback: show as description
