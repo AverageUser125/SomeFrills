@@ -44,7 +44,7 @@ public class GhostVision {
         }
     }
     @EventHandler
-    private void onScoreboardUpdate(AreaChangeEvent event) {
+    private static void onScoreboardUpdate(AreaChangeEvent event) {
         inDwarvenMines = event.area.equals("Dwarven Mines");
     }
 

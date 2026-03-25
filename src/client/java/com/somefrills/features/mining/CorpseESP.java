@@ -19,7 +19,7 @@ public class CorpseESP {
     private static final Set<ArmorStandEntity> armorStandEntities = new ConcurrentHashSet<>();
 
     @EventHandler
-    private void onWorldRender(WorldRenderEvent event) {
+    private static void onWorldRender(WorldRenderEvent event) {
         if(!instance.isActive() || !inMineshaft) return;
 
         for(var entity : armorStandEntities) {
@@ -56,7 +56,7 @@ public class CorpseESP {
     }
 
     @EventHandler
-    private void onScoreboardUpdate(AreaChangeEvent event) {
+    private static void onScoreboardUpdate(AreaChangeEvent event) {
         String area = event.area.toLowerCase();
         inMineshaft = area.contains("glacite") && area.contains("mineshaft");
         if(!inMineshaft) {
