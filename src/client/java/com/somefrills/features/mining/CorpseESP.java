@@ -5,6 +5,7 @@ import com.somefrills.events.*;
 import com.somefrills.misc.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.text.Text;
 
@@ -20,9 +21,10 @@ public class CorpseESP {
         if (mc.world == null) return;
 
         for (var entity : mc.world.getEntities()) {
-            if (!(entity instanceof ArmorStandEntity stand)) continue;
+            // if (!(entity instanceof LivingEntity ArmorStandEntity)) continue;
+            if (!(entity instanceof LivingEntity livingEntity)) continue;
 
-            var helmet = stand.getEquippedStack(EquipmentSlot.HEAD);
+            var helmet = livingEntity.getEquippedStack(EquipmentSlot.HEAD);
             if (helmet.isEmpty()) continue;
 
             // Determine type name + color
@@ -48,9 +50,9 @@ public class CorpseESP {
                 color = RenderColor.fromFloat(1, 0, 1, 1);
             }
 
-            var box = Utils.getLerpedBox(stand, event).expand(0.1);
+            var box = Utils.getLerpedBox(entity, event).expand(0.1);
 
-            var pos = stand.getEntityPos().add(0, stand.getHeight() + 0.5, 0);
+            var pos = entity.getEntityPos().add(0, entity.getHeight() + 0.5, 0);
             event.drawText(pos, typeName, 0.8f, true, color);
             event.drawFilled(box, true, color);
         }
