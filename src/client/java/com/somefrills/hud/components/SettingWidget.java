@@ -1,29 +1,25 @@
 package com.somefrills.hud.components;
 
 import com.daqem.uilib.api.widget.IWidget;
-import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import com.daqem.uilib.gui.component.text.TextComponent;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.navigation.GuiNavigation;
-import net.minecraft.client.gui.navigation.NavigationDirection;
-import net.minecraft.client.gui.ScreenRect;
 import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.gui.Click;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
 
 import static com.somefrills.Main.mc;
 
 public class SettingWidget extends ClickableWidget implements IWidget {
-    private final Text label;
+    private final TextComponent label;
     private final IWidget settingWidget;
 
-    public SettingWidget(int x, int y, int textWidth, int height, String label, String description, IWidget settingWidget) {
-        super(x, y, textWidth, height, Text.literal(label));
-        this.label = Text.literal(label);
+    public SettingWidget(int x, int y, int textWidth, int height, String str, String description, IWidget settingWidget) {
+        super(x, y, textWidth, height, Text.literal(str));
+        this.label = new TextComponent(x, y, Text.literal(str));
         settingWidget.setX(x + textWidth + 5);
         settingWidget.setY(y);
         setTooltip(Tooltip.of(Text.literal(description)));
@@ -32,8 +28,7 @@ public class SettingWidget extends ClickableWidget implements IWidget {
 
     @Override
     protected void renderWidget(DrawContext guiGraphics, int i, int j, float f) {
-        int textY = getY() + (getHeight() - mc.textRenderer.fontHeight) / 2;
-        guiGraphics.drawText(mc.textRenderer, label, getX(), textY, 0xffffffff, false);
+        label.render(guiGraphics, i, j, f);
         settingWidget.render(guiGraphics, i, j, f);
     }
 

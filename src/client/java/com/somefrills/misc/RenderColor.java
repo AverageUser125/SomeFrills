@@ -6,6 +6,7 @@ public class RenderColor {
     public static final RenderColor white = RenderColor.fromHex(0xffffff);
     public static final RenderColor green = RenderColor.fromHex(0x55ff55);
     public static final RenderColor red = RenderColor.fromHex(0xff5555);
+    public static final RenderColor black = RenderColor.fromHex(0xFF000000);
 
     public float r;
     public float g;
@@ -28,8 +29,13 @@ public class RenderColor {
         this.g = Math.clamp(g, 0.0f, 1.0f);
         this.b = Math.clamp(b, 0.0f, 1.0f);
         this.a = Math.clamp(a, 0.0f, 1.0f);
-        this.hex = (((int) this.r * 255) << 16) + (((int) this.g * 255) << 8) + ((int) this.b * 255);
-        this.argb = ColorHelper.fromFloats(this.a, this.r, this.g, this.b);
+        // compute integer components and hex/argb in a consistent manner
+        int ri = (int) (this.r * 255f);
+        int gi = (int) (this.g * 255f);
+        int bi = (int) (this.b * 255f);
+        int ai = (int) (this.a * 255f);
+        this.hex = (ri << 16) | (gi << 8) | bi; // RGB hex
+        this.argb = ColorHelper.getArgb(ai, ri, gi, bi);
     }
 
     public static RenderColor fromHex(int hex) {

@@ -76,8 +76,7 @@ public class SettingsScreen extends AbstractScreen {
         if (clazz.equals(SettingColor.class)) {
             var s = (SettingColor) setting;
             return new ButtonWidget(x, y, width, height, Text.literal("Edit Color"), button -> {
-                // FIXME
-                //mc.setScreen(new ColorPickerScreen(s, this));
+                mc.setScreen(new ColorPickerScreen(s, this));
             });
         }
         if (clazz.equals(SettingBlockPosList.class)) {

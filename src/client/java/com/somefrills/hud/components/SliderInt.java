@@ -2,24 +2,23 @@ package com.somefrills.hud.components;
 
 import com.daqem.uilib.api.widget.IWidget;
 import com.somefrills.config.SettingIntSlider;
-import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.navigation.GuiNavigation;
-import net.minecraft.client.gui.navigation.NavigationDirection;
-import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.input.CharInput;
 import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.gui.Click;
 import net.minecraft.text.Text;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Consumer;
 
 public class SliderInt extends ClickableWidget implements IWidget {
     private final NumberInt numberBox;
     private final SliderWidget slider;
     private boolean updating = false;
     private final SettingIntSlider setting;
+    private Consumer<Integer> consumer = null;
+
     public SliderInt(int x, int y, int widthNum, int widthSlider, int height, SettingIntSlider set) {
         super(x, y, widthNum + 5 + widthSlider, height, Text.empty());
         this.setting = set;
@@ -56,6 +55,7 @@ public class SliderInt extends ClickableWidget implements IWidget {
             function.run();
         } finally {
             updating = false;
+            if(consumer != null) consumer.accept(numberBox.getNumber());
         }
     }
 
@@ -144,5 +144,23 @@ public class SliderInt extends ClickableWidget implements IWidget {
     @Override
     public boolean isFocused() {
         return numberBox.isFocused() || slider.isFocused();
+    }
+
+    public void onValueChange(Consumer<Integer> consumer) {
+        this.consumer = consumer;
+    }
+
+    /**
+     * Programmatically set the numeric value shown by this control (0..255 etc).
+     * This updates both the number box and the slider, using the same internal
+     * synchronization as user input.
+     */
+    public void setNumber(int number) {
+        updateContext(() -> {
+            numberBox.setNumber(number);
+            double v = Math.max(this.setting.min(), Math.min(this.setting.max(), numberBox.getNumber()));
+            double sliderValue = (this.setting.max() == this.setting.min()) ? 0.0 : (v - this.setting.min()) / (this.setting.max() - this.setting.min());
+            slider.setValue(sliderValue);
+        });
     }
 }
