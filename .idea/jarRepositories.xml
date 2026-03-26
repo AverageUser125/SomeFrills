@@ -61,5 +61,10 @@
       <option name="name" value="wispforest-maven" />
       <option name="url" value="https://maven.wispforest.io/releases/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="DAQEM Studios Maven" />
+      <option name="name" value="DAQEM Studios Maven" />
+      <option name="url" value="https://maven.daqem.com/releases" />
+    </remote-repository>
   </component>
 </project>

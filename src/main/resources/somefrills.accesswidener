@@ -1,5 +1,14 @@
 accessWidener v2 named
 accessible class net/minecraft/client/network/ClientPlayNetworkHandler$CommandRunResult
+accessible class net/minecraft/client/render/RenderLayer$MultiPhase
+accessible class net/minecraft/client/render/RenderPhase$LineWidth
+accessible method net/minecraft/client/render/RenderLayer of (Ljava/lang/String;IZZLcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;)Lnet/minecraft/client/render/RenderLayer$MultiPhase;
+accessible class net/minecraft/client/render/RenderPhase$LineWidth
+accessible method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder build (Z)Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters;
+accessible field net/minecraft/client/render/RenderPhase VIEW_OFFSET_Z_LAYERING Lnet/minecraft/client/render/RenderPhase$Layering;
+accessible class net/minecraft/client/render/RenderLayer$MultiPhaseParameters
+accessible method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder layering (Lnet/minecraft/client/render/RenderPhase$Layering;)Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder;
+accessible method net/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder lineWidth (Lnet/minecraft/client/render/RenderPhase$LineWidth;)Lnet/minecraft/client/render/RenderLayer$MultiPhaseParameters$Builder;
 accessible field net/minecraft/component/type/NbtComponent nbt Lnet/minecraft/nbt/NbtCompound;
 accessible field net/minecraft/client/world/ClientWorld entityManager Lnet/minecraft/world/entity/ClientEntityManager;
 accessible field net/minecraft/world/entity/SimpleEntityLookup index Lnet/minecraft/world/entity/EntityIndex;
