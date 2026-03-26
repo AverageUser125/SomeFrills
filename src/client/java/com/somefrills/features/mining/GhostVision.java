@@ -31,18 +31,20 @@ public class GhostVision {
 
     private static final EntityCache cache = new EntityCache();
     private static boolean inDwarvenMines = false;
+
     public static boolean isGhost(Creeper entity) {
         return instance.isActive() && cache.has(entity);
     }
 
     @EventHandler
     private static void onEntity(EntityUpdatedEvent event) {
-        if (inDwarvenMines&& event.entity instanceof Creeper creeper) {
+        if (inDwarvenMines && event.entity instanceof Creeper creeper) {
             if (creeper.asLivingEntity().getY() < 100) {
                 cache.add(event.entity);
             }
         }
     }
+
     @EventHandler
     private static void onScoreboardUpdate(AreaChangeEvent event) {
         inDwarvenMines = event.area.equals("Dwarven Mines");

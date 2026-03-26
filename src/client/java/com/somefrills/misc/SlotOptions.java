@@ -3,10 +3,10 @@ package com.somefrills.misc;
 import com.somefrills.events.ScreenOpenEvent;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.network.chat.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

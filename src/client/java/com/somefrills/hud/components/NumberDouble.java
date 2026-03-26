@@ -53,6 +53,7 @@ public class NumberDouble extends EditBoxWidget {
             }
         });
     }
+
     /**
      * Validate that the current text is an integer. Returns a non-empty list
      * of components when validation fails so the UILib tooltip will appear.

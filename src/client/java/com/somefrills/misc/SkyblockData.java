@@ -3,15 +3,11 @@ package com.somefrills.misc;
 import com.somefrills.events.*;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.world.scores.DisplaySlot;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.ScoreHolder;
-import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
+import net.minecraft.world.scores.*;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,11 +1,8 @@
 package com.somefrills.hud.components;
 
-import net.minecraft.client.gui.GuiGraphics;
+import com.daqem.uilib.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import com.daqem.uilib.gui.widget.ButtonWidget;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ToggleButton extends ButtonWidget {
     private boolean state;
@@ -30,6 +27,7 @@ public class ToggleButton extends ButtonWidget {
     public boolean getToggle() {
         return this.state;
     }
+
     public void setToggle(boolean toggle) {
         this.state = toggle;
         this.setMessage(boolToStr(toggle));

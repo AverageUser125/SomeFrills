@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 public class KeybindButton extends ButtonWidget {
     private int key;
     private boolean waitingForKey = false;
+
     public KeybindButton(int x, int y, int width, int height, int key) {
         super(x, y, width, height, SettingKeybind.staticGetKeyLabel(key), button -> {
             var btn = (KeybindButton) button;
@@ -17,18 +18,21 @@ public class KeybindButton extends ButtonWidget {
         }, Button.DEFAULT_NARRATION);
         this.key = key;
     }
+
     @Override
     public boolean charTyped(CharacterEvent characterEvent) {
-        if(!waitingForKey) return false;
+        if (!waitingForKey) return false;
         int keyCode = characterEvent.codepoint();
         setKey(keyCode);
         waitingForKey = false;
         return true;
     }
+
     private void setKey(int keyCode) {
         key = keyCode;
         this.setMessage(SettingKeybind.staticGetKeyLabel(keyCode));
     }
+
     public int getKey() {
         return key;
     }

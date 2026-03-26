@@ -1,7 +1,7 @@
 package com.somefrills.config;
 
-import org.lwjgl.glfw.GLFW;
 import net.minecraft.network.chat.Component;
+import org.lwjgl.glfw.GLFW;
 
 public class SettingKeybind extends SettingInt {
     public SettingKeybind(int defaultValue) {
@@ -23,7 +23,8 @@ public class SettingKeybind extends SettingInt {
     // Returns a human-readable label for the current binding (never a raw number)
     public Component getLabel() {
         int k = this.value();
-        if (k == GLFW.GLFW_KEY_UNKNOWN) return Component.literal("Not Bound").withStyle(net.minecraft.ChatFormatting.WHITE);
+        if (k == GLFW.GLFW_KEY_UNKNOWN)
+            return Component.literal("Not Bound").withStyle(net.minecraft.ChatFormatting.WHITE);
         return staticGetKeyLabel(k);
     }
 
@@ -42,43 +43,71 @@ public class SettingKeybind extends SettingInt {
             return Component.literal("Num " + n).withStyle(net.minecraft.ChatFormatting.WHITE);
         }
         switch (keycode) {
-            case GLFW.GLFW_KEY_LEFT: return Component.literal("Left").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_RIGHT: return Component.literal("Right").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_UP: return Component.literal("Up").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_DOWN: return Component.literal("Down").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_PAGE_UP: return Component.literal("Page Up").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_PAGE_DOWN: return Component.literal("Page Down").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_HOME: return Component.literal("Home").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_END: return Component.literal("End").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_INSERT: return Component.literal("Insert").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_DELETE: return Component.literal("Delete").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_BACKSPACE: return Component.literal("Backspace").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_ENTER: return Component.literal("Enter").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_TAB: return Component.literal("Tab").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_SPACE: return Component.literal("Space").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_ESCAPE: return Component.literal("Escape").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_GRAVE_ACCENT: return Component.literal("` / ~").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_COMMA: return Component.literal(",").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_PERIOD: return Component.literal(".").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_SLASH: return Component.literal("/").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_SEMICOLON: return Component.literal(";").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_APOSTROPHE: return Component.literal("'").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_LEFT_BRACKET: return Component.literal("[").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_RIGHT_BRACKET: return Component.literal("]").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_MINUS: return Component.literal("-").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_EQUAL: return Component.literal("=").withStyle(net.minecraft.ChatFormatting.WHITE);
-            case GLFW.GLFW_KEY_BACKSLASH: return Component.literal("\\").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_LEFT:
+                return Component.literal("Left").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_RIGHT:
+                return Component.literal("Right").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_UP:
+                return Component.literal("Up").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_DOWN:
+                return Component.literal("Down").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_PAGE_UP:
+                return Component.literal("Page Up").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_PAGE_DOWN:
+                return Component.literal("Page Down").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_HOME:
+                return Component.literal("Home").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_END:
+                return Component.literal("End").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_INSERT:
+                return Component.literal("Insert").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_DELETE:
+                return Component.literal("Delete").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_BACKSPACE:
+                return Component.literal("Backspace").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_ENTER:
+                return Component.literal("Enter").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_TAB:
+                return Component.literal("Tab").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_SPACE:
+                return Component.literal("Space").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_ESCAPE:
+                return Component.literal("Escape").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_GRAVE_ACCENT:
+                return Component.literal("` / ~").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_COMMA:
+                return Component.literal(",").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_PERIOD:
+                return Component.literal(".").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_SLASH:
+                return Component.literal("/").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_SEMICOLON:
+                return Component.literal(";").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_APOSTROPHE:
+                return Component.literal("'").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_LEFT_BRACKET:
+                return Component.literal("[").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_RIGHT_BRACKET:
+                return Component.literal("]").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_MINUS:
+                return Component.literal("-").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_EQUAL:
+                return Component.literal("=").withStyle(net.minecraft.ChatFormatting.WHITE);
+            case GLFW.GLFW_KEY_BACKSLASH:
+                return Component.literal("\\").withStyle(net.minecraft.ChatFormatting.WHITE);
         }
         try {
             String name = org.lwjgl.glfw.GLFW.glfwGetKeyName(keycode, 0);
             if (name != null && !name.isEmpty()) {
                 if (name.matches("\\d+")) {
                 } else {
-                    if (name.length() == 1) return Component.literal(name.toUpperCase()).withStyle(net.minecraft.ChatFormatting.WHITE);
+                    if (name.length() == 1)
+                        return Component.literal(name.toUpperCase()).withStyle(net.minecraft.ChatFormatting.WHITE);
                     return Component.literal(name.replace('_', ' ')).withStyle(net.minecraft.ChatFormatting.WHITE);
                 }
             }
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
         try {
             com.mojang.blaze3d.platform.InputConstants.Key input = com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM.getOrCreate(keycode);
             String localized = input.getDisplayName().getString();
@@ -96,17 +125,20 @@ public class SettingKeybind extends SettingInt {
                 if (pretty.equalsIgnoreCase("grave accent")) pretty = "` / ~";
                 return Component.literal(pretty).withStyle(net.minecraft.ChatFormatting.WHITE);
             }
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
         try {
             com.mojang.blaze3d.platform.InputConstants.Key mouse = com.mojang.blaze3d.platform.InputConstants.Type.MOUSE.getOrCreate(keycode);
             String mouseLabel = mouse.getDisplayName().getString();
             String mouseTrans = mouse.getName();
-            if (mouseLabel != null && !mouseLabel.isEmpty() && !mouseLabel.equals(mouseTrans)) return mouse.getDisplayName();
+            if (mouseLabel != null && !mouseLabel.isEmpty() && !mouseLabel.equals(mouseTrans))
+                return mouse.getDisplayName();
             if (keycode >= GLFW.GLFW_MOUSE_BUTTON_1 && keycode <= GLFW.GLFW_MOUSE_BUTTON_8) {
                 int idx = keycode - GLFW.GLFW_MOUSE_BUTTON_1 + 1;
                 return Component.literal("Mouse " + idx).withStyle(net.minecraft.ChatFormatting.WHITE);
             }
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
         return Component.literal("Unknown").withStyle(net.minecraft.ChatFormatting.WHITE);
     }
 

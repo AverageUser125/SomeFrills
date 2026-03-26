@@ -1,14 +1,13 @@
 package com.somefrills.hud.components;
 
+import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.input.MouseButtonEvent;
-
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
-import com.somefrills.misc.Utils;
 
 import java.util.function.Consumer;
 
@@ -22,15 +21,26 @@ public class SliderWidget extends AbstractWidget {
         super(x, y, width, height, Component.empty());
     }
 
-    public double getValue() { return value; }
-    public void setValue(double v) { this.value = Math.max(0.0, Math.min(1.0, v)); }
+    public double getValue() {
+        return value;
+    }
 
-    public void onValueChange(Consumer<Double> cb) { this.onValueChange = cb; }
+    public void setValue(double v) {
+        this.value = Math.max(0.0, Math.min(1.0, v));
+    }
+
+    public void onValueChange(Consumer<Double> cb) {
+        this.onValueChange = cb;
+    }
+
     private void notifyIfChanged() {
         if (onValueChange == null) return;
         if (Double.isNaN(lastNotified) || Math.abs(value - lastNotified) > 1e-6) {
             lastNotified = value;
-            try { onValueChange.accept(value); } catch (Throwable ignored) {}
+            try {
+                onValueChange.accept(value);
+            } catch (Throwable ignored) {
+            }
         }
     }
 
@@ -53,7 +63,8 @@ public class SliderWidget extends AbstractWidget {
             this.dragging = true;
             notifyIfChanged();
             return true;
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
         return false;
     }
 
@@ -73,7 +84,8 @@ public class SliderWidget extends AbstractWidget {
             this.value = valueFromMouse(pos.x);
             notifyIfChanged();
             return true;
-        } catch (Throwable ignored) {}
+        } catch (Throwable ignored) {
+        }
         return false;
     }
 
@@ -82,13 +94,16 @@ public class SliderWidget extends AbstractWidget {
         int trackY = this.getY() + this.height / 2 - 3;
         guiGraphics.fill(this.getX(), trackY, this.getX() + this.width, trackY + 6, 0xff444444);
         // knob
-        int kx = this.getX() + (int)Math.round(this.value * (this.width - 8));
+        int kx = this.getX() + (int) Math.round(this.value * (this.width - 8));
         int ky = this.getY() + 3;
         guiGraphics.fill(kx, ky, kx + 8, ky + this.height - 6, 0xffffffff);
     }
 
     @Override
-    public @NotNull NarrationPriority narrationPriority() { return NarrationPriority.FOCUSED; }
+    public @NotNull NarrationPriority narrationPriority() {
+        return NarrationPriority.FOCUSED;
+    }
+
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
     }

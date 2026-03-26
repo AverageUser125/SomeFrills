@@ -6,13 +6,9 @@ import com.somefrills.Main;
 import com.somefrills.config.FeatureRegistry;
 import com.somefrills.hud.SettingsScreen;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-
-import java.awt.*;
 
 import static com.somefrills.Main.mc;
 
@@ -20,7 +16,7 @@ public class FeatureWidget extends ButtonWidget implements IWidget {
     private final FeatureRegistry.FeatureInfo info;
 
     public FeatureWidget(int x, int y, int width, int height, FeatureRegistry.FeatureInfo info) {
-        super(x, y, width, height, Component.literal(info.name), button -> {;
+        super(x, y, width, height, Component.literal(info.name), button -> {
             var fw = (FeatureWidget) button;
             fw.toggleState();
         });
@@ -51,7 +47,7 @@ public class FeatureWidget extends ButtonWidget implements IWidget {
     @Override
     public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
         if (mouseButtonEvent.input() == 1) {
-            if(!info.settings.isEmpty()) {
+            if (!info.settings.isEmpty()) {
                 mc.setScreen(new SettingsScreen(info));
                 return true;
             }

@@ -1,8 +1,8 @@
 package com.somefrills.events;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 
 public class SlotClickEvent extends Cancellable {
     public Slot slot;

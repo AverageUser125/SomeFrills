@@ -8,9 +8,9 @@ import com.somefrills.events.*;
 import com.somefrills.misc.Clock;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.InteractionHand;
 
 import static com.somefrills.Main.mc;
 

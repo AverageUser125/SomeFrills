@@ -1,12 +1,14 @@
 package com.somefrills.hud;
 
 import com.daqem.uilib.gui.AbstractScreen;
-import com.somefrills.config.*;
+import com.somefrills.config.Config;
+import com.somefrills.config.FeatureRegistry;
 import com.somefrills.config.FeatureRegistry.FeatureInfo;
 import com.somefrills.hud.components.FeatureWidget;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+
 import java.util.*;
 
 public class ClickGui extends AbstractScreen {
@@ -51,8 +53,8 @@ public class ClickGui extends AbstractScreen {
         final int FEATURE_HEIGHT = 20;
         int startX = 10;
         int startY = START_FEATURE_Y;
-        for(CategoryData category : this.categories) {
-            for(FeatureInfo info : category.features) {
+        for (CategoryData category : this.categories) {
+            for (FeatureInfo info : category.features) {
                 addWidget(new FeatureWidget(startX, startY, FEATURE_WIDTH, FEATURE_HEIGHT, info));
                 startY += FEATURE_HEIGHT + 10;
             }
@@ -79,7 +81,7 @@ public class ClickGui extends AbstractScreen {
                 features.removeIf(info -> {
                     if (matchSearch(info.name, value) || matchSearch(info.description, value)) return false;
                     for (FeatureRegistry.SettingInfo entry : info.settings) {
-                        if (matchSearch(entry.name, value) || matchSearch(entry.description, value)) return false;
+                        if (matchSearch(entry.name(), value) || matchSearch(entry.description(), value)) return false;
                     }
                     return true;
                 });
@@ -109,7 +111,16 @@ public class ClickGui extends AbstractScreen {
         }
     }
 
-    private static class Rect { int x, y, w, h; Rect(int x,int y,int w,int h){this.x=x;this.y=y;this.w=w;this.h=h;} }
+    private static class Rect {
+        int x, y, w, h;
+
+        Rect(int x, int y, int w, int h) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+        }
+    }
 }
 
 

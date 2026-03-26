@@ -40,7 +40,7 @@ public class SettingsScreen extends AbstractScreen {
         int columnWidth = labelWidth + 6 + controlWidth;
 
         for (FeatureRegistry.SettingInfo entry : info.settings) {
-            var setting = entry.settingInstance;
+            var setting = entry.settingInstance();
             // wrap column if we would overflow the screen height
             if (y + rowHeight > this.height - 40) {
                 x += columnWidth + colGap;
@@ -48,7 +48,7 @@ public class SettingsScreen extends AbstractScreen {
             }
             IWidget w = getWidget(x, y, controlWidth, rowHeight, setting);
             if (w == null) continue;
-            SettingWidget sw = new SettingWidget(x, y, labelWidth, rowHeight, entry.name, entry.description, w);
+            SettingWidget sw = new SettingWidget(x, y, labelWidth, rowHeight, entry.name(), entry.description(), w);
             widgets.add(sw);
             y += rowHeight + rowGap;
         }
@@ -103,5 +103,6 @@ public class SettingsScreen extends AbstractScreen {
     public void onClose() {
         Config.save();
         mc.setScreen(new ClickGui());
+        super.onClose();
     }
 }

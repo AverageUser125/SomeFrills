@@ -20,6 +20,7 @@ import static com.somefrills.Main.mc;
 public class SettingWidget extends AbstractWidget implements IWidget {
     private final Component label;
     private final IWidget settingWidget;
+
     public SettingWidget(int x, int y, int textWidth, int height, String label, String description, IWidget settingWidget) {
         super(x, y, textWidth, height, Component.literal(label));
         this.label = Component.literal(label);

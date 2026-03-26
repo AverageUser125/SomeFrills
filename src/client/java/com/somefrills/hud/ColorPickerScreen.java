@@ -1,4 +1,5 @@
 package com.somefrills.hud;
+
 import com.daqem.uilib.gui.AbstractScreen;
 import com.somefrills.config.SettingColor;
 import com.somefrills.misc.RenderColor;
@@ -42,9 +43,14 @@ public class ColorPickerScreen extends AbstractScreen {
 
         // layout
         svSize = Math.min(200, this.width - 260);
-        svX = 10; svY = 10;
-        hueW = 12; hueX = svX + svSize + 8; hueY = svY; hueH = svSize;
-        inputsX = hueX + hueW + 12; inputsY = svY;
+        svX = 10;
+        svY = 10;
+        hueW = 12;
+        hueX = svX + svSize + 8;
+        hueY = svY;
+        hueH = svSize;
+        inputsX = hueX + hueW + 12;
+        inputsY = svY;
 
         // load initial state from setting
         RenderColor rc = setting.value();
@@ -58,18 +64,38 @@ public class ColorPickerScreen extends AbstractScreen {
         int w = 50;
         rBox = new EditBox(this.font, inputsX, y, w, 20, Component.literal("R"));
         gBox = new EditBox(this.font, inputsX + (w + 6), y, w, 20, Component.literal("G"));
-        bBox = new EditBox(this.font, inputsX + 2*(w + 6), y, w, 20, Component.literal("B"));
-        aBox = new EditBox(this.font, inputsX + 3*(w + 6), y, w, 20, Component.literal("A"));
+        bBox = new EditBox(this.font, inputsX + 2 * (w + 6), y, w, 20, Component.literal("B"));
+        aBox = new EditBox(this.font, inputsX + 3 * (w + 6), y, w, 20, Component.literal("A"));
 
-        hexBox = new EditBox(this.font, inputsX, y + 28, w*3 + 12, 20, Component.literal("Hex"));
+        hexBox = new EditBox(this.font, inputsX, y + 28, w * 3 + 12, 20, Component.literal("Hex"));
 
         updateUiFromSetting();
 
         // responders - update setting live when user edits numeric inputs
-        rBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> { int c = clamp(i,0,255); RenderColor cur = setting.value(); setting.set(new RenderColor(c, (int)(cur.g*255),(int)(cur.b*255),(int)(cur.a*255))); updateUiFromSetting(); }));
-        gBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> { int c = clamp(i,0,255); RenderColor cur = setting.value(); setting.set(new RenderColor((int)(cur.r*255), c, (int)(cur.b*255),(int)(cur.a*255))); updateUiFromSetting(); }));
-        bBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> { int c = clamp(i,0,255); RenderColor cur = setting.value(); setting.set(new RenderColor((int)(cur.r*255), (int)(cur.g*255), c,(int)(cur.a*255))); updateUiFromSetting(); }));
-        aBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> { int c = clamp(i,0,255); RenderColor cur = setting.value(); setting.set(new RenderColor((int)(cur.r*255), (int)(cur.g*255), (int)(cur.b*255), c)); updateUiFromSetting(); }));
+        rBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> {
+            int c = clamp(i, 0, 255);
+            RenderColor cur = setting.value();
+            setting.set(new RenderColor(c, (int) (cur.g * 255), (int) (cur.b * 255), (int) (cur.a * 255)));
+            updateUiFromSetting();
+        }));
+        gBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> {
+            int c = clamp(i, 0, 255);
+            RenderColor cur = setting.value();
+            setting.set(new RenderColor((int) (cur.r * 255), c, (int) (cur.b * 255), (int) (cur.a * 255)));
+            updateUiFromSetting();
+        }));
+        bBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> {
+            int c = clamp(i, 0, 255);
+            RenderColor cur = setting.value();
+            setting.set(new RenderColor((int) (cur.r * 255), (int) (cur.g * 255), c, (int) (cur.a * 255)));
+            updateUiFromSetting();
+        }));
+        aBox.setResponder(v -> Utils.parseInt(v).ifPresent(i -> {
+            int c = clamp(i, 0, 255);
+            RenderColor cur = setting.value();
+            setting.set(new RenderColor((int) (cur.r * 255), (int) (cur.g * 255), (int) (cur.b * 255), c));
+            updateUiFromSetting();
+        }));
 
         hexBox.setResponder(v -> {
             if (v == null) return;
@@ -83,7 +109,8 @@ public class ColorPickerScreen extends AbstractScreen {
                 else return;
                 setting.set(RenderColor.fromArgb(argb));
                 updateUiFromSetting();
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         });
 
         this.addRenderableWidget(rBox);
@@ -92,14 +119,16 @@ public class ColorPickerScreen extends AbstractScreen {
         this.addRenderableWidget(aBox);
         this.addRenderableWidget(hexBox);
 
-        com.daqem.uilib.gui.widget.ButtonWidget back = new com.daqem.uilib.gui.widget.ButtonWidget(this.width/2-50, this.height-30, 100, 20, Component.literal("Back"), b -> {
+        com.daqem.uilib.gui.widget.ButtonWidget back = new com.daqem.uilib.gui.widget.ButtonWidget(this.width / 2 - 50, this.height - 30, 100, 20, Component.literal("Back"), b -> {
             com.somefrills.config.Config.save();
             mc.setScreen(this.previous);
         });
         this.addRenderableWidget(back);
     }
 
-    private static int clamp(int v, int a, int b) { return Math.max(a, Math.min(b, v)); }
+    private static int clamp(int v, int a, int b) {
+        return Math.max(a, Math.min(b, v));
+    }
 
     private void updateUiFromSetting() {
         RenderColor cur = setting.value();
@@ -108,10 +137,10 @@ public class ColorPickerScreen extends AbstractScreen {
         this.sat = hsv[1];
         this.val = hsv[2];
 
-        rBox.setValue(String.valueOf((int)(cur.r * 255)));
-        gBox.setValue(String.valueOf((int)(cur.g * 255)));
-        bBox.setValue(String.valueOf((int)(cur.b * 255)));
-        aBox.setValue(String.valueOf((int)(cur.a * 255)));
+        rBox.setValue(String.valueOf((int) (cur.r * 255)));
+        gBox.setValue(String.valueOf((int) (cur.g * 255)));
+        bBox.setValue(String.valueOf((int) (cur.b * 255)));
+        aBox.setValue(String.valueOf((int) (cur.a * 255)));
         hexBox.setValue(String.format("0x%08X", setting.value().argb));
     }
 
@@ -224,7 +253,9 @@ public class ColorPickerScreen extends AbstractScreen {
         //return super.mouseClicked(mouseX, mouseY, button);
     }
 
-    private static float clampFloat(float v, float a, float b) { return Math.max(a, Math.min(b, v)); }
+    private static float clampFloat(float v, float a, float b) {
+        return Math.max(a, Math.min(b, v));
+    }
 
     private void applyHsvToSetting() {
         float[] rgb = hsvToRgb(hue / 360f, sat, val);

@@ -11,7 +11,7 @@ public class SliderInt extends AbstractWidget implements IWidget {
     private final SliderWidget slider;
     private final int minValue;
     private final int maxValue;
-    private  boolean updating = false;
+    private boolean updating = false;
 
     public SliderInt(int x, int y, int widthNum, int widthSlider, int height, int value, int min, int max) {
         super(x, y, widthNum + 5 + widthSlider, height, Component.empty());
@@ -49,8 +49,8 @@ public class SliderInt extends AbstractWidget implements IWidget {
         slider.updateNarration(narrationElementOutput);
     }
 
-    private void updateContext(Runnable function){
-        if(updating) return;
+    private void updateContext(Runnable function) {
+        if (updating) return;
         try {
             updating = true;
             function.run();

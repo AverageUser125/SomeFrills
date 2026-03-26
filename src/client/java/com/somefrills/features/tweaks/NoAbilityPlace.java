@@ -4,8 +4,8 @@ import com.google.common.collect.Sets;
 import com.somefrills.config.Feature;
 import com.somefrills.misc.Utils;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 import java.util.HashSet;
 

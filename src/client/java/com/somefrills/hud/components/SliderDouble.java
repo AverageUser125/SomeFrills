@@ -49,8 +49,8 @@ public class SliderDouble extends AbstractWidget implements IWidget {
         slider.updateNarration(narrationElementOutput);
     }
 
-    private void updateContext(Runnable function){
-        if(updating) return;
+    private void updateContext(Runnable function) {
+        if (updating) return;
         try {
             updating = true;
             function.run();

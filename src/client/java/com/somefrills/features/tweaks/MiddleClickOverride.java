@@ -4,9 +4,9 @@ import com.google.common.collect.Sets;
 import com.somefrills.config.Feature;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashSet;

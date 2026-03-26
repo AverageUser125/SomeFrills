@@ -7,9 +7,9 @@ import com.somefrills.events.InteractBlockEvent;
 import com.somefrills.events.InteractItemEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.HitResult;
 
 import static com.somefrills.Main.mc;

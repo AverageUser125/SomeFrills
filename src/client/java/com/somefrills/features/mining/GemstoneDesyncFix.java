@@ -7,9 +7,9 @@ import com.somefrills.events.BlockUpdateEvent;
 import com.somefrills.misc.SkyblockData;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.StainedGlassBlock;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.HashSet;
 

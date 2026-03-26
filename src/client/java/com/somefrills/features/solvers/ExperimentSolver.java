@@ -1,17 +1,16 @@
 package com.somefrills.features.solvers;
 
 import com.somefrills.config.*;
-import com.somefrills.events.HudRenderEvent;
 import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.ScreenRenderEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -60,6 +59,7 @@ public class ExperimentSolver {
     public static void onHudTick(ScreenRenderEvent event) {
         onHudTick();
     }
+
     @EventHandler
     public static void onScreen(ScreenOpenEvent event) {
         onHudTick();
@@ -205,6 +205,7 @@ public class ExperimentSolver {
         String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
         return id.equals(itemId);
     }
+
     private static boolean isDye(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
         String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();

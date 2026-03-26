@@ -2,8 +2,6 @@ package com.somefrills.misc;
 
 import net.minecraft.util.ARGB;
 
-import java.awt.*;
-
 public class RenderColor {
     public static final RenderColor white = RenderColor.fromHex(0xffffff);
     public static final RenderColor green = RenderColor.fromHex(0x55ff55);

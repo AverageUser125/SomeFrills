@@ -9,52 +9,51 @@ import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
 import com.somefrills.events.WorldRenderEvent;
-import com.somefrills.mixin.BossHealthOverlayAccessor;
 import com.somefrills.mixin.AbstractContainerScreenAccessor;
+import com.somefrills.mixin.BossHealthOverlayAccessor;
 import com.somefrills.mixin.PlayerTabOverlayAccessor;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.GuiMessageTag;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
+import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.AABB;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.entity.LevelEntityGetterAdapter;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import org.joml.Vector2d;
 
 import java.io.IOException;
@@ -156,7 +155,8 @@ public class Utils {
         char prev = ' ';
         for (int i = 0; i < withSpaces.length(); i++) {
             char c = withSpaces.charAt(i);
-            if (i > 0 && Character.isUpperCase(c) && (Character.isLowerCase(prev) || Character.isDigit(prev))) out.append(' ');
+            if (i > 0 && Character.isUpperCase(c) && (Character.isLowerCase(prev) || Character.isDigit(prev)))
+                out.append(' ');
             out.append(c);
             prev = c;
         }
@@ -368,9 +368,10 @@ public class Utils {
     public static AABB getLerpedBox(Entity entity, WorldRenderEvent event) {
         return Utils.getLerpedBox(entity, event.tickCounter.getGameTimeDeltaPartialTick(true));
     }
-        /**
-         * Returns the entity's bounding box at their interpolated position.
-         */
+
+    /**
+     * Returns the entity's bounding box at their interpolated position.
+     */
     public static AABB getLerpedBox(Entity entity, float tickProgress) {
         return entity.getDimensions(Pose.STANDING).makeBoundingBox(entity.getPosition(tickProgress));
     }

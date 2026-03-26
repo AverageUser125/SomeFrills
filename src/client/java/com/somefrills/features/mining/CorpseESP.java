@@ -1,13 +1,14 @@
 package com.somefrills.features.mining;
 
 import com.somefrills.config.Feature;
-import com.somefrills.events.*;
-import com.somefrills.misc.*;
+import com.somefrills.events.AreaChangeEvent;
+import com.somefrills.events.WorldRenderEvent;
+import com.somefrills.misc.RenderColor;
+import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.network.chat.Component;
 
 import static com.somefrills.Main.mc;
 
@@ -41,10 +42,10 @@ public class CorpseESP {
                 color = RenderColor.fromFloat(1, 1, 1, 1);
             } else if (n.contains("yog")) {
                 typeName = Component.nullToEmpty("Umber");
-                color = RenderColor.fromFloat(181f/255, 98f/255, 34f/255, 1);
+                color = RenderColor.fromFloat(181f / 255, 98f / 255, 34f / 255, 1);
             } else if (n.contains("vanguard")) {
                 typeName = Component.nullToEmpty("Vanguard");
-                color = RenderColor.fromFloat(242f/255, 36f/255, 184f/255, 1);
+                color = RenderColor.fromFloat(242f / 255, 36f / 255, 184f / 255, 1);
             } else {
                 typeName = Component.nullToEmpty("Unknown");
                 color = RenderColor.fromFloat(1, 0, 1, 1);

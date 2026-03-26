@@ -18,7 +18,7 @@ final class AutoFishAntiAfk {
 
     public static void reset() {
         if (mc.player == null) return;
-        if(!instance.isActive()) return;
+        if (!instance.isActive()) return;
         if (resetFacingWhenNotFishing.value()) {
             mc.player.setYRot(0f);
             mc.player.setXRot(0f);

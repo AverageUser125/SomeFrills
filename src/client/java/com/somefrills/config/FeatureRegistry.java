@@ -10,10 +10,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.JarURLConnection;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
 
 /**
  * Scans the classpath for classes under com.somefrills.features.* that expose a public static
@@ -171,8 +172,8 @@ public class FeatureRegistry {
     }
 
     public static void reconcileFeatureSubscriptions() {
-        for(FeatureInfo info : FEATURES) {
-            if(info.featureInstance.isActive()){
+        for (FeatureInfo info : FEATURES) {
+            if (info.featureInstance.isActive()) {
                 Main.eventBus.subscribe(info.clazz);
             } else {
                 Main.eventBus.unsubscribe(info.clazz);
@@ -201,15 +202,7 @@ public class FeatureRegistry {
             description = Utils.humanize(featureInstance.key());
         }
     }
-    public static class SettingInfo {
-        public final String name;
-        public final String description;
-        public final SettingGeneric settingInstance;
 
-        public SettingInfo(String name, String description, SettingGeneric settingInstance) {
-            this.name = name;
-            this.description = description;
-            this.settingInstance = settingInstance;
-        }
+    public record SettingInfo(String name, String description, SettingGeneric settingInstance) {
     }
 }

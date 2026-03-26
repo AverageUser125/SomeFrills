@@ -81,9 +81,9 @@ public class AutoFarm {
 
         // --- block detection ---
         BlockPos forwardPos = player.blockPosition().offset(1, 0, 0);
-        BlockPos rightPos   = player.blockPosition().offset(0, 0, 1);  // DIAG_RIGHT
-        BlockPos leftPos    = player.blockPosition().offset(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
-        BlockPos behindPos  = player.blockPosition().offset(-1, 0, 0); // for RETURN
+        BlockPos rightPos = player.blockPosition().offset(0, 0, 1);  // DIAG_RIGHT
+        BlockPos leftPos = player.blockPosition().offset(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
+        BlockPos behindPos = player.blockPosition().offset(-1, 0, 0); // for RETURN
 
         boolean diagRightBlocked = isSolidBlockAt(rightPos);
         boolean diagLeftBlocked = isSolidBlockAt(leftPos);
@@ -93,11 +93,12 @@ public class AutoFarm {
         // --- call extracted state handler ---
         updateMovementState(diagRightBlocked, diagLeftBlocked, diagForwardBlocked, behindBlocked, now);
     }
+
     private static void updateMovementState(boolean diagRightBlocked,
-                                             boolean diagLeftBlocked,
-                                             boolean diagForwardBlocked,
-                                             boolean behindBlocked,
-                                             long now) {
+                                            boolean diagLeftBlocked,
+                                            boolean diagForwardBlocked,
+                                            boolean behindBlocked,
+                                            long now) {
         boolean pressForward = false;
         boolean pressRight = false;
         boolean pressLeft = false;
@@ -243,6 +244,7 @@ public class AutoFarm {
         while (diff > 180f) diff -= 360f;
         return diff;
     }
+
     private static boolean isHoldingHoe() {
         String skyblockId = Utils.getSkyblockId(Utils.getHeldItem()).toUpperCase();
         return skyblockId.contains("WHEAT") && skyblockId.contains("HOE");
@@ -256,7 +258,7 @@ public class AutoFarm {
     @EventHandler
     public static void onKey(InputEvent event) {
         if (!(event.isKeyboard && toggleKey.isKey(event.key) && event.action == GLFW.GLFW_PRESS)) return;
-        if(!isHoldingHoe()){
+        if (!isHoldingHoe()) {
             Utils.infoFormat("AutoFarm can only be toggled while holding a hoe");
             return;
         }
@@ -267,6 +269,7 @@ public class AutoFarm {
         Utils.infoFormat("AutoFarm {}", isActive ? "enabled" : "disabled");
         event.cancel();
     }
+
     private enum Direction {
         NONE, RIGHT, LEFT, FORWARD, RETURN
     }

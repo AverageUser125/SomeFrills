@@ -1,8 +1,8 @@
 package com.somefrills.events;
 
 import com.somefrills.misc.Utils;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.Entity;
 
 public class EntityNamedEvent {
     public Entity entity;
