@@ -1,7 +1,7 @@
 package com.somefrills.events;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.hit.BlockHitResult;
 
 public class AttackBlockEvent {
     public BlockHitResult blockHitResult;

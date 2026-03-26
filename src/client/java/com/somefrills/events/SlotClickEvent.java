@@ -1,18 +1,18 @@
 package com.somefrills.events;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.slot.Slot;
 
 public class SlotClickEvent extends Cancellable {
     public Slot slot;
     public int slotId;
     public int button;
-    public ClickType actionType;
+    public SlotActionType actionType;
     public String title;
-    public AbstractContainerMenu handler;
+    public ScreenHandler handler;
 
-    public SlotClickEvent(Slot slot, int slotId, int button, ClickType actionType, String title, AbstractContainerMenu handler) {
+    public SlotClickEvent(Slot slot, int slotId, int button, SlotActionType actionType, String title, ScreenHandler handler) {
         this.setCancelled(false);
         this.slot = slot;
         this.slotId = slotId;

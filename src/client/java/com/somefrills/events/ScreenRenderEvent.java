@@ -1,34 +1,35 @@
 package com.somefrills.events;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Rendering;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
-import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
+import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.gui.render.state.SimpleGuiElementRenderState;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.texture.TextureSetup;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.Text;
 import org.joml.Matrix3x2f;
 import org.joml.Vector2d;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
 import static com.somefrills.Main.mc;
 
 public class ScreenRenderEvent {
-    public GuiGraphics context;
+    public DrawContext context;
     public int mouseX;
     public int mouseY;
     public float deltaTicks;
     public String title;
-    public AbstractContainerMenu handler;
+    public ScreenHandler handler;
     public Slot focusedSlot;
 
-    public ScreenRenderEvent(GuiGraphics context, int mouseX, int mouseY, float deltaTicks, String title, AbstractContainerMenu handler, Slot focusedSlot) {
+    public ScreenRenderEvent(DrawContext context, int mouseX, int mouseY, float deltaTicks, String title, ScreenHandler handler, Slot focusedSlot) {
         this.context = context;
         this.mouseX = mouseX;
         this.mouseY = mouseY;
@@ -51,15 +52,15 @@ public class ScreenRenderEvent {
         if (slot1.isPresent() && slot2.isPresent()) {
             Slot first = slot1.get();
             Slot second = slot2.get();
-            this.drawLine(RenderPipelines.GUI, first.x + 8, first.y + 8, second.x + 8, second.y + 8, width, color);
+            this.drawLine(RenderPipelines.GUI, first.x + 8, first.y + 8, second.x + 8, second.y + 8, width, RenderColor.ofArgb(color.argb));
         }
     }
 
     public void drawLine(RenderPipeline pipeline, int x1, int y1, int x2, int y2, double width, RenderColor color) {
-        this.context.guiRenderState.submitGuiElement(new LineElementRenderState(
+        this.context.state.addSimpleElement(new LineElementRenderState(
                 pipeline,
-                new Matrix3x2f(context.pose()),
-                context.scissorStack.peek(),
+                new Matrix3x2f(context.getMatrices()),
+                context.scissorStack.peekLast(),
                 x1, y1, x2, y2,
                 width,
                 color
@@ -70,8 +71,8 @@ public class ScreenRenderEvent {
         this.getSlot(slotId).ifPresent(slot -> Rendering.drawBorder(this.context, slot.x, slot.y, 16, 16, color.argb));
     }
 
-    public void drawLabel(int slotId, Component text) {
-        this.getSlot(slotId).ifPresent(slot -> this.context.drawCenteredString(mc.font, text, slot.x + 8, slot.y + 4, RenderColor.white.argb));
+    public void drawLabel(int slotId, Text text) {
+        this.getSlot(slotId).ifPresent(slot -> this.context.drawCenteredTextWithShadow(mc.textRenderer, text, slot.x + 8, slot.y + 4, RenderColor.white.argb));
     }
 
     public void drawFill(int slotId, RenderColor color) {
@@ -79,13 +80,13 @@ public class ScreenRenderEvent {
     }
 
     public static class Before extends ScreenRenderEvent {
-        public Before(GuiGraphics context, int mouseX, int mouseY, float deltaTicks, String title, AbstractContainerMenu handler, Slot focusedSlot) {
+        public Before(DrawContext context, int mouseX, int mouseY, float deltaTicks, String title, ScreenHandler handler, Slot focusedSlot) {
             super(context, mouseX, mouseY, deltaTicks, title, handler, focusedSlot);
         }
     }
 
     public static class After extends ScreenRenderEvent {
-        public After(GuiGraphics context, int mouseX, int mouseY, float deltaTicks, String title, AbstractContainerMenu handler, Slot focusedSlot) {
+        public After(DrawContext context, int mouseX, int mouseY, float deltaTicks, String title, ScreenHandler handler, Slot focusedSlot) {
             super(context, mouseX, mouseY, deltaTicks, title, handler, focusedSlot);
         }
     }
@@ -93,33 +94,30 @@ public class ScreenRenderEvent {
     public record LineElementRenderState(
             RenderPipeline pipeline,
             Matrix3x2f pose,
-            ScreenRectangle scissorArea,
+            ScreenRect scissorArea,
             int x0,
             int y0,
             int x1,
             int y1,
             double thiccness,
             RenderColor color
-    ) implements GuiElementRenderState {
-        @Override
-        public void buildVertices(VertexConsumer vertices) {
+    ) implements SimpleGuiElementRenderState {
+        public void setupVertices(VertexConsumer vertices) {
             var offset = new Vector2d(this.x1 - this.x0, this.y1 - this.y0).perpendicular().normalize().mul(this.thiccness * .5d);
 
-            int vColor = color.argb;
-            vertices.addVertexWith2DPose(this.pose, (float) (x0 + offset.x), (float) (y0 + offset.y)).setColor(vColor);
-            vertices.addVertexWith2DPose(this.pose, (float) (x0 - offset.x), (float) (y0 - offset.y)).setColor(vColor);
-            vertices.addVertexWith2DPose(this.pose, (float) (x1 - offset.x), (float) (y1 - offset.y)).setColor(vColor);
-            vertices.addVertexWith2DPose(this.pose, (float) (x1 + offset.x), (float) (y1 + offset.y)).setColor(vColor);
+            int vColor = this.color.argb;
+            vertices.vertex(this.pose, (float) (x0 + offset.x), (float) (y0 + offset.y)).color(vColor);
+            vertices.vertex(this.pose, (float) (x0 - offset.x), (float) (y0 - offset.y)).color(vColor);
+            vertices.vertex(this.pose, (float) (x1 - offset.x), (float) (y1 - offset.y)).color(vColor);
+            vertices.vertex(this.pose, (float) (x1 + offset.x), (float) (y1 + offset.y)).color(vColor);
         }
 
-        @Override
         public TextureSetup textureSetup() {
-            return TextureSetup.noTexture();
+            return TextureSetup.empty();
         }
 
-        @Override
-        public ScreenRectangle bounds() {
-            return new ScreenRectangle(this.x0, this.y0, this.x1 - this.x0, this.y1 - this.y0);
+        public ScreenRect bounds() {
+            return new ScreenRect(this.x0, this.y0, this.x1 - this.x0, this.y1 - this.y0);
         }
     }
 }

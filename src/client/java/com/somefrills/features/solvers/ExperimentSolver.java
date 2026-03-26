@@ -5,12 +5,12 @@ import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.ScreenRenderEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.Text;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,13 +67,13 @@ public class ExperimentSolver {
 
     public static void onHudTick() {
         if (mc == null || mc.player == null) return;
-        LocalPlayer player = mc.player;
-        AbstractContainerMenu handler = player.containerMenu;
+        ClientPlayerEntity player = mc.player;
+        ScreenHandler handler = player.currentScreenHandler;
         if (handler == null) return;
 
         String title = "";
-        if (mc.screen != null) {
-            Component txt = mc.screen.getTitle();
+        if (mc.currentScreen != null) {
+            Text txt = mc.currentScreen.getTitle();
             if (txt != null) title = txt.getString();
         }
 
@@ -94,20 +94,20 @@ public class ExperimentSolver {
         }
     }
 
-    private static void solveChronomatron(AbstractContainerMenu handler) {
+    private static void solveChronomatron(ScreenHandler handler) {
         List<Slot> invSlots = handler.slots;
         int maxChronomatron = getMaxXp.value() ? 15 : (11 - serumCount.value());
 
         // Check if slot 49 is glowstone AND last added slot is not enchanted (click registered)
-        ItemStack stack49 = invSlots.get(49).getItem();
+        ItemStack stack49 = invSlots.get(49).getStack();
         Slot lastAddedSlot = invSlots.get(lastAdded);
         boolean slot49IsGlowstone = isItem(stack49, "minecraft:glowstone");
-        boolean lastAddedNotEnchanted = lastAddedSlot.getItem() != null && !isEnchanted(lastAddedSlot.getItem());
+        boolean lastAddedNotEnchanted = lastAddedSlot.getStack() != null && !isEnchanted(lastAddedSlot.getStack());
 
         if (slot49IsGlowstone && lastAddedNotEnchanted) {
             if (autoClose.value() && chronomatronOrder.size() > maxChronomatron) {
                 if (mc.player != null) {
-                    mc.player.closeContainer();
+                    mc.player.closeScreen();
                 }
             }
             hasAdded = false;
@@ -121,8 +121,8 @@ public class ExperimentSolver {
             int lastSlotAdded = -1;
             for (int i = 11; i < 57; i++) { // Scan the colored glass/terracotta area (slots 11-56)
                 Slot s = invSlots.get(i);
-                if (s.getItem() != null && !s.getItem().isEmpty() && isEnchanted(s.getItem())) {
-                    String itemName = BuiltInRegistries.ITEM.getKey(s.getItem().getItem()).toString();
+                if (s.getStack() != null && !s.getStack().isEmpty() && isEnchanted(s.getStack())) {
+                    String itemName = Registries.ITEM.getKey(s.getStack().getItem()).toString();
 
                     // ONLY add terracotta blocks, skip everything else
                     if (!itemName.contains("terracotta")) {
@@ -156,17 +156,17 @@ public class ExperimentSolver {
         }
     }
 
-    private static void solveUltraSequencer(AbstractContainerMenu handler) {
+    private static void solveUltraSequencer(ScreenHandler handler) {
         List<Slot> invSlots = handler.slots;
         int maxUltraSequencer = getMaxXp.value() ? 20 : (9 - serumCount.value());
 
-        ItemStack stack49 = invSlots.get(49).getItem();
+        ItemStack stack49 = invSlots.get(49).getStack();
 
         // Remember the mapping when glowstone appears
         if (!hasAdded && isItem(stack49, "minecraft:glowstone")) {
             ultrasequencerOrder.clear();
             for (int i = 0; i < invSlots.size(); i++) {
-                ItemStack stack = invSlots.get(i).getItem();
+                ItemStack stack = invSlots.get(i).getStack();
                 if (stack != null && !stack.isEmpty() && isDye(stack)) {
                     ultrasequencerOrder.put(stack.getCount() - 1, i); // stackSize-1 -> slot
                 }
@@ -175,7 +175,7 @@ public class ExperimentSolver {
             clicks = 0;
 
             if (ultrasequencerOrder.size() > maxUltraSequencer && autoClose.value() && mc.player != null) {
-                mc.player.closeContainer();
+                mc.player.closeScreen();
             }
         }
 
@@ -202,13 +202,13 @@ public class ExperimentSolver {
 
     private static boolean isItem(ItemStack stack, String itemId) {
         if (stack == null || stack.isEmpty()) return false;
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        String id = Registries.ITEM.getKey(stack.getItem()).toString();
         return id.equals(itemId);
     }
 
     private static boolean isDye(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
-        String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+        String id = Registries.ITEM.getKey(stack.getItem()).toString();
         return id.contains("dye")
                 || id.contains("ink_sac") || id.contains("lapis")
                 || id.contains("rose") || id.contains("cactus")
@@ -219,7 +219,7 @@ public class ExperimentSolver {
     private static boolean isEnchanted(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return false;
         // Check for both actual enchantments AND the enchanted glint effect
-        return stack.isEnchanted() || stack.hasFoil();
+        return stack.hasEnchantments() || stack.hasGlint();
     }
 
     private static void reset() {

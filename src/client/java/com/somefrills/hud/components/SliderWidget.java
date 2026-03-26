@@ -1,24 +1,26 @@
 package com.somefrills.hud.components;
 
+import com.daqem.uilib.api.widget.IWidget;
 import com.somefrills.misc.Utils;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.narration.NarrationPart;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.Click;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2d;
 
 import java.util.function.Consumer;
 
-public class SliderWidget extends AbstractWidget {
+public class SliderWidget extends ClickableWidget implements IWidget {
     private double value = 0.0; // normalized 0..1
     private boolean dragging = false;
     private Consumer<Double> onValueChange = null;
     private double lastNotified = Double.NaN;
 
     public SliderWidget(int x, int y, int width, int height) {
-        super(x, y, width, height, Component.empty());
+        super(x, y, width, height, Text.empty());
     }
 
     public double getValue() {
@@ -54,7 +56,7 @@ public class SliderWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+    public boolean mouseClicked(Click event, boolean bl) {
         // rely on this.isMouseOver() per your instruction
         if (!this.isMouseOver(event.x(), event.y())) return false;
         try {
@@ -69,7 +71,7 @@ public class SliderWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+    public boolean mouseReleased(Click mouseButtonEvent) {
         if (!this.dragging) return false;
         this.dragging = false;
         notifyIfChanged();
@@ -77,7 +79,7 @@ public class SliderWidget extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double dx, double dy) {
+    public boolean mouseDragged(Click mouseButtonEvent, double dx, double dy) {
         if (!this.dragging) return false;
         try {
             Vector2d pos = Utils.getMousePos();
@@ -90,7 +92,12 @@ public class SliderWidget extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+        builder.put(NarrationPart.TITLE, Text.literal(String.format("Slider, value %.0f%%", value * 100)));
+    }
+
+    @Override
+    protected void renderWidget(DrawContext guiGraphics, int i, int j, float f) {
         int trackY = this.getY() + this.height / 2 - 3;
         guiGraphics.fill(this.getX(), trackY, this.getX() + this.width, trackY + 6, 0xff444444);
         // knob
@@ -99,12 +106,4 @@ public class SliderWidget extends AbstractWidget {
         guiGraphics.fill(kx, ky, kx + 8, ky + this.height - 6, 0xffffffff);
     }
 
-    @Override
-    public @NotNull NarrationPriority narrationPriority() {
-        return NarrationPriority.FOCUSED;
-    }
-
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-    }
 }

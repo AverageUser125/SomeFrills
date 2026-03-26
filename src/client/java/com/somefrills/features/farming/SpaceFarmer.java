@@ -18,19 +18,19 @@ public class SpaceFarmer {
         if (!instance.isActive() || event.key != GLFW.GLFW_KEY_SPACE) {
             return;
         }
-        if (mc.screen != null && spaceHeld) {
+        if (mc.currentScreen != null && spaceHeld) {
             spaceHeld = false;
-            mc.options.keyAttack.setDown(false);
+            mc.options.attackKey.setPressed(false);
             return;
         }
-        if (event.action == GLFW.GLFW_PRESS && mc.options.keyShift.isDown() && Utils.isOnGardenPlot()) {
+        if (event.action == GLFW.GLFW_PRESS && mc.options.sneakKey.isPressed() && Utils.isOnGardenPlot()) {
             spaceHeld = true;
-            mc.options.keyAttack.setDown(true);
+            mc.options.attackKey.setPressed(true);
             event.cancel();
         } else if (event.action == GLFW.GLFW_RELEASE && spaceHeld) {
             spaceHeld = false;
-            if (mc.options.keyAttack.isDown()) {
-                mc.options.keyAttack.setDown(false);
+            if (mc.options.attackKey.isPressed()) {
+                mc.options.attackKey.setPressed(false);
             }
             event.cancel();
         } else if (spaceHeld) {
@@ -42,7 +42,7 @@ public class SpaceFarmer {
     public static void onScreen(ScreenOpenEvent event) {
         if (instance.isActive() && spaceHeld) {
             spaceHeld = false;
-            mc.options.keyAttack.setDown(false);
+            mc.options.attackKey.setPressed(false);
         }
     }
 }

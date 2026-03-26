@@ -7,7 +7,7 @@ import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.daqem.uilib.gui.widget.EditBoxWidget;
 import com.somefrills.config.*;
 import com.somefrills.hud.components.*;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class SettingsScreen extends AbstractScreen {
     private final FeatureRegistry.FeatureInfo info;
 
     public SettingsScreen(FeatureRegistry.FeatureInfo info) {
-        super(Component.literal(info.name + " Settings"));
+        super(Text.literal(info.name + " Settings"));
         this.info = info;
     }
 
@@ -75,8 +75,9 @@ public class SettingsScreen extends AbstractScreen {
         }
         if (clazz.equals(SettingColor.class)) {
             var s = (SettingColor) setting;
-            return new ButtonWidget(x, y, width, height, Component.literal("Edit Color"), button -> {
-                mc.setScreen(new ColorPickerScreen(s, this));
+            return new ButtonWidget(x, y, width, height, Text.literal("Edit Color"), button -> {
+                // FIXME
+                //mc.setScreen(new ColorPickerScreen(s, this));
             });
         }
         if (clazz.equals(SettingBlockPosList.class)) {
@@ -95,7 +96,7 @@ public class SettingsScreen extends AbstractScreen {
     }
 
     @Override
-    public void onClose() {
+    public void close() {
         Config.save();
         mc.setScreen(new ClickGui());
     }

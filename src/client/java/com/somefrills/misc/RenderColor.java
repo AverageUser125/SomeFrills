@@ -1,6 +1,6 @@
 package com.somefrills.misc;
 
-import net.minecraft.util.ARGB;
+import net.minecraft.util.math.ColorHelper;
 
 public class RenderColor {
     public static final RenderColor white = RenderColor.fromHex(0xffffff);
@@ -20,7 +20,7 @@ public class RenderColor {
         this.b = (float) Math.clamp(b, 0, 255) / 255;
         this.a = (float) Math.clamp(a, 0, 255) / 255;
         this.hex = (Math.clamp(r, 0, 255) << 16) + (Math.clamp(g, 0, 255) << 8) + Math.clamp(b, 0, 255);
-        this.argb = ARGB.color(Math.clamp(a, 0, 255), Math.clamp(r, 0, 255), Math.clamp(g, 0, 255), Math.clamp(b, 0, 255));
+        this.argb = ColorHelper.getArgb(Math.clamp(a, 0, 255), Math.clamp(r, 0, 255), Math.clamp(g, 0, 255), Math.clamp(b, 0, 255));
     }
 
     public RenderColor(float r, float g, float b, float a) {
@@ -29,7 +29,7 @@ public class RenderColor {
         this.b = Math.clamp(b, 0.0f, 1.0f);
         this.a = Math.clamp(a, 0.0f, 1.0f);
         this.hex = (((int) this.r * 255) << 16) + (((int) this.g * 255) << 8) + ((int) this.b * 255);
-        this.argb = ARGB.colorFromFloat(this.a, this.r, this.g, this.b);
+        this.argb = ColorHelper.fromFloats(this.a, this.r, this.g, this.b);
     }
 
     public static RenderColor fromHex(int hex) {
@@ -46,6 +46,15 @@ public class RenderColor {
 
     public static RenderColor fromFloat(float r, float g, float b, float a) {
         return new RenderColor(r, g, b, a);
+    }
+
+    public static RenderColor ofArgb(int argb) {
+        return new RenderColor(
+                ((argb >> 16) & 0xFF) / 255.0f,
+                ((argb >> 8) & 0xFF) / 255.0f,
+                (argb & 0xFF) / 255.0f,
+                ((argb >> 24) & 0xFF) / 255.0f
+        );
     }
 
     public RenderColor withRed(float red) {

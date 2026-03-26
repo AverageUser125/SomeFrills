@@ -2,26 +2,26 @@ package com.somefrills.hud.components;
 
 import com.daqem.uilib.api.widget.IWidget;
 import com.somefrills.config.SettingIntSlider;
-import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenDirection;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.NavigationDirection;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.Click;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
-public class SliderInt extends AbstractWidget implements IWidget {
+public class SliderInt extends ClickableWidget implements IWidget {
     private final NumberInt numberBox;
     private final SliderWidget slider;
     private boolean updating = false;
     private final SettingIntSlider setting;
     public SliderInt(int x, int y, int widthNum, int widthSlider, int height, SettingIntSlider set) {
-        super(x, y, widthNum + 5 + widthSlider, height, Component.empty());
+        super(x, y, widthNum + 5 + widthSlider, height, Text.empty());
         this.setting = set;
         numberBox = new NumberInt(x, y, widthNum, height, set);
         slider = new SliderWidget(x + widthNum + 5, y, widthSlider, height);
@@ -44,15 +44,9 @@ public class SliderInt extends AbstractWidget implements IWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
+    protected void renderWidget(DrawContext guiGraphics, int i, int j, float f) {
         numberBox.render(guiGraphics, i, j, f);
         slider.render(guiGraphics, i, j, f);
-    }
-
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-        numberBox.updateNarration(narrationElementOutput);
-        slider.updateNarration(narrationElementOutput);
     }
 
     private void updateContext(Runnable function) {
@@ -90,20 +84,20 @@ public class SliderInt extends AbstractWidget implements IWidget {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    public boolean mouseClicked(Click mouseButtonEvent, boolean bl) {
         if (numberBox.mouseClicked(mouseButtonEvent, bl)) return true;
         return slider.mouseClicked(mouseButtonEvent, bl);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+    public boolean mouseReleased(Click mouseButtonEvent) {
         boolean a = numberBox.mouseReleased(mouseButtonEvent);
         boolean b = slider.mouseReleased(mouseButtonEvent);
         return a || b;
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double d, double e) {
+    public boolean mouseDragged(Click mouseButtonEvent, double d, double e) {
         if (slider.mouseDragged(mouseButtonEvent, d, e)) return true;
         return numberBox.mouseDragged(mouseButtonEvent, d, e);
     }
@@ -115,28 +109,21 @@ public class SliderInt extends AbstractWidget implements IWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent keyEvent) {
+    public boolean keyPressed(KeyInput keyEvent) {
         if (numberBox.keyPressed(keyEvent)) return true;
         return slider.keyPressed(keyEvent);
     }
 
     @Override
-    public boolean keyReleased(KeyEvent keyEvent) {
+    public boolean keyReleased(KeyInput keyEvent) {
         if (numberBox.keyReleased(keyEvent)) return true;
         return slider.keyReleased(keyEvent);
     }
 
     @Override
-    public boolean charTyped(CharacterEvent characterEvent) {
+    public boolean charTyped(CharInput characterEvent) {
         if (numberBox.charTyped(characterEvent)) return true;
         return slider.charTyped(characterEvent);
-    }
-
-    @Override
-    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
-        var p = numberBox.nextFocusPath(focusNavigationEvent);
-        if (p != null) return p;
-        return slider.nextFocusPath(focusNavigationEvent);
     }
 
     @Override
@@ -151,25 +138,11 @@ public class SliderInt extends AbstractWidget implements IWidget {
     }
 
     @Override
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+    }
+
+    @Override
     public boolean isFocused() {
         return numberBox.isFocused() || slider.isFocused();
-    }
-
-    @Override
-    public boolean shouldTakeFocusAfterInteraction() {
-        return numberBox.shouldTakeFocusAfterInteraction() || slider.shouldTakeFocusAfterInteraction();
-    }
-
-    @Override
-    public @Nullable ComponentPath getCurrentFocusPath() {
-        var p = numberBox.getCurrentFocusPath();
-        if (p != null) return p;
-        return slider.getCurrentFocusPath();
-    }
-
-    @Override
-    public ScreenRectangle getBorderForArrowNavigation(ScreenDirection screenDirection) {
-        ScreenRectangle r = numberBox.getBorderForArrowNavigation(screenDirection);
-        return (r != null) ? r : slider.getBorderForArrowNavigation(screenDirection);
     }
 }

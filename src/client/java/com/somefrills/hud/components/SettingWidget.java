@@ -1,45 +1,40 @@
 package com.somefrills.hud.components;
 
 import com.daqem.uilib.api.widget.IWidget;
-import net.minecraft.client.gui.ComponentPath;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.navigation.FocusNavigationEvent;
-import net.minecraft.client.gui.navigation.ScreenDirection;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
-import net.minecraft.client.input.CharacterEvent;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.navigation.GuiNavigationPath;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.navigation.GuiNavigation;
+import net.minecraft.client.gui.navigation.NavigationDirection;
+import net.minecraft.client.gui.ScreenRect;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.Click;
+import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import static com.somefrills.Main.mc;
 
-public class SettingWidget extends AbstractWidget implements IWidget {
-    private final Component label;
+public class SettingWidget extends ClickableWidget implements IWidget {
+    private final Text label;
     private final IWidget settingWidget;
 
     public SettingWidget(int x, int y, int textWidth, int height, String label, String description, IWidget settingWidget) {
-        super(x, y, textWidth, height, Component.literal(label));
-        this.label = Component.literal(label);
+        super(x, y, textWidth, height, Text.literal(label));
+        this.label = Text.literal(label);
         settingWidget.setX(x + textWidth + 5);
         settingWidget.setY(y);
-        setTooltip(Tooltip.create(Component.literal(description)));
+        setTooltip(Tooltip.of(Text.literal(description)));
         this.settingWidget = settingWidget;
     }
 
     @Override
-    protected void renderWidget(GuiGraphics guiGraphics, int i, int j, float f) {
-        int textY = getY() + (getHeight() - mc.font.lineHeight) / 2;
-        guiGraphics.drawString(mc.font, label, getX(), textY, 0xffffffff);
+    protected void renderWidget(DrawContext guiGraphics, int i, int j, float f) {
+        int textY = getY() + (getHeight() - mc.textRenderer.fontHeight) / 2;
+        guiGraphics.drawText(mc.textRenderer, label, getX(), textY, 0xffffffff, false);
         settingWidget.render(guiGraphics, i, j, f);
-    }
-
-    @Override
-    protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-        settingWidget.updateNarration(narrationElementOutput);
     }
 
     @Override
@@ -53,17 +48,17 @@ public class SettingWidget extends AbstractWidget implements IWidget {
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+    public boolean mouseClicked(Click mouseButtonEvent, boolean bl) {
         return settingWidget.mouseClicked(mouseButtonEvent, bl);
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
+    public boolean mouseReleased(Click mouseButtonEvent) {
         return settingWidget.mouseReleased(mouseButtonEvent);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double d, double e) {
+    public boolean mouseDragged(Click mouseButtonEvent, double d, double e) {
         return settingWidget.mouseDragged(mouseButtonEvent, d, e);
     }
 
@@ -73,23 +68,18 @@ public class SettingWidget extends AbstractWidget implements IWidget {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent keyEvent) {
+    public boolean keyPressed(KeyInput keyEvent) {
         return settingWidget.keyPressed(keyEvent);
     }
 
     @Override
-    public boolean keyReleased(KeyEvent keyEvent) {
+    public boolean keyReleased(KeyInput keyEvent) {
         return settingWidget.keyReleased(keyEvent);
     }
 
     @Override
-    public boolean charTyped(CharacterEvent characterEvent) {
+    public boolean charTyped(CharInput characterEvent) {
         return settingWidget.charTyped(characterEvent);
-    }
-
-    @Override
-    public @Nullable ComponentPath nextFocusPath(FocusNavigationEvent focusNavigationEvent) {
-        return settingWidget.nextFocusPath(focusNavigationEvent);
     }
 
     @Override
@@ -103,22 +93,12 @@ public class SettingWidget extends AbstractWidget implements IWidget {
     }
 
     @Override
+    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
+
+    }
+
+    @Override
     public boolean isFocused() {
         return settingWidget.isFocused();
-    }
-
-    @Override
-    public boolean shouldTakeFocusAfterInteraction() {
-        return settingWidget.shouldTakeFocusAfterInteraction();
-    }
-
-    @Override
-    public @Nullable ComponentPath getCurrentFocusPath() {
-        return settingWidget.getCurrentFocusPath();
-    }
-
-    @Override
-    public ScreenRectangle getBorderForArrowNavigation(ScreenDirection screenDirection) {
-        return settingWidget.getBorderForArrowNavigation(screenDirection);
     }
 }

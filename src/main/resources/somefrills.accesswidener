@@ -1,26 +1,19 @@
 accessWidener v2 named
-accessible method net/minecraft/client/gui/components/EditBox getMaxLength ()I
-accessible class net/minecraft/client/multiplayer/ClientPacketListener$CommandCheckResult
-accessible class net/minecraft/client/renderer/RenderType$CompositeRenderType
-accessible class net/minecraft/client/renderer/RenderStateShard$LineStateShard
-accessible method net/minecraft/client/renderer/RenderType create (Ljava/lang/String;IZZLcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/client/renderer/RenderType$CompositeState;)Lnet/minecraft/client/renderer/RenderType$CompositeRenderType;
-accessible class net/minecraft/client/renderer/RenderStateShard$LineStateShard
-accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder createCompositeState (Z)Lnet/minecraft/client/renderer/RenderType$CompositeState;
-accessible field net/minecraft/client/renderer/RenderStateShard VIEW_OFFSET_Z_LAYERING Lnet/minecraft/client/renderer/RenderStateShard$LayeringStateShard;
-accessible class net/minecraft/client/renderer/RenderType$CompositeState
-accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder setLayeringState (Lnet/minecraft/client/renderer/RenderStateShard$LayeringStateShard;)Lnet/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder;
-accessible method net/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder setLineState (Lnet/minecraft/client/renderer/RenderStateShard$LineStateShard;)Lnet/minecraft/client/renderer/RenderType$CompositeState$CompositeStateBuilder;
-accessible field net/minecraft/world/item/component/CustomData tag Lnet/minecraft/nbt/CompoundTag;
-accessible field net/minecraft/client/multiplayer/ClientLevel entityStorage Lnet/minecraft/world/level/entity/TransientEntitySectionManager;
-accessible field net/minecraft/world/level/entity/LevelEntityGetterAdapter visibleEntities Lnet/minecraft/world/level/entity/EntityLookup;
-accessible field net/minecraft/world/level/entity/EntityLookup byId Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
-accessible field net/minecraft/world/entity/monster/Creeper DATA_IS_POWERED Lnet/minecraft/network/syncher/EntityDataAccessor;
-accessible method net/minecraft/client/gui/components/ChatComponent screenToChatX (D)D
-accessible method net/minecraft/client/gui/components/ChatComponent screenToChatY (D)D
-accessible method net/minecraft/client/gui/components/ChatComponent getMessageLineIndexAt (DD)I
-accessible field net/minecraft/client/gui/components/ChatComponent trimmedMessages Ljava/util/List;
-accessible field net/minecraft/world/entity/Avatar STANDING_DIMENSIONS Lnet/minecraft/world/entity/EntityDimensions;
-accessible method net/minecraft/client/gui/GuiGraphics submitBlit (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;IIIIFFFFI)V
-accessible field net/minecraft/world/level/saveddata/maps/MapItemSavedData decorations Ljava/util/Map;
-accessible method net/minecraft/client/gui/components/PlayerTabOverlay getPlayerInfos ()Ljava/util/List;
-accessible method net/minecraft/client/gui/screens/inventory/AbstractContainerScreen slotClicked (Lnet/minecraft/world/inventory/Slot;IILnet/minecraft/world/inventory/ClickType;)V
+accessible class net/minecraft/client/network/ClientPlayNetworkHandler$CommandRunResult
+accessible field net/minecraft/component/type/NbtComponent nbt Lnet/minecraft/nbt/NbtCompound;
+accessible field net/minecraft/client/world/ClientWorld entityManager Lnet/minecraft/world/entity/ClientEntityManager;
+accessible field net/minecraft/world/entity/SimpleEntityLookup index Lnet/minecraft/world/entity/EntityIndex;
+accessible field net/minecraft/world/entity/EntityIndex idToEntity Lit/unimi/dsi/fastutil/ints/Int2ObjectMap;
+accessible field net/minecraft/entity/mob/CreeperEntity CHARGED Lnet/minecraft/entity/data/TrackedData;
+accessible field net/minecraft/client/gui/hud/ChatHud visibleMessages Ljava/util/List;
+accessible field net/minecraft/entity/PlayerLikeEntity STANDING_DIMENSIONS Lnet/minecraft/entity/EntityDimensions;
+accessible class net/minecraft/client/render/WorldRenderer$Gizmos
+accessible method net/minecraft/client/gui/hud/ChatHud getChatScale ()D
+accessible method net/minecraft/client/gui/hud/ChatHud getLineHeight ()I
+accessible method net/minecraft/client/gui/hud/ChatHud isChatHidden ()Z
+accessible method net/minecraft/client/gui/hud/ChatHud getWidth ()I
+accessible field net/minecraft/client/gui/hud/ChatHud scrolledLines I
+accessible method net/minecraft/client/gui/DrawContext drawTexturedQuad (Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lcom/mojang/blaze3d/textures/GpuTextureView;Lnet/minecraft/client/gl/GpuSampler;IIIIFFFFI)V
+accessible field net/minecraft/item/map/MapState decorations Ljava/util/Map;
+accessible method net/minecraft/client/gui/hud/PlayerListHud collectPlayerEntries ()Ljava/util/List;
+accessible method net/minecraft/client/gui/screen/ingame/HandledScreen onMouseClick (Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V

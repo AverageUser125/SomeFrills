@@ -2,8 +2,8 @@ package com.somefrills.hud.components;
 
 import com.daqem.uilib.gui.widget.EditBoxWidget;
 import com.somefrills.config.SettingDouble;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,17 +24,17 @@ public class NumberDouble extends EditBoxWidget {
     }
 
     public NumberDouble(int x, int y, SettingDouble number) {
-        this(x, y, Button.DEFAULT_WIDTH, number);
+        this(x, y, ButtonWidget.DEFAULT_WIDTH, number);
     }
 
     public NumberDouble(int x, int y, int width, SettingDouble number) {
-        this(x, y, width, Button.DEFAULT_HEIGHT, number);
+        this(x, y, width, ButtonWidget.DEFAULT_HEIGHT, number);
     }
 
     public NumberDouble(int x, int y, int width, int height, SettingDouble number) {
-        super(mc.font, x, y, width, height, Component.empty());
+        super(mc.textRenderer, x, y, width, height, Text.empty());
         this.num = number;
-        this.setValue(Double.toString(number.value()));
+        this.setText(Double.toString(number.value()));
     }
 
     public double getNumber() {
@@ -43,12 +43,12 @@ public class NumberDouble extends EditBoxWidget {
 
     public void setNumber(double number) {
         this.num.set( number);
-        this.setValue(Double.toString(number));
+        this.setText(Double.toString(number));
     }
 
     void onValueChange(Consumer<Double> callback) {
-        this.setResponder(str -> {
-            List<Component> errors = validateInput(str);
+        this.setChangedListener(str -> {
+            List<Text> errors = validateInput(str);
             if (errors.isEmpty()) {
                 callback.accept(Double.parseDouble(str.trim()));
             }
@@ -60,16 +60,16 @@ public class NumberDouble extends EditBoxWidget {
      * of components when validation fails so the UILib tooltip will appear.
      */
     @Override
-    public List<Component> validateInput(String input) {
-        List<Component> errors = new ArrayList<>();
+    public List<Text> validateInput(String input) {
+        List<Text> errors = new ArrayList<>();
         if (input == null || input.isEmpty()) {
-            errors.add(Component.literal("Please enter a number"));
+            errors.add(Text.literal("Please enter a number"));
             return errors;
         }
         try {
             Double.parseDouble(input.trim());
         } catch (NumberFormatException ex) {
-            errors.add(Component.literal("Not a valid integer"));
+            errors.add(Text.literal("Not a valid integer"));
         }
         return errors;
     }

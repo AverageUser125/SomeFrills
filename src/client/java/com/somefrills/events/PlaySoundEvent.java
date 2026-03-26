@@ -1,14 +1,14 @@
 package com.somefrills.events;
 
-import net.minecraft.core.Holder;
-import net.minecraft.network.protocol.game.ClientboundSoundPacket;
-import net.minecraft.sounds.SoundEvent;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
+import net.minecraft.sound.SoundEvent;
 
 
 public class PlaySoundEvent extends Cancellable {
-    public ClientboundSoundPacket packet;
+    public PlaySoundS2CPacket packet;
 
-    public PlaySoundEvent(ClientboundSoundPacket packet) {
+    public PlaySoundEvent(PlaySoundS2CPacket packet) {
         this.setCancelled(false);
         this.packet = packet;
     }
@@ -17,10 +17,10 @@ public class PlaySoundEvent extends Cancellable {
      * Returns true if the SoundEvent from the packet matches the provided SoundEvent.
      */
     public boolean isSound(SoundEvent sound) {
-        return packet.getSound().value().location().equals(sound.location());
+        return packet.getSound().value().id().equals(sound.id());
     }
 
-    public boolean isSound(Holder.Reference<SoundEvent> sound) {
+    public boolean isSound(RegistryEntry.Reference<SoundEvent> sound) {
         return this.isSound(sound.value());
     }
 }

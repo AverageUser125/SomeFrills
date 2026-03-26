@@ -3,7 +3,7 @@ package com.somefrills.config;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.BlockPos;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.List;

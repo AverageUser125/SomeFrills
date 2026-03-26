@@ -2,13 +2,13 @@ package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.somefrills.features.mining.GemstoneDesyncFix;
-import net.minecraft.world.level.block.IronBarsBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.block.PaneBlock;
+import net.minecraft.block.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(IronBarsBlock.class)
-public abstract class IronBarsBlockMixin {
+@Mixin(PaneBlock.class)
+public abstract class PaneBlockMixin {
 
     @ModifyReturnValue(method = "updateShape", at = @At("RETURN"))
     private BlockState onGetUpdateState(BlockState original) {

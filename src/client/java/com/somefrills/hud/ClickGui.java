@@ -8,15 +8,15 @@ import com.somefrills.config.FeatureRegistry;
 import com.somefrills.config.FeatureRegistry.FeatureInfo;
 import com.somefrills.hud.components.FeatureWidget;
 import com.somefrills.misc.Utils;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.text.Text;
 
 import java.util.*;
 
 public class ClickGui extends AbstractScreen {
     private final List<CategoryData> categories = new ArrayList<>();
     public ClickGui() {
-        super(Component.literal("SomeFrills - Click GUI"));
+        super(Text.literal("SomeFrills - Click GUI"));
     }
 
     @Override
@@ -55,10 +55,10 @@ public class ClickGui extends AbstractScreen {
 
 
     @Override
-    public void onClose() {
+    public void close() {
         // persist config
         Config.save();
-        super.onClose();
+        super.close();
     }
 
     public static class CategoryData {

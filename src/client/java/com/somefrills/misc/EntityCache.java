@@ -5,7 +5,7 @@ import com.somefrills.events.EntityUpdatedEvent;
 import com.somefrills.events.ServerJoinEvent;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.entity.Entity;
 
 import java.util.ArrayList;
 import java.util.List;

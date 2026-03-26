@@ -2,8 +2,8 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.events.ClientDisconnectEvent;
-import net.minecraft.ChatFormatting;
-import net.minecraft.util.ARGB;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.ColorHelper;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class GlowPlayer {
     public static final Feature instance = new Feature("glowPlayer", true);
-    private static final ConcurrentHashMap<String, ChatFormatting> forcedGlows = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Formatting> forcedGlows = new ConcurrentHashMap<>();
     private static final Pattern USERNAME_TOKEN = Pattern.compile("[A-Za-z0-9_]{1,16}");
 
     /**
@@ -21,7 +21,7 @@ public class GlowPlayer {
      */
     public static String convertToPureName(String raw) {
         if (raw == null) return null;
-        String stripped = ChatFormatting.stripFormatting(raw).trim();
+        String stripped = Formatting.strip(raw).trim();
         if (stripped.isEmpty()) return null;
 
         // If the whole stripped string looks like a username, return it
@@ -44,7 +44,7 @@ public class GlowPlayer {
     }
 
     // API: operate by pure player name (String) only; a color is required to add
-    public static boolean addPlayer(String pureName, ChatFormatting color) {
+    public static boolean addPlayer(String pureName, Formatting color) {
         if (pureName == null || color == null) return false;
         return forcedGlows.put(pureName, color) == null;
     }
@@ -59,7 +59,7 @@ public class GlowPlayer {
         return forcedGlows.containsKey(pureName);
     }
 
-    public static ChatFormatting getColor(String pureName) {
+    public static Formatting getColor(String pureName) {
         if (pureName == null) return null;
         return forcedGlows.get(pureName);
     }
@@ -73,10 +73,10 @@ public class GlowPlayer {
     }
 
     public static Integer getColorAsInt(String pureName) {
-        ChatFormatting f = getColor(pureName);
+        Formatting f = getColor(pureName);
         if (f == null) return null;
-        Integer color = f.getColor();
+        Integer color = f.getColorValue();
         if (color == null) return null;
-        return ARGB.opaque(color);
+        return ColorHelper.fullAlpha(color);
     }
 }

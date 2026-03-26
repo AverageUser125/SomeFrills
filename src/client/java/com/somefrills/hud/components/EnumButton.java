@@ -2,8 +2,6 @@ package com.somefrills.hud.components;
 
 import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.somefrills.config.SettingEnum;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
@@ -18,11 +16,11 @@ public class EnumButton<T extends Enum<T>> extends ButtonWidget {
 
 	public EnumButton(int x, int y, int width, int height, SettingEnum<T> initial) {
 		// initialize with the current enum value from the setting
-		super(x, y, width, height, Component.literal(initial.value().name()), button -> {
+		super(x, y, width, height, net.minecraft.text.Text.of(initial.value().name()), button -> {
 			@SuppressWarnings("unchecked")
 			var btn = (EnumButton<T>) button;
 			btn.cycleNext();
-		}, Button.DEFAULT_NARRATION);
+		}, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
 
 		this.values = initial.values;
 		this.index = findIndex(initial.value());
@@ -55,6 +53,6 @@ public class EnumButton<T extends Enum<T>> extends ButtonWidget {
 	}
 
 	private void updateMessage() {
-		this.setMessage(Component.literal(values[index].name()));
+		this.setMessage(net.minecraft.text.Text.literal(values[index].name()));
 	}
 }

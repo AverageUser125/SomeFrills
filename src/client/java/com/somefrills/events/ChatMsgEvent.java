@@ -1,18 +1,18 @@
 package com.somefrills.events;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 public class ChatMsgEvent extends Cancellable {
-    public Component message;
+    public Text message;
     public String messagePlain;
 
-    public ChatMsgEvent(Component message, String messagePlain) {
+    public ChatMsgEvent(Text message, String messagePlain) {
         this.setCancelled(false);
         this.message = message;
         this.messagePlain = messagePlain;
     }
 
-    public Component getMessage() {
+    public Text getMessage() {
         return this.message;
     }
 

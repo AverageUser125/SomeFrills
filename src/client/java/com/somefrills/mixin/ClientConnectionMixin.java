@@ -4,12 +4,12 @@ import com.somefrills.events.ReceivePacketEvent;
 import com.somefrills.events.SendPacketEvent;
 import com.somefrills.events.ServerTickEvent;
 import io.netty.channel.ChannelFutureListener;
-import net.minecraft.network.Connection;
-import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.common.ClientboundPingPacket;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.ClientConnection;
+import net.minecraft.network.listener.PacketListener;
+import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.common.CommonPingS2CPacket;
+import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.CustomPayload;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,12 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static com.somefrills.Main.LOGGER;
 import static com.somefrills.Main.eventBus;
 
-@Mixin(Connection.class)
-public abstract class ConnectionMixin {
-    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"), cancellable = true)
+@Mixin(ClientConnection.class)
+public abstract class ClientConnectionMixin {
+    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void glowplayer$interceptPackets(Packet<?> packet, CallbackInfo ci) {
-        if (packet instanceof ServerboundCustomPayloadPacket(CustomPacketPayload payload)) {
-            CustomPacketPayload.Type<?> type = payload.type();
+        if (packet instanceof CustomPayloadC2SPacket(CustomPayload payload)) {
+            CustomPayload.Id<?> type = payload.getId();
             String typeId = type.id().toString();
             if (typeId.contains("firmament")) {
                 LOGGER.debug("Intercepted mod list packet, cancelling to prevent server from knowing about SomeFrills");
@@ -33,9 +33,9 @@ public abstract class ConnectionMixin {
         }
     }
 
-    @Inject(method = "genericsFtw", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static void onPacketReceive(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
-        if (packet instanceof ClientboundPingPacket pingPacket && pingPacket.getId() != 0) {
+        if (packet instanceof CommonPingS2CPacket pingPacket && pingPacket.getParameter() != 0) {
             eventBus.post(new ServerTickEvent());
         }
         if (eventBus.post(new ReceivePacketEvent(packet)).isCancelled()) {
@@ -43,7 +43,7 @@ public abstract class ConnectionMixin {
         }
     }
 
-    @Inject(method = "send(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("HEAD"), cancellable = true)
     private void onPacketSend(Packet<?> packet, @Nullable ChannelFutureListener channelFutureListener, boolean flush, CallbackInfo ci) {
         if (eventBus.post(new SendPacketEvent(packet)).isCancelled()) {
             ci.cancel();

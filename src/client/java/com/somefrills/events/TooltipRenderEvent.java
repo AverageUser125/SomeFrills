@@ -1,25 +1,25 @@
 package com.somefrills.events;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
+import net.minecraft.item.ItemStack;
 
 import java.util.List;
 
 public class TooltipRenderEvent {
-    public List<Component> lines;
+    public List<Text> lines;
     public ItemStack stack;
-    public CompoundTag customData;
+    public NbtCompound customData;
     public String title;
 
-    public TooltipRenderEvent(List<Component> lines, ItemStack stack, CompoundTag customData, String title) {
+    public TooltipRenderEvent(List<Text> lines, ItemStack stack, NbtCompound customData, String title) {
         this.lines = lines;
         this.stack = stack;
         this.customData = customData;
         this.title = title;
     }
 
-    public void addLine(Component line) {
+    public void addLine(Text line) {
         try {
             lines.add(line);
         } catch (UnsupportedOperationException ignored) {

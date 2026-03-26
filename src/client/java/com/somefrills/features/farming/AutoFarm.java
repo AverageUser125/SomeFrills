@@ -9,8 +9,8 @@ import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.WorldTickEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.core.BlockPos;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 import static com.somefrills.Main.mc;
@@ -48,8 +48,8 @@ public class AutoFarm {
 
     @EventHandler
     public static void onWorldTick(WorldTickEvent event) {
-        LocalPlayer player = mc.player;
-        if (player == null || !isActive || mc.level == null) return;
+        ClientPlayerEntity player = mc.player;
+        if (player == null || !isActive || mc.world == null) return;
         if (!Utils.isOnGardenPlot()) return;
 
         // --- check held item ---
@@ -80,10 +80,10 @@ public class AutoFarm {
         long now = System.currentTimeMillis();
 
         // --- block detection ---
-        BlockPos forwardPos = player.blockPosition().offset(1, 0, 0);
-        BlockPos rightPos = player.blockPosition().offset(0, 0, 1);  // DIAG_RIGHT
-        BlockPos leftPos = player.blockPosition().offset(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
-        BlockPos behindPos = player.blockPosition().offset(-1, 0, 0); // for RETURN
+        BlockPos forwardPos = player.getBlockPos().add(1, 0, 0);
+        BlockPos rightPos = player.getBlockPos().add(0, 0, 1);  // DIAG_RIGHT
+        BlockPos leftPos = player.getBlockPos().add(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
+        BlockPos behindPos = player.getBlockPos().add(-1, 0, 0); // for RETURN
 
         boolean diagRightBlocked = isSolidBlockAt(rightPos);
         boolean diagLeftBlocked = isSolidBlockAt(leftPos);
@@ -167,18 +167,24 @@ public class AutoFarm {
 
         if (mc.options != null) {
             var options = mc.options;
-            options.keyUp.setDown(forwardPress > 0.1f);
-            options.keyRight.setDown(sidePress > 0.1f);
-            options.keyLeft.setDown(sidePress < -0.1f);
-            options.keyAttack.setDown(true);
+            options.forwardKey.setPressed(forwardPress > 0.1f);
+            options.rightKey.setPressed(sidePress > 0.1f);
+            options.leftKey.setPressed(sidePress < -0.1f);
+            options.attackKey.setPressed(true);
+            /*
+            options.keyUp.setPressed(forwardPress > 0.1f);
+            options.keyRight.setPressed(sidePress > 0.1f);
+            options.keyLeft.setPressed(sidePress < -0.1f);
+            options.keyAttack.setPressed(true);
+             */
         }
     }
 
     // --- helper: solid block check, ignores air but treats water as free ---
     private static boolean isSolidBlockAt(BlockPos pos) {
-        var state = mc.level.getBlockState(pos);
+        var state = mc.world.getBlockState(pos);
         if (state == null) return false;
-        return !state.liquid();
+        return !state.isLiquid();
     }
 
     private static void reset() {
@@ -188,14 +194,14 @@ public class AutoFarm {
         sidePress = 0;
         if (mc.options == null) return;
         var o = mc.options;
-        o.keyUp.setDown(false);
-        o.keyRight.setDown(false);
-        o.keyLeft.setDown(false);
-        o.keyAttack.setDown(false);
+        o.forwardKey.setPressed(false);
+        o.rightKey.setPressed(false);
+        o.leftKey.setPressed(false);
+        o.attackKey.setPressed(false);
     }
 
-    private static boolean interpolateFacing(LocalPlayer player, float targetYaw) {
-        float currentYaw = player.getYRot();
+    private static boolean interpolateFacing(ClientPlayerEntity player, float targetYaw) {
+        float currentYaw = player.getYaw();
         float yawDelta = angleDiff(targetYaw, currentYaw);
 
         float speed = Math.min(MAX_YAW_SPEED,
@@ -203,7 +209,7 @@ public class AutoFarm {
 
         float newYaw = currentYaw + Math.signum(yawDelta) * Math.min(speed, Math.abs(yawDelta));
 
-        float currentPitch = player.getXRot();
+        float currentPitch = player.getPitch();
         float pitchDelta = -currentPitch;
 
         float pSpeed = Math.min(MAX_PITCH_SPEED,
@@ -211,15 +217,15 @@ public class AutoFarm {
 
         float newPitch = currentPitch + Math.signum(pitchDelta) * Math.min(pSpeed, Math.abs(pitchDelta));
 
-        player.setYRot(newYaw);
-        player.setXRot(newPitch);
+        player.setYaw(newYaw);
+        player.setPitch(newPitch);
 
         return Math.abs(angleDiff(targetYaw, newYaw)) <= REACHED_EPSILON
                 && Math.abs(newPitch) <= REACHED_EPSILON;
     }
 
-    private static float getTargetYaw(LocalPlayer player) {
-        float yaw = player.getYRot();
+    private static float getTargetYaw(ClientPlayerEntity player) {
+        float yaw = player.getYaw();
         float normalized = yaw % 360f;
         if (normalized < 0) normalized += 360f;
 

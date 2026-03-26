@@ -2,8 +2,7 @@ package com.somefrills.hud.components;
 
 import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.somefrills.config.SettingBool;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
+import net.minecraft.text.Text;
 
 public class ToggleButton extends ButtonWidget {
     private SettingBool state;
@@ -12,12 +11,12 @@ public class ToggleButton extends ButtonWidget {
         super(x, y, width, height, boolToStr(state.value()), button -> {
             var btn = (ToggleButton) button;
             btn.toggle();
-        }, Button.DEFAULT_NARRATION);
+        }, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
         this.state = state;
     }
 
-    private static Component boolToStr(boolean b) {
-        return b ? Component.literal("ON") : Component.literal("OFF");
+    private static net.minecraft.text.Text boolToStr(boolean b) {
+        return b ? net.minecraft.text.Text.literal("ON") : net.minecraft.text.Text.literal("OFF");
     }
 
     public void toggle() {

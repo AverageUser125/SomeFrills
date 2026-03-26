@@ -1,13 +1,14 @@
 package com.somefrills.misc;
 
 import com.somefrills.events.*;
+import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket;
-import net.minecraft.world.scores.*;
+import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.network.packet.s2c.query.PingResultS2CPacket;
+import net.minecraft.scoreboard.*;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -100,9 +101,9 @@ public class SkyblockData {
 
     private static void updateTabListIfDirty() {
         List<String> lines = new ArrayList<>();
-        for (PlayerInfo entry : mc.gui.getTabList().getPlayerInfos()) {
-            if (entry != null && entry.getTabListDisplayName() != null) {
-                String name = Utils.toPlain(entry.getTabListDisplayName()).trim();
+        for (PlayerListEntry entry : mc.inGameHud.getPlayerListHud().collectPlayerEntries()) {
+            if (entry != null && entry.getDisplayName() != null) {
+                String name = Utils.toPlain(entry.getDisplayName()).trim();
                 if (name.isEmpty()) continue;
                 if (name.startsWith("Area: ") || name.startsWith("Dungeon: ")) {
                     area = name.split(":", 2)[1].trim();
@@ -123,13 +124,13 @@ public class SkyblockData {
     }
 
     public static void updateObjective() {
-        if (mc.player == null) return;
-        Scoreboard scoreboard = mc.player.connection.scoreboard();
-        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.BY_ID.apply(1));
-        if (objective != null) {
-            inSkyblock = Utils.toPlain(objective.getDisplayName()).contains("SKYBLOCK");
+        if (mc.player != null) {
+            Scoreboard scoreboard = mc.player.networkHandler.getScoreboard();
+            ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.FROM_ID.apply(1));
+            if (objective != null) {
+                inSkyblock = Utils.toPlain(objective.getDisplayName()).contains("SKYBLOCK");
+            }
         }
-
     }
 
     public static void markScoreboardDirty() {
@@ -137,29 +138,29 @@ public class SkyblockData {
     }
 
     private static void updateScoreboardIfDirty() {
-        if (mc.player == null) return;
-        List<String> currentLines = new ArrayList<>();
-        Scoreboard scoreboard = mc.player.connection.scoreboard();
-        Objective objective = scoreboard.getDisplayObjective(DisplaySlot.BY_ID.apply(1));
-        for (ScoreHolder scoreHolder : scoreboard.getTrackedPlayers()) {
-            if (scoreboard.listPlayerScores(scoreHolder).containsKey(objective)) {
-                PlayerTeam team = scoreboard.getPlayersTeam(scoreHolder.getScoreboardName());
-                if (team != null) {
-                    String line = ChatFormatting.stripFormatting(team.getPlayerPrefix().getString() + team.getPlayerSuffix().getString()).trim();
-                    if (!line.isEmpty()) {
-                        if (line.startsWith(Utils.Symbols.zone) || line.startsWith(Utils.Symbols.zoneRift)) {
-                            location = line;
+        if (mc.player != null) {
+            List<String> currentLines = new ArrayList<>();
+            Scoreboard scoreboard = mc.player.networkHandler.getScoreboard();
+            ScoreboardObjective objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.FROM_ID.apply(1));
+            for (ScoreHolder scoreHolder : scoreboard.getKnownScoreHolders()) {
+                if (scoreboard.getScoreHolderObjectives(scoreHolder).containsKey(objective)) {
+                    Team team = scoreboard.getScoreHolderTeam(scoreHolder.getNameForScoreboard());
+                    if (team != null) {
+                        String line = Formatting.strip(team.getPrefix().getString() + team.getSuffix().getString()).trim();
+                        if (!line.isEmpty()) {
+                            if (line.startsWith(Utils.Symbols.zone) || line.startsWith(Utils.Symbols.zoneRift)) {
+                                location = line;
+                            }
+                            if (Utils.isInKuudra() && !instanceOver) {
+                                instanceOver = line.startsWith("Instance Shutdown");
+                            }
+                            currentLines.add(line);
                         }
-                        if (Utils.isInKuudra() && !instanceOver) {
-                            instanceOver = line.startsWith("Instance Shutdown");
-                        }
-                        currentLines.add(line);
                     }
                 }
             }
+            lines = currentLines;
         }
-        lines = currentLines;
-
     }
 
     private static void updateScoreboard() {
@@ -189,8 +190,8 @@ public class SkyblockData {
 
     @EventHandler
     private static void onPing(ReceivePacketEvent event) {
-        if (showPing && event.packet instanceof ClientboundPongResponsePacket(long startTime)) {
-            Utils.infoFormat("§aPing: §f{}ms", Util.getMillis() - startTime);
+        if (showPing && event.packet instanceof PingResultS2CPacket pingPacket) {
+            Utils.infoFormat("§aPing: §f{}ms", Util.getMeasuringTimeMs() - pingPacket.startTime());
             showPing = false;
         }
     }

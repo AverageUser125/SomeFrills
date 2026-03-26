@@ -3,10 +3,10 @@ package com.somefrills.features.tweaks;
 import com.google.common.collect.Sets;
 import com.somefrills.config.Feature;
 import com.somefrills.misc.Utils;
-import net.minecraft.client.gui.screens.inventory.ContainerScreen;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.item.ItemStack;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashSet;
@@ -76,11 +76,11 @@ public class MiddleClickOverride {
         return Utils.getLoreLines(stack).stream().anyMatch(line -> line.equals("Cost") || line.equals("Sell Price") || line.equals("Bazaar Price"));
     }
 
-    public static boolean shouldOverride(Slot slot, int button, ClickType actionType) {
-        if (instance.isActive() && mc.screen instanceof ContainerScreen container) {
-            if (slot != null && button == GLFW.GLFW_MOUSE_BUTTON_LEFT && actionType.equals(ClickType.PICKUP)) {
+    public static boolean shouldOverride(Slot slot, int button, SlotActionType actionType) {
+        if (instance.isActive() && mc.currentScreen instanceof GenericContainerScreen container) {
+            if (slot != null && button == GLFW.GLFW_MOUSE_BUTTON_LEFT && actionType.equals(SlotActionType.PICKUP)) {
                 String title = container.getTitle().getString();
-                ItemStack stack = slot.getItem();
+                ItemStack stack = slot.getStack();
                 if (stack.isEmpty() || isBlacklisted(title)) {
                     return false;
                 }

@@ -19,9 +19,9 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
-import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.util.Util;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.command.CommandRegistryAccess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,17 +31,17 @@ import static net.fabricmc.loader.impl.FabricLoaderImpl.MOD_ID;
 
 public class Main implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static Minecraft mc;
+    public static MinecraftClient mc;
     public static IEventBus eventBus = new EventBus();
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandBuildContext access) {
+    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         SomeFrillsCommand.init(dispatcher);
     }
 
     @Override
     public void onInitializeClient() {
-        long start = Util.getMillis();
-        mc = Minecraft.getInstance();
+        long start = Util.getMeasuringTimeMs();
+        mc = MinecraftClient.getInstance();
 
         Config.load();
         ClientCommandRegistrationCallback.EVENT.register(Main::registerCommands);
@@ -89,6 +89,6 @@ public class Main implements ClientModInitializer {
         FeatureRegistry.reconcileFeatureSubscriptions();
 
 
-        LOGGER.info("It's time to get real, NoFrills mod initialized in {}ms.", Util.getMillis() - start);
+        LOGGER.info("It's time to get real, NoFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }
 }

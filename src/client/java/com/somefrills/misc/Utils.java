@@ -9,51 +9,49 @@ import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
 import com.somefrills.events.WorldRenderEvent;
-import com.somefrills.mixin.AbstractContainerScreenAccessor;
-import com.somefrills.mixin.BossHealthOverlayAccessor;
-import com.somefrills.mixin.PlayerTabOverlayAccessor;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.client.GuiMessageTag;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.gui.components.LerpingBossEvent;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.client.input.MouseButtonInfo;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.PlayerInfo;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.component.ItemLore;
-import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.level.entity.LevelEntityGetterAdapter;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import com.somefrills.mixin.HandledScreenAccessor;
+import com.somefrills.mixin.BossBarHudAccessor;
+import com.somefrills.mixin.PlayerListHudAccessor;
+import net.minecraft.client.network.*;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
+import net.minecraft.client.gui.hud.MessageIndicator;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.gui.hud.ClientBossBar;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.input.KeyInput;
+import net.minecraft.client.gui.Click;
+import net.minecraft.client.input.MouseInput;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Text;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
+import net.minecraft.util.Identifier;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.EntityPose;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.LoreComponent;
+import net.minecraft.component.type.ProfileComponent;
+import net.minecraft.world.entity.SimpleEntityLookup;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 import org.joml.Vector2d;
 
 import java.io.IOException;
@@ -72,8 +70,7 @@ import java.util.stream.Collectors;
 import static com.somefrills.Main.mc;
 
 public class Utils {
-    public static final GuiMessageTag someFrillsIndicator = new GuiMessageTag(0x5ca0bf, null, Component.nullToEmpty("Message SomeFrills mod."), "FarmHelper Mod");
-    private static final HashSet<String> modernIslands = Sets.newHashSet(
+    public static final MessageIndicator noFrillsIndicator = new MessageIndicator(0x5ca0bf, null, Text.of("Message from NoFrills mod."), "NoFrills Mod");    private static final HashSet<String> modernIslands = Sets.newHashSet(
             "Hub",
             "Galatea",
             "Gold Mine",
@@ -97,31 +94,31 @@ public class Utils {
     private static final Pattern DISPLAY_NPC_COMPRESSED_NAME_PATTERN = Pattern.compile("[a-z0-9]{10}");
 
     public static void clickSlot(int slotIdx) {
-        if (mc.gameMode == null || mc.player == null) {
+        if (mc.interactionManager == null || mc.player == null) {
             return;
         }
 
-        mc.gameMode.handleInventoryMouseClick(
-                mc.player.containerMenu.containerId,
+        mc.interactionManager.clickSlot(
+                mc.player.currentScreenHandler.syncId,
                 slotIdx,
                 0,
-                ClickType.PICKUP,
+                SlotActionType.PICKUP,
                 mc.player
         );
     }
 
     public static void showTitle(String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
-        mc.gui.setTitle(Component.nullToEmpty(title));
-        mc.gui.setSubtitle(Component.nullToEmpty(subtitle));
-        mc.gui.setTimes(fadeInTicks, stayTicks, fadeOutTicks);
+        mc.inGameHud.setTitle(Text.of(title));
+        mc.inGameHud.setSubtitle(Text.of(subtitle));
+        mc.inGameHud.setTitleTicks(fadeInTicks, stayTicks, fadeOutTicks);
     }
 
     public static void showTitleCustom(String title, int stayTicks, int yOffset, float scale, RenderColor color) {
-        ((TitleRendering) mc.gui).somefrills_mod$setRenderTitle(title, stayTicks, yOffset, scale, color);
+        ((TitleRendering) mc.inGameHud).somefrills_mod$setRenderTitle(title, stayTicks, yOffset, scale, color);
     }
 
     public static boolean isRenderingCustomTitle() {
-        return ((TitleRendering) mc.gui).somefrills_mod$isRenderingTitle();
+        return ((TitleRendering) mc.inGameHud).somefrills_mod$isRenderingTitle();
     }
 
     public static boolean isNearlyEqual(double a, double b, double eps) {
@@ -137,15 +134,15 @@ public class Utils {
     }
 
     public static void playSound(SoundEvent event, float volume, float pitch) {
-        mc.getSoundManager().play(SimpleSoundInstance.forUI(event, pitch, volume));
+        mc.getSoundManager().play(PositionedSoundInstance.master(event, pitch, volume));
     }
 
-    public static void playSound(Holder.Reference<SoundEvent> event, float volume, float pitch) {
+    public static void playSound(RegistryEntry.Reference<SoundEvent> event, float volume, float pitch) {
         playSound(event.value(), volume, pitch);
     }
 
     public static void playSound(String event, float volume, float pitch) {
-        playSound(SoundEvent.createVariableRangeEvent(ResourceLocation.parse(event)), volume, pitch);
+        playSound(SoundEvent.of(Identifier.of(event)), volume, pitch);
     }
 
     public static String humanize(String in) {
@@ -168,27 +165,27 @@ public class Utils {
     public static void sendMessage(String message) {
         if (mc.player != null && !message.isEmpty()) {
             if (message.startsWith("/")) {
-                mc.player.connection.sendCommand(message.substring(1));
+                mc.player.networkHandler.sendChatCommand(message.substring(1));
             } else {
-                mc.player.connection.sendChat(message);
+                mc.player.networkHandler.sendChatMessage(message);
             }
         }
     }
 
-    public static ChatFormatting parseColor(String input) {
+    public static Formatting parseColor(String input) {
         if (input == null) return null;
-        ChatFormatting f = ChatFormatting.getByName(input.toLowerCase());
-        return (f != null && f.isColor()) ? f : null;
+        Formatting f = Formatting.valueOf(input.toLowerCase());
+        return f.isColor() ? f : null;
     }
 
     /**
      * Checks if the provided client player entity is a real player and not an NPC.
      * This mirrors checks used by GlowPlayerCommand's suggestions and matching.
      */
-    public static boolean isRealPlayer(net.minecraft.client.player.AbstractClientPlayer player) {
+    public static boolean isRealPlayer(AbstractClientPlayerEntity player) {
         if (player == null) return false;
 
-        java.util.UUID uuid = player.getUUID();
+        java.util.UUID uuid = player.getUuid();
         if (uuid == null || uuid.version() != 4) return false;
 
         String name = player.getName().getString();
@@ -201,13 +198,13 @@ public class Utils {
 
     public static void refillItem(String refill_query, int amount) {
         int total = 0;
-        Inventory inv = mc.player.getInventory();
+        PlayerInventory inv = mc.player.getInventory();
         String query = refill_query.replaceAll("_", " ");
         for (int i = 0; i <= 35; i++) {
-            ItemStack stack = inv.getItem(i);
+            ItemStack stack = inv.getStack(i);
             if (stack.isEmpty()) continue;
             String id = Utils.getSkyblockId(stack).replaceAll("_", " ");
-            String name = Utils.toPlain(stack.getHoverName());
+            String name = Utils.toPlain(stack.getName());
             if (query.equalsIgnoreCase(id) || query.equalsIgnoreCase(name)) {
                 total += stack.getCount();
             }
@@ -217,41 +214,42 @@ public class Utils {
         }
     }
 
-    public static MutableComponent getTag() {
-        return Component.literal("[SomeFrills] ").withColor(0x5ca0bf);
+
+    public static MutableText getTag() {
+        return Text.literal("[SomeFrills] ").withColor(0x5ca0bf);
     }
 
-    public static MutableComponent getShortTag() {
-        return Component.literal("[SF] ").withColor(0x5ca0bf);
+    public static MutableText getShortTag() {
+        return Text.literal("[SF] ").withColor(0x5ca0bf);
     }
 
     public static void info(String message) {
-        infoRaw(Component.literal(message));
+        infoRaw(Text.literal(message));
     }
 
     public static void infoButton(String message, String command) {
         ClickEvent click = new ClickEvent.RunCommand(command);
-        infoRaw(Component.literal(message).setStyle(Style.EMPTY.withClickEvent(click)));
+        infoRaw(Text.literal(message).setStyle(Style.EMPTY.withClickEvent(click)));
     }
 
     public static void infoLink(String message, String url) {
         ClickEvent click = new ClickEvent.OpenUrl(URI.create(url));
-        infoRaw(Component.literal(message).setStyle(Style.EMPTY.withClickEvent(click)));
+        infoRaw(Text.literal(message).setStyle(Style.EMPTY.withClickEvent(click)));
     }
 
-    public static void infoRaw(MutableComponent message) {
+    public static void infoRaw(MutableText message) {
         if (message.getStyle() == null || message.getStyle().getColor() == null) {
             message = message.withColor(0xffffff);
         }
-        mc.gui.getChat().addMessage(getTag().append(message), null, someFrillsIndicator);
+        mc.inGameHud.getChatHud().addMessage(getTag().append(message), null, noFrillsIndicator);
     }
 
     public static void infoFormat(String message, Object... values) {
-        infoRaw(Component.literal(format(message, values)));
+        infoRaw(Text.literal(format(message, values)));
     }
 
     public static String getCoordsFormatted(String format) {
-        BlockPos pos = mc.player.blockPosition();
+        BlockPos pos = mc.player.getBlockPos();
         return format(format, pos.getX(), pos.getY(), pos.getZ());
 
     }
@@ -327,21 +325,21 @@ public class Utils {
     }
 
     public static boolean isOnHypixel() {
-        ServerData info = mc.getCurrentServer();
-        return info != null && toLower(info.ip).endsWith("hypixel.net");
+        ServerInfo info = mc.getCurrentServerEntry();
+        return info != null && toLower(info.address).endsWith("hypixel.net");
     }
 
     /**
      * Checks if a PlayerEntity is a real player, and not an enemy or NPC. Some NPCs might falsely return true for a few seconds after spawning.
      */
-    public static boolean isPlayer(Player entity) {
-        ClientPacketListener handler = mc.getConnection();
+    public static boolean isPlayer(PlayerEntity entity) {
+        ClientPlayNetworkHandler handler = mc.getNetworkHandler();
         if (handler != null) {
-            PlayerInfo listEntry = handler.getPlayerInfo(entity.getUUID());
+            PlayerListEntry listEntry = handler.getPlayerListEntry(entity.getUuid());
             if (listEntry != null) {
                 String displayName = listEntry.getProfile().name();
                 if (displayName != null) {
-                    String name = ChatFormatting.stripFormatting(displayName);
+                    String name = Formatting.strip(displayName);
                     return !name.isEmpty() && !name.contains(" ");
                 }
             }
@@ -353,7 +351,7 @@ public class Utils {
      * Check if the provided entity is a living entity (and in the case of player entities, if it isn't a real player).
      */
     public static boolean isMob(Entity entity) {
-        if (entity instanceof Player player) {
+        if (entity instanceof PlayerEntity player) {
             return !isPlayer(player);
         }
         return entity instanceof LivingEntity;
@@ -365,26 +363,27 @@ public class Utils {
         return current >= health && (current % health == 0 || (current - difference) % health == 0);
     }
 
-    public static AABB getLerpedBox(Entity entity, WorldRenderEvent event) {
-        return Utils.getLerpedBox(entity, event.tickCounter.getGameTimeDeltaPartialTick(true));
+    public static Box getLerpedBox(Entity entity, WorldRenderEvent event) {
+        return Utils.getLerpedBox(entity, event.tickCounter.getTickProgress(true));
     }
 
     /**
      * Returns the entity's bounding box at their interpolated position.
      */
-    public static AABB getLerpedBox(Entity entity, float tickProgress) {
-        return entity.getDimensions(Pose.STANDING).makeBoundingBox(entity.getPosition(tickProgress));
+    public static Box getLerpedBox(Entity entity, float tickProgress) {
+        return entity.getDimensions(EntityPose.STANDING).getBoxAt(entity.getLerpedPos(tickProgress));
     }
 
+    @SuppressWarnings("unchecked")
     public static List<Entity> getEntities() {
-        if (mc.level != null) {
-            LevelEntityGetterAdapter<Entity> lookup = (LevelEntityGetterAdapter<Entity>) mc.level.entityStorage.getEntityGetter();
-            return new ArrayList<>(lookup.visibleEntities.byId.values());
+        if (mc.world != null) {
+            SimpleEntityLookup<Entity> lookup = (SimpleEntityLookup<Entity>) mc.world.entityManager.getLookup();
+            return new ArrayList<>(lookup.index.idToEntity.values());
         }
         return new ArrayList<>();
     }
 
-    public static List<Entity> getOtherEntities(Entity except, AABB box, Predicate<? super Entity> filter) {
+    public static List<Entity> getOtherEntities(Entity except, Box box, Predicate<? super Entity> filter) {
         List<Entity> entities = new ArrayList<>();
         for (Entity ent : getEntities()) {
             if (ent != null && ent != except && (filter == null || filter.test(ent)) && ent.getBoundingBox().intersects(box)) {
@@ -395,11 +394,11 @@ public class Utils {
     }
 
     public static List<Entity> getOtherEntities(Entity from, double distX, double distY, double distZ, Predicate<? super Entity> filter) {
-        return getOtherEntities(from, AABB.ofSize(from.position(), distX, distY, distZ), filter);
+        return getOtherEntities(from, Box.of(from.getEntityPos(), distX, distY, distZ), filter);
     }
 
     public static List<Entity> getOtherEntities(Entity from, double dist, Predicate<? super Entity> filter) {
-        return getOtherEntities(from, AABB.ofSize(from.position(), dist, dist, dist), filter);
+        return getOtherEntities(from, Box.of(from.getEntityPos(), dist, dist, dist), filter);
     }
 
     public static float getTextScale(double dist, float base, float scaling) {
@@ -411,56 +410,57 @@ public class Utils {
         return getTextScale(dist, base, 0.1f);
     }
 
-    public static float getTextScale(Vec3 pos, float base, float scaling) {
+    public static float getTextScale(Vec3d pos, float base, float scaling) {
         if (mc.player != null) {
-            return getTextScale(mc.player.position().distanceTo(pos), base, scaling);
+            return getTextScale(mc.player.getEntityPos().distanceTo(pos), base, scaling);
         }
         return 0.0f;
     }
 
-    public static float getTextScale(Vec3 pos, float base) {
+    public static float getTextScale(Vec3d pos, float base) {
         return getTextScale(pos, base, 0.1f);
     }
 
-    public static boolean matchesKey(KeyMapping binding, KeyEvent keyInput, MouseButtonInfo mouseInput) {
-        return (keyInput != null && binding.matches(keyInput)) || (mouseInput != null && binding.matchesMouse(new MouseButtonEvent(0, 0, mouseInput)));
+    public static boolean matchesKey(KeyBinding binding, KeyInput keyInput, MouseInput mouseInput) {
+        return (keyInput != null && binding.matchesKey(keyInput)) || (mouseInput != null && binding.matchesMouse(new Click(0, 0, mouseInput)));
     }
 
-    public static boolean matchesKey(KeyMapping binding, KeyEvent keyInput) {
+    public static boolean matchesKey(KeyBinding binding, KeyInput keyInput) {
         return matchesKey(binding, keyInput, null);
     }
 
-    public static boolean matchesKey(KeyMapping binding, MouseButtonInfo mouseInput) {
+    public static boolean matchesKey(KeyBinding binding, MouseInput mouseInput) {
         return matchesKey(binding, null, mouseInput);
     }
 
     public static void sendPingPacket() {
-        ClientPacketListener handler = mc.getConnection();
+        ClientPlayNetworkHandler handler = mc.getNetworkHandler();
         if (handler != null) {
-            handler.send(new ServerboundPingRequestPacket(Util.getMillis()));
+            handler.sendPacket(new QueryPingC2SPacket(Util.getMeasuringTimeMs()));
         }
     }
+
 
     /**
      * Returns the armor that the entity is wearing.
      */
     public static List<ItemStack> getEntityArmor(LivingEntity entity) {
         return List.of(
-                entity.getItemBySlot(EquipmentSlot.HEAD),
-                entity.getItemBySlot(EquipmentSlot.CHEST),
-                entity.getItemBySlot(EquipmentSlot.LEGS),
-                entity.getItemBySlot(EquipmentSlot.FEET)
+                entity.getEquippedStack(EquipmentSlot.HEAD),
+                entity.getEquippedStack(EquipmentSlot.CHEST),
+                entity.getEquippedStack(EquipmentSlot.LEGS),
+                entity.getEquippedStack(EquipmentSlot.FEET)
         );
     }
 
     /**
      * Returns the custom data compound of the provided ItemStack, or else null.
      */
-    public static CompoundTag getCustomData(ItemStack stack) {
+    public static NbtCompound getCustomData(ItemStack stack) {
         if (stack != null && !stack.isEmpty()) {
-            CustomData data = stack.get(DataComponents.CUSTOM_DATA);
+            NbtComponent data = stack.get(DataComponentTypes.CUSTOM_DATA);
             if (data != null) {
-                return data.tag;
+                return data.nbt;
             }
         }
         return null;
@@ -469,7 +469,7 @@ public class Utils {
     /**
      * Returns the Skyblock item ID from the provided NbtCompound, or else an empty string.
      */
-    public static String getSkyblockId(CompoundTag customData) {
+    public static String getSkyblockId(NbtCompound customData) {
         if (customData != null && customData.contains("id")) {
             return customData.getString("id").orElse("");
         }
@@ -486,7 +486,7 @@ public class Utils {
     /**
      * Tries to parse the Bazaar/Auction ID tied to the name of the item.
      */
-    public static String getMarketId(Component text) {
+    public static String getMarketId(Text text) {
         String name = toPlain(text);
         if (hasItemQuantity(name)) {
             name = name.substring(0, name.lastIndexOf(" ")).trim();
@@ -496,7 +496,7 @@ public class Utils {
             String enchantName = toID(enchant.substring(0, enchant.lastIndexOf(" ")));
             int enchantLevel = parseRoman(enchant.substring(enchant.lastIndexOf(" ") + 1));
             Optional<Style> style = getStyle(text, enchant::equals);
-            if (style.isPresent() && hasColor(style.get(), ChatFormatting.LIGHT_PURPLE) && !enchantName.startsWith("ULTIMATE_")) {
+            if (style.isPresent() && hasColor(style.get(), Formatting.LIGHT_PURPLE) && !enchantName.startsWith("ULTIMATE_")) {
                 return format("ENCHANTMENT_ULTIMATE_{}_{}", enchantName, enchantLevel);
             }
             return format("ENCHANTMENT_{}_{}", enchantName, enchantLevel);
@@ -516,10 +516,10 @@ public class Utils {
             String rarity = "COMMON";
             if (styleOptional.isPresent()) {
                 Style style = styleOptional.get();
-                if (hasColor(style, ChatFormatting.GOLD)) rarity = "LEGENDARY";
-                if (hasColor(style, ChatFormatting.DARK_PURPLE)) rarity = "EPIC";
-                if (hasColor(style, ChatFormatting.BLUE)) rarity = "RARE";
-                if (hasColor(style, ChatFormatting.GREEN)) rarity = "UNCOMMON";
+                if (hasColor(style, Formatting.GOLD)) rarity = "LEGENDARY";
+                if (hasColor(style, Formatting.DARK_PURPLE)) rarity = "EPIC";
+                if (hasColor(style, Formatting.BLUE)) rarity = "RARE";
+                if (hasColor(style, Formatting.GREEN)) rarity = "UNCOMMON";
             }
             return format("{}_PET_{}", toID(petName), rarity);
         }
@@ -544,7 +544,7 @@ public class Utils {
      * Returns the Bazaar/Auction ID tied to the item.
      */
     public static String getMarketId(ItemStack stack) {
-        CompoundTag data = getCustomData(stack);
+        NbtCompound data = getCustomData(stack);
         String id = getSkyblockId(data);
         String shardId = ShardData.getId(stack);
         if (!shardId.isEmpty()) {
@@ -560,19 +560,19 @@ public class Utils {
                 return "UNKNOWN_PET";
             }
             case "RUNE", "UNIQUE_RUNE" -> {
-                CompoundTag runeData = data.getCompound("runes").orElse(null);
+                NbtCompound runeData = data.getCompound("runes").orElse(null);
                 if (runeData != null) {
-                    String runeId = (String) runeData.keySet().toArray()[0];
+                    String runeId = (String) runeData.getKeys().toArray()[0];
                     return format("{}_{}_RUNE", runeId, runeData.getInt(runeId).orElse(0));
                 }
                 return "EMPTY_RUNE";
             }
             case "ENCHANTED_BOOK" -> {
-                CompoundTag enchantData = data.getCompound("enchantments").orElse(null);
+                NbtCompound enchantData = data.getCompound("enchantments").orElse(null);
                 if (enchantData != null) {
-                    Set<String> enchants = enchantData.keySet();
+                    Set<String> enchants = enchantData.getKeys();
                     if (enchants.size() == 1) {
-                        String enchantId = (String) enchantData.keySet().toArray()[0];
+                        String enchantId = (String) enchantData.getKeys().toArray()[0];
                         int enchantLevel = enchantData.getInt(enchantId).orElse(0);
                         return format("ENCHANTMENT_{}_{}", toUpper(enchantId), enchantLevel);
                     }
@@ -598,16 +598,16 @@ public class Utils {
     }
 
     public static GameProfile getTextures(ItemStack stack) {
-        ResolvableProfile profile = stack.getComponents().get(DataComponents.PROFILE);
+        ProfileComponent profile = stack.getComponents().get(DataComponentTypes.PROFILE);
         if (!stack.isEmpty() && profile != null) {
-            return profile.partialProfile();
+            return profile.getGameProfile();
         }
         return null;
     }
 
     public static String getTextureUrl(GameProfile profile) {
         if (profile != null) {
-            MinecraftSessionService service = mc.services().sessionService();
+            MinecraftSessionService service = mc.getApiServices().sessionService();
             Property property = service.getPackedTextures(profile);
             MinecraftProfileTextures textures = service.unpackTextures(property);
             if (textures.skin() != null) {
@@ -629,8 +629,8 @@ public class Utils {
         return false;
     }
 
-    public static List<Component> getLoreText(ItemStack stack) {
-        ItemLore lore = stack.getComponents().get(DataComponents.LORE);
+    public static List<Text> getLoreText(ItemStack stack) {
+        LoreComponent lore = stack.getComponents().get(DataComponentTypes.LORE);
         if (lore != null) {
             return lore.lines();
         }
@@ -642,7 +642,7 @@ public class Utils {
      */
     public static List<String> getLoreLines(ItemStack stack) {
         List<String> lines = new ArrayList<>();
-        for (Component line : getLoreText(stack)) {
+        for (Text line : getLoreText(stack)) {
             lines.add(toPlain(line).trim());
         }
         return lines;
@@ -686,8 +686,8 @@ public class Utils {
     public static BlockPos findGround(BlockPos pos, int maxDistance) {
         int dist = Math.clamp(maxDistance, 0, 256);
         for (int i = 0; i <= dist; i++) {
-            BlockPos below = pos.below(i);
-            if (!mc.level.getBlockState(below).isAir()) {
+            BlockPos below = pos.down(i);
+            if (!mc.world.getBlockState(below).isAir()) {
                 return below;
             }
         }
@@ -710,7 +710,7 @@ public class Utils {
         String fileName = path.getFileName().toString();
         Path tempPath = parent.resolve(Utils.format("{}-Temp-{}.{}",
                 fileName.substring(0, fileName.indexOf(".")),
-                Util.getMillis(),
+                Util.getMeasuringTimeMs(),
                 fileName.substring(fileName.indexOf(".") + 1)
         ));
         if (!Files.exists(parent)) {
@@ -730,8 +730,8 @@ public class Utils {
      * Checks if our player entity is currently within an area, made from 2 sets of coordinates.
      */
     public static boolean isInZone(double x1, double y1, double z1, double x2, double y2, double z2) {
-        AABB area = new AABB(x1, y1, z1, x2, y2, z2);
-        return area.contains(mc.player.position());
+        Box area = new Box(x1, y1, z1, x2, y2, z2);
+        return area.contains(mc.player.getEntityPos());
     }
 
     /**
@@ -747,14 +747,14 @@ public class Utils {
         return entity == mc.player;
     }
 
-    public static float horizontalDistance(Vec3 from, Vec3 to) {
-        float x = (float) (from.x() - to.x());
-        float z = (float) (from.z() - to.z());
-        return Mth.sqrt(x * x + z * z);
+    public static float horizontalDistance(Vec3d from, Vec3d to) {
+        float x = (float) (from.getX() - to.getX());
+        float z = (float) (from.getZ() - to.getZ());
+        return MathHelper.sqrt(x * x + z * z);
     }
 
     public static float horizontalDistance(Entity from, Entity to) {
-        return horizontalDistance(from.position(), to.position());
+        return horizontalDistance(from.getEntityPos(), to.getEntityPos());
     }
 
     /**
@@ -763,10 +763,10 @@ public class Utils {
     public static Entity findNametagOwner(Entity ArmorStandEntity, List<Entity> otherEntities) {
         Entity entity = null;
         float lowestDist = 2.0f;
-        double maxY = ArmorStandEntity.position().y();
+        double maxY = ArmorStandEntity.getEntityPos().getY();
         for (Entity ent : otherEntities) {
-            float dist = horizontalDistance(ent.position(), ArmorStandEntity.position());
-            if (!(ent instanceof ArmorStand) && ent.position().y() < maxY && dist < lowestDist) {
+            float dist = horizontalDistance(ent.getEntityPos(), ArmorStandEntity.getEntityPos());
+            if (!(ent instanceof ArmorStandEntity) && ent.getEntityPos().getY() < maxY && dist < lowestDist) {
                 entity = ent;
                 lowestDist = dist;
             }
@@ -778,7 +778,7 @@ public class Utils {
      * Checks if the provided ItemStack has a glint override flag. Ignores the default flag to work correctly with items such as Nether Stars.
      */
     public static boolean hasGlint(ItemStack stack) {
-        Optional<? extends Boolean> component = stack.getComponentsPatch().get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE);
+        Optional<? extends Boolean> component = stack.getComponentChanges().get(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE);
         return component != null && component.isPresent();
     }
 
@@ -791,7 +791,7 @@ public class Utils {
      */
     public static List<String> getFooterLines() {
         List<String> list = new ArrayList<>();
-        Component footer = ((PlayerTabOverlayAccessor) mc.gui.getTabList()).getFooter();
+        Text footer = ((PlayerListHudAccessor) mc.inGameHud.getPlayerListHud()).getFooter();
         if (footer != null) {
             String[] lines = footer.getString().split("\n");
             for (String line : lines) {
@@ -804,8 +804,8 @@ public class Utils {
         return list;
     }
 
-    public static List<LerpingBossEvent> getBossBars() {
-        return ((BossHealthOverlayAccessor) mc.gui.getBossOverlay()).getEvents().values().stream().toList();
+    public static List<ClientBossBar> getBossBars() {
+        return ((BossBarHudAccessor) mc.inGameHud.getBossBarHud()).getBossBars().values().stream().toList();
     }
 
     /**
@@ -813,23 +813,23 @@ public class Utils {
      *
      * @param inverse if true, returns the slots that are part of the player inventory instead of the container itself.
      */
-    public static List<Slot> getContainerSlots(ChestMenu handler, boolean inverse) {
+    public static List<Slot> getContainerSlots(GenericContainerScreenHandler handler, boolean inverse) {
         if (inverse) {
-            return handler.slots.stream().filter(slot -> slot.index >= handler.getRowCount() * 9).toList();
+            return handler.slots.stream().filter(slot -> slot.id >= handler.getRows() * 9).toList();
         }
-        return handler.slots.stream().filter(slot -> slot.index < handler.getRowCount() * 9).toList();
+        return handler.slots.stream().filter(slot -> slot.id < handler.getRows() * 9).toList();
     }
 
-    public static List<Slot> getContainerSlots(ChestMenu handler) {
+    public static List<Slot> getContainerSlots(GenericContainerScreenHandler handler) {
         return getContainerSlots(handler, false);
     }
 
     public static ItemStack getHeldItem() {
-        return mc.player != null ? mc.player.getMainHandItem() : ItemStack.EMPTY;
+        return mc.player != null ? mc.player.getMainHandStack() : ItemStack.EMPTY;
     }
 
     public static Slot getFocusedSlot() {
-        return mc.screen != null ? ((AbstractContainerScreenAccessor) mc.screen).getHoveredSlot() : null;
+        return mc.currentScreen != null ? ((HandledScreenAccessor) mc.currentScreen).getFocusedSlot() : null;
     }
 
     private static int romanToInt(Character roman) {
@@ -884,14 +884,14 @@ public class Utils {
     /**
      * Gets the string out of a Text object and removes any formatting codes.
      */
-    public static String toPlain(Component text) {
+    public static String toPlain(Text text) {
         if (text != null) {
-            return ChatFormatting.stripFormatting(text.getString());
+            return Formatting.strip(text.getString());
         }
         return "";
     }
 
-    public static Optional<Style> getStyle(Component text, Predicate<String> predicate) {
+    public static Optional<Style> getStyle(Text text, Predicate<String> predicate) {
         return text.visit((textStyle, textString) -> {
             if (predicate.test(textString)) {
                 return Optional.of(textStyle);
@@ -900,12 +900,12 @@ public class Utils {
         }, Style.EMPTY);
     }
 
-    public static boolean hasColor(Style style, ChatFormatting color) {
-        return color.getColor() != null && hasColor(style, color.getColor());
+    public static boolean hasColor(Style style, Formatting color) {
+        return color.getColorValue() != null && hasColor(style, color.getColorValue());
     }
 
     public static boolean hasColor(Style style, int hex) {
-        return style != null && style.getColor() != null && style.getColor().getValue() == hex;
+        return style != null && style.getColor() != null && style.getColor().getRgb() == hex;
     }
 
     public static Optional<Integer> parseInt(String value) {
@@ -1021,16 +1021,28 @@ public class Utils {
     }
 
     public static void setScreen(Screen screen) {
-        mc.schedule(() -> mc.setScreen(screen));
+        mc.send(() -> mc.setScreen(screen));
     }
 
     public static void runCommand(String string) {
-        mc.player.connection.sendCommand(string);
+        mc.player.networkHandler.sendChatCommand(string);
     }
 
     public static Vector2d getMousePos() {
-        return new Vector2d(mc.mouseHandler.getScaledXPos(mc.getWindow()), mc.mouseHandler.getScaledYPos(mc.getWindow()));
+        return new Vector2d(mc.mouse.getScaledX(mc.getWindow()), mc.mouse.getScaledY(mc.getWindow()));
     }
+
+    public static void setGlowing(Entity ent, boolean shouldGlow, RenderColor color) {
+        ((EntityRendering) ent).nofrills_mod$setGlowingColored(shouldGlow, color);
+    }
+
+    /**
+     * Checks if an entity is drawing the glow effect. Does not account for vanilla/server applied glows.
+     */
+    public static boolean isGlowing(Entity ent) {
+        return ((EntityRendering) ent).nofrills_mod$getGlowing();
+    }
+
 
     public static class Symbols {
         public static String zone = "⏣";

@@ -8,9 +8,9 @@ import com.somefrills.events.*;
 import com.somefrills.misc.Clock;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Hand;
+import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.item.ItemStack;
 
 import static com.somefrills.Main.mc;
 
@@ -186,18 +186,18 @@ public final class AutoFish {
         if (doneRightClickThisTick) return;
         var player = mc.player;
         if (player == null) return;
-        if (mc.gameMode == null) return;
-        mc.gameMode.useItem(player, InteractionHand.MAIN_HAND);
+        if (mc.interactionManager == null) return;
+        mc.interactionManager.interactItem(player, Hand.MAIN_HAND);
         doneRightClickThisTick = true;
     }
 
     @EventHandler
     private static void onEntity(EntityUpdatedEvent event) {
         var entity = event.entity;
-        if (!(entity instanceof FishingHook hook)) return;
+        if (!(entity instanceof FishingBobberEntity hook)) return;
         var player = mc.player;
         if (player == null || !heldRod || hook.getOwner() == null) return;
-        if (!hook.getOwner().getUUID().equals(player.getUUID())) {
+        if (!hook.getOwner().getUuid().equals(player.getUuid())) {
             return;
         }
         hookId = hook.getId();

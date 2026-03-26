@@ -5,48 +5,49 @@ import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.somefrills.Main;
 import com.somefrills.config.FeatureRegistry;
 import com.somefrills.hud.SettingsScreen;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.components.Tooltip;
-import net.minecraft.client.input.MouseButtonEvent;
-import net.minecraft.network.chat.Component;
+import net.minecraft.util.Formatting;
+import net.minecraft.client.gui.tooltip.Tooltip;
+import net.minecraft.client.gui.Click;
+import net.minecraft.text.Text;
 
 import static com.somefrills.Main.mc;
+import net.minecraft.text.Text;
 
 public class FeatureWidget extends ButtonWidget implements IWidget {
     private final FeatureRegistry.FeatureInfo info;
 
     public FeatureWidget(int x, int y, int width, int height, FeatureRegistry.FeatureInfo info) {
-        super(x, y, width, height, Component.literal(info.name), button -> {
+        super(x, y, width, height, net.minecraft.text.Text.literal(info.name), button -> {
             var fw = (FeatureWidget) button;
             fw.toggleState();
         });
         this.info = info;
-        setTooltip(Tooltip.create(Component.literal(info.description).withStyle(ChatFormatting.GRAY)));
+        setTooltip(Tooltip.of(net.minecraft.text.Text.literal(info.description).formatted(Formatting.GRAY)));
         updateState();
     }
 
     private void updateState() {
         if (info.featureInstance.isActive()) {
-            setMessage(Component.literal(info.name).withStyle(ChatFormatting.GREEN));
+            setMessage(net.minecraft.text.Text.literal(info.name).formatted(Formatting.GREEN));
         } else {
-            setMessage(Component.literal(info.name).withStyle(ChatFormatting.RED));
+            setMessage(net.minecraft.text.Text.literal(info.name).formatted(Formatting.RED));
         }
     }
 
     private void toggleState() {
         info.featureInstance.setActive(!info.featureInstance.isActive());
         if (info.featureInstance.isActive()) {
-            setMessage(Component.literal(info.name).withStyle(ChatFormatting.GREEN));
+            setMessage(net.minecraft.text.Text.literal(info.name).formatted(Formatting.GREEN));
             Main.eventBus.subscribe(info.featureInstance);
         } else {
-            setMessage(Component.literal(info.name).withStyle(ChatFormatting.RED));
+            setMessage(net.minecraft.text.Text.literal(info.name).formatted(Formatting.RED));
             Main.eventBus.unsubscribe(info.featureInstance);
         }
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
-        if (mouseButtonEvent.input() == 1) {
+    public boolean mouseClicked(Click mouseButtonEvent, boolean bl) {
+        if (mouseButtonEvent.button() == 1) {
             if (!info.settings.isEmpty()) {
                 mc.setScreen(new SettingsScreen(info));
                 return true;

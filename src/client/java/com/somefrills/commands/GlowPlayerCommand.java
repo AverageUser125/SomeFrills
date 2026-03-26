@@ -9,8 +9,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.features.misc.GlowPlayer;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.util.Formatting;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -49,7 +49,7 @@ public class GlowPlayerCommand {
                                         Utils.info("GlowPlayer feature is disabled.");
                                         return 1;
                                     }
-                                    return addGlow(ctx, ChatFormatting.WHITE);
+                                    return addGlow(ctx, Formatting.WHITE);
                                 })
                                 .then(argument("color", StringArgumentType.word())
                                         .suggests(GlowPlayerCommand::suggestColors)
@@ -58,7 +58,7 @@ public class GlowPlayerCommand {
                                                 Utils.info("GlowPlayer feature is disabled.");
                                                 return 1;
                                             }
-                                            ChatFormatting color = Utils.parseColor(
+                                            Formatting color = Utils.parseColor(
                                                     StringArgumentType.getString(ctx, "color")
                                             );
                                             if (color == null) {
@@ -80,7 +80,7 @@ public class GlowPlayerCommand {
                                                 Utils.info("GlowPlayer feature is disabled.");
                                                 return 1;
                                             }
-                                            ChatFormatting color = Utils.parseColor(
+                                            Formatting color = Utils.parseColor(
                                                     StringArgumentType.getString(ctx, "color")
                                             );
                                             if (color == null) {
@@ -117,7 +117,7 @@ public class GlowPlayerCommand {
 
     /* ---------------- Command handlers ---------------- */
 
-    private static int addGlow(CommandContext<FabricClientCommandSource> ctx, ChatFormatting color) {
+    private static int addGlow(CommandContext<FabricClientCommandSource> ctx, Formatting color) {
         String rawName = StringArgumentType.getString(ctx, "player");
         String pureName = GlowPlayer.convertToPureName(rawName);
 
@@ -135,7 +135,7 @@ public class GlowPlayerCommand {
         return 1;
     }
 
-    private static int setColor(CommandContext<FabricClientCommandSource> ctx, ChatFormatting color) {
+    private static int setColor(CommandContext<FabricClientCommandSource> ctx, Formatting color) {
         String rawName = StringArgumentType.getString(ctx, "player");
         String pureName = GlowPlayer.convertToPureName(rawName);
 
@@ -181,7 +181,7 @@ public class GlowPlayerCommand {
 
         StringBuilder sb = new StringBuilder("Forced glows:\n");
         for (String name : names) {
-            ChatFormatting color = GlowPlayer.getColor(name);
+            Formatting color = GlowPlayer.getColor(name);
             sb.append(name).append(" (").append(color == null ? "none" : color.getName()).append(")\n");
         }
         Utils.info(sb.toString());
@@ -193,11 +193,11 @@ public class GlowPlayerCommand {
             CommandContext<FabricClientCommandSource> ctx,
             SuggestionsBuilder builder
     ) {
-        if (mc.level == null) return builder.buildFuture();
+        if (mc.world == null) return builder.buildFuture();
 
         String remaining = builder.getRemaining().toLowerCase();
 
-        for (AbstractClientPlayer player : mc.level.players()) {
+        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
             if (Utils.isRealPlayer(player)) {
                 String name = player.getName().getString();
                 if (name.toLowerCase().startsWith(remaining)) {
@@ -214,7 +214,7 @@ public class GlowPlayerCommand {
             SuggestionsBuilder builder
     ) {
         String remaining = builder.getRemaining().toLowerCase();
-        for (ChatFormatting f : ChatFormatting.values()) {
+        for (Formatting f : Formatting.values()) {
             if (f.isColor() && f.getName().startsWith(remaining)) {
                 builder.suggest(f.getName());
             }

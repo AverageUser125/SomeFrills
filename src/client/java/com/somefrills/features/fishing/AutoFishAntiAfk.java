@@ -20,8 +20,8 @@ final class AutoFishAntiAfk {
         if (mc.player == null) return;
         if (!instance.isActive()) return;
         if (resetFacingWhenNotFishing.value()) {
-            mc.player.setYRot(0f);
-            mc.player.setXRot(0f);
+            mc.player.setYaw(0f);
+            mc.player.setPitch(0f);
         }
         lastAfkTriggerTime = 0;
     }
@@ -39,8 +39,8 @@ final class AutoFishAntiAfk {
         Random rand = new Random();
         float yawDelta = -5f + rand.nextFloat() * 10f;   // -5 to +5 degrees
         float pitchDelta = -2f + rand.nextFloat() * 4f;  // -2 to +2 degrees
-        player.setYRot((player.getYRot() + yawDelta) % 360);
-        player.setXRot(Math.max(-90f, Math.min(90f, player.getXRot() + pitchDelta)));
+        player.setYaw((player.getYaw() + yawDelta) % 360);
+        player.setPitch(Math.max(-90f, Math.min(90f, player.getPitch() + pitchDelta)));
         LOGGER.debug("AutoFishAntiAfk.trigger applied yawDelta={}, pitchDelta={}", yawDelta, pitchDelta);
     }
 }

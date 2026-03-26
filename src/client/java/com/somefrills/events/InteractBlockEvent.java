@@ -1,6 +1,6 @@
 package com.somefrills.events;
 
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.util.hit.BlockHitResult;
 
 public class InteractBlockEvent extends Cancellable {
     public BlockHitResult blockHitResult;

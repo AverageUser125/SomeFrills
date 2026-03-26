@@ -1,6 +1,6 @@
 package com.somefrills.events;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.entity.Entity;
 
 public class AttackEntityEvent {
     public Entity entity;

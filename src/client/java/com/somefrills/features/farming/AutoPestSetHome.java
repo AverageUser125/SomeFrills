@@ -5,7 +5,7 @@ import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.ChatFormatting;
+import net.minecraft.util.Formatting;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,7 +33,7 @@ public class AutoPestSetHome {
         if (event.messagePlain == null || event.messagePlain.isEmpty()) return;
 
         // Strip formatting safely
-        String stripped = ChatFormatting.stripFormatting(event.messagePlain);
+        String stripped = Formatting.strip(event.messagePlain);
         stripped = stripped.trim();
 
         Matcher m = PEST_SPAWN_PATTERN.matcher(stripped);
@@ -42,7 +42,7 @@ public class AutoPestSetHome {
         long now = System.currentTimeMillis();
         if (now - lastServerJoinTime < IGNORE_WINDOW_MS) return;
 
-        if (mc.player == null || mc.player.connection == null) return;
+        if (mc.player == null || mc.player.networkHandler == null) return;
 
         try {
             Utils.info("Pests spawned detected in chat, running /sethome");

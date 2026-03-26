@@ -1,6 +1,6 @@
 package com.somefrills.events;
 
-import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.packet.Packet;
 
 public class SendPacketEvent extends Cancellable {
     public Packet<?> packet;

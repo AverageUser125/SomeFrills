@@ -9,9 +9,9 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Rendering;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Vec3d;
 
 import java.util.List;
 
@@ -26,7 +26,7 @@ public class Rewarp {
     // Add current player position as a waypoint (x,y,z)
     public static void addWaypoint() {
         if (mc.player == null) return;
-        BlockPos pos = mc.player.blockPosition();
+        BlockPos pos = mc.player.getBlockPos();
         warps.add(pos);
         Utils.infoFormat("Added waypoint at {},{},{}.", pos.getX(), pos.getY(), pos.getZ());
     }
@@ -54,9 +54,9 @@ public class Rewarp {
 
         for (BlockPos pos : list) {
             try {
-                Vec3 center = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-                AABB box = AABB.ofSize(center, 0.5, 0.5, 0.5);
-                Rendering.drawFilled(event.matrices, event.consumer, event.camera, box, true, cyan);
+                Vec3d center = new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+                Box box = Box.of(center, 0.5, 0.5, 0.5);
+                event.drawFilled(box, true, cyan);
             } catch (Exception ignored) {
             }
         }
