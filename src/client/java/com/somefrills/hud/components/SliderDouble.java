@@ -1,11 +1,12 @@
 package com.somefrills.hud.components;
 
+import com.daqem.uilib.api.widget.IWidget;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 
-public class SliderDouble extends AbstractWidget {
+public class SliderDouble extends AbstractWidget implements IWidget {
     private final NumberDouble numberBox;
     private final SliderWidget slider;
     private final double minValue;

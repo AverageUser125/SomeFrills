@@ -3,13 +3,10 @@ package com.somefrills.hud;
 import com.daqem.uilib.gui.AbstractScreen;
 import com.somefrills.config.*;
 import com.somefrills.config.FeatureRegistry.FeatureInfo;
-// ...existing code...
 import com.somefrills.hud.components.FeatureWidget;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class ClickGui extends AbstractScreen {
@@ -50,17 +47,17 @@ public class ClickGui extends AbstractScreen {
         this.refreshSearchResults("");
 
         final int START_FEATURE_Y = 40;
-        final int FEATURE_WIDTH = 200;
+        final int FEATURE_WIDTH = 100;
         final int FEATURE_HEIGHT = 20;
         int startX = 10;
         int startY = START_FEATURE_Y;
         for(CategoryData category : this.categories) {
             for(FeatureInfo info : category.features) {
                 addWidget(new FeatureWidget(startX, startY, FEATURE_WIDTH, FEATURE_HEIGHT, info));
-                startY += 30;
+                startY += FEATURE_HEIGHT + 10;
             }
             startY = START_FEATURE_Y;
-            startX += FEATURE_WIDTH;
+            startX += FEATURE_WIDTH + 5;
         }
     }
 
