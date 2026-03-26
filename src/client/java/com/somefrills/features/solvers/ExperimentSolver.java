@@ -24,10 +24,10 @@ public class ExperimentSolver {
     public static final Feature instance = new Feature("experimentSolver");
 
     @SettingDescription("Enable automatic solving of Chronomatron experiments")
-    public static final SettingBool enableChronomatron = new SettingBool(true);
+    public static final SettingBool chronomatron = new SettingBool(true);
 
     @SettingDescription("Enable automatic solving of Ultrasequencer experiments")
-    public static final SettingBool enableUltrasequencer = new SettingBool(true);
+    public static final SettingBool ultrasequencer = new SettingBool(true);
 
     @SettingDescription("Try to maximize XP when solving experiments")
     public static final SettingBool getMaxXp = new SettingBool(false);
@@ -71,26 +71,13 @@ public class ExperimentSolver {
         ScreenHandler handler = player.currentScreenHandler;
         if (handler == null) return;
 
-        String title = "";
-        if (mc.currentScreen != null) {
-            Text txt = mc.currentScreen.getTitle();
-            if (txt != null) title = txt.getString();
-        }
-
-        // Use regex pattern to detect experiment table
-        if (EXPERIMENT_PATTERN.matcher(title).find()) {
-            // Determine which experiment type
-            if (enableChronomatron.value() && title.contains("Chronomatron")) {
-                solveChronomatron(handler);
-            } else if (enableUltrasequencer.value() && title.contains("Ultrasequencer")) {
-                solveUltraSequencer(handler);
-            } else {
-                reset();
-            }
-        } else {
-            if (!title.isEmpty()) {
-                reset();
-            }
+        // Use the helper to determine the current experiment type (if any)
+        ExperimentType type = getExperimentType();
+        switch (type) {
+            case Chronomatron -> { if (chronomatron.value()) solveChronomatron(handler); else reset(); }
+            case Ultrasequencer -> { if (ultrasequencer.value()) solveUltraSequencer(handler); else reset(); }
+            case Superpairs -> reset(); // Not implemented yet — ensure state is reset
+            case None -> reset(); // If we're no longer on an experiment screen, clear state
         }
     }
 
@@ -228,5 +215,36 @@ public class ExperimentSolver {
         hasAdded = false;
         lastAdded = 0;
         clicks = 0;
+    }
+    public enum ExperimentType {
+        Chronomatron,
+        Ultrasequencer,
+        Superpairs,
+        None
+    }
+
+    public static ExperimentType getExperimentType() {
+        if (mc == null || mc.currentScreen == null) return ExperimentType.None;
+        Text titleText = mc.currentScreen.getTitle();
+        if (titleText == null) return ExperimentType.None;
+
+        String title = titleText.getString();
+        if (title == null || title.isEmpty()) return ExperimentType.None;
+
+        // If the title doesn't match known experiment patterns, return None
+        if (!EXPERIMENT_PATTERN.matcher(title).find()) return ExperimentType.None;
+
+        String lower = title.toLowerCase();
+        if (lower.contains("chronomatron")) return ExperimentType.Chronomatron;
+        if (lower.contains("ultrasequencer")) return ExperimentType.Ultrasequencer;
+        if (lower.contains("superpairs")) return ExperimentType.Superpairs;
+
+        // Fallback: attempt to deduce from common words
+        if (lower.contains("experiment") || lower.contains("experimentation") || lower.contains("table") || lower.contains("stakes") || lower.contains("rewards")) {
+            // Unknown specific experiment type, return None
+            return ExperimentType.None;
+        }
+
+        return ExperimentType.None;
     }
 }

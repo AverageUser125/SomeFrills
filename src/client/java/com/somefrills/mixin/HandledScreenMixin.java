@@ -50,15 +50,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         super(title);
     }
 
-    @WrapOperation(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", ordinal = 1))
-    private void onClickSlotRedirect(HandledScreen<?> instance, Slot slot, int slotId, int button, SlotActionType actionType, Operation<Void> original) {
-        if (MiddleClickOverride.shouldOverride(slot, button, actionType)) {
-            instance.onMouseClick(slot, slotId, GLFW.GLFW_MOUSE_BUTTON_3, SlotActionType.CLONE);
-        } else {
-            original.call(instance, slot, slotId, button, actionType);
-        }
-    }
-
     @Inject(method = "onMouseClick(Lnet/minecraft/screen/slot/Slot;IILnet/minecraft/screen/slot/SlotActionType;)V", at = @At("HEAD"), cancellable = true)
     private void onClickSlot(Slot slot, int slotId, int button, SlotActionType actionType, CallbackInfo ci) {
         if (eventBus.post(new SlotClickEvent(slot, slotId, button, actionType, this.title.getString(), this.handler)).isCancelled()) {
@@ -106,7 +97,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     @Inject(method = "drawSlot", at = @At("HEAD"))
-    private void onRenderSlot(DrawContext context, Slot slot, CallbackInfo ci) {
+    private void onRenderSlot(DrawContext context, Slot slot, int mouseX, int mouseY, CallbackInfo ci) {
         if (SlotOptions.hasBackground(slot)) {
             context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, SlotOptions.getBackground(slot).argb);
         }

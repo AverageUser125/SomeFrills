@@ -2,7 +2,12 @@ package com.somefrills.features.tweaks;
 
 import com.google.common.collect.Sets;
 import com.somefrills.config.Feature;
+import com.somefrills.events.SlotClickEvent;
+import com.somefrills.features.solvers.ExperimentSolver;
+import com.somefrills.misc.SlotOptions;
 import com.somefrills.misc.Utils;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.slot.Slot;
@@ -88,5 +93,29 @@ public class MiddleClickOverride {
             }
         }
         return false;
+    }
+    private static boolean experimentCheck() {
+        return switch (ExperimentSolver.getExperimentType()) {
+            case Chronomatron -> ExperimentSolver.chronomatron.value();
+            case Ultrasequencer -> ExperimentSolver.ultrasequencer.value();
+            case Superpairs -> false; // FIXME
+            default -> true;
+        };
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    private static void onClick(SlotClickEvent event) {
+        if (instance.isActive() && Utils.isInSkyblock() && mc.currentScreen instanceof GenericContainerScreen container) {
+            if (event.slot != null && event.button == GLFW.GLFW_MOUSE_BUTTON_LEFT && event.actionType.equals(SlotActionType.PICKUP)) {
+                String title = container.getTitle().getString();
+                ItemStack stack = event.slot.getStack();
+                if (!SlotOptions.isDisabled(event.slot) && !stack.isEmpty() && !isBlacklisted(title) && experimentCheck()) {
+                    if (Utils.getSkyblockId(stack).isEmpty() || isWhitelisted(title) || isTransaction(stack)) {
+                        mc.interactionManager.clickSlot(container.getScreenHandler().syncId, event.slot.id, GLFW.GLFW_MOUSE_BUTTON_3, SlotActionType.CLONE, mc.player);
+                        event.cancel();
+                    }
+                }
+            }
+        }
     }
 }
