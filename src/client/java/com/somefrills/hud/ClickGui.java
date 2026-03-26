@@ -1,6 +1,7 @@
 package com.somefrills.hud;
 
 import com.daqem.uilib.gui.AbstractScreen;
+import com.daqem.uilib.gui.background.BlurredBackground;
 import com.daqem.uilib.gui.widget.EditBoxWidget;
 import com.somefrills.config.Config;
 import com.somefrills.config.FeatureRegistry;
@@ -21,6 +22,7 @@ public class ClickGui extends AbstractScreen {
     @Override
     protected void init() {
         super.init();
+        setBackground(new BlurredBackground());
         // Build categories by grouping features by their package segment
         Map<String, List<FeatureInfo>> byCategory = new TreeMap<>();
         for (FeatureInfo info : FeatureRegistry.getFeatures()) {

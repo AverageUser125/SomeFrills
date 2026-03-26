@@ -1,6 +1,7 @@
 package com.somefrills.hud;
 
 import com.daqem.uilib.gui.AbstractScreen;
+import com.daqem.uilib.gui.background.BlurredBackground;
 import com.somefrills.config.SettingColor;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
@@ -40,6 +41,7 @@ public class ColorPickerScreen extends AbstractScreen {
     @Override
     protected void init() {
         super.init();
+        setBackground(new BlurredBackground());
 
         // layout
         svSize = Math.min(200, this.width - 260);

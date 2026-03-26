@@ -2,6 +2,7 @@ package com.somefrills.hud;
 
 import com.daqem.uilib.api.widget.IWidget;
 import com.daqem.uilib.gui.AbstractScreen;
+import com.daqem.uilib.gui.background.BlurredBackground;
 import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.daqem.uilib.gui.widget.EditBoxWidget;
 import com.somefrills.config.*;
@@ -23,6 +24,8 @@ public class SettingsScreen extends AbstractScreen {
 
     @Override
     protected void init() {
+        super.init();
+        setBackground(new BlurredBackground());
         List<SettingWidget> widgets = new ArrayList<>();
         int marginLeft = 10;
         int marginTop = 10;
