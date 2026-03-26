@@ -1,6 +1,8 @@
 package com.somefrills.hud.components;
 
 import com.daqem.uilib.api.widget.IWidget;
+import com.somefrills.config.SettingInt;
+import com.somefrills.config.SettingIntSlider;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -9,32 +11,27 @@ import net.minecraft.network.chat.Component;
 public class SliderInt extends AbstractWidget implements IWidget {
     private final NumberInt numberBox;
     private final SliderWidget slider;
-    private final int minValue;
-    private final int maxValue;
     private boolean updating = false;
-
-    public SliderInt(int x, int y, int widthNum, int widthSlider, int height, int value, int min, int max) {
+    SettingIntSlider setting;
+    public SliderInt(int x, int y, int widthNum, int widthSlider, int height, SettingIntSlider set) {
         super(x, y, widthNum + 5 + widthSlider, height, Component.empty());
-        numberBox = new NumberInt(x, y, widthNum, height, 0);
+        numberBox = new NumberInt(x, y, widthNum, height, setting);
         slider = new SliderWidget(x + widthNum + 5, y, widthSlider, height);
-        this.minValue = min;
-        this.maxValue = max;
         slider.onValueChange(newValue -> {
             updateContext(() -> {
-                int v = (int) Math.round(newValue * (maxValue - minValue) + minValue);
+                int v = (int) Math.round(newValue * (setting.max() - setting.min()) + setting.min());
                 numberBox.setNumber(v);
             });
         });
 
         numberBox.onValueChange(newValue -> {
             updateContext(() -> {
-                double v = Math.max(minValue, Math.min(maxValue, numberBox.getNumber()));
-                double sliderValue = (maxValue == minValue) ? 0.0 : (v - minValue) / (maxValue - minValue);
+                double v = Math.max(setting.min(), Math.min(setting.max(), numberBox.getNumber()));
+                double sliderValue = (setting.max() == setting.min()) ? 0.0 : (v - setting.min()) / (setting.max() - setting.min());
                 slider.setValue(sliderValue);
             });
         });
-
-        numberBox.setNumber(value);
+        setting = set;
     }
 
     @Override

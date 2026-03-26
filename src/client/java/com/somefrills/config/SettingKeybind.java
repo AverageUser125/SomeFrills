@@ -28,7 +28,6 @@ public class SettingKeybind extends SettingInt {
         return staticGetKeyLabel(k);
     }
 
-    // Inlined helper from previous KeybindButton to avoid UI dependency
     public static Component staticGetKeyLabel(int keycode) {
         if (keycode >= GLFW.GLFW_KEY_A && keycode <= GLFW.GLFW_KEY_Z) {
             char c = (char) ('A' + (keycode - GLFW.GLFW_KEY_A));

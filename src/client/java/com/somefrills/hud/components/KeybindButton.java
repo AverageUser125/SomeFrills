@@ -7,11 +7,11 @@ import net.minecraft.client.input.CharacterEvent;
 import net.minecraft.network.chat.Component;
 
 public class KeybindButton extends ButtonWidget {
-    private int key;
+    private SettingKeybind key;
     private boolean waitingForKey = false;
 
-    public KeybindButton(int x, int y, int width, int height, int key) {
-        super(x, y, width, height, SettingKeybind.staticGetKeyLabel(key), button -> {
+    public KeybindButton(int x, int y, int width, int height, SettingKeybind key) {
+        super(x, y, width, height, key.getLabel(), button -> {
             var btn = (KeybindButton) button;
             btn.waitingForKey = true;
             btn.setMessage(Component.literal("Press a key..."));
@@ -29,11 +29,11 @@ public class KeybindButton extends ButtonWidget {
     }
 
     private void setKey(int keyCode) {
-        key = keyCode;
-        this.setMessage(SettingKeybind.staticGetKeyLabel(keyCode));
+        key.set(keyCode);
+        this.setMessage(key.getLabel());
     }
 
     public int getKey() {
-        return key;
+        return key.value();
     }
 }

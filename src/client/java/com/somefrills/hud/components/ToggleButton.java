@@ -1,14 +1,15 @@
 package com.somefrills.hud.components;
 
 import com.daqem.uilib.gui.widget.ButtonWidget;
+import com.somefrills.config.SettingBool;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
 public class ToggleButton extends ButtonWidget {
-    private boolean state;
+    private SettingBool state;
 
-    public ToggleButton(int x, int y, int width, int height, boolean state) {
-        super(x, y, width, height, boolToStr(state), button -> {
+    public ToggleButton(int x, int y, int width, int height, SettingBool state) {
+        super(x, y, width, height, boolToStr(state.value()), button -> {
             var btn = (ToggleButton) button;
             btn.toggle();
         }, Button.DEFAULT_NARRATION);
@@ -20,16 +21,16 @@ public class ToggleButton extends ButtonWidget {
     }
 
     public void toggle() {
-        this.state = !this.state;
-        this.setMessage(boolToStr(this.state));
+        this.state.set(!this.state.value());
+        this.setMessage(boolToStr(this.state.value()));
     }
 
     public boolean getToggle() {
-        return this.state;
+        return this.state.value();
     }
 
     public void setToggle(boolean toggle) {
-        this.state = toggle;
+        this.state.set(toggle);
         this.setMessage(boolToStr(toggle));
     }
 }

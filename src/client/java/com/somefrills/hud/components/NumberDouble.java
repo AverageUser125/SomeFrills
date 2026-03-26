@@ -1,6 +1,7 @@
 package com.somefrills.hud.components;
 
 import com.daqem.uilib.gui.widget.EditBoxWidget;
+import com.somefrills.config.SettingDouble;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
@@ -16,32 +17,32 @@ import static com.somefrills.Main.mc;
  * getNumber/setNumber and validates input to ensure only integers are accepted.
  */
 public class NumberDouble extends EditBoxWidget {
-    private double num;
+    private SettingDouble num;
 
-    public NumberDouble(double number) {
+    public NumberDouble(SettingDouble number) {
         this(0, 0, number);
     }
 
-    public NumberDouble(int x, int y, double number) {
+    public NumberDouble(int x, int y, SettingDouble number) {
         this(x, y, Button.DEFAULT_WIDTH, number);
     }
 
-    public NumberDouble(int x, int y, int width, double number) {
+    public NumberDouble(int x, int y, int width, SettingDouble number) {
         this(x, y, width, Button.DEFAULT_HEIGHT, number);
     }
 
-    public NumberDouble(int x, int y, int width, int height, double number) {
+    public NumberDouble(int x, int y, int width, int height, SettingDouble number) {
         super(mc.font, x, y, width, height, Component.empty());
         this.num = number;
-        this.setValue(Double.toString(number));
+        this.setValue(Double.toString(number.value()));
     }
 
     public double getNumber() {
-        return this.num;
+        return this.num.value();
     }
 
     public void setNumber(double number) {
-        this.num = number;
+        this.num.set( number);
         this.setValue(Double.toString(number));
     }
 

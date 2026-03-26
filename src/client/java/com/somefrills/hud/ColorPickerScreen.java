@@ -267,6 +267,5 @@ public class ColorPickerScreen extends AbstractScreen {
     @Override
     public void onClose() {
         mc.setScreen(this.previous);
-        super.onClose();
     }
 }

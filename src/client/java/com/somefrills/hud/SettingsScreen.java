@@ -4,7 +4,6 @@ import com.daqem.uilib.api.widget.IWidget;
 import com.daqem.uilib.gui.AbstractScreen;
 import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.daqem.uilib.gui.widget.EditBoxWidget;
-import com.daqem.uilib.gui.widget.ScrollContainer2DWidget;
 import com.somefrills.config.*;
 import com.somefrills.hud.components.*;
 import net.minecraft.network.chat.Component;
@@ -16,7 +15,6 @@ import static com.somefrills.Main.mc;
 
 public class SettingsScreen extends AbstractScreen {
     private final FeatureRegistry.FeatureInfo info;
-    private ScrollContainer2DWidget scrollContainer;
 
     public SettingsScreen(FeatureRegistry.FeatureInfo info) {
         super(Component.literal(info.name + " Settings"));
@@ -58,20 +56,19 @@ public class SettingsScreen extends AbstractScreen {
     private IWidget getWidget(int x, int y, int width, int height, SettingGeneric setting) {
         var clazz = setting.getClass();
         if (clazz.equals(SettingBool.class)) {
-            var s = (SettingBool) setting;
-            return new ToggleButton(x, y, width, height, s.value());
+            return new ToggleButton(x, y, width, height, (SettingBool) setting);
         }
         if (clazz.equals(SettingKeybind.class)) {
-            var s = (SettingKeybind) setting;
-            return new KeybindButton(x, y, width, height, s.value());
+            return new KeybindButton(x, y, width, height, (SettingKeybind) setting);
+        }
+        if(clazz.equals(SettingEnum.class)) {
+            return new EnumButton<>(x, y, width, height, (SettingEnum<?>) setting);
         }
         if (clazz.equals(SettingInt.class)) {
-            var s = (SettingInt) setting;
-            return new NumberInt(x, y, width, height, s.value());
+            return new NumberInt(x, y, width, height, (SettingInt) setting);
         }
         if (clazz.equals(SettingDouble.class)) {
-            var s = (SettingDouble) setting;
-            return new NumberDouble(x, y, width, height, s.value());
+            return new NumberDouble(x, y, width, height, (SettingDouble) setting);
         }
         if (clazz.equals(SettingColor.class)) {
             var s = (SettingColor) setting;
@@ -79,19 +76,14 @@ public class SettingsScreen extends AbstractScreen {
                 mc.setScreen(new ColorPickerScreen(s, this));
             });
         }
-        if (clazz.equals(SettingEnum.class)) {
-            // TODO
-        }
         if (clazz.equals(SettingBlockPosList.class)) {
             // TODO
         }
         if (clazz.equals(SettingString.class)) {
-            var s = (SettingString) setting;
-            return new EditBoxWidget(mc.font, x, y, width, height, Component.literal(s.value()));
+            return new StringButton(x, y, width, height, (SettingString) setting);
         }
         if (clazz.equals(SettingIntSlider.class)) {
-            var s = (SettingIntSlider) setting;
-            return new SliderInt(x, y, 70, width - 70, height, s.value(), s.min(), s.max());
+            return new SliderInt(x, y, 70, width - 70, height, (SettingIntSlider) setting);
         }
         if (clazz.equals(SettingJson.class)) {
             // TODO
@@ -103,6 +95,5 @@ public class SettingsScreen extends AbstractScreen {
     public void onClose() {
         Config.save();
         mc.setScreen(new ClickGui());
-        super.onClose();
     }
 }
