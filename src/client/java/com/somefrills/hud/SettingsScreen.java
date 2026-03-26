@@ -25,15 +25,34 @@ public class SettingsScreen extends AbstractScreen {
     @Override
     protected void init() {
         List<SettingWidget> widgets = new ArrayList<>();
-        int startY = 10;
-        for(FeatureRegistry.SettingInfo entry : info.settings) {
+        int marginLeft = 10;
+        int marginTop = 10;
+        int labelWidth = 140;
+        int controlWidth = 160;
+        int rowHeight = 22;
+        int rowGap = 6;
+        int colGap = 12;
+
+        int x = marginLeft;
+        int y = marginTop;
+
+        int columnWidth = labelWidth + 6 + controlWidth;
+
+        for (FeatureRegistry.SettingInfo entry : info.settings) {
             var setting = entry.settingInstance;
-            IWidget widget = getWidget(0, 0, 100, 20, setting);
-            if(widget == null) continue;
-            widgets.add(new SettingWidget(0, startY, 100, 20, entry.name, entry.description, widget));
-            startY += 30;
+            // wrap column if we would overflow the screen height
+            if (y + rowHeight > this.height - 40) {
+                x += columnWidth + colGap;
+                y = marginTop;
+            }
+            IWidget w = getWidget(x, y, controlWidth, rowHeight, setting);
+            if (w == null) continue;
+            SettingWidget sw = new SettingWidget(x, y, labelWidth, rowHeight, entry.name, entry.description, w);
+            widgets.add(sw);
+            // add the label/control container to the screen so it renders and receives input
+            this.addRenderableWidget(sw);
+            y += rowHeight + rowGap;
         }
-        addWidgets(widgets);
     }
 
     private static IWidget getWidget(int x, int y, int width, int height, SettingGeneric setting) {
