@@ -1,13 +1,13 @@
-package com.somefrills.hud.clickgui;
+package com.somefrills.hud;
 
 import com.daqem.uilib.gui.AbstractScreen;
 import com.daqem.uilib.gui.widget.ButtonWidget;
 import com.somefrills.config.*;
 import com.somefrills.config.FeatureRegistry.FeatureInfo;
-import com.somefrills.hud.clickgui.components.FlatSlider;
-import com.somefrills.hud.clickgui.components.FlatTextbox;
-import com.somefrills.hud.clickgui.components.KeybindButton;
-import com.somefrills.hud.clickgui.components.ToggleButton;
+import com.somefrills.hud.components.FlatSlider;
+import com.somefrills.hud.components.FlatTextbox;
+import com.somefrills.hud.components.KeybindButton;
+import com.somefrills.hud.components.ToggleButton;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -21,16 +21,13 @@ import org.joml.Vector2d;
 import java.lang.reflect.Field;
 import java.util.*;
 
-/**
- * Migrated Click GUI using the new ui-lib's AbstractScreen. This screen builds a simple,
- * fully-working UI using FeatureRegistry as the source of truth. It implements a search box,
- * a left-side category list and a right-side feature list. Left-click toggles a feature; right-click is reserved for settings.
- */
 public class ClickGui extends AbstractScreen {
     private final List<CategoryData> categories = new ArrayList<>();
 
     // transient layout info used for click detection
     private final Map<FeatureInfo, Rect> featureBounds = new HashMap<>();
+    // forwarded mouse button used by the 2-arg/1-arg UI hooks
+    private static int forwardedMouseButton = -1;
 
     public ClickGui() {
         super(Component.literal("SomeFrills - Click GUI"));
@@ -117,28 +114,46 @@ public class ClickGui extends AbstractScreen {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         super.render(graphics, mouseX, mouseY, delta);
-
         int left = 10;
         int top = 40;
-        int gap = 6;
+        int gap = 8;
 
-        // draw categories and their features beneath each category
+        // draw categories horizontally across the top; each category is a column with features listed beneath
         featureBounds.clear();
-        int y = top;
-        int fh = 12 + gap;
-        for (CategoryData c : this.categories) {
+        int colWidth = 200;
+        int titleHeight = 12;
+        int featHeight = 20; // feature button height
+        int featGap = 6;
+
+        for (int ci = 0; ci < this.categories.size(); ci++) {
+            CategoryData c = this.categories.get(ci);
+            int x = left + ci * (colWidth + gap);
+            // draw category title
             String txt = c.name + " (" + c.filteredFeatures.size() + "/" + c.features.size() + ")";
-            graphics.drawString(this.font, txt, left, y, 0xff5ca0bf);
-            y += 12;
+            graphics.drawString(this.font, txt, x, top, 0xff5ca0bf);
+
+            // draw each feature as a button-like rectangle beneath the title
+            int fy = top + titleHeight + featGap;
             for (FeatureInfo info : c.filteredFeatures) {
                 String name = humanize(info.featureInstance.key());
                 boolean active = info.featureInstance.isActive();
-                int color = active ? 0xffaaffaa : 0xffffffff;
-                graphics.drawString(this.font, (active ? "[ON] " : "[OFF] ") + name, left + 8, y, color);
-                featureBounds.put(info, new Rect(left + 8, y, 200, fh));
-                y += fh;
+
+                // solid background color depends on enabled state (fully opaque alpha)
+                int bg = active ? 0xff3fb5ff : 0xff0a2b66; // enabled: light blue, disabled: dark blue
+                // draw filled body (no separate outline) with full opacity
+                graphics.fill(x, fy, x + colWidth, fy + featHeight, bg);
+
+                // draw feature name with a little left padding and vertical centering
+                int textX = x + 6;
+                int textY = fy + (featHeight - this.font.lineHeight) / 2;
+                int textColor = active ? 0xffe8f7ff : 0xffffffff;
+                graphics.drawString(this.font, name, textX, textY, textColor);
+
+                // store clickable bounds
+                featureBounds.put(info, new Rect(x, fy, colWidth, featHeight));
+
+                fy += featHeight + featGap;
             }
-            y += gap; // extra gap after category
         }
 
         // status / hint
@@ -161,6 +176,8 @@ public class ClickGui extends AbstractScreen {
                     else FeatureRegistry.unsubscribeFeature(info.featureInstance);
                     return;
                 } else if (button == 1) { // right click -> open settings screen
+                    // Do not open a settings screen for features that have no settings
+                    if (info.settings.isEmpty()) return;
                     SettingsScreen screen = new SettingsScreen(info, this);
                     mc.setScreen(screen);
                     return;
@@ -169,33 +186,56 @@ public class ClickGui extends AbstractScreen {
         }
     }
 
+    /**
+     * Overload that matches the UI framework's expected signature (mouseClicked(x,y)).
+     * Delegates to the 3-arg variant using the last forwarded button value.
+     */
+    public void mouseClicked(double mouseX, double mouseY) {
+        // delegate to 3-arg handler using forwarded button
+        this.mouseClicked(mouseX, mouseY, forwardedMouseButton);
+    }
+
+    // accept releases forwarded from the input hook (no-op here)
+    public void mouseReleased(double mouseX, double mouseY, int button) { }
+
+    /**
+     * Overload matching UI framework's mouseReleased(int) signature.
+     */
+    public void mouseReleased(int button) {
+        Vector2d pos = Utils.getMousePos();
+        this.mouseReleased(pos.x, pos.y, button);
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     private static void onInput(InputEvent event) {
         if (mc == null || mc.screen == null) return;
         if (event.isCancelled()) return;
         try {
-            // Mouse presses: forward to active screen.mouseClicked(x,y,button)
+            // Mouse presses: set forwarded mouse button and call the 2-arg mouseClicked
             if (event.isMouse && event.action == GLFW.GLFW_PRESS) {
                 Vector2d mousePos = Utils.getMousePos();
                 double mx = mousePos.x;
                 double my = mousePos.y;
+                forwardedMouseButton = event.key;
+                Object screenObj = mc.screen;
+                if (screenObj instanceof SettingsScreen ss) {
+                    try { ss.mouseClicked(mx, my); } catch (Throwable ignored) {}
+                } else if (screenObj instanceof ClickGui cg) {
+                    try { cg.mouseClicked(mx, my); } catch (Throwable ignored) {}
+                }
+                return;
+            }
+
+            // Mouse releases: call the 1-arg mouseReleased with the button and clear forwarded state
+            if (event.isMouse && event.action == GLFW.GLFW_RELEASE) {
                 int btn = event.key;
                 Object screenObj = mc.screen;
-                if (screenObj instanceof ClickGui cg) {
-                    // Forward the click to our local screen handling. Do not cancel the global
-                    // InputEvent; other listeners (including vanilla GUI) should still receive it.
-                    cg.mouseClicked(mx, my, btn);
-                } else {
-                    try {
-                        java.lang.reflect.Method m = screenObj.getClass().getMethod("mouseClicked", double.class, double.class, int.class);
-                        // invoke if available; ignore return value
-                        m.invoke(screenObj, mx, my, btn);
-                    } catch (NoSuchMethodException ignored) {
-                        // no 3-arg mouseClicked on this screen - ignore
-                    } catch (Throwable ignored) {
-                        // ignore other reflection/invocation issues here
-                    }
+                if (screenObj instanceof SettingsScreen ss) {
+                    try { ss.mouseReleased(btn); } catch (Throwable ignored) {}
+                } else if (screenObj instanceof ClickGui cg) {
+                    try { cg.mouseReleased(btn); } catch (Throwable ignored) {}
                 }
+                forwardedMouseButton = -1;
                 return;
             }
 
@@ -242,6 +282,23 @@ public class ClickGui extends AbstractScreen {
         private final AbstractScreen previous;
         // no persistent widget tracking needed
         private final List<KeybindButton> keybindButtons = new ArrayList<>();
+        // UI rows for labels + controls so we can render labels and tooltips
+        private final List<Row> rows = new ArrayList<>();
+        private int pressedRow = -1;
+
+        private static class Row {
+            int labelX, labelY, labelW, labelH;
+            int ctrlX, ctrlY, ctrlW, ctrlH;
+            Component label;
+            String desc;
+            Runnable onClick;
+            Object control;
+            Row(int lx,int ly,int lw,int lh,int cx,int cy,int cw,int ch, Component label, String desc) {
+                this.labelX = lx; this.labelY = ly; this.labelW = lw; this.labelH = lh;
+                this.ctrlX = cx; this.ctrlY = cy; this.ctrlW = cw; this.ctrlH = ch;
+                this.label = label; this.desc = desc;
+            }
+        }
 
         public SettingsScreen(FeatureRegistry.FeatureInfo info, AbstractScreen previous) {
             super(net.minecraft.network.chat.Component.literal("Settings - " + info.featureInstance.key()));
@@ -252,16 +309,25 @@ public class ClickGui extends AbstractScreen {
         @Override
         protected void init() {
             super.init();
-            int x = 10, y = 10;
+            int labelX = 10;
+            int labelW = 100;
+            int ctrlX = labelX + labelW + 10; // control placed to the right of label
+            int y = 10;
             for (Map.Entry<java.lang.reflect.Field, SettingGeneric> entry : this.info.settings.entrySet()) {
                 SettingGeneric setting = entry.getValue();
+                java.lang.reflect.Field field = entry.getKey();
+                String desc = this.info.descriptions.getOrDefault(field, "");
+                Component labelComp = Component.literal(humanizeLocal(field.getName()));
 
                 if (setting.getClass().equals(SettingBool.class)) {
                     SettingBool sb = (SettingBool) setting;
                     ToggleButton t = new ToggleButton(sb.value());
-                    ButtonWidget btn = t.createButton(x, y, 80, 20);
+                    ButtonWidget btn = t.createButton(ctrlX, y, 80, 20);
                     t.addListener(sb::set);
                     this.addRenderableWidget(btn);
+                    Row rr = new Row(labelX, y, labelW, 20, ctrlX, y, 80, 20, labelComp, desc);
+                    rr.control = btn; // let the ButtonWidget handle clicks itself
+                    rows.add(rr);
                     y += 24; continue;
                 }
 
@@ -272,13 +338,17 @@ public class ClickGui extends AbstractScreen {
                         int startIdx = 0;
                         for (int i = 0; i < vals.length; i++) if (vals[i].equals(se.value())) { startIdx = i; break; }
                         final int[] idx = new int[] { startIdx };
-                        ButtonWidget eb = new ButtonWidget(x, y, 100, 20, Component.literal(vals[idx[0]].toString()), btn -> {
+                        ButtonWidget eb = new ButtonWidget(ctrlX, y, 100, 20, Component.literal(vals[idx[0]].toString()), btn -> {
                             idx[0] = (idx[0] + 1) % vals.length;
                             Object newVal = vals[idx[0]];
                             try { se.set(newVal); } catch (Throwable ignored) {}
                             btn.setMessage(Component.literal(newVal.toString()));
                         });
                         this.addRenderableWidget(eb);
+                        Row rr = new Row(labelX, y, labelW, 20, ctrlX, y, 100, 20, labelComp, desc);
+                        rr.control = eb;
+                        // clicking the enum button cycles the value; the ButtonWidget already handles it
+                        rows.add(rr);
                     } catch (Throwable ignored) {}
                     y += 24; continue;
                 }
@@ -310,18 +380,25 @@ public class ClickGui extends AbstractScreen {
                         slider.value(si.value());
                         slider.onChanged(d -> si.set((int) Math.round(d)));
                     }
-                    this.addRenderableWidget(slider.getEditBox());
+                    EditBox eb = slider.getEditBoxAt(ctrlX, y);
+                    this.addRenderableWidget(eb);
+                    Row rr = new Row(labelX, y, labelW, 20, ctrlX, y, 80, 20, labelComp, desc);
+                    rr.control = eb;
+                    rows.add(rr);
                     y += 24; continue;
                 }
 
                 if (setting.getClass().equals(SettingKeybind.class)) {
                     SettingKeybind sk = (SettingKeybind) setting;
                     KeybindButton kb = new KeybindButton();
-                    ButtonWidget b = kb.createButton(x, y, 100, 20);
+                    ButtonWidget b = kb.createButton(ctrlX, y, 100, 20);
                     kb.setBoundKey(sk.value());
                     kb.onBound().subscribe(sk::set);
                     keybindButtons.add(kb);
                     this.addRenderableWidget(b);
+                    Row rr = new Row(labelX, y, labelW, 20, ctrlX, y, 100, 20, labelComp, desc);
+                    rr.control = b;
+                    rows.add(rr);
                     y += 24; continue;
                 }
 
@@ -330,10 +407,25 @@ public class ClickGui extends AbstractScreen {
                     FlatTextbox tb = new FlatTextbox(200);
                     tb.setValue(ss.value());
                     tb.onChanged(ss::set);
-                    this.addRenderableWidget(tb.getEditBox());
+                    EditBox tbox = tb.getEditBoxAt(ctrlX, y);
+                    this.addRenderableWidget(tbox);
+                    Row rr = new Row(labelX, y, labelW, 20, ctrlX, y, 200, 20, labelComp, desc);
+                    rr.control = tbox;
+                    rows.add(rr);
                     y += 24; continue;
                 }
 
+                if(setting.getClass().equals(SettingColor.class)) {
+                    ButtonWidget colorBtn = new ButtonWidget(ctrlX, y, 80, 20, Component.literal("Pick Color"), btn -> {
+                        var newScreen = new ColorPickerScreen((SettingColor) setting,this);
+                        mc.setScreen(newScreen);
+                    });
+                    this.addRenderableWidget(colorBtn);
+                    Row rr = new Row(labelX, y, labelW, 20, ctrlX, y, 80, 20, labelComp, desc);
+                    rr.control = colorBtn;
+                    rows.add(rr);
+                    y += 24; continue;
+                }
                 // fallback: plain label describing the setting (no editor available)
                 y += 18;
             }
@@ -345,21 +437,123 @@ public class ClickGui extends AbstractScreen {
             this.addRenderableWidget(save);
         }
 
-        // Returns true if the key event was consumed
-        public boolean handleKeyEvent(int key, int action) {
+        @Override
+        public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            super.render(graphics, mouseX, mouseY, delta);
+            // Draw labels for each row and show tooltip when hovering either the label or the control
+            for (Row r : rows) {
+                graphics.drawString(this.font, r.label, r.labelX, r.labelY + (20 - this.font.lineHeight) / 2, 0xffffffff);
+                boolean overLabel = mouseX >= r.labelX && mouseX <= r.labelX + r.labelW && mouseY >= r.labelY && mouseY <= r.labelY + r.labelH;
+                boolean overCtrl = mouseX >= r.ctrlX && mouseX <= r.ctrlX + r.ctrlW && mouseY >= r.ctrlY && mouseY <= r.ctrlY + r.ctrlH;
+                if ((overLabel || overCtrl) && r.desc != null && !r.desc.isEmpty()) {
+                    // Tooltip sizing
+                    int tw = this.font.width(r.desc) + 6;
+                    int th = this.font.lineHeight + 4;
+
+                    // Center the tooltip over the control's horizontal span
+                    int ctrlCenterX = r.ctrlX + r.ctrlW / 2;
+                    int tx = ctrlCenterX - tw / 2;
+
+                    // Prefer placing above the control if there's space, otherwise below
+                    int padding = 6;
+                    int tyAbove = r.ctrlY - th - padding;
+                    int tyBelow = r.ctrlY + r.ctrlH + padding;
+                    int ty = tyAbove >= 8 ? tyAbove : tyBelow;
+
+                    // Clamp to screen bounds
+                    int screenW = this.width;
+                    int screenH = this.height;
+                    if (tx + tw > screenW - 8) tx = Math.max(8, screenW - 8 - tw);
+                    if (tx < 8) tx = 8;
+                    if (ty + th > screenH - 8) ty = Math.max(8, screenH - 8 - th);
+                    if (ty < 8) ty = 8;
+
+                    graphics.fill(tx - 3, ty - 3, tx + tw, ty + th, 0xcc000000);
+                    graphics.drawString(this.font, Component.literal(r.desc), tx, ty, 0xffffffff);
+                }
+            }
+        }
+
+        public void mouseClicked(double mouseX, double mouseY, int button) {
+            // detect which row (if any) was pressed down. If the row has a real widget child
+            // (ButtonWidget / EditBox) we must not intercept: let the widget receive the event.
+            for (int i = 0; i < rows.size(); i++) {
+                Row r = rows.get(i);
+                if (mouseX >= r.ctrlX && mouseX <= r.ctrlX + r.ctrlW && mouseY >= r.ctrlY && mouseY <= r.ctrlY + r.ctrlH) {
+                    // If a widget is present, do not capture the click here
+                    if (r.control instanceof ButtonWidget || r.control instanceof EditBox) {
+                        pressedRow = -1;
+                        // Allow the widget to handle the press; do not intercept.
+                        return;
+                    }
+                    pressedRow = i;
+                    return;
+                }
+            }
+            pressedRow = -1;
+        }
+
+        public void mouseReleased(double mouseX, double mouseY, int button) {
+            if (pressedRow >= 0 && pressedRow < rows.size()) {
+                Row r = rows.get(pressedRow);
+                if (mouseX >= r.ctrlX && mouseX <= r.ctrlX + r.ctrlW && mouseY >= r.ctrlY && mouseY <= r.ctrlY + r.ctrlH) {
+                    if (r.control == null && r.onClick != null) {
+                        try { r.onClick.run(); } catch (Throwable ignored) {}
+                        pressedRow = -1;
+                        return;
+                    }
+                    // if control is a widget, allow the widget to handle release (do not intercept)
+                    if (r.control instanceof ButtonWidget || r.control instanceof EditBox) {
+                        pressedRow = -1;
+                        return;
+                    }
+                }
+            }
+            pressedRow = -1;
+        }
+
+        // 2-arg/1-arg overloads used by the global input forwarder (match ClickGui)
+        public void mouseClicked(double mouseX, double mouseY) {
+            this.mouseClicked(mouseX, mouseY, forwardedMouseButton);
+        }
+
+        public void mouseReleased(int button) {
+            Vector2d pos = Utils.getMousePos();
+            this.mouseReleased(pos.x, pos.y, button);
+        }
+
+        private String humanizeLocal(String in) {
+            if (in == null || in.isEmpty()) return "";
+            String withSpaces = in.replace('_', ' ').replace('-', ' ');
+            StringBuilder out = new StringBuilder();
+            char prev = ' ';
+            for (int i = 0; i < withSpaces.length(); i++) {
+                char c = withSpaces.charAt(i);
+                if (i > 0 && Character.isUpperCase(c) && (Character.isLowerCase(prev) || Character.isDigit(prev))) out.append(' ');
+                out.append(c);
+                prev = c;
+            }
+            String res = out.toString().trim();
+            if (res.isEmpty()) return res;
+            return Character.toUpperCase(res.charAt(0)) + res.substring(1);
+        }
+
+        // Handle a forwarded key event. ESC closes the settings screen; if any keybind
+        // widget is awaiting input, the key will be bound. This method intentionally
+        // returns void because callers in this class do not use a boolean return value.
+        public void handleKeyEvent(int key, int action) {
             // ESC closes the settings screen
             if (key == GLFW.GLFW_KEY_ESCAPE && action == GLFW.GLFW_PRESS) {
                 mc.setScreen(previous);
-                return true;
+                return;
             }
-            // If any keybind button is awaiting binding, consume this key and bind it
+            // If any keybind button is awaiting binding, bind this key
             for (KeybindButton kb : keybindButtons) {
                 if (kb.isBinding) {
                     kb.bind(key);
-                    return true;
+                    return;
                 }
             }
-            return false;
         }
 
         // Public accessor used by ClickGui to decide whether to forward key events

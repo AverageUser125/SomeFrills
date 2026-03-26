@@ -1,4 +1,4 @@
-package com.somefrills.hud.clickgui.components;
+package com.somefrills.hud.components;
 
 import com.daqem.uilib.gui.widget.ButtonWidget;
 import net.minecraft.network.chat.Component;

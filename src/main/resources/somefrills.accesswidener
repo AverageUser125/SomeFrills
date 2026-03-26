@@ -1,4 +1,5 @@
 accessWidener v2 named
+accessible method net/minecraft/client/gui/components/EditBox getMaxLength ()I
 accessible class net/minecraft/client/multiplayer/ClientPacketListener$CommandCheckResult
 accessible class net/minecraft/client/renderer/RenderType$CompositeRenderType
 accessible class net/minecraft/client/renderer/RenderStateShard$LineStateShard
