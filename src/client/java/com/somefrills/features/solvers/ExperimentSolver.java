@@ -29,7 +29,13 @@ public class ExperimentSolver {
 
     public static final SettingBool chronomatron = new SettingBool(true, "Automatically solve the Chronomatron");
     public static final SettingBool ultrasequencer = new SettingBool(true, "Automatically solve the Ultrasequencer");
-    public static final SettingInt clickDelay = new SettingInt(300, "Click delay");
+    public static final SettingInt clickDelay = new SettingInt(400, "Click delay");
+    // Close menu settings: enable automatic closing and configurable thresholds.
+    // The numeric threshold means "N" where closing occurs after N-1 clicks have been completed.
+    public static final SettingBool closeOnChronomatronThreshold = new SettingBool(true, "Close menu when Chronomatron reaches threshold");
+    public static final SettingInt chronomatronThreshold = new SettingInt(10, "Chronomatron close threshold (N means close after N-1 clicks)");
+    public static final SettingBool closeOnUltrasequencerThreshold = new SettingBool(true, "Close menu when Ultrasequencer reaches threshold");
+    public static final SettingInt ultrasequencerThreshold = new SettingInt(7, "Ultrasequencer close threshold (N means close after N-1 clicks)");
 
     // --- Chronomatron state ---
     private static final List<Slot> chronoSequence = new ArrayList<>();
@@ -40,6 +46,7 @@ public class ExperimentSolver {
     // --- Ultrasequencer state ---
     private static final List<Solution> ultraSolution = new ArrayList<>();
     private static long lastClickTime = 0;
+    private static int ultraSolutionInitialSize = 0;
 
     private static void updatePhase(ItemStack stack) {
         Item item = stack.getItem();
@@ -108,6 +115,17 @@ public class ExperimentSolver {
                         slotToClick.id, nextClickIndex + 1, chronoSequence.size());
 
                 nextClickIndex++;
+                // If configured, close the menu when we have reached the configured amount
+                // (user provides N meaning close after N-1 clicks)
+                try {
+                    if (closeOnChronomatronThreshold.value()) {
+                        int threshold = Math.max(1, chronomatronThreshold.value());
+                        if (nextClickIndex >= threshold - 1) {
+                            if (mc.player != null) mc.player.closeHandledScreen();
+                        }
+                    }
+                } catch (Throwable ignored) {
+                }
             }
         }
 
@@ -117,6 +135,21 @@ public class ExperimentSolver {
             Utils.clickSlot(slotToClick.id);
             ultraSolution.removeFirst();
             lastClickTime = currentTime;
+            // initialize initial size if not set
+            if (ultraSolutionInitialSize == 0) ultraSolutionInitialSize = Math.max(ultraSolution.size() + 1, 1);
+            int clicksDone = ultraSolutionInitialSize - ultraSolution.size();
+            // If configured, close the menu once we've clicked enough items
+            try {
+                if (closeOnUltrasequencerThreshold.value()) {
+                    int threshold = Math.max(1, ultrasequencerThreshold.value());
+                    if (clicksDone >= threshold - 1) {
+                        if (mc.player != null) mc.player.closeHandledScreen();
+                        ultraSolutionInitialSize = 0;
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+            if (ultraSolution.isEmpty()) ultraSolutionInitialSize = 0;
         }
     }
 
@@ -170,6 +203,8 @@ public class ExperimentSolver {
                 tempSolution.sort(Comparator.comparingInt(s -> s.stack.getCount()));
                 ultraSolution.clear();
                 ultraSolution.addAll(tempSolution);
+                // initialize/reset ultrasequencer initial size when a new solution appears
+                ultraSolutionInitialSize = ultraSolution.size();
             }
         }
     }
@@ -183,6 +218,7 @@ public class ExperimentSolver {
             currentRoundProgress = 0;
 
             ultraSolution.clear();
+            ultraSolutionInitialSize = 0;
             lastClickTime = System.currentTimeMillis();
 
             LOGGER.info("[Chronomatron] Screen opened, sequence cleared");
