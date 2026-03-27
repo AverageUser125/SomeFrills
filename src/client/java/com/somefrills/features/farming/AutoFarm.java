@@ -184,7 +184,7 @@ public class AutoFarm {
     private static boolean isSolidBlockAt(BlockPos pos) {
         var state = mc.world.getBlockState(pos);
         if (state == null) return false;
-        return !state.isLiquid();
+        return state.getFluidState().isEmpty();
     }
 
     private static void reset() {
