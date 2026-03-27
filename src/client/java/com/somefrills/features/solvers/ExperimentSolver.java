@@ -1,8 +1,10 @@
 package com.somefrills.features.solvers;
 
+import com.somefrills.Main;
 import com.somefrills.config.*;
 import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.ScreenRenderEvent;
+import com.somefrills.events.WorldTickEvent;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -41,13 +43,6 @@ public class ExperimentSolver {
     @SettingDescription("Delay between automated clicks (ms)")
     public static final SettingInt clickDelay = new SettingInt(100);
 
-    // Regex pattern for experiment table detection
-    // Matches: Superpairs, Chronomatron, Ultrasequencer with optional suffixes like (Metaphysical), ➜ Stakes, Rewards
-    // Also matches: Experimentation Table, Experiment Over
-    private static final Pattern EXPERIMENT_PATTERN = Pattern.compile(
-            "(?:Superpairs|Chronomatron|Ultrasequencer) ?(?:\\(.+\\)|➜ Stakes|Rewards)|Experiment(?:ation Tabl| [Oo]v)er?",
-            Pattern.CASE_INSENSITIVE
-    );
     private static final Map<Integer, Integer> ultrasequencerOrder = new HashMap<>();
     private static final List<Integer> chronomatronOrder = new ArrayList<>();
     private static long lastClickTime = 0;
@@ -56,12 +51,7 @@ public class ExperimentSolver {
     private static int clicks = 0;
 
     @EventHandler
-    public static void onHudTick(ScreenRenderEvent event) {
-        onHudTick();
-    }
-
-    @EventHandler
-    public static void onScreen(ScreenOpenEvent event) {
+    public static void onHudTick(WorldTickEvent event) {
         onHudTick();
     }
 
@@ -231,19 +221,11 @@ public class ExperimentSolver {
         String title = titleText.getString();
         if (title == null || title.isEmpty()) return ExperimentType.None;
 
-        // If the title doesn't match known experiment patterns, return None
-        if (!EXPERIMENT_PATTERN.matcher(title).find()) return ExperimentType.None;
-
+        Main.LOGGER.info("Experiment screen detected with title: {}", title);
         String lower = title.toLowerCase();
         if (lower.contains("chronomatron")) return ExperimentType.Chronomatron;
         if (lower.contains("ultrasequencer")) return ExperimentType.Ultrasequencer;
         if (lower.contains("superpairs")) return ExperimentType.Superpairs;
-
-        // Fallback: attempt to deduce from common words
-        if (lower.contains("experiment") || lower.contains("experimentation") || lower.contains("table") || lower.contains("stakes") || lower.contains("rewards")) {
-            // Unknown specific experiment type, return None
-            return ExperimentType.None;
-        }
 
         return ExperimentType.None;
     }
