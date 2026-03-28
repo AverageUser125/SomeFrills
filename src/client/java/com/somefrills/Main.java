@@ -4,10 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.somefrills.commands.SomeFrillsCommand;
 import com.somefrills.config.Config;
 import com.somefrills.config.FeatureRegistry;
-import com.somefrills.events.ChatMsgEvent;
-import com.somefrills.events.ClientDisconnectEvent;
-import com.somefrills.events.OverlayMsgEvent;
-import com.somefrills.events.PartyChatMsgEvent;
+import com.somefrills.events.*;
 import com.somefrills.hud.ClickGui;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.SkyblockData;
@@ -18,6 +15,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandRegistryAccess;
@@ -69,6 +67,13 @@ public class Main implements ClientModInitializer {
             // ensure config persists on disconnect
             Config.save();
         });
+
+        ClientSendMessageEvents.MODIFY_COMMAND.register(message -> {
+            var event = new ModifyCommandEvent(message);
+            eventBus.post(message);
+            return event.command;
+        });
+
         // Save config on JVM shutdown (game close)
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
