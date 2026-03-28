@@ -220,8 +220,6 @@ public class ExperimentSolver {
             ultraSolution.clear();
             ultraSolutionInitialSize = 0;
             lastClickTime = System.currentTimeMillis();
-
-            LOGGER.info("[Chronomatron] Screen opened, sequence cleared");
         }
     }
 

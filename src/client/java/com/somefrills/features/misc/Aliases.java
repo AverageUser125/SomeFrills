@@ -2,8 +2,6 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.SettingJson;
-import com.somefrills.events.ModifyCommandEvent;
-import meteordevelopment.orbit.EventHandler;
 import com.google.gson.JsonObject;
 
 public class Aliases {
@@ -44,11 +42,13 @@ public class Aliases {
         aliases = new SettingJson(defaults);
     }
 
-    @EventHandler
-    private static void onCommand(ModifyCommandEvent event) {
+
+    public static String convertCommand(String message) {
+        if(!instance.isActive()) return message;
         JsonObject obj = aliases.value();
-        if (obj != null && obj.has(event.command)) {
-            event.command = obj.get(event.command).getAsString();
+        if (obj != null && obj.has(message)) {
+            return obj.get(message).getAsString();
         }
+        return message;
     }
 }

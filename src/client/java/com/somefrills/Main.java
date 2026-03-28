@@ -5,6 +5,7 @@ import com.somefrills.commands.SomeFrillsCommand;
 import com.somefrills.config.Config;
 import com.somefrills.config.FeatureRegistry;
 import com.somefrills.events.*;
+import com.somefrills.features.misc.Aliases;
 import com.somefrills.hud.ClickGui;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.SkyblockData;
@@ -69,9 +70,7 @@ public class Main implements ClientModInitializer {
         });
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(message -> {
-            var event = new ModifyCommandEvent(message);
-            eventBus.post(message);
-            return event.command;
+            return Aliases.convertCommand(message);
         });
 
         // Save config on JVM shutdown (game close)
@@ -92,7 +91,6 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(EntityCache.class);
         FeatureRegistry.init();
         FeatureRegistry.reconcileFeatureSubscriptions();
-
 
         LOGGER.info("It's time to get real, SomeFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }
