@@ -73,9 +73,10 @@ public final class AutoFish {
         heldItem = ItemStack.EMPTY;
         hookWaitingState = HookWaitingState.NONE;
 
+        // Reset state first, then start the initial throw timer if the feature is active.
+        reset();
         if (instance.isActive()) {
             throwFirstClock.update();
-            reset();
         }
 
         AutoFishAntiAfk.reset();
@@ -119,6 +120,12 @@ public final class AutoFish {
             // Already handled above, but keep as safety
             return;
         }
+        // If the feature is active and the player is already holding a rod when the
+        // feature becomes active mid-game, ensure the initial throw clock is started
+        // so the first auto-throw can happen after the configured initial delay.
+        if (instance.isActive() && heldRod && !throwFirstClock.started()) {
+            throwFirstClock.update();
+        }
         // If we are waiting for a hook after cast,
         // and it's been more than HOOK_WAIT_TIMEOUT_MS, consider recasting
         if (faultDetectionEnabled.value() && waitingForHookCast && waitingForHookSince > 0 && hookId == -1) {
@@ -154,7 +161,7 @@ public final class AutoFish {
             recastAttempts = 0;
             lastRecastTime = 0;
         }
-        if (instance.isActive()) doThrow();
+        doThrow();
     }
 
     @EventHandler
@@ -245,16 +252,16 @@ public final class AutoFish {
     }
 
     private static void doThrow() {
+        // runtime check for throwing — no verbose logging here
         if (
                 !autoThrow.value() ||
                         doneRightClickThisTick ||
                         !heldRod ||
                         hookWaitingState == HookWaitingState.WAITING_JOIN ||
-                        hookId != -1 && !(doNotWaitHookDead.value() && hookWaitingState == HookWaitingState.WAITING_DEAD) ||
-                        !throwClock.ended(autoThrowDelay.value()) ||
+                                        hookId != -1 && !(doNotWaitHookDead.value() && hookWaitingState == HookWaitingState.WAITING_DEAD) ||
+                                        (throwClock.started() && !throwClock.ended(autoThrowDelay.value())) ||
                         !throwFirstClock.ended(autoThrowFirstDelay.value())
         ) return;
-        chat("Do throw, time={}", System.currentTimeMillis());
         doRightClick();
         hookWaitingState = HookWaitingState.WAITING_JOIN;
         catchClock.update();

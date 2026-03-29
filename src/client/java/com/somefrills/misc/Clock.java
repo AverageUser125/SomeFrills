@@ -54,4 +54,11 @@ public final class Clock {
         }
         return false;
     }
+
+    /**
+     * Returns true if this Clock has been started (update() called at least once).
+     */
+    public boolean started() {
+        return this.begin != 0L;
+    }
 }

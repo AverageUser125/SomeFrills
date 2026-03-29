@@ -35,3 +35,4 @@ Thumbs.db      # Windows system files
 src/main/java/com/somefrills/ui/AbstractScreen.java
 src/main/java/com/somefrills/ui/IComponent.java
 src/main/java/com/somefrills/ui/TextComponentImpl.java
+.idea/copilotDiffState.xml
