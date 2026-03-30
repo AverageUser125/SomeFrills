@@ -55,6 +55,9 @@ public class FeatureRegistry {
                         feat.setDescription(deriveDescriptionFromName(simpleName));
                     }
 
+                    // Create the FeatureInfo that will hold metadata and discovered settings
+                    FeatureInfo info = new FeatureInfo(cls, feat);
+
                     // Validate event handler methods: any method annotated with @EventHandler must be static
                     for (Method m : cls.getDeclaredMethods()) {
                         if (m.isAnnotationPresent(meteordevelopment.orbit.EventHandler.class) && !Modifier.isStatic(m.getModifiers())) {
@@ -62,14 +65,6 @@ public class FeatureRegistry {
                         }
                     }
 
-                    // Log detected event handler methods for diagnostics
-                    for (Method m : cls.getDeclaredMethods()) {
-                        if (m.isAnnotationPresent(meteordevelopment.orbit.EventHandler.class)) {
-                            Main.LOGGER.debug("Feature class {} has @EventHandler method {} (static={})", cls.getName(), m.getName(), Modifier.isStatic(m.getModifiers()));
-                        }
-                    }
-
-                    FeatureInfo info = new FeatureInfo(cls, feat);
 
                     for (Field f : cls.getDeclaredFields()) {
                         if (!SettingGeneric.class.isAssignableFrom(f.getType())) continue;

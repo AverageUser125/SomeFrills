@@ -22,6 +22,8 @@ repositories {
         name = "daqem-maven"
         url = "https://maven.daqem.com/releases"
     }
+    // Repository for NotEnoughUpdates / MoulConfig
+    maven { url "https://maven.notenoughupdates.org/releases/" }
 }
 
 loom {
@@ -33,7 +35,10 @@ loom {
             sourceSet sourceSets.client
         }
     }
+}
 
+loom {
+    accessWidenerPath = file("src/main/resources/somefrills.accesswidener")
 }
 
 dependencies {
@@ -48,15 +53,11 @@ dependencies {
     modImplementation "meteordevelopment:orbit:${project.orbit_version}"
     include "meteordevelopment:orbit:${project.orbit_version}"
 
-    // UI Lib Fabric
-    modImplementation "com.daqem.uilib:uilib-fabric:${project.uilib_version}"
-    include "com.daqem.uilib:uilib-fabric:${project.uilib_version}"
+    // MoulConfig (artifact uses mapping suffix modern-1.21.11)
+    modImplementation "org.notenoughupdates.moulconfig:modern-1.21.11:${project.moulconfig_version}"
+    include "org.notenoughupdates.moulconfig:modern-1.21.11:${project.moulconfig_version}"
 
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-}
-
-loom {
-    accessWidenerPath = file("src/main/resources/somefrills.accesswidener")
 }
 
 processResources {

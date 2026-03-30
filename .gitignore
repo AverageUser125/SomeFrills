@@ -20,6 +20,7 @@ gradle-app.setting
 .idea/dictionaries/
 .idea/snapshots/
 .idea/contentModel.xml
+.idea/*.xml
 /out/
 /build/
 target/        # Maven build directory
@@ -32,7 +33,3 @@ target/        # Maven build directory
 *.iml
 .DS_Store      # macOS system files
 Thumbs.db      # Windows system files
-src/main/java/com/somefrills/ui/AbstractScreen.java
-src/main/java/com/somefrills/ui/IComponent.java
-src/main/java/com/somefrills/ui/TextComponentImpl.java
-.idea/copilotDiffState.xml

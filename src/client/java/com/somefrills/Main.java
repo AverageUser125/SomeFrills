@@ -72,33 +72,14 @@ public class Main implements ClientModInitializer {
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
 
         // Save config on JVM shutdown (game close)
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Config.save();
-            } catch (Throwable t) {
-                LOGGER.error("Error saving config on shutdown", t);
-            }
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(Config::save));
 
-        try {
-            eventBus.registerLambdaFactory("com.somefrills",
-                    (lookupInMethod, klass) -> (MethodHandles.Lookup)
-                            lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
-        } catch (Throwable t) {
-            LOGGER.error("Failed to register Orbit lambda factory for com.somefrills", t);
-        }
+        eventBus.registerLambdaFactory("com.somefrills",
+                (lookupInMethod, klass) -> (MethodHandles.Lookup)
+                        lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
-        try {
-            eventBus.subscribe(SkyblockData.class);
-        } catch (Throwable t) {
-            LOGGER.error("Failed to subscribe SkyblockData class to event bus", t);
-        }
-
-        try {
-            eventBus.subscribe(EntityCache.class);
-        } catch (Throwable t) {
-            LOGGER.error("Failed to subscribe EntityCache class to event bus", t);
-        }
+        eventBus.subscribe(SkyblockData.class);
+        eventBus.subscribe(EntityCache.class);
         FeatureRegistry.init();
         FeatureRegistry.reconcileFeatureSubscriptions();
 
