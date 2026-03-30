@@ -9,11 +9,11 @@ import io.github.notenoughupdates.moulconfig.observer.Property;
 public class MiscCategory {
     @ConfigOption(name = "Item Count Fix", desc = "Fix the issue where item counts in the inventory are not updated correctly")
     @ConfigEditorBoolean
-    public boolean itemCountFix;
+    public boolean itemCountFix = true;
 
     @ConfigOption(name = "No Pearl Cooldown", desc = "Remove the cooldown after using an ender pearl")
     @ConfigEditorBoolean
-    public boolean noPearlCooldown;
+    public boolean noPearlCooldown = true;
 
     @Accordion
     @ConfigOption(name = "Auto Update", desc = "Automatically update the mod when a new version is available")
@@ -21,7 +21,7 @@ public class MiscCategory {
     public static class AutoUpdateConfig {
         @ConfigOption(name = "Enabled", desc = "Automatically update the mod when a new version is available")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(false);
     }
 
     @Accordion
@@ -31,7 +31,7 @@ public class MiscCategory {
     public static class GlowPlayerConfig {
         @ConfigOption(name = "Enabled", desc = "Make players glow through walls")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(true);
     }
 
     @Accordion
@@ -40,7 +40,7 @@ public class MiscCategory {
     public static class CommandAliasesConfig {
         @ConfigOption(name = "Enabled", desc = "Add aliases for commonly used commands")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(true);
     }
 
     @Accordion
@@ -49,6 +49,6 @@ public class MiscCategory {
     public static class ChatFilterConfig {
         @ConfigOption(name = "Enabled", desc = "Filter out unwanted chat messages")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(true);
     }
 }

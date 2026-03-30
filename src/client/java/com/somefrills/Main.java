@@ -2,6 +2,8 @@ package com.somefrills;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.somefrills.commands.SomeFrillsCommand;
+import com.somefrills.config.FeatureRegistry;
+import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ClientDisconnectEvent;
 import com.somefrills.events.OverlayMsgEvent;
@@ -10,6 +12,7 @@ import com.somefrills.features.misc.Aliases;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
+import io.github.notenoughupdates.moulconfig.managed.ManagedConfig;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
@@ -24,6 +27,7 @@ import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.lang.invoke.MethodHandles;
 
 import static net.fabricmc.loader.impl.FabricLoaderImpl.MOD_ID;
@@ -32,6 +36,7 @@ public class Main implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static MinecraftClient mc;
     public static IEventBus eventBus = new EventBus();
+    public static ManagedConfig<FrillsConfig> config;
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         SomeFrillsCommand.init(dispatcher);
@@ -65,6 +70,8 @@ public class Main implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             eventBus.post(new ClientDisconnectEvent());
         });
+
+        config = ManagedConfig.create(new File("config/somefrills/config.json"), FrillsConfig.class);
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
 

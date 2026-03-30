@@ -57,6 +57,11 @@ dependencies {
     modImplementation "org.notenoughupdates.moulconfig:modern-1.21.11:${project.moulconfig_version}"
     include "org.notenoughupdates.moulconfig:modern-1.21.11:${project.moulconfig_version}"
 
+    // Kotlin stdlib is required by MoulConfig (and other Kotlin-based libs)
+    // Provides kotlin.jvm.functions.Function1 and other kotlin types.
+    modImplementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
+    include "org.jetbrains.kotlin:kotlin-stdlib:1.9.10"
+
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 }
 

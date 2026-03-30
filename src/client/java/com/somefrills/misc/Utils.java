@@ -8,10 +8,15 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.properties.Property;
+import com.somefrills.Main;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.mixin.BossBarHudAccessor;
 import com.somefrills.mixin.HandledScreenAccessor;
 import com.somefrills.mixin.PlayerListHudAccessor;
+import io.github.notenoughupdates.moulconfig.common.IMinecraft;
+import io.github.notenoughupdates.moulconfig.gui.MoulConfigEditor;
+import io.github.notenoughupdates.moulconfig.platform.MoulConfigPlatform;
+import io.github.notenoughupdates.moulconfig.platform.MoulConfigScreenComponent;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -1061,6 +1066,10 @@ public class Utils {
 
     public static void setScreen(Screen screen) {
         mc.send(() -> mc.setScreen(screen));
+    }
+    public static void showGui(){
+        var editor = Main.config.getEditor();
+        IMinecraft.INSTANCE.openWrappedScreen(editor);
     }
 
     public static void runCommand(String string) {

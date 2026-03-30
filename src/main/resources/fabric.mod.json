@@ -15,7 +15,7 @@
       "com.somefrills.Main"
     ],
     "modmenu": [
-      "com.somefrills.hud.ModMenuIntegration"
+      "com.somefrills.config.ModMenuIntegration"
     ]
   },
   "mixins": [

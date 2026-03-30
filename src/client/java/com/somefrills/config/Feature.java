@@ -1,7 +1,7 @@
 package com.somefrills.config;
 
 import com.somefrills.Main;
-import com.somefrills.config.solvers.ExperimentSolverConfig;
+import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public abstract class Feature {

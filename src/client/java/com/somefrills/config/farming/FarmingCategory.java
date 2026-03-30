@@ -10,15 +10,15 @@ import org.lwjgl.glfw.GLFW;
 public class FarmingCategory {
     @ConfigOption(name = "Auto warp home", desc = "Automatically warp home when taking fatal damage")
     @ConfigEditorBoolean
-    public Property<Boolean> autoWarpHomeEnabled;
+    public Property<Boolean> autoWarpHomeEnabled = Property.of(false);
 
     @ConfigOption(name = "Auto pest set home", desc = "Automatically set home when pests spawn")
     @ConfigEditorBoolean
-    public Property<Boolean> autoPestSetHomeEnabled;
+    public Property<Boolean> autoPestSetHomeEnabled = Property.of(false);
 
     @ConfigOption(name = "Space farmer", desc = "Farm with space bar while holding shift ")
     @ConfigEditorBoolean
-    public Property<Boolean> spaceFarmerEnabled;
+    public Property<Boolean> spaceFarmerEnabled = Property.of(false);
 
     @Accordion
     @ConfigOption(name = "Auto Farm", desc = "Automatically farm wheat")
@@ -26,7 +26,7 @@ public class FarmingCategory {
     public static class AutoFarmConfig {
         @ConfigOption(name = "Enabled", desc = "Automatically farm wheat")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(false);
 
         @ConfigOption(name = "Toggle Key", desc = "Key to toggle AutoFarm on/off")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_GRAVE_ACCENT)

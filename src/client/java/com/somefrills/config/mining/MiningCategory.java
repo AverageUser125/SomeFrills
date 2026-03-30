@@ -8,7 +8,7 @@ import io.github.notenoughupdates.moulconfig.observer.Property;
 public class MiningCategory {
     @ConfigOption(name = "Gemstone Dsync Fix", desc = "Fix desync issues with gemstones in Dwarven Mines")
     @ConfigEditorBoolean
-    public Property<Boolean> gemstoneDesyncFixEnabled;
+    public Property<Boolean> gemstoneDesyncFixEnabled = Property.of(false);
 
     @Accordion
     @ConfigOption(name = "Ghost Vision", desc = "Settings for ghost vision features in Dwarven Mines")
@@ -16,7 +16,7 @@ public class MiningCategory {
     public static class GhostVisionConfig {
         @ConfigOption(name = "Enabled", desc = "Enable ghost vision features in Dwarven Mines")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(false);
 
         @ConfigOption(name = "Rendering Style", desc = "Rendering style for ghost boxes (fill/outline/both)")
         @ConfigEditorDropdown
@@ -36,11 +36,11 @@ public class MiningCategory {
 
         @ConfigOption(name = "Make Creepers Visible", desc = "Make creepers visible")
         @ConfigEditorBoolean
-        public boolean makeCreepersVisible;
+        public boolean makeCreepersVisible = false;
 
         @ConfigOption(name = "Ghosts show HP", desc = "Show HP of ghost creepers above their head")
         @ConfigEditorBoolean
-        public boolean creeperShowHP;
+        public boolean creeperShowHP = false;
     }
 
     @Accordion
@@ -49,7 +49,7 @@ public class MiningCategory {
     public static class CorpseHighlightConfig {
         @ConfigOption(name = "Enabled", desc = "Enable corpse highlighter in Dwarven Mines")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled;
+        public Property<Boolean> enabled = Property.of(false);
 
         @ConfigOption(name = "Hide Opened Corpses", desc = "Hide glow on corpses you've already opened")
         @ConfigEditorBoolean

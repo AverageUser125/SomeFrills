@@ -2,8 +2,6 @@ package com.somefrills.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.somefrills.config.FrillsConfig;
-import com.somefrills.hud.ClickGui;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -15,7 +13,7 @@ public class SomeFrillsCommand {
             new ModCommand("settings", "Opens the settings GUI.",
                     ClientCommandManager.literal("settings")
                             .executes(context -> {
-                                Utils.setScreen(new ClickGui());
+                                Utils.showGui();
                                 return SINGLE_SUCCESS;
                             })
             )
@@ -37,13 +35,13 @@ public class SomeFrillsCommand {
 
         LiteralArgumentBuilder<FabricClientCommandSource> commandMain =
                 ClientCommandManager.literal("somefrills").executes(context -> {
-                    Utils.setScreen(new ClickGui());
+                    Utils.showGui();
                     return SINGLE_SUCCESS;
                 });
 
         LiteralArgumentBuilder<FabricClientCommandSource> commandShort =
                 ClientCommandManager.literal("sf").executes(context -> {
-                    Utils.setScreen(new ClickGui());
+                    Utils.showGui();
                     return SINGLE_SUCCESS;
                 });
 
