@@ -8,6 +8,8 @@ import com.somefrills.config.tweaks.*;
 import io.github.notenoughupdates.moulconfig.Config;
 import io.github.notenoughupdates.moulconfig.annotations.Category;
 import io.github.notenoughupdates.moulconfig.common.text.StructuredText;
+import io.github.notenoughupdates.moulconfig.observer.Property;
+import java.lang.reflect.Field;
 
 public class FrillsConfig extends Config {
     public static FrillsConfig instance;
