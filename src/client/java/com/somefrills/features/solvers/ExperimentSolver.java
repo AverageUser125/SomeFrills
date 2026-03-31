@@ -1,5 +1,6 @@
 package com.somefrills.features.solvers;
 
+import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
 import com.somefrills.config.Feature;
 import com.somefrills.events.ScreenOpenEvent;
@@ -35,9 +36,9 @@ public class ExperimentSolver extends Feature {
     private long lastClickTime = 0;
     private int ultraSolutionInitialSize = 0;
 
-    public ExperimentSolver(ExperimentSolverConfig cfg) {
-        super(cfg.enabled);
-        config = cfg;
+    public ExperimentSolver() {
+        super(FrillsConfig.instance.solvers.experimentSolver.enabled);
+        config = FrillsConfig.instance.solvers.experimentSolver;
     }
 
     private void updatePhase(ItemStack stack) {

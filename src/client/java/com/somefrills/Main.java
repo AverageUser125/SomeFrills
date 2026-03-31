@@ -83,7 +83,6 @@ public class Main implements ClientModInitializer {
         });
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
-
         config = ManagedConfig.create(new File("config/somefrills/config.json"), FrillsConfig.class);
 
         eventBus.registerLambdaFactory("com.somefrills",
@@ -93,6 +92,8 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
         FeatureRegistry.init();
+
+        config.rebuildConfigProcessor();
 
         LOGGER.info("It's time to get real, SomeFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }

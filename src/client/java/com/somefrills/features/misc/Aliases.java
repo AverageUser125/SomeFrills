@@ -40,12 +40,12 @@ public class Aliases extends Feature {
         aliases.addProperty("sbs", "skyblocker config");
     }
 
-    public Aliases(Property<Boolean> enabledProperty) {
-        super(enabledProperty);
+    public Aliases() {
+        super(FrillsConfig.instance.misc.commandAliases.enabled);
     }
 
     public static String convertCommand(String message) {
-        if(FrillsConfig.instance.misc.commandAliases.enabled.get()) return message;
+        if(!FrillsConfig.instance.misc.commandAliases.enabled.get()) return message;
         JsonObject obj = aliases;
         if (obj != null && obj.has(message)) {
             return obj.get(message).getAsString();

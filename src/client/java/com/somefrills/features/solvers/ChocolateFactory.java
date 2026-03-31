@@ -1,4 +1,5 @@
 package com.somefrills.features.solvers;
+import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ChocolateFactoryConfig;
 import com.somefrills.config.Feature;
 import com.somefrills.events.ScreenRenderEvent;
@@ -22,9 +23,9 @@ public class ChocolateFactory extends Feature {
     private static final String CHOCOLATE_FACTORY_TITLE = "Chocolate Factory";
     private long lastClaimTime = 0;
 
-    public ChocolateFactory(ChocolateFactoryConfig cfg) {
-        super(cfg.enabled);
-        config = cfg;
+    public ChocolateFactory() {
+        super(FrillsConfig.instance.solvers.chocolateFactorySolver.enabled);
+        config = FrillsConfig.instance.solvers.chocolateFactorySolver;
     }
 
     @EventHandler
