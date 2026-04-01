@@ -78,9 +78,7 @@ public class Main implements ClientModInitializer {
         });
 
         // Post ClientDisconnectEvent on Fabric disconnect and save config
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            eventBus.post(new ClientDisconnectEvent());
-        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> eventBus.post(new ClientDisconnectEvent()));
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
         config = ManagedConfig.create(new File("config/somefrills/config.json"), FrillsConfig.class);
