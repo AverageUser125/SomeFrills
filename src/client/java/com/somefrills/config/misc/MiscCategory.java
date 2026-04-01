@@ -7,14 +7,6 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public class MiscCategory {
-    @ConfigOption(name = "Item Count Fix", desc = "Fix the issue where item counts in the inventory are not updated correctly")
-    @ConfigEditorBoolean
-    public boolean itemCountFix = true;
-
-    @ConfigOption(name = "No Pearl Cooldown", desc = "Remove the cooldown after using an ender pearl")
-    @ConfigEditorBoolean
-    public boolean noPearlCooldown = true;
-
     @Accordion
     @ConfigOption(name = "Auto Update", desc = "Automatically update the mod when a new version is available")
     public AutoUpdateConfig autoUpdate = new AutoUpdateConfig();

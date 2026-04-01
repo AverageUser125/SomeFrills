@@ -1,13 +1,15 @@
 package com.somefrills.config;
 
+import com.somefrills.misc.ImmutableClassToInstanceMap;
+
 import java.io.File;
 import java.net.URL;
 import java.util.*;
 import java.lang.reflect.Modifier;
 
-public class FeatureRegistry {
-
-    private static final Map<Class<? extends Feature>, Feature> FEATURES = new HashMap<>();
+public class Features {
+    private static volatile ImmutableClassToInstanceMap<Feature> FEATURES =
+            ImmutableClassToInstanceMap.of();
 
     /** Initialize all features in com.somefrills.features and subpackages */
     public static void init() {
@@ -15,6 +17,9 @@ public class FeatureRegistry {
 
         try {
             List<Class<?>> classes = getClasses(packageName);
+
+            ImmutableClassToInstanceMap.Builder<Feature> builder =
+                    ImmutableClassToInstanceMap.builder();
 
             for (Class<?> clazz : classes) {
                 // Skip anything that does NOT extend Feature
@@ -24,13 +29,7 @@ public class FeatureRegistry {
                 if (Modifier.isAbstract(clazz.getModifiers())) continue;
 
                 try {
-                    // Enforce no-arg constructor
-                    var constructor = clazz.getDeclaredConstructor();
-                    constructor.setAccessible(true); // allow private if needed
-
-                    Feature feature = (Feature) constructor.newInstance();
-                    FEATURES.put((Class<? extends Feature>) clazz, feature);
-
+                    addFeature(builder, clazz.asSubclass(Feature.class));
                 } catch (NoSuchMethodException e) {
                     throw new IllegalStateException(
                             "Feature class " + clazz.getName() + " must have a no-arg constructor", e
@@ -38,23 +37,30 @@ public class FeatureRegistry {
                 }
             }
 
+            // 🔒 Atomic publish (important for thread safety)
+            FEATURES = builder.build();
+
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize features", e);
         }
     }
+    private static <T extends Feature> void addFeature(
+            ImmutableClassToInstanceMap.Builder<Feature> builder,
+            Class<T> clazz) throws Exception {
+
+        var constructor = clazz.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        T instance = clazz.cast(constructor.newInstance());
+        builder.put(clazz, instance);
+    }
 
     /** Get feature by class */
-    @SuppressWarnings("unchecked")
-    public static <T extends Feature> T getFeature(Class<T> featureClass) {
-        return (T) FEATURES.get(featureClass);
+    public static <T extends Feature> T get(Class<T> featureClass) {
+        return FEATURES.getInstance(featureClass);
     }
 
-    /** Get all instantiated features */
-    public static List<Feature> getAllFeatures() {
-        return new ArrayList<>(FEATURES.values());
-    }
-
-    /** Helper to recursively list all classes in a package (filesystem only) */
+    /** Helper to recursively list all classes in a package (filesystem + jar) */
     private static List<Class<?>> getClasses(String packageName) throws Exception {
         List<Class<?>> classes = new ArrayList<>();
         String path = packageName.replace('.', '/');
@@ -74,7 +80,8 @@ public class FeatureRegistry {
 
         } else if (protocol.equals("jar")) {
             String jarPath = resource.getPath().substring(5, resource.getPath().indexOf("!"));
-            try (java.util.jar.JarFile jar = new java.util.jar.JarFile(java.net.URLDecoder.decode(jarPath, "UTF-8"))) {
+            try (java.util.jar.JarFile jar = new java.util.jar.JarFile(
+                    java.net.URLDecoder.decode(jarPath, "UTF-8"))) {
 
                 Enumeration<java.util.jar.JarEntry> entries = jar.entries();
 
@@ -95,8 +102,6 @@ public class FeatureRegistry {
 
         return classes;
     }
-
-
 
     /** Recursively scan directory for .class files */
     private static void scanDirectory(String packageName, File directory, List<Class<?>> classes)

@@ -5,9 +5,18 @@ import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public class TweaksCategory {
-    @ConfigOption(name = "Enabled", desc = "Replace left click with middle click where possible")
+    @ConfigOption(name = "Middle Click Override", desc = "Replace left click with middle click where possible")
     @ConfigEditorBoolean
     public Property<Boolean> middleClickOverrideEnabled = Property.of(true);
+
+    @ConfigOption(name = "Item Count Fix", desc = "Fix the issue where item counts in the inventory are not updated correctly")
+    @ConfigEditorBoolean
+    public boolean itemCountFix = true;
+
+    @ConfigOption(name = "No Pearl Cooldown", desc = "Remove the cooldown after using an ender pearl")
+    @ConfigEditorBoolean
+    public boolean noPearlCooldown = true;
+
 
     @ConfigOption(name = "Break Reset Fix", desc = "Fix the issue where breaking a block and then switching to another item resets your break progress")
     @ConfigEditorBoolean

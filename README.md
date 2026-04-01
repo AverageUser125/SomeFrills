@@ -102,3 +102,4 @@ It's in the name. Simple and effective Hypixel Skyblock mod for modern versions 
 - [Skyblocker](https://github.com/SkyblockerMod/Skyblocker): Has more info on how YACL works than its own wiki, also a
   source for the odd function such as reading scoreboard lines.
 - [clientcommands](https://github.com/Earthcomputer/clientcommands): Taught me rendering magic with mixins.
+- [Guava](https://github.com/google/guava/blob/master/LICENSE): Referenced for "ImmutableClassToInstanceMap"

@@ -2,7 +2,7 @@ package com.somefrills;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.somefrills.commands.SomeFrillsCommand;
-import com.somefrills.config.FeatureRegistry;
+import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ClientDisconnectEvent;
@@ -91,7 +91,7 @@ public class Main implements ClientModInitializer {
 
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
-        FeatureRegistry.init();
+        Features.init();
 
         config.rebuildConfigProcessor();
 
