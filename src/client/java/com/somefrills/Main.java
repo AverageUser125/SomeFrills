@@ -2,6 +2,7 @@ package com.somefrills;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.somefrills.commands.SomeFrillsCommand;
+import com.somefrills.config.ConfigMapper;
 import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
@@ -12,10 +13,8 @@ import com.somefrills.features.misc.Aliases;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
-import io.github.notenoughupdates.moulconfig.gui.GuiContext;
-import io.github.notenoughupdates.moulconfig.gui.GuiElementComponent;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig;
-import io.github.notenoughupdates.moulconfig.platform.MoulConfigScreenComponent;
+import io.github.notenoughupdates.moulconfig.managed.ManagedConfigBuilder;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
@@ -24,15 +23,13 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.lang.invoke.MethodHandles;
 
 public class Main implements ClientModInitializer {
@@ -76,7 +73,11 @@ public class Main implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> eventBus.post(new ClientDisconnectEvent()));
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
-        config = ManagedConfig.create(new File("config/somefrills/config.json"), FrillsConfig.class);
+        var file = FabricLoader.getInstance().getConfigDir().resolve("somefrills.json").toFile();
+        var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
+        builder.setCheckExpose(false);
+        builder.setMapper(new ConfigMapper());
+        config = new ManagedConfig<>(builder);
         FrillsConfig.instance = config.getInstance();
         
         eventBus.registerLambdaFactory("com.somefrills",
