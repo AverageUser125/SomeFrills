@@ -1,6 +1,7 @@
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import com.somefrills.Main;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.*;
 import com.somefrills.features.misc.GlowPlayer;
@@ -76,5 +77,10 @@ public abstract class MinecraftClientMixin {
     @Inject(method = "doAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;attackBlock(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/Direction;)Z"))
     private void onAttackBlock(CallbackInfoReturnable<Boolean> cir, @Local BlockHitResult blockHitResult, @Local BlockPos blockPos) {
         eventBus.post(new AttackBlockEvent(blockHitResult, blockPos));
+    }
+
+    @Inject(method = "stop", at = @At("HEAD"))
+    private void beforeStop(CallbackInfo ci) {
+        Main.config.saveToFile();
     }
 }

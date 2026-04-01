@@ -42,16 +42,10 @@ public class Main implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static MinecraftClient mc;
     public static IEventBus eventBus = new EventBus();
-    private static ManagedConfig<FrillsConfig> config;
+    public static ManagedConfig<FrillsConfig> config;
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         SomeFrillsCommand.init(dispatcher);
-    }
-
-    public static Screen getConfigScreen(Screen previous) {
-        var editor = Main.config.getEditor();
-        GuiContext guiContext = new GuiContext(new GuiElementComponent(editor));
-        return new MoulConfigScreenComponent(Text.empty(), guiContext, previous);
     }
 
     @Override
@@ -83,7 +77,8 @@ public class Main implements ClientModInitializer {
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
         config = ManagedConfig.create(new File("config/somefrills/config.json"), FrillsConfig.class);
-
+        FrillsConfig.instance = config.getInstance();
+        
         eventBus.registerLambdaFactory("com.somefrills",
                 (lookupInMethod, klass) -> (MethodHandles.Lookup)
                         lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
@@ -91,7 +86,6 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
         Features.init();
-
         config.rebuildConfigProcessor();
 
         LOGGER.info("It's time to get real, SomeFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);

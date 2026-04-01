@@ -1,5 +1,6 @@
 package com.somefrills.config;
 
+import com.somefrills.Main;
 import com.somefrills.config.farming.FarmingCategory;
 import com.somefrills.config.mining.MiningCategory;
 import com.somefrills.config.misc.MiscCategory;
@@ -13,16 +14,15 @@ import java.lang.reflect.Field;
 
 public class FrillsConfig extends Config {
     public static FrillsConfig instance;
+    @Override
+    public boolean isValidRunnable(int runnableId) {
+        return false;
+    }
 
     @Override
     public StructuredText getTitle() {
         return StructuredText.of("Some Frills Config");
     }
-
-    public FrillsConfig() {
-        instance = this;
-    }
-
     @Category(name = "Solvers", desc = "Settings for puzzle solvers")
     public SolverCategory solvers = new SolverCategory();
     @Category(name = "Tweaks/Fixes", desc = "Settings for various tweaks and fixes")

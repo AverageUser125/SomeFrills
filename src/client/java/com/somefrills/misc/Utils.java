@@ -1068,7 +1068,7 @@ public class Utils {
         mc.send(() -> mc.setScreen(screen));
     }
     public static void showGui(){
-        setScreen(Main.getConfigScreen(null));
+        Main.config.openConfigGui();;
     }
 
     public static void runCommand(String string) {
