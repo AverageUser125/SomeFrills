@@ -85,21 +85,6 @@ public class GlowPlayerCommand {
                                                             RenderColor color = new RenderColor(r, g, b, 255);
                                                             return addGlowWithRenderColor(ctx, color);
                                                         })
-                                                        // RGBA format
-                                                        .then(argument("a", IntegerArgumentType.integer(0, 255))
-                                                                .executes(ctx -> {
-                                                                    if (!isGlowPlayerEnabled()) {
-                                                                        Utils.info("GlowPlayer feature is disabled.");
-                                                                        return 1;
-                                                                    }
-                                                                    int r = IntegerArgumentType.getInteger(ctx, "r");
-                                                                    int g = IntegerArgumentType.getInteger(ctx, "g");
-                                                                    int b = IntegerArgumentType.getInteger(ctx, "b");
-                                                                    int a = IntegerArgumentType.getInteger(ctx, "a");
-                                                                    RenderColor color = new RenderColor(r, g, b, a);
-                                                                    return addGlowWithRenderColor(ctx, color);
-                                                                })
-                                                        )
                                                 )
                                         )
                                 )
@@ -139,21 +124,6 @@ public class GlowPlayerCommand {
                                                             RenderColor color = new RenderColor(r, g, b, 255);
                                                             return setColorWithRenderColor(ctx, color);
                                                         })
-                                                        // RGBA format
-                                                        .then(argument("a", IntegerArgumentType.integer(0, 255))
-                                                                .executes(ctx -> {
-                                                                    if (!isGlowPlayerEnabled()) {
-                                                                        Utils.info("GlowPlayer feature is disabled.");
-                                                                        return 1;
-                                                                    }
-                                                                    int r = IntegerArgumentType.getInteger(ctx, "r");
-                                                                    int g = IntegerArgumentType.getInteger(ctx, "g");
-                                                                    int b = IntegerArgumentType.getInteger(ctx, "b");
-                                                                    int a = IntegerArgumentType.getInteger(ctx, "a");
-                                                                    RenderColor color = new RenderColor(r, g, b, a);
-                                                                    return setColorWithRenderColor(ctx, color);
-                                                                })
-                                                        )
                                                 )
                                         )
                                 )
@@ -359,7 +329,6 @@ public class GlowPlayerCommand {
      * Parse a color string which can be:
      * - A formatting color name (e.g., "red", "white")
      * - A 6-char hex color (e.g., "#FFFFFF", "FFFFFF") - RGB format
-     * - An 8-char hex color (e.g., "#FFFFFFFF", "FFFFFFFF") - RRGGBBAA format
      */
     private static RenderColor parseColorString(String colorStr) {
         if (colorStr == null) return null;
@@ -373,17 +342,6 @@ public class GlowPlayerCommand {
             try {
                 int hex = Integer.parseInt(colorStr, 16);
                 return RenderColor.fromHex(hex);
-            } catch (NumberFormatException e) {
-                // Fall through to formatting check
-            }
-        } else if (colorStr.length() == 8) {
-            try {
-                // Parse as RRGGBBAA and convert to ARGB
-                int r = Integer.parseInt(colorStr.substring(0, 2), 16);
-                int g = Integer.parseInt(colorStr.substring(2, 4), 16);
-                int b = Integer.parseInt(colorStr.substring(4, 6), 16);
-                int a = Integer.parseInt(colorStr.substring(6, 8), 16);
-                return new RenderColor(r, g, b, a);
             } catch (NumberFormatException e) {
                 // Fall through to formatting check
             }
