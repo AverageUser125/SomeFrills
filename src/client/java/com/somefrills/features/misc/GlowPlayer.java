@@ -2,18 +2,20 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.events.ClientDisconnectEvent;
+import com.somefrills.events.EntityUpdatedEvent;
+import com.somefrills.misc.RenderColor;
+import com.somefrills.misc.Utils;
+import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.ColorHelper;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GlowPlayer extends Feature {
-    private static final ConcurrentHashMap<String, Formatting> forcedGlows = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, RenderColor> forcedGlows = new ConcurrentHashMap<>();
     private static final Pattern USERNAME_TOKEN = Pattern.compile("[A-Za-z0-9_]{1,16}");
-
     public GlowPlayer() {
         super(FrillsConfig.instance.misc.glowPlayer.enabled);
     }
@@ -42,13 +44,20 @@ public class GlowPlayer extends Feature {
         return stripped;
     }
 
-    public void onDisconnect(ClientDisconnectEvent event) {
+    @EventHandler
+    public void onEntityUpdate(EntityUpdatedEvent event) {
         if (!isActive()) return;
-        clear();
+        var entity = event.entity;
+        if(entity instanceof AbstractClientPlayerEntity player) {
+            String pureName = convertToPureName(player.getName().getString());
+            RenderColor color = getColor(pureName);
+            if (color != null) {
+                Utils.setGlowing(entity, true, color);
+            }
+        }
     }
 
-    // API: operate by pure player name (String) only; a color is required to add
-    public static boolean addPlayer(String pureName, Formatting color) {
+    public static boolean addPlayer(String pureName, RenderColor color) {
         if (pureName == null || color == null) return false;
         return forcedGlows.put(pureName, color) == null;
     }
@@ -63,7 +72,7 @@ public class GlowPlayer extends Feature {
         return forcedGlows.containsKey(pureName);
     }
 
-    public static Formatting getColor(String pureName) {
+    public static RenderColor getColor(String pureName) {
         if (pureName == null) return null;
         return forcedGlows.get(pureName);
     }
@@ -76,11 +85,7 @@ public class GlowPlayer extends Feature {
         return java.util.Set.copyOf(forcedGlows.keySet());
     }
 
-    public static Integer getColorAsInt(String pureName) {
-        Formatting f = getColor(pureName);
-        if (f == null) return null;
-        Integer color = f.getColorValue();
-        if (color == null) return null;
-        return ColorHelper.fullAlpha(color);
+    public static void setGlowImmediately(AbstractClientPlayerEntity player, RenderColor color) {
+        Utils.setGlowing(player, true, color);
     }
 }

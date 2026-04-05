@@ -3,10 +3,8 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.mining.GhostVision;
-import com.somefrills.features.misc.GlowPlayer;
 import com.somefrills.misc.EntityRendering;
 import com.somefrills.misc.RenderColor;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.text.Text;
@@ -109,20 +107,8 @@ public class EntityMixin implements EntityRendering {
         }
     }
 
-    @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
-    public void onGetTeamColor(CallbackInfoReturnable<Integer> cir) {
-        if (!FrillsConfig.instance.misc.glowPlayer.enabled.get()) return;
-        Entity self = (Entity) (Object) this;
-        if (self instanceof AbstractClientPlayerEntity player) {
-            String pure = GlowPlayer.convertToPureName(player.getName().getString());
-            Integer color = GlowPlayer.getColorAsInt(pure);
-            if (color != null) {
-                cir.setReturnValue(color);
-            }
-        }
-    }
 
-    @org.spongepowered.asm.mixin.Unique
+    @Unique
     private String formatHealth(float health) {
         if (health >= 1000.0f) {
             float thousands = health / 1000.0f;

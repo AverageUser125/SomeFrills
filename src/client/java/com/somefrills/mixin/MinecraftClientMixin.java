@@ -4,10 +4,8 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.Main;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.*;
-import com.somefrills.features.misc.GlowPlayer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
@@ -32,16 +30,6 @@ public abstract class MinecraftClientMixin {
     @Shadow
     public abstract void setScreen(@Nullable Screen screen);
 
-    @Inject(method = "hasOutline", at = @At("HEAD"), cancellable = true)
-    private void glowSpecificPlayers(Entity entity, CallbackInfoReturnable<Boolean> cir) {
-        if (!FrillsConfig.instance.misc.glowPlayer.enabled.get()) return;
-        if (entity instanceof AbstractClientPlayerEntity player) {
-            String pure = GlowPlayer.convertToPureName(player.getName().getString());
-            if (GlowPlayer.hasPlayer(pure)) {
-                cir.setReturnValue(true);
-            }
-        }
-    }
 
     @Inject(method = "setScreen", at = @At("TAIL"))
     private void onOpenScreen(Screen screen, CallbackInfo ci) {

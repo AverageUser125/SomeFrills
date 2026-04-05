@@ -1,13 +1,14 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiJavaCodeReferenceElement
 package com.somefrills.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.misc.GlowPlayer;
+import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -52,6 +53,7 @@ public class GlowPlayerCommand {
                                     }
                                     return addGlow(ctx, Formatting.WHITE);
                                 })
+                                // String color format (formatting name or hex)
                                 .then(argument("color", StringArgumentType.word())
                                         .suggests(GlowPlayerCommand::suggestColors)
                                         .executes(ctx -> {
@@ -59,15 +61,47 @@ public class GlowPlayerCommand {
                                                 Utils.info("GlowPlayer feature is disabled.");
                                                 return 1;
                                             }
-                                            Formatting color = Utils.parseColor(
-                                                    StringArgumentType.getString(ctx, "color")
-                                            );
+                                            String colorStr = StringArgumentType.getString(ctx, "color");
+                                            RenderColor color = parseColorString(colorStr);
                                             if (color == null) {
-                                                Utils.info("Invalid color.");
+                                                Utils.info("Invalid color format.");
                                                 return 1;
                                             }
-                                            return addGlow(ctx, color);
+                                            return addGlowWithRenderColor(ctx, color);
                                         })
+                                )
+                                // RGB format
+                                .then(argument("r", IntegerArgumentType.integer(0, 255))
+                                        .then(argument("g", IntegerArgumentType.integer(0, 255))
+                                                .then(argument("b", IntegerArgumentType.integer(0, 255))
+                                                        .executes(ctx -> {
+                                                            if (!isGlowPlayerEnabled()) {
+                                                                Utils.info("GlowPlayer feature is disabled.");
+                                                                return 1;
+                                                            }
+                                                            int r = IntegerArgumentType.getInteger(ctx, "r");
+                                                            int g = IntegerArgumentType.getInteger(ctx, "g");
+                                                            int b = IntegerArgumentType.getInteger(ctx, "b");
+                                                            RenderColor color = new RenderColor(r, g, b, 255);
+                                                            return addGlowWithRenderColor(ctx, color);
+                                                        })
+                                                        // RGBA format
+                                                        .then(argument("a", IntegerArgumentType.integer(0, 255))
+                                                                .executes(ctx -> {
+                                                                    if (!isGlowPlayerEnabled()) {
+                                                                        Utils.info("GlowPlayer feature is disabled.");
+                                                                        return 1;
+                                                                    }
+                                                                    int r = IntegerArgumentType.getInteger(ctx, "r");
+                                                                    int g = IntegerArgumentType.getInteger(ctx, "g");
+                                                                    int b = IntegerArgumentType.getInteger(ctx, "b");
+                                                                    int a = IntegerArgumentType.getInteger(ctx, "a");
+                                                                    RenderColor color = new RenderColor(r, g, b, a);
+                                                                    return addGlowWithRenderColor(ctx, color);
+                                                                })
+                                                        )
+                                                )
+                                        )
                                 )
                         )
                 )
@@ -81,15 +115,47 @@ public class GlowPlayerCommand {
                                                 Utils.info("GlowPlayer feature is disabled.");
                                                 return 1;
                                             }
-                                            Formatting color = Utils.parseColor(
-                                                    StringArgumentType.getString(ctx, "color")
-                                            );
+                                            String colorStr = StringArgumentType.getString(ctx, "color");
+                                            RenderColor color = parseColorString(colorStr);
                                             if (color == null) {
-                                                Utils.info("Invalid color.");
+                                                Utils.info("Invalid color format.");
                                                 return 1;
                                             }
-                                            return setColor(ctx, color);
+                                            return setColorWithRenderColor(ctx, color);
                                         })
+                                )
+                                // RGB format
+                                .then(argument("r", IntegerArgumentType.integer(0, 255))
+                                        .then(argument("g", IntegerArgumentType.integer(0, 255))
+                                                .then(argument("b", IntegerArgumentType.integer(0, 255))
+                                                        .executes(ctx -> {
+                                                            if (!isGlowPlayerEnabled()) {
+                                                                Utils.info("GlowPlayer feature is disabled.");
+                                                                return 1;
+                                                            }
+                                                            int r = IntegerArgumentType.getInteger(ctx, "r");
+                                                            int g = IntegerArgumentType.getInteger(ctx, "g");
+                                                            int b = IntegerArgumentType.getInteger(ctx, "b");
+                                                            RenderColor color = new RenderColor(r, g, b, 255);
+                                                            return setColorWithRenderColor(ctx, color);
+                                                        })
+                                                        // RGBA format
+                                                        .then(argument("a", IntegerArgumentType.integer(0, 255))
+                                                                .executes(ctx -> {
+                                                                    if (!isGlowPlayerEnabled()) {
+                                                                        Utils.info("GlowPlayer feature is disabled.");
+                                                                        return 1;
+                                                                    }
+                                                                    int r = IntegerArgumentType.getInteger(ctx, "r");
+                                                                    int g = IntegerArgumentType.getInteger(ctx, "g");
+                                                                    int b = IntegerArgumentType.getInteger(ctx, "b");
+                                                                    int a = IntegerArgumentType.getInteger(ctx, "a");
+                                                                    RenderColor color = new RenderColor(r, g, b, a);
+                                                                    return setColorWithRenderColor(ctx, color);
+                                                                })
+                                                        )
+                                                )
+                                        )
                                 )
                         )
                 )
@@ -133,12 +199,34 @@ public class GlowPlayerCommand {
             return 1;
         }
 
-        boolean added = GlowPlayer.addPlayer(pureName, color);
+        RenderColor renderColor = RenderColor.fromFormatting(color);
+        boolean added = GlowPlayer.addPlayer(pureName, renderColor);
         Utils.info(
                 added
                         ? pureName + " will now glow (" + color.getName() + ")."
                         : pureName + " is already glowing."
         );
+        applyGlowToOnlinePlayer(pureName);
+        return 1;
+    }
+
+    private static int addGlowWithRenderColor(CommandContext<FabricClientCommandSource> ctx, RenderColor color) {
+        String rawName = StringArgumentType.getString(ctx, "player");
+        String pureName = GlowPlayer.convertToPureName(rawName);
+
+        if (pureName == null) {
+            Utils.info("Invalid player name.");
+            return 1;
+        }
+
+        boolean added = GlowPlayer.addPlayer(pureName, color);
+        String colorStr = String.format("#%06X", color.hex);
+        Utils.info(
+                added
+                        ? pureName + " will now glow (" + colorStr + ")."
+                        : pureName + " is already glowing."
+        );
+        applyGlowToOnlinePlayer(pureName);
         return 1;
     }
 
@@ -152,8 +240,26 @@ public class GlowPlayerCommand {
         }
 
         // Set color even if the player wasn't previously added
-        GlowPlayer.addPlayer(pureName, color);
+        RenderColor renderColor = RenderColor.fromFormatting(color);
+        GlowPlayer.addPlayer(pureName, renderColor);
         Utils.info(pureName + " glow color set to " + color.getName() + ".");
+        applyGlowToOnlinePlayer(pureName);
+        return 1;
+    }
+
+    private static int setColorWithRenderColor(CommandContext<FabricClientCommandSource> ctx, RenderColor color) {
+        String rawName = StringArgumentType.getString(ctx, "player");
+        String pureName = GlowPlayer.convertToPureName(rawName);
+
+        if (pureName == null) {
+            Utils.info("Invalid player name.");
+            return 1;
+        }
+
+        GlowPlayer.addPlayer(pureName, color);
+        String colorStr = String.format("#%06X", color.hex);
+        Utils.info(pureName + " glow color set to " + colorStr + ".");
+        applyGlowToOnlinePlayer(pureName);
         return 1;
     }
 
@@ -188,8 +294,9 @@ public class GlowPlayerCommand {
 
         StringBuilder sb = new StringBuilder("Forced glows:\n");
         for (String name : names) {
-            Formatting color = GlowPlayer.getColor(name);
-            sb.append(name).append(" (").append(color == null ? "none" : color.getName()).append(")\n");
+            RenderColor color = GlowPlayer.getColor(name);
+            String colorStr = color == null ? "none" : String.format("#%06X", color.hex);
+            sb.append(name).append(" (").append(colorStr).append(")\n");
         }
         Utils.info(sb.toString());
     }
@@ -230,5 +337,65 @@ public class GlowPlayerCommand {
     }
 
     /* ---------------- Utilities ---------------- */
+
+    private static void applyGlowToOnlinePlayer(String pureName) {
+        if (mc.world == null) return;
+        
+        // Find and apply glow to all matching players
+        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+            if (!Utils.isRealPlayer(player)) continue;
+            
+            String playerPureName = GlowPlayer.convertToPureName(player.getName().getString());
+            if (playerPureName == null || !playerPureName.equals(pureName)) continue;
+            
+            RenderColor glowColor = GlowPlayer.getColor(pureName);
+            if (glowColor != null) {
+                GlowPlayer.setGlowImmediately(player, glowColor);
+            }
+        }
+    }
+
+    /**
+     * Parse a color string which can be:
+     * - A formatting color name (e.g., "red", "white")
+     * - A 6-char hex color (e.g., "#FFFFFF", "FFFFFF") - RGB format
+     * - An 8-char hex color (e.g., "#FFFFFFFF", "FFFFFFFF") - RRGGBBAA format
+     */
+    private static RenderColor parseColorString(String colorStr) {
+        if (colorStr == null) return null;
+
+        // Try hex format first (#FFFFFF or FFFFFF)
+        if (colorStr.startsWith("#")) {
+            colorStr = colorStr.substring(1);
+        }
+        
+        if (colorStr.length() == 6) {
+            try {
+                int hex = Integer.parseInt(colorStr, 16);
+                return RenderColor.fromHex(hex);
+            } catch (NumberFormatException e) {
+                // Fall through to formatting check
+            }
+        } else if (colorStr.length() == 8) {
+            try {
+                // Parse as RRGGBBAA and convert to ARGB
+                int r = Integer.parseInt(colorStr.substring(0, 2), 16);
+                int g = Integer.parseInt(colorStr.substring(2, 4), 16);
+                int b = Integer.parseInt(colorStr.substring(4, 6), 16);
+                int a = Integer.parseInt(colorStr.substring(6, 8), 16);
+                return new RenderColor(r, g, b, a);
+            } catch (NumberFormatException e) {
+                // Fall through to formatting check
+            }
+        }
+
+        // Try formatting color
+        Formatting formatting = Utils.parseColor(colorStr);
+        if (formatting != null) {
+            return RenderColor.fromFormatting(formatting);
+        }
+
+        return null;
+    }
 
 }
