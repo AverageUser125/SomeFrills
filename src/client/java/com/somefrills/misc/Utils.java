@@ -13,6 +13,9 @@ import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.mixin.BossBarHudAccessor;
 import com.somefrills.mixin.HandledScreenAccessor;
 import com.somefrills.mixin.PlayerListHudAccessor;
+import io.github.notenoughupdates.moulconfig.gui.GuiContext;
+import io.github.notenoughupdates.moulconfig.gui.GuiElementComponent;
+import io.github.notenoughupdates.moulconfig.platform.MoulConfigScreenComponent;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -1082,7 +1085,18 @@ public class Utils {
     }
 
     public static void showGui() {
-        Main.config.openConfigGui();
+        setScreen(getGuiScreen());
+
+    }
+
+    public static Screen getGuiScreen() {
+        return getGuiScreen(null);
+    }
+
+    public static Screen getGuiScreen(Screen previous) {
+        var editor = Main.config.getEditor();
+        GuiContext guiContext = new GuiContext(new GuiElementComponent(editor));
+        return new MoulConfigScreenComponent(Text.empty(), guiContext, previous);
     }
 
     public static void runCommand(String string) {
