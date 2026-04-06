@@ -16,6 +16,10 @@ import com.somefrills.mixin.PlayerListHudAccessor;
 import io.github.notenoughupdates.moulconfig.gui.GuiContext;
 import io.github.notenoughupdates.moulconfig.gui.GuiElementComponent;
 import io.github.notenoughupdates.moulconfig.platform.MoulConfigScreenComponent;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.StainedGlassBlock;
+import net.minecraft.block.StainedGlassPaneBlock;
 import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.client.gui.hud.MessageIndicator;
@@ -274,6 +278,21 @@ public class Utils {
         }
     }
 
+    public static boolean isStainedGlass(ItemStack stack) {
+        return stack.getItem().toString().endsWith("stained_glass");
+    }
+
+    public static boolean isStainedGlassPane(ItemStack stack) {
+        return stack.getItem().toString().endsWith("stained_glass_pane");
+    }
+
+    public static boolean isStainedGlass(BlockState state) {
+        return isStainedGlass(state.getBlock());
+    }
+
+    public static boolean isStainedGlass(Block block) {
+        return block instanceof StainedGlassBlock || block instanceof StainedGlassPaneBlock;
+    }
 
     public static MutableText getTag() {
         return Text.literal("[SomeFrills] ").withColor(0x5ca0bf);
@@ -1117,7 +1136,6 @@ public class Utils {
     public static boolean isGlowing(Entity ent) {
         return ((EntityRendering) ent).somefrills_mod$getGlowing();
     }
-
 
     public static class Symbols {
         public static String zone = "⏣";

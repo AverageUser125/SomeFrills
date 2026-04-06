@@ -6,6 +6,7 @@ import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.BlockUpdateEvent;
 import com.somefrills.misc.SkyblockData;
+import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -35,13 +36,9 @@ public class GemstoneDesyncFix extends Feature {
         return isActive() && islands.contains(SkyblockData.getArea());
     }
 
-    public static boolean isStainedGlass(BlockState state) {
-        Block block = state.getBlock();
-        return block instanceof StainedGlassBlock || block instanceof StainedGlassPaneBlock;
-    }
 
     public static boolean isDefaultPane(BlockState state) {
-        return isStainedGlass(state) && !isConnectedPane(state);
+        return Utils.isStainedGlass(state) && !isConnectedPane(state);
     }
 
     public static boolean isConnectedPane(BlockState state) {
@@ -54,7 +51,7 @@ public class GemstoneDesyncFix extends Feature {
 
     @EventHandler
     private void onBlock(BlockUpdateEvent event) {
-        if (active() && event.newState.isAir() && isStainedGlass(event.oldState)) {
+        if (active() && event.newState.isAir() && Utils.isStainedGlass(event.oldState)) {
             event.newState.updateNeighbors(mc.world, event.pos, Block.NOTIFY_ALL);
         }
     }

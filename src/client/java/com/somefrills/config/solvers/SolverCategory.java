@@ -1,9 +1,7 @@
 package com.somefrills.config.solvers;
 
-import io.github.notenoughupdates.moulconfig.annotations.Accordion;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorSlider;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
+import io.github.notenoughupdates.moulconfig.ChromaColour;
+import io.github.notenoughupdates.moulconfig.annotations.*;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public class SolverCategory {
@@ -63,6 +61,23 @@ public class SolverCategory {
             @ConfigOption(name = "Enable", desc = "Enable superpairs helper")
             @ConfigEditorBoolean
             public boolean enabled = false;
+
+            @ConfigOption(name = "Show revealed", desc = "Keep previously revealed pairs visible")
+            @ConfigEditorBoolean
+            public boolean keepRevealed = false;
+
+            @ConfigOption(name = "Matched color", desc = "Color for matched pairs")
+            @ConfigEditorColour
+            public ChromaColour matchedColor = ChromaColour.fromStaticRGB(0, 255, 0, 128);
+
+            @ConfigOption(name = "Matching Show", desc = "Color for matching pairs")
+            @ConfigEditorColour
+            public ChromaColour matchingColor = ChromaColour.fromStaticRGB(255, 255, 0, 128);
+
+            @ConfigOption(name = "Powerup Show", desc = "Color for powerup pairs")
+            @ConfigEditorColour
+            public ChromaColour powerupColor = ChromaColour.fromStaticRGB(255, 0, 255, 128);
+
         }
     }
 

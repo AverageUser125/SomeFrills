@@ -6,6 +6,8 @@ import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
 import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.SlotUpdateEvent;
 import com.somefrills.events.WorldTickEvent;
+import com.somefrills.misc.RenderColor;
+import com.somefrills.misc.SlotOptions;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -15,9 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.slot.Slot;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static com.somefrills.Main.LOGGER;
 import static com.somefrills.Main.mc;
@@ -27,13 +27,17 @@ public class ExperimentSolver extends Feature {
 
     // --- Chronomatron state ---
     private final List<Slot> chronoSequence = new ArrayList<>();
+    private int nextClickIndex = 0;
+    private int currentRoundProgress = 0;
     // --- Ultrasequencer state ---
     private final List<Solution> ultraSolution = new ArrayList<>();
-    private int nextClickIndex = 0;
-    private boolean rememberPhase = true;
-    private int currentRoundProgress = 0;
-    private long lastClickTime = 0;
     private int ultraSolutionInitialSize = 0;
+    // --- Superpairs state ---
+    private final Map<Slot, ItemStack> superRewards = new HashMap<>();
+    private Slot superSlot = null;
+    // --- Shared state ---
+    private boolean rememberPhase = true;
+    private long lastClickTime = 0;
 
     public ExperimentSolver() {
         super(FrillsConfig.instance.solvers.experimentSolver.enabled);
@@ -50,6 +54,13 @@ public class ExperimentSolver extends Feature {
         return ExperimentType.None;
     }
 
+    private static boolean matchSuperStacks(ItemStack first, ItemStack second) {
+        return first.getItem().equals(second.getItem())
+                && first.getName().getString().equals(second.getName().getString())
+                && first.getCount() == second.getCount()
+                && Objects.equals(Utils.getTextureUrl(first), Utils.getTextureUrl(second));
+    }
+
     private static boolean isDye(ItemStack stack) {
         Item item = stack.getItem();
         return item instanceof DyeItem
@@ -57,6 +68,15 @@ public class ExperimentSolver extends Feature {
                 || item.equals(Items.BONE_MEAL)
                 || item.equals(Items.LAPIS_LAZULI)
                 || item.equals(Items.COCOA_BEANS);
+    }
+
+    private static boolean isPowerup(ItemStack stack) {
+        for (String line : Utils.getLoreLines(stack)) {
+            if (Utils.toLower(line).contains("powerup")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isTerracotta(ItemStack stack) {
@@ -149,8 +169,6 @@ public class ExperimentSolver extends Feature {
                 break;
 
             case Superpairs:
-                if (!config.superpairs.enabled) break;
-                // TODO: Implement superpairs solving logic
                 break;
         }
     }
@@ -215,7 +233,34 @@ public class ExperimentSolver extends Feature {
 
             case Superpairs:
                 if (!config.superpairs.enabled) break;
-                // TODO: Implement superpairs recording logic
+                if (isPowerup(event.stack)) {
+                    SlotOptions.setBackground(event.slot, RenderColor.fromChroma(config.superpairs.powerupColor));
+                    return;
+                }
+                if (Utils.isStainedGlass(event.stack) || Utils.isStainedGlassPane(event.stack) || event.stack.getItem().equals(Items.AIR)) {
+                    break;
+                }
+
+                // Check if current slot matches the first slot of current pair
+                if (superSlot != null && superSlot != event.slot) {
+                    if (matchSuperStacks(event.stack, superSlot.getStack())) {
+                        var color = RenderColor.fromChroma(config.superpairs.matchedColor);
+                        SlotOptions.setBackground(event.slot, color);
+                        SlotOptions.setBackground(superSlot, color);
+                    }
+                }
+                // Check if current slot matches any previously seen card
+                for (Map.Entry<Slot, ItemStack> solution : superRewards.entrySet()) {
+                    if (!SlotOptions.hasBackground(event.slot) && !event.slot.equals(solution.getKey()) && matchSuperStacks(event.stack, solution.getValue())) {
+                        var color = RenderColor.fromChroma(config.superpairs.matchingColor);
+                        SlotOptions.setBackground(event.slot, color);
+                        SlotOptions.setBackground(solution.getKey(), color);
+                    }
+                }
+                // Track this click and set as current slot
+                superRewards.put(event.slot, event.stack);
+                superSlot = event.slot;
+                SlotOptions.setSpoofed(event.slot, event.stack);
                 break;
         }
     }
@@ -230,6 +275,9 @@ public class ExperimentSolver extends Feature {
 
             ultraSolution.clear();
             ultraSolutionInitialSize = 0;
+
+            superSlot = null;
+            superRewards.clear();
 
             lastClickTime = System.currentTimeMillis();
         }
@@ -248,4 +296,5 @@ public class ExperimentSolver extends Feature {
             this.slot = slot;
         }
     }
+
 }
