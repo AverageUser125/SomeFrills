@@ -83,7 +83,6 @@ It's in the name. Simple and effective Hypixel Skyblock mod for modern versions 
   your Minecraft version, and add it to your "mods" folder.
 - Additional dependencies needed to launch the mod:
     - [Fabric API](https://modrinth.com/mod/fabric-api)
-    - [ui-lib](https://modrinth.com/mod/ui-lib)
     - [Mod Menu](https://modrinth.com/mod/modmenu) (Optional, settings can be accessed with `/somefrills`, or `/sf`)
 - To finish off, open the mod's settings screen, and configure it to your liking. **Every feature is off by default**.
 
@@ -103,3 +102,4 @@ It's in the name. Simple and effective Hypixel Skyblock mod for modern versions 
   source for the odd function such as reading scoreboard lines.
 - [clientcommands](https://github.com/Earthcomputer/clientcommands): Taught me rendering magic with mixins.
 - [Guava](https://github.com/google/guava/blob/master/LICENSE): Referenced for "ImmutableClassToInstanceMap"
+- [Skyhanni-REPO](https://github.com/hannibal002/SkyHanni-REPO): For NPC location data, and general Skyblock info.
