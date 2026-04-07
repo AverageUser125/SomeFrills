@@ -23,10 +23,10 @@ public class SomeFrillsCommand {
                     GlowMobCommand.getBuilder()
             ),
             new ModCommand("npclocator", "Track NPC locations.",
-                    NpcLocatorCommand.getBuilder()
+                    NpcLocatorCommand.getBuilder("npclocator")
             ),
             new ModCommand("locatenpc", "Alias for npclocator.",
-                    ClientCommandManager.literal("locatenpc").redirect(NpcLocatorCommand.getBuilder().build())
+                    NpcLocatorCommand.getBuilder("locatenpc")
             )
     };
 

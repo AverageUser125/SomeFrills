@@ -17,8 +17,8 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.lit
 
 public class NpcLocatorCommand {
 
-    public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
-        return literal("npclocator")
+    public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder(String commandName) {
+        return literal(commandName)
                 .executes(ctx -> {
                     Integer checkResult = checkNpcLocatorEnabledOrWarn();
                     if (checkResult != null) return checkResult;
@@ -31,7 +31,7 @@ public class NpcLocatorCommand {
                     return listNpcLocations();
                 }))
                 .then(literal("add")
-                        .then(argument("npc_name", StringArgumentType.word())
+                        .then(argument("npc_name", StringArgumentType.greedyString())
                                 .suggests(NpcLocatorCommand::suggestAvailableNpcs)
                                 .executes(ctx -> {
                                     Integer checkResult = checkNpcLocatorEnabledOrWarn();
@@ -46,7 +46,7 @@ public class NpcLocatorCommand {
                             if (checkResult != null) return checkResult;
                             return clearAllNpcLocations();
                         }))
-                        .then(argument("npc_name", StringArgumentType.word())
+                        .then(argument("npc_name", StringArgumentType.greedyString())
                                 .suggests(NpcLocatorCommand::suggestTrackedNpcs)
                                 .executes(ctx -> {
                                     Integer checkResult = checkNpcLocatorEnabledOrWarn();

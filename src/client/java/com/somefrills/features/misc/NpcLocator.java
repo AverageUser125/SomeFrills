@@ -44,7 +44,7 @@ public class NpcLocator extends Feature {
     @EventHandler
     public void onRenderEvent(WorldRenderEvent event) {
         for (var npc : npcLocations.values()) {
-            Vec3d center = npc.position.add(-0.5, 0, 0.5);
+            Vec3d center = npc.position.add(0.5, 0, 0.5);
             if (config.beaconBeam) {
                 event.drawBeam(center, 255, true, color);
             }
@@ -52,7 +52,7 @@ public class NpcLocator extends Feature {
                 event.drawTracer(center, color);
             }
             if (config.outlineBox) {
-                Box box = new Box(npc.position.subtract(1, 1, 0), npc.position.add(0, 1, 1));
+                Box box = new Box(npc.position.subtract(0, 1, 0), npc.position.add(1, 1, 1));
                 event.drawOutline(box, true, color);
             }
         }
