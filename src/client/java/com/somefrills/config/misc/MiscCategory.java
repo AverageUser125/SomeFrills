@@ -27,6 +27,15 @@ public class MiscCategory {
     }
 
     @Accordion
+    @ConfigOption(name = "Mob Glow", desc = "Highlight entities based on name, type, or both")
+    public MobGlowConfig glowMob = new MobGlowConfig();
+    public static class MobGlowConfig {
+        @ConfigOption(name = "Enabled", desc = "Highlight entities based on name, type, or both")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(false);
+    }
+
+    @Accordion
     @ConfigOption(name = "Command Aliases", desc = "Add aliases for commonly used commands")
     public CommandAliasesConfig commandAliases = new CommandAliasesConfig();
 
@@ -46,13 +55,4 @@ public class MiscCategory {
         public Property<Boolean> enabled = Property.of(true);
     }
 
-    @Accordion
-    @ConfigOption(name = "Entity Highlight", desc = "Highlight entities based on name, type, or both")
-    public EntityHighlightConfig entityHighlight = new EntityHighlightConfig();
-
-    public static class EntityHighlightConfig {
-        @ConfigOption(name = "Enabled", desc = "Highlight entities based on name, type, or both")
-        @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(false);
-    }
 }

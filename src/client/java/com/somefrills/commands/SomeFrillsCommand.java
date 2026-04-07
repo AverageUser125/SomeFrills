@@ -62,8 +62,8 @@ public class SomeFrillsCommand {
         commandShort.then(GlowPlayerCommand.getBuilder());
 
         // Register entityhighlight as a subcommand and also as a top-level alias
-        commandMain.then(EntityHighlightCommand.getBuilder());
-        commandShort.then(EntityHighlightCommand.getBuilder());
+        commandMain.then(GlowMobCommand.getBuilder());
+        commandShort.then(GlowMobCommand.getBuilder());
 
         dispatcher.register(commandMain);
         dispatcher.register(commandShort);
@@ -72,7 +72,7 @@ public class SomeFrillsCommand {
         dispatcher.register(GlowPlayerCommand.getBuilder());
 
         // Top-level registration for /entityhighlight
-        dispatcher.register(EntityHighlightCommand.getBuilder());
+        dispatcher.register(GlowMobCommand.getBuilder());
     }
 
     public static class ModCommand {

@@ -19,11 +19,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * Entity highlighting feature that allows users to highlight entities based on name, type, or both.
  * Supports commands like /entityhighlight, /entityhighlight list, /entityhighlight clear
  */
-public class EntityHighlight extends Feature {
-    private static final ConcurrentHashMap<String, EntityHighlightRule> rules = new ConcurrentHashMap<>();
+public class GlowMob extends Feature {
+    private static final ConcurrentHashMap<String, GlowMobRule> rules = new ConcurrentHashMap<>();
 
-    public EntityHighlight() {
-        super(FrillsConfig.instance.misc.entityHighlight.enabled);
+    public GlowMob() {
+        super(FrillsConfig.instance.misc.glowMob.enabled);
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -46,7 +46,7 @@ public class EntityHighlight extends Feature {
     }
 
     private static void applyHighlight(Entity entity) {
-        for (EntityHighlightRule rule : rules.values()) {
+        for (GlowMobRule rule : rules.values()) {
             if (!rule.matches(entity)) {
                 continue;
             }
@@ -61,7 +61,7 @@ public class EntityHighlight extends Feature {
      */
     public static boolean addRule(String name, String type, RenderColor color) {
         String ruleKey = generateRuleKey(name, type);
-        boolean isNew = rules.put(ruleKey, new EntityHighlightRule(name, type, color)) == null;
+        boolean isNew = rules.put(ruleKey, new GlowMobRule(name, type, color)) == null;
         updateAllEntities();
         return isNew;
     }
@@ -101,7 +101,7 @@ public class EntityHighlight extends Feature {
     /**
      * Get all rules
      */
-    public static Collection<EntityHighlightRule> getRules() {
+    public static Collection<GlowMobRule> getRules() {
         return List.copyOf(rules.values());
     }
 
@@ -117,12 +117,12 @@ public class EntityHighlight extends Feature {
     /**
      * Data class to store an entity highlighting rule
      */
-    public static class EntityHighlightRule {
+    public static class GlowMobRule {
         public String name;
         public String type;
         public RenderColor color;
 
-        public EntityHighlightRule(String name, String type, RenderColor color) {
+        public GlowMobRule(String name, String type, RenderColor color) {
             this.name = (name == null || name.isEmpty()) ? null : name;
             // Normalize type: strip minecraft: prefix if present and store lowercase
             if (type != null && !type.isEmpty()) {

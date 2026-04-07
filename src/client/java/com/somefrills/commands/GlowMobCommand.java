@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.features.misc.EntityHighlight;
+import com.somefrills.features.misc.GlowMob;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -17,42 +17,42 @@ import java.util.concurrent.CompletableFuture;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
-public class EntityHighlightCommand {
+public class GlowMobCommand {
 
     public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
-        return literal("entityhighlight")
+        return literal("glowmob")
                 .executes(ctx -> {
-                    if (!isEntityHighlightEnabled()) {
-                        Utils.info("EntityHighlight feature is disabled.");
+                    if (!isGlowMobEnabled()) {
+                        Utils.info("GlowMob feature is disabled.");
                         return 1;
                     }
-                    Utils.info("Usage: /entityhighlight <add|remove|list|clear>");
+                    Utils.info("Usage: /GlowMob <add|remove|list|clear>");
                     return 1;
                 })
                 .then(literal("list").executes(ctx -> {
-                    if (!isEntityHighlightEnabled()) {
-                        Utils.info("EntityHighlight feature is disabled.");
+                    if (!isGlowMobEnabled()) {
+                        Utils.info("GlowMob feature is disabled.");
                         return 1;
                     }
                     listRules();
                     return 1;
                 }))
                 .then(literal("clear").executes(ctx -> {
-                    if (!isEntityHighlightEnabled()) {
-                        Utils.info("EntityHighlight feature is disabled.");
+                    if (!isGlowMobEnabled()) {
+                        Utils.info("GlowMob feature is disabled.");
                         return 1;
                     }
-                    EntityHighlight.clearRules();
+                    GlowMob.clearRules();
                     Utils.info("Cleared all entity highlight rules.");
                     return 1;
                 }))
                 .then(literal("add")
                         .then(argument("type", StringArgumentType.word())
-                                .suggests(EntityHighlightCommand::suggestEntityTypes)
+                                .suggests(GlowMobCommand::suggestEntityTypes)
                                 // Optional name - path without name
                                 .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
-                                    if (!isEntityHighlightEnabled()) {
-                                        Utils.info("EntityHighlight feature is disabled.");
+                                    if (!isGlowMobEnabled()) {
+                                        Utils.info("GlowMob feature is disabled.");
                                         return 1;
                                     }
                                     return addRuleWithColor(ctx, null, color);
@@ -60,8 +60,8 @@ public class EntityHighlightCommand {
                                 // Optional name - path with name
                                 .then(argument("name", StringArgumentType.word())
                                         .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
-                                            if (!isEntityHighlightEnabled()) {
-                                                Utils.info("EntityHighlight feature is disabled.");
+                                            if (!isGlowMobEnabled()) {
+                                                Utils.info("GlowMob feature is disabled.");
                                                 return 1;
                                             }
                                             return addRuleWithColor(ctx, StringArgumentType.getString(ctx, "name"), color);
@@ -71,21 +71,21 @@ public class EntityHighlightCommand {
                 )
                 .then(literal("remove")
                         .then(literal("all").executes(ctx -> {
-                            if (!isEntityHighlightEnabled()) {
-                                Utils.info("EntityHighlight feature is disabled.");
+                            if (!isGlowMobEnabled()) {
+                                Utils.info("GlowMob feature is disabled.");
                                 return 1;
                             }
-                            EntityHighlight.clearRules();
+                            GlowMob.clearRules();
                             Utils.info("Removed all entity highlight rules.");
                             return 1;
                         }))
                         .then(argument("type", StringArgumentType.word())
-                                .suggests(EntityHighlightCommand::suggestRuleTypes)
+                                .suggests(GlowMobCommand::suggestRuleTypes)
                                 .then(argument("name", StringArgumentType.word())
-                                        .suggests(EntityHighlightCommand::suggestRuleNames)
+                                        .suggests(GlowMobCommand::suggestRuleNames)
                                         .executes(ctx -> {
-                                            if (!isEntityHighlightEnabled()) {
-                                                Utils.info("EntityHighlight feature is disabled.");
+                                            if (!isGlowMobEnabled()) {
+                                                Utils.info("GlowMob feature is disabled.");
                                                 return 1;
                                             }
                                             return removeRule(ctx);
@@ -95,9 +95,9 @@ public class EntityHighlightCommand {
                 );
     }
 
-    private static boolean isEntityHighlightEnabled() {
-        if (!FrillsConfig.instance.misc.entityHighlight.enabled.get()) {
-            Utils.info("EntityHighlight feature is disabled.");
+    private static boolean isGlowMobEnabled() {
+        if (!FrillsConfig.instance.misc.glowMob.enabled.get()) {
+            Utils.info("GlowMob feature is disabled.");
             return false;
         }
         return true;
@@ -117,7 +117,7 @@ public class EntityHighlightCommand {
             return 1;
         }
 
-        boolean added = EntityHighlight.addRule(name, type, color);
+        boolean added = GlowMob.addRule(name, type, color);
         String colorStr = String.format("#%06X", color.hex);
 
         String nameStr = (name == null || name.isEmpty()) ? "any" : name;
@@ -139,7 +139,7 @@ public class EntityHighlightCommand {
         name = normalizeNoneAlias(name);
         type = normalizeNoneAlias(type);
 
-        boolean removed = EntityHighlight.removeRule(name, type);
+        boolean removed = GlowMob.removeRule(name, type);
         String nameStr = (name == null || name.isEmpty()) ? "any" : name;
         String typeStr = (type == null || type.isEmpty()) ? "any" : type;
 
@@ -152,14 +152,14 @@ public class EntityHighlightCommand {
     }
 
     private static void listRules() {
-        var rules = EntityHighlight.getRules();
+        var rules = GlowMob.getRules();
         if (rules.isEmpty()) {
             Utils.info("No entity highlight rules.");
             return;
         }
 
         StringBuilder sb = new StringBuilder("Entity highlight rules:\n");
-        for (EntityHighlight.EntityHighlightRule rule : rules) {
+        for (GlowMob.GlowMobRule rule : rules) {
             String name = (rule.name == null || rule.name.isEmpty()) ? "any" : rule.name;
             String type = (rule.type == null || rule.type.isEmpty()) ? "any" : rule.type;
             String colorStr = String.format("#%06X", rule.color.hex);
@@ -194,7 +194,7 @@ public class EntityHighlightCommand {
     ) {
         String remaining = builder.getRemaining().toLowerCase();
 
-        for (EntityHighlight.EntityHighlightRule rule : EntityHighlight.getRules()) {
+        for (GlowMob.GlowMobRule rule : GlowMob.getRules()) {
             String type = (rule.type == null || rule.type.isEmpty()) ? "any" : rule.type;
             if (type.toLowerCase().startsWith(remaining)) {
                 builder.suggest(type);
@@ -215,7 +215,7 @@ public class EntityHighlightCommand {
         String selectedType = StringArgumentType.getString(ctx, "type");
         String normalizedSelectedType = normalizeNoneAlias(selectedType);
 
-        for (EntityHighlight.EntityHighlightRule rule : EntityHighlight.getRules()) {
+        for (GlowMob.GlowMobRule rule : GlowMob.getRules()) {
             // Check if this rule matches the selected type
             String ruleType = (rule.type == null || rule.type.isEmpty()) ? null : rule.type;
 
