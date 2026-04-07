@@ -20,55 +20,62 @@ public class NpcLocatorCommand {
     public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
         return literal("npclocator")
                 .executes(ctx -> {
-                    if (!isNpcLocatorEnabled()) {
-                        Utils.info("NPC Locator feature is disabled.");
-                        return 1;
-                    }
+                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                    if (checkResult != null) return checkResult;
                     Utils.info("Usage: /npclocator <list|add|remove|clear>");
                     return 1;
                 })
                 .then(literal("list").executes(ctx -> {
-                    if (!isNpcLocatorEnabled()) {
-                        Utils.info("NPC Locator feature is disabled.");
-                        return 1;
-                    }
+                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                    if (checkResult != null) return checkResult;
                     return listNpcLocations();
                 }))
                 .then(literal("add")
                         .then(argument("npc_name", StringArgumentType.word())
                                 .suggests(NpcLocatorCommand::suggestAvailableNpcs)
                                 .executes(ctx -> {
-                                    if (!isNpcLocatorEnabled()) {
-                                        Utils.info("NPC Locator feature is disabled.");
-                                        return 1;
-                                    }
+                                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                                    if (checkResult != null) return checkResult;
                                     return addNpcLocation(ctx);
                                 })
                         )
                 )
                 .then(literal("remove")
+                        .then(literal("all").executes(ctx -> {
+                            Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                            if (checkResult != null) return checkResult;
+                            return clearAllNpcLocations();
+                        }))
                         .then(argument("npc_name", StringArgumentType.word())
                                 .suggests(NpcLocatorCommand::suggestTrackedNpcs)
                                 .executes(ctx -> {
-                                    if (!isNpcLocatorEnabled()) {
-                                        Utils.info("NPC Locator feature is disabled.");
-                                        return 1;
-                                    }
+                                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                                    if (checkResult != null) return checkResult;
                                     return removeNpcLocation(ctx);
                                 })
                         )
                 )
                 .then(literal("clear").executes(ctx -> {
-                    if (!isNpcLocatorEnabled()) {
-                        Utils.info("NPC Locator feature is disabled.");
-                        return 1;
-                    }
+                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                    if (checkResult != null) return checkResult;
                     return clearAllNpcLocations();
                 }));
     }
 
     private static boolean isNpcLocatorEnabled() {
         return FrillsConfig.instance.misc.npcLocator.enabled.get();
+    }
+
+    /**
+     * Checks if NPC Locator is enabled. Returns 1 (failure code) if disabled, or null if enabled.
+     * Should be used like: Integer result = checkNpcLocatorEnabledOrWarn(); if (result != null) return result;
+     */
+    private static Integer checkNpcLocatorEnabledOrWarn() {
+        if (!isNpcLocatorEnabled()) {
+            Utils.info("NPC Locator feature is disabled.");
+            return 1;
+        }
+        return null;
     }
 
     private static int listNpcLocations() {
