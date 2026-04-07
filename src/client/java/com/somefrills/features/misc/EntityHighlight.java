@@ -11,7 +11,6 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,20 +33,19 @@ public class EntityHighlight extends Feature {
         Entity entity = event.entity;
         if (!(entity instanceof LivingEntity)) return;
 
-        // Don't highlight players
         if (entity instanceof PlayerEntity) return;
 
-        highlightEntity(entity);
+        applyHighlight(entity);
     }
 
     @EventHandler(priority = EventPriority.LOW)
     private void onServerJoin(ServerJoinEvent event) {
         for (Entity entity: Utils.getEntities()) {
-            highlightEntity(entity);
+            applyHighlight(entity);
         }
     }
 
-    private void highlightEntity(Entity entity) {
+    private static void applyHighlight(Entity entity) {
         for (EntityHighlightRule rule : rules.values()) {
             if (!rule.matches(entity)) {
                 continue;
@@ -55,6 +53,7 @@ public class EntityHighlight extends Feature {
             Utils.setGlowing(entity, true, rule.color);
             return;
         }
+        Utils.setGlowing(entity, false, RenderColor.white);
     }
 
     /**
@@ -62,7 +61,9 @@ public class EntityHighlight extends Feature {
      */
     public static boolean addRule(String name, String type, RenderColor color) {
         String ruleKey = generateRuleKey(name, type);
-        return rules.put(ruleKey, new EntityHighlightRule(name, type, color)) == null;
+        boolean isNew = rules.put(ruleKey, new EntityHighlightRule(name, type, color)) == null;
+        updateAllEntities();
+        return isNew;
     }
 
     /**
@@ -70,7 +71,11 @@ public class EntityHighlight extends Feature {
      */
     public static boolean removeRule(String name, String type) {
         String ruleKey = generateRuleKey(name, type);
-        return rules.remove(ruleKey) != null;
+        boolean removed = rules.remove(ruleKey) != null;
+        if (removed) {
+            updateAllEntities();
+        }
+        return removed;
     }
 
     /**
@@ -78,6 +83,19 @@ public class EntityHighlight extends Feature {
      */
     public static void clearRules() {
         rules.clear();
+        updateAllEntities();
+    }
+
+    /**
+     * Update all existing entities with current rules
+     */
+    private static void updateAllEntities() {
+        for (Entity entity : Utils.getEntities()) {
+            if (!(entity instanceof LivingEntity) || entity instanceof PlayerEntity) {
+                continue;
+            }
+            applyHighlight(entity);
+        }
     }
 
     /**
@@ -91,8 +109,8 @@ public class EntityHighlight extends Feature {
      * Generate a unique key for a rule based on name and type
      */
     private static String generateRuleKey(String name, String type) {
-        String n = (name == null || name.isEmpty() || name.equalsIgnoreCase("none")) ? "ANY" : name.toLowerCase();
-        String t = (type == null || type.isEmpty() || type.equalsIgnoreCase("none")) ? "ANY" : type.toLowerCase();
+        String n = (name == null || name.isEmpty()) ? "ANY" : name.toLowerCase();
+        String t = (type == null || type.isEmpty()) ? "ANY" : type.toLowerCase();
         return n + ":" + t;
     }
 
@@ -106,12 +124,18 @@ public class EntityHighlight extends Feature {
 
         public EntityHighlightRule(String name, String type, RenderColor color) {
             this.name = (name == null || name.isEmpty()) ? null : name;
-            this.type = (type == null || type.isEmpty()) ? null : type;
+            // Normalize type: strip minecraft: prefix if present and store lowercase
+            if (type != null && !type.isEmpty()) {
+                this.type = Utils.stripPrefix(type, "minecraft:").toLowerCase();
+            } else {
+                this.type = null;
+            }
             this.color = color;
         }
-        
+
         public boolean matches(Entity entity) {
-            if (this.name != null && !this.name.isEmpty() && !this.name.equalsIgnoreCase("none")) {
+            // Check name match
+            if (this.name != null && !this.name.isEmpty()) {
                 String entityName = Utils.toPlain(entity.getName());
                 if (!entityName.toLowerCase().contains(this.name.toLowerCase())) {
                     return false;
@@ -119,9 +143,11 @@ public class EntityHighlight extends Feature {
             }
 
             // Check type match (exact match if rule has a type)
-            if (this.type != null && !this.type.isEmpty() && !this.type.equalsIgnoreCase("none")) {
+            if (this.type != null && !this.type.isEmpty()) {
                 String entityTypeStr = entity.getType().toString();
-                if (!entityTypeStr.equalsIgnoreCase(this.type)) {
+                entityTypeStr = Utils.stripPrefix(entityTypeStr, "entity.minecraft.");
+                entityTypeStr = entityTypeStr.toLowerCase();
+                if (!entityTypeStr.equals(this.type)) {
                     return false;
                 }
             }

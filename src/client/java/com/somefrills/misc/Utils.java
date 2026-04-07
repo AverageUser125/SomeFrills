@@ -1137,6 +1137,13 @@ public class Utils {
         return ((EntityRendering) ent).somefrills_mod$getGlowing();
     }
 
+    public static String stripPrefix(String str, String prefix) {
+        if (str.startsWith(prefix)) {
+            return str.substring(prefix.length());
+        }
+        return str;
+    }
+
     public static class Symbols {
         public static String zone = "⏣";
         public static String zoneRift = "ф";

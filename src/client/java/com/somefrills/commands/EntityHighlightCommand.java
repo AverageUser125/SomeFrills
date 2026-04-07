@@ -51,7 +51,7 @@ public class EntityHighlightCommand {
                         .then(argument("name", StringArgumentType.word())
                                 .then(argument("type", StringArgumentType.word())
                                         .suggests(EntityHighlightCommand::suggestEntityTypes)
-                                        .then(argument("color", StringArgumentType.word())
+                                        .then(argument("color", StringArgumentType.string())
                                                 .suggests(CommandColorUtils::suggestColors)
                                                 .executes(ctx -> {
                                                     if (!isEntityHighlightEnabled()) {
@@ -115,6 +115,10 @@ public class EntityHighlightCommand {
         String name = StringArgumentType.getString(ctx, "name");
         String type = StringArgumentType.getString(ctx, "type");
 
+        // Normalize "none" aliases to null
+        name = normalizeNoneAlias(name);
+        type = normalizeNoneAlias(type);
+
         // Validate and normalize name and type
         if ((name == null || name.isEmpty()) && (type == null || type.isEmpty())) {
             Utils.info("At least one of name or type must be specified (not both 'none').");
@@ -124,8 +128,8 @@ public class EntityHighlightCommand {
         boolean added = EntityHighlight.addRule(name, type, color);
         String colorStr = String.format("#%06X", color.hex);
 
-        String nameStr = (name == null || name.isEmpty() || name.equalsIgnoreCase("none")) ? "any" : name;
-        String typeStr = (type == null || type.isEmpty() || type.equalsIgnoreCase("none")) ? "any" : type;
+        String nameStr = (name == null || name.isEmpty()) ? "any" : name;
+        String typeStr = (type == null || type.isEmpty()) ? "any" : type;
 
         Utils.info(
                 added
@@ -139,9 +143,13 @@ public class EntityHighlightCommand {
         String name = StringArgumentType.getString(ctx, "name");
         String type = StringArgumentType.getString(ctx, "type");
 
+        // Normalize "none" aliases to null
+        name = normalizeNoneAlias(name);
+        type = normalizeNoneAlias(type);
+
         boolean removed = EntityHighlight.removeRule(name, type);
-        String nameStr = (name == null || name.isEmpty() || name.equalsIgnoreCase("none")) ? "any" : name;
-        String typeStr = (type == null || type.isEmpty() || type.equalsIgnoreCase("none")) ? "any" : type;
+        String nameStr = (name == null || name.isEmpty()) ? "any" : name;
+        String typeStr = (type == null || type.isEmpty()) ? "any" : type;
 
         Utils.info(
                 removed
@@ -176,19 +184,28 @@ public class EntityHighlightCommand {
 
         Registries.ENTITY_TYPE.forEach(entityType -> {
             String id = Registries.ENTITY_TYPE.getId(entityType).toString();
-            // Suggest both with and without minecraft: prefix
-            if (id.startsWith("minecraft:")) {
-                String withoutPrefix = id.substring(10); // Remove "minecraft:" prefix
-                if (withoutPrefix.toLowerCase().startsWith(remaining)) {
-                    builder.suggest(withoutPrefix);
-                }
-            }
-            if (id.toLowerCase().startsWith(remaining)) {
+            id = Utils.stripPrefix(id, "minecraft:").toLowerCase();
+            if (id.startsWith(remaining)) {
                 builder.suggest(id);
             }
         });
 
         return builder.buildFuture();
+    }
+
+    /**
+     * Normalize "none" aliases to null
+     * Aliases: "none", "ignore", "any", "null", ""
+     */
+    private static String normalizeNoneAlias(String input) {
+        if (input == null) {
+            return null;
+        }
+        String lower = input.toLowerCase();
+        if (lower.equals("none") || lower.equals("ignore") || lower.equals("any") || lower.equals("null") || lower.isEmpty()) {
+            return null;
+        }
+        return input;
     }
 }
 
