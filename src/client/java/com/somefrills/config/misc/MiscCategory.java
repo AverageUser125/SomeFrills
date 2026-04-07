@@ -45,4 +45,14 @@ public class MiscCategory {
         @ConfigEditorBoolean
         public Property<Boolean> enabled = Property.of(true);
     }
+
+    @Accordion
+    @ConfigOption(name = "Entity Highlight", desc = "Highlight entities based on name, type, or both")
+    public EntityHighlightConfig entityHighlight = new EntityHighlightConfig();
+
+    public static class EntityHighlightConfig {
+        @ConfigOption(name = "Enabled", desc = "Highlight entities based on name, type, or both")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(false);
+    }
 }

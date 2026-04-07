@@ -1,7 +1,7 @@
 package com.somefrills.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -55,14 +55,14 @@ public class GlowPlayerCommand {
                                 })
                                 // String color format (formatting name or hex)
                                 .then(argument("color", StringArgumentType.word())
-                                        .suggests(GlowPlayerCommand::suggestColors)
+                                        .suggests(CommandColorUtils::suggestColors)
                                         .executes(ctx -> {
                                             if (!isGlowPlayerEnabled()) {
                                                 Utils.info("GlowPlayer feature is disabled.");
                                                 return 1;
                                             }
                                             String colorStr = StringArgumentType.getString(ctx, "color");
-                                            RenderColor color = parseColorString(colorStr);
+                                            RenderColor color = CommandColorUtils.parseColorString(colorStr);
                                             if (color == null) {
                                                 Utils.info("Invalid color format.");
                                                 return 1;
@@ -94,14 +94,14 @@ public class GlowPlayerCommand {
                         .then(argument("player", StringArgumentType.word())
                                 .suggests(GlowPlayerCommand::suggestOnlinePlayers)
                                 .then(argument("color", StringArgumentType.word())
-                                        .suggests(GlowPlayerCommand::suggestColors)
+                                        .suggests(CommandColorUtils::suggestColors)
                                         .executes(ctx -> {
                                             if (!isGlowPlayerEnabled()) {
                                                 Utils.info("GlowPlayer feature is disabled.");
                                                 return 1;
                                             }
                                             String colorStr = StringArgumentType.getString(ctx, "color");
-                                            RenderColor color = parseColorString(colorStr);
+                                            RenderColor color = CommandColorUtils.parseColorString(colorStr);
                                             if (color == null) {
                                                 Utils.info("Invalid color format.");
                                                 return 1;
@@ -293,31 +293,18 @@ public class GlowPlayerCommand {
         return builder.buildFuture();
     }
 
-    private static CompletableFuture<Suggestions> suggestColors(
-            CommandContext<FabricClientCommandSource> ctx,
-            SuggestionsBuilder builder
-    ) {
-        String remaining = builder.getRemaining().toLowerCase();
-        for (Formatting f : Formatting.values()) {
-            if (f.isColor() && f.getName().startsWith(remaining)) {
-                builder.suggest(f.getName());
-            }
-        }
-        return builder.buildFuture();
-    }
-
     /* ---------------- Utilities ---------------- */
 
     private static void applyGlowToOnlinePlayer(String pureName) {
         if (mc.world == null) return;
-        
+
         // Find and apply glow to all matching players
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
             if (!Utils.isRealPlayer(player)) continue;
-            
+
             String playerPureName = GlowPlayer.convertToPureName(player.getName().getString());
             if (playerPureName == null || !playerPureName.equals(pureName)) continue;
-            
+
             RenderColor glowColor = GlowPlayer.getColor(pureName);
             if (glowColor != null) {
                 GlowPlayer.setGlowImmediately(player, glowColor);
@@ -325,35 +312,5 @@ public class GlowPlayerCommand {
         }
     }
 
-    /**
-     * Parse a color string which can be:
-     * - A formatting color name (e.g., "red", "white")
-     * - A 6-char hex color (e.g., "#FFFFFF", "FFFFFF") - RGB format
-     */
-    private static RenderColor parseColorString(String colorStr) {
-        if (colorStr == null) return null;
-
-        // Try hex format first (#FFFFFF or FFFFFF)
-        if (colorStr.startsWith("#")) {
-            colorStr = colorStr.substring(1);
-        }
-        
-        if (colorStr.length() == 6) {
-            try {
-                int hex = Integer.parseInt(colorStr, 16);
-                return RenderColor.fromHex(hex);
-            } catch (NumberFormatException e) {
-                // Fall through to formatting check
-            }
-        }
-
-        // Try formatting color
-        Formatting formatting = Utils.parseColor(colorStr);
-        if (formatting != null) {
-            return RenderColor.fromFormatting(formatting);
-        }
-
-        return null;
-    }
 
 }
