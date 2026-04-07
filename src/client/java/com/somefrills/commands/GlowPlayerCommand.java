@@ -1,6 +1,5 @@
 package com.somefrills.commands;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -53,80 +52,26 @@ public class GlowPlayerCommand {
                                     }
                                     return addGlow(ctx, Formatting.WHITE);
                                 })
-                                // String color format (formatting name or hex)
-                                .then(argument("color", StringArgumentType.word())
-                                        .suggests(CommandColorUtils::suggestColors)
-                                        .executes(ctx -> {
-                                            if (!isGlowPlayerEnabled()) {
-                                                Utils.info("GlowPlayer feature is disabled.");
-                                                return 1;
-                                            }
-                                            String colorStr = StringArgumentType.getString(ctx, "color");
-                                            RenderColor color = CommandColorUtils.parseColorString(colorStr);
-                                            if (color == null) {
-                                                Utils.info("Invalid color format.");
-                                                return 1;
-                                            }
-                                            return addGlowWithRenderColor(ctx, color);
-                                        })
-                                )
-                                // RGB format
-                                .then(argument("r", IntegerArgumentType.integer(0, 255))
-                                        .then(argument("g", IntegerArgumentType.integer(0, 255))
-                                                .then(argument("b", IntegerArgumentType.integer(0, 255))
-                                                        .executes(ctx -> {
-                                                            if (!isGlowPlayerEnabled()) {
-                                                                Utils.info("GlowPlayer feature is disabled.");
-                                                                return 1;
-                                                            }
-                                                            int r = IntegerArgumentType.getInteger(ctx, "r");
-                                                            int g = IntegerArgumentType.getInteger(ctx, "g");
-                                                            int b = IntegerArgumentType.getInteger(ctx, "b");
-                                                            RenderColor color = new RenderColor(r, g, b, 255);
-                                                            return addGlowWithRenderColor(ctx, color);
-                                                        })
-                                                )
-                                        )
-                                )
+                                // String color format (formatting name or hex) or RGB format
+                                .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
+                                    if (!isGlowPlayerEnabled()) {
+                                        Utils.info("GlowPlayer feature is disabled.");
+                                        return 1;
+                                    }
+                                    return addGlowWithRenderColor(ctx, color);
+                                }))
                         )
                 )
                 .then(literal("color")
                         .then(argument("player", StringArgumentType.word())
                                 .suggests(GlowPlayerCommand::suggestOnlinePlayers)
-                                .then(argument("color", StringArgumentType.word())
-                                        .suggests(CommandColorUtils::suggestColors)
-                                        .executes(ctx -> {
-                                            if (!isGlowPlayerEnabled()) {
-                                                Utils.info("GlowPlayer feature is disabled.");
-                                                return 1;
-                                            }
-                                            String colorStr = StringArgumentType.getString(ctx, "color");
-                                            RenderColor color = CommandColorUtils.parseColorString(colorStr);
-                                            if (color == null) {
-                                                Utils.info("Invalid color format.");
-                                                return 1;
-                                            }
-                                            return setColorWithRenderColor(ctx, color);
-                                        })
-                                )
-                                // RGB format
-                                .then(argument("r", IntegerArgumentType.integer(0, 255))
-                                        .then(argument("g", IntegerArgumentType.integer(0, 255))
-                                                .then(argument("b", IntegerArgumentType.integer(0, 255))
-                                                        .executes(ctx -> {
-                                                            if (!isGlowPlayerEnabled()) {
-                                                                Utils.info("GlowPlayer feature is disabled.");
-                                                                return 1;
-                                                            }
-                                                            int r = IntegerArgumentType.getInteger(ctx, "r");
-                                                            int g = IntegerArgumentType.getInteger(ctx, "g");
-                                                            int b = IntegerArgumentType.getInteger(ctx, "b");
-                                                            RenderColor color = new RenderColor(r, g, b, 255);
-                                                            return setColorWithRenderColor(ctx, color);
-                                                        })
-                                                )
-                                        )
-                                )
+                                .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
+                                    if (!isGlowPlayerEnabled()) {
+                                        Utils.info("GlowPlayer feature is disabled.");
+                                        return 1;
+                                    }
+                                    return setColorWithRenderColor(ctx, color);
+                                }))
                         )
                 )
                 .then(literal("remove")

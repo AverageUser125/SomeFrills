@@ -1,6 +1,5 @@
 package com.somefrills.commands;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -48,43 +47,25 @@ public class EntityHighlightCommand {
                     return 1;
                 }))
                 .then(literal("add")
-                        .then(argument("name", StringArgumentType.word())
-                                .then(argument("type", StringArgumentType.word())
-                                        .suggests(EntityHighlightCommand::suggestEntityTypes)
-                                        .then(argument("color", StringArgumentType.string())
-                                                .suggests(CommandColorUtils::suggestColors)
-                                                .executes(ctx -> {
-                                                    if (!isEntityHighlightEnabled()) {
-                                                        Utils.info("EntityHighlight feature is disabled.");
-                                                        return 1;
-                                                    }
-                                                    String colorStr = StringArgumentType.getString(ctx, "color");
-                                                    RenderColor color = CommandColorUtils.parseColorString(colorStr);
-                                                    if (color == null) {
-                                                        Utils.info("Invalid color format.");
-                                                        return 1;
-                                                    }
-                                                    return addRuleWithColor(ctx, color);
-                                                })
-                                        )
-                                        // RGB format
-                                        .then(argument("r", IntegerArgumentType.integer(0, 255))
-                                                .then(argument("g", IntegerArgumentType.integer(0, 255))
-                                                        .then(argument("b", IntegerArgumentType.integer(0, 255))
-                                                                .executes(ctx -> {
-                                                                    if (!isEntityHighlightEnabled()) {
-                                                                        Utils.info("EntityHighlight feature is disabled.");
-                                                                        return 1;
-                                                                    }
-                                                                    int r = IntegerArgumentType.getInteger(ctx, "r");
-                                                                    int g = IntegerArgumentType.getInteger(ctx, "g");
-                                                                    int b = IntegerArgumentType.getInteger(ctx, "b");
-                                                                    RenderColor color = new RenderColor(r, g, b, 255);
-                                                                    return addRuleWithColor(ctx, color);
-                                                                })
-                                                        )
-                                                )
-                                        )
+                        .then(argument("type", StringArgumentType.word())
+                                .suggests(EntityHighlightCommand::suggestEntityTypes)
+                                // Optional name - path without name
+                                .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
+                                    if (!isEntityHighlightEnabled()) {
+                                        Utils.info("EntityHighlight feature is disabled.");
+                                        return 1;
+                                    }
+                                    return addRuleWithColor(ctx, null, color);
+                                }))
+                                // Optional name - path with name
+                                .then(argument("name", StringArgumentType.word())
+                                        .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
+                                            if (!isEntityHighlightEnabled()) {
+                                                Utils.info("EntityHighlight feature is disabled.");
+                                                return 1;
+                                            }
+                                            return addRuleWithColor(ctx, StringArgumentType.getString(ctx, "name"), color);
+                                        }))
                                 )
                         )
                 )
@@ -111,9 +92,9 @@ public class EntityHighlightCommand {
         return true;
     }
 
-    private static int addRuleWithColor(CommandContext<FabricClientCommandSource> ctx, RenderColor color) {
-        String name = StringArgumentType.getString(ctx, "name");
+    private static int addRuleWithColor(CommandContext<FabricClientCommandSource> ctx, String nameParam, RenderColor color) {
         String type = StringArgumentType.getString(ctx, "type");
+        String name = nameParam;
 
         // Normalize "none" aliases to null
         name = normalizeNoneAlias(name);
