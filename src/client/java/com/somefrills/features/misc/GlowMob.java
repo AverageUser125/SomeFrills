@@ -33,8 +33,6 @@ public class GlowMob extends Feature {
         Entity entity = event.entity;
         if (!(entity instanceof LivingEntity)) return;
 
-        if (entity instanceof PlayerEntity) return;
-
         applyHighlight(entity);
     }
 

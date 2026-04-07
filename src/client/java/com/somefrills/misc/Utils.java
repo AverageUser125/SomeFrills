@@ -80,17 +80,9 @@ import java.util.stream.Collectors;
 
 import static com.somefrills.Main.mc;
 
+@SuppressWarnings("unused")
 public class Utils {
     public static final MessageIndicator someFrillsIndicator = new MessageIndicator(0x5ca0bf, null, Text.of("Message from SomeFrills mod."), "SomeFrills Mod");
-    private static final HashSet<String> modernIslands = Sets.newHashSet(
-            "Hub",
-            "Galatea",
-            "Gold Mine",
-            "Spider's Den",
-            "The Barn",
-            "The End",
-            "The Park"
-    );
     private static final HashSet<String> lootIslands = Sets.newHashSet(
             "Catacombs",
             "Kuudra",
@@ -262,12 +254,13 @@ public class Utils {
 
     public static void refillItem(String refill_query, int amount) {
         int total = 0;
+        if (mc.player == null) return;
         PlayerInventory inv = mc.player.getInventory();
-        String query = refill_query.replaceAll("_", " ");
+        String query = refill_query.replace("_", " ");
         for (int i = 0; i <= 35; i++) {
             ItemStack stack = inv.getStack(i);
             if (stack.isEmpty()) continue;
-            String id = Utils.getSkyblockId(stack).replaceAll("_", " ");
+            String id = Utils.getSkyblockId(stack).replace("_", " ");
             String name = Utils.toPlain(stack.getName());
             if (query.equalsIgnoreCase(id) || query.equalsIgnoreCase(name)) {
                 total += stack.getCount();
@@ -328,6 +321,7 @@ public class Utils {
     }
 
     public static String getCoordsFormatted(String format) {
+        if (mc.player == null) return "";
         BlockPos pos = mc.player.getBlockPos();
         return format(format, pos.getX(), pos.getY(), pos.getZ());
 
@@ -386,13 +380,6 @@ public class Utils {
 
     public static boolean isInHub() {
         return isInArea("Hub");
-    }
-
-    /**
-     * Returns true if the current island is running on a modern Minecraft version and/or running under prediction-based Watchdog.
-     */
-    public static boolean isOnModernIsland() {
-        return modernIslands.contains(SkyblockData.getArea());
     }
 
     public static boolean isInstanceOver() {
@@ -766,7 +753,7 @@ public class Utils {
         int dist = Math.clamp(maxDistance, 0, 256);
         for (int i = 0; i <= dist; i++) {
             BlockPos below = pos.down(i);
-            if (!mc.world.getBlockState(below).isAir()) {
+            if (mc.world != null && !mc.world.getBlockState(below).isAir()) {
                 return below;
             }
         }
@@ -779,7 +766,7 @@ public class Utils {
      * @param replaceUnderscores if true, automatically replace all underscores with spaces
      */
     public static String uppercaseFirst(String text, boolean replaceUnderscores) {
-        return Arrays.stream(replaceUnderscores ? text.replaceAll("_", " ").split("\\s") : text.split("\\s"))
+        return Arrays.stream(replaceUnderscores ? text.replace("_", " ").split("\\s") : text.split("\\s"))
                 .map(word -> Character.toTitleCase(word.charAt(0)) + word.substring(1))
                 .collect(Collectors.joining(" ")).trim();
     }
@@ -809,6 +796,7 @@ public class Utils {
      * Checks if our player entity is currently within an area, made from 2 sets of coordinates.
      */
     public static boolean isInZone(double x1, double y1, double z1, double x2, double y2, double z2) {
+        if (mc.player == null) return false;
         Box area = new Box(x1, y1, z1, x2, y2, z2);
         return area.contains(mc.player.getEntityPos());
     }
@@ -957,7 +945,7 @@ public class Utils {
     }
 
     public static String toID(String string) {
-        return toUpper(string.replace("'s", "").replaceAll(" ", "_"));
+        return toUpper(string.replace("'s", "").replace(" ", "_"));
     }
 
     /**
@@ -1119,7 +1107,9 @@ public class Utils {
     }
 
     public static void runCommand(String string) {
-        mc.player.networkHandler.sendChatCommand(string);
+        if (mc.player != null && mc.player.networkHandler != null) {
+            mc.player.networkHandler.sendChatCommand(string);
+        }
     }
 
     public static Vector2d getMousePos() {

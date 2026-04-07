@@ -11,6 +11,7 @@ public final class ImmutableClassToInstanceMap<B> {
     private final int[] table; // hash table (indexes into keys[])
     private final int mask;
 
+    @SuppressWarnings("rawtypes")
     private static final ImmutableClassToInstanceMap<?> EMPTY =
             new ImmutableClassToInstanceMap<>(new Class[0], new Object[0]);
 
@@ -95,6 +96,7 @@ public final class ImmutableClassToInstanceMap<B> {
     // ---------------- Builder ----------------
 
     public static final class Builder<B> {
+        @SuppressWarnings({"rawtypes", "RedundantSuppression"})
         private Class<? extends B>[] keys = new Class[8];
         private Object[] values = new Object[8];
         private int size = 0;
