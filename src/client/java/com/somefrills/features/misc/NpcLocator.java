@@ -5,9 +5,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.config.misc.MiscCategory;
 import com.somefrills.config.misc.MiscCategory.NpcLocatorConfig;
 import com.somefrills.events.WorldRenderEvent;
+import com.somefrills.events.WorldTickEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
@@ -22,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.somefrills.Main.mc;
 
 public class NpcLocator extends Feature {
     private static final ConcurrentHashMap<String, NpcLocation> npcLocations = new ConcurrentHashMap<>();
@@ -39,6 +41,20 @@ public class NpcLocator extends Feature {
 
     private static void onColorConfigChanged(ChromaColour newColor) {
         color = RenderColor.fromChroma(newColor);
+    }
+
+    @EventHandler
+    public void onWorldTick(WorldTickEvent event){
+        if(!config.autoRemoveWaypoint) return;
+        if(mc.player == null) return;
+        if(npcLocations.isEmpty()) return;
+
+        Vec3d playerPos = mc.player.getEyePos();
+        npcLocations.entrySet().removeIf(entry -> {
+            Vec3d npcPos = entry.getValue().position;
+            double distance = playerPos.distanceTo(npcPos);
+            return distance <= config.waypointRemoveDistance;
+        });
     }
 
     @EventHandler

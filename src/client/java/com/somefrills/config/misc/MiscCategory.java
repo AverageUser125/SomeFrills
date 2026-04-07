@@ -1,10 +1,7 @@
 package com.somefrills.config.misc;
 
 import io.github.notenoughupdates.moulconfig.ChromaColour;
-import io.github.notenoughupdates.moulconfig.annotations.Accordion;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
+import io.github.notenoughupdates.moulconfig.annotations.*;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public class MiscCategory {
@@ -61,6 +58,14 @@ public class MiscCategory {
         @ConfigOption(name = "Color", desc = "Rendering color for NPC locator")
         @ConfigEditorColour
         public Property<ChromaColour> color = Property.of(ChromaColour.fromStaticRGB(255, 100, 100, 255));
+
+        @ConfigOption(name = "Auto Remove Waypoint", desc = "Automatically remove NPC waypoints when you get close to them")
+        @ConfigEditorBoolean
+        public boolean autoRemoveWaypoint;
+
+        @ConfigOption(name = "Waypoint Remove Distance", desc = "Distance threshold for automatically removing NPC waypoints")
+        @ConfigEditorSlider(minValue = 1.0f, maxValue = 20.0f, minStep = 0.5f)
+        public float waypointRemoveDistance = 6.0f;
     }
 
     @Accordion
