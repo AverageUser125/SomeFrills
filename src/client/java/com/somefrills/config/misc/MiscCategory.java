@@ -1,7 +1,9 @@
 package com.somefrills.config.misc;
 
+import io.github.notenoughupdates.moulconfig.ChromaColour;
 import io.github.notenoughupdates.moulconfig.annotations.Accordion;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorColour;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
@@ -33,6 +35,32 @@ public class MiscCategory {
         @ConfigOption(name = "Enabled", desc = "Highlight entities based on name, type, or both")
         @ConfigEditorBoolean
         public Property<Boolean> enabled = Property.of(false);
+    }
+
+    @Accordion
+    @ConfigOption(name = "NPC Locator", desc = "Locate and track NPCs")
+    public NpcLocatorConfig npcLocator = new NpcLocatorConfig();
+
+    public static class NpcLocatorConfig {
+        @ConfigOption(name = "Enabled", desc = "Locate and track NPCs")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(false);
+
+        @ConfigOption(name = "Beacon Beam", desc = "Show beacon beam to NPCs")
+        @ConfigEditorBoolean
+        public boolean beaconBeam = false;
+
+        @ConfigOption(name = "Tracer", desc = "Show tracer lines to NPCs")
+        @ConfigEditorBoolean
+        public boolean tracer = true;
+
+        @ConfigOption(name = "Outline Box", desc = "Show outline box around NPCs")
+        @ConfigEditorBoolean
+        public boolean outlineBox = false;
+
+        @ConfigOption(name = "Color", desc = "Rendering color for NPC locator")
+        @ConfigEditorColour
+        public Property<ChromaColour> color = Property.of(ChromaColour.fromStaticRGB(255, 100, 100, 255));
     }
 
     @Accordion

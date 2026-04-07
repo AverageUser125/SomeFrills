@@ -2,6 +2,7 @@ package com.somefrills.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -21,6 +22,14 @@ public class SomeFrillsCommand {
     private static final LiteralArgumentBuilder<FabricClientCommandSource> queueCommandBuilder =
             ClientCommandManager.literal("queue")
                     .executes(context -> SINGLE_SUCCESS);
+
+    /**
+     * Checks if a command with the given name already exists at the top level of the dispatcher.
+     */
+    private static boolean commandExists(CommandDispatcher<FabricClientCommandSource> dispatcher, String commandName) {
+        CommandNode<FabricClientCommandSource> root = dispatcher.getRoot();
+        return root.getChild(commandName) != null;
+    }
 
     public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher) {
 
@@ -61,18 +70,41 @@ public class SomeFrillsCommand {
         commandMain.then(GlowPlayerCommand.getBuilder());
         commandShort.then(GlowPlayerCommand.getBuilder());
 
-        // Register entityhighlight as a subcommand and also as a top-level alias
+        // Register glowmob as a subcommand and also as a top-level alias
         commandMain.then(GlowMobCommand.getBuilder());
         commandShort.then(GlowMobCommand.getBuilder());
+
+        // Register npclocator as a subcommand and also as a top-level alias
+        commandMain.then(NpcLocatorCommand.getBuilder());
+        commandShort.then(NpcLocatorCommand.getBuilder());
 
         dispatcher.register(commandMain);
         dispatcher.register(commandShort);
 
         // Top-level registration for /glowplayer
-        dispatcher.register(GlowPlayerCommand.getBuilder());
+        if (!commandExists(dispatcher, "glowplayer")) {
+            dispatcher.register(GlowPlayerCommand.getBuilder());
+        }
 
         // Top-level registration for /entityhighlight
-        dispatcher.register(GlowMobCommand.getBuilder());
+        if (!commandExists(dispatcher, "entityhighlight")) {
+            dispatcher.register(GlowMobCommand.getBuilder());
+        }
+
+        // Top-level registration for /npclocator
+        if (!commandExists(dispatcher, "npclocator")) {
+            dispatcher.register(NpcLocatorCommand.getBuilder());
+        }
+
+        // Register locatenpc alias as a subcommand and also as a top-level alias
+        var locateNpcAlias = ClientCommandManager.literal("locatenpc").redirect(NpcLocatorCommand.getBuilder().build());
+        commandMain.then(locateNpcAlias);
+        commandShort.then(locateNpcAlias);
+
+        // Alias for /locatenpc
+        if (!commandExists(dispatcher, "locatenpc")) {
+            dispatcher.register(locateNpcAlias);
+        }
     }
 
     public static class ModCommand {
