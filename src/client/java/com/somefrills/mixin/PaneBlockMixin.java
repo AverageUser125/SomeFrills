@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(PaneBlock.class)
 public abstract class PaneBlockMixin {
 
-    @ModifyReturnValue(method = "updateShape", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getStateForNeighborUpdate", at = @At("RETURN"))
     private BlockState onGetUpdateState(BlockState original) {
         if (FrillsConfig.instance.mining.gemstoneDesyncFixEnabled.get()
                 && GemstoneDesyncFix.isDefaultPane(original)) {
