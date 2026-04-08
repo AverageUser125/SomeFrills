@@ -66,10 +66,16 @@ public class RenderColor {
     }
 
     public static RenderColor fromChroma(ChromaColour colour) {
+        if(colour == null) {
+            return RenderColor.white;
+        }
         return RenderColor.ofArgb(colour.getEffectiveColourRGB()).withAlpha(colour.getAlpha() / 255.0f);
     }
 
     public static RenderColor fromFormatting(Formatting formatting) {
+        if(formatting == null) {
+            return RenderColor.white;
+        }
         int color = formatting.getColorValue();
         if (color == -1) {
             return RenderColor.white;

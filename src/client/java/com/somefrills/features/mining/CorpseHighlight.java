@@ -86,8 +86,10 @@ public class CorpseHighlight extends Feature {
                     if (openedCorpses.contains(stand.getId()) || Utils.isGlowing(stand)) {
                         continue;
                     }
-                    RenderColor color = RenderColor.fromChroma(getCorpseColor(getCorpseType(stand)));
-                    if (color != null) Utils.setGlowing(stand, true, color);
+                    var colour = getCorpseColor(getCorpseType(stand));
+                    if (colour == null) continue;
+                    RenderColor color = RenderColor.fromChroma(colour);
+                    Utils.setGlowing(stand, true, color);
                 }
             }
         }
