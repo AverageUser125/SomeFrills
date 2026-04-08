@@ -1,6 +1,7 @@
 package com.somefrills.config;
 
 import com.somefrills.Main;
+import com.somefrills.misc.Utils;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import io.github.notenoughupdates.moulconfig.gui.GuiContext;
@@ -17,8 +18,6 @@ public class ModMenuIntegration implements ModMenuApi {
     }
 
     private static Screen getConfigScreen(Screen previous) {
-        var editor = Main.config.getEditor();
-        GuiContext guiContext = new GuiContext(new GuiElementComponent(editor));
-        return new MoulConfigScreenComponent(Text.empty(), guiContext, previous);
+        return Utils.getGuiScreen(previous);
     }
 }

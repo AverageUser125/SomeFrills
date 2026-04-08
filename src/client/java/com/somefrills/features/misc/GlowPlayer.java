@@ -3,10 +3,13 @@ package com.somefrills.features.misc;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.EntityUpdatedEvent;
+import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.Formatting;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,15 +49,25 @@ public class GlowPlayer extends Feature {
     }
 
     @EventHandler
+    private void onServerJoin(ServerJoinEvent event) {
+        for (Entity entity : Utils.getEntities()) {
+            applyHighlight(entity);
+        }
+    }
+
+    @EventHandler
     public void onEntityUpdate(EntityUpdatedEvent event) {
         if (!isActive()) return;
         var entity = event.entity;
-        if (entity instanceof AbstractClientPlayerEntity player) {
-            String pureName = convertToPureName(player.getName().getString());
-            RenderColor color = getColor(pureName);
-            if (color != null) {
-                Utils.setGlowing(entity, true, color);
-            }
+        applyHighlight(entity);
+    }
+
+    private static void applyHighlight(Entity entity) {
+        if (!(entity instanceof AbstractClientPlayerEntity player)) return;
+        String pureName = convertToPureName(player.getName().getString());
+        RenderColor color = getColor(pureName);
+        if (color != null) {
+            Utils.setGlowing(entity, true, color);
         }
     }
 

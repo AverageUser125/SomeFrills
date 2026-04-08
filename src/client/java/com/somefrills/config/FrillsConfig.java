@@ -1,5 +1,6 @@
 package com.somefrills.config;
 
+import com.google.gson.annotations.Expose;
 import com.somefrills.config.about.AboutCategory;
 import com.somefrills.config.farming.FarmingCategory;
 import com.somefrills.config.mining.MiningCategory;
@@ -23,16 +24,22 @@ public class FrillsConfig extends Config {
         return StructuredText.of("Some Frills Config");
     }
 
+    @Expose
     @Category(name = "About", desc = "Information and update settings")
     public AboutCategory about = new AboutCategory();
+    @Expose
     @Category(name = "Solvers", desc = "Settings for puzzle solvers")
     public SolverCategory solvers = new SolverCategory();
+    @Expose
     @Category(name = "Tweaks/Fixes", desc = "Settings for various tweaks and fixes")
     public TweaksCategory tweaks = new TweaksCategory();
+    @Expose
     @Category(name = "Farming", desc = "Settings for farming helpers")
     public FarmingCategory farming = new FarmingCategory();
+    @Expose
     @Category(name = "Mining", desc = "Settings for mining helpers")
     public MiningCategory mining = new MiningCategory();
+    @Expose
     @Category(name = "Misc", desc = "Settings for miscellaneous features")
     public MiscCategory misc = new MiscCategory();
 
