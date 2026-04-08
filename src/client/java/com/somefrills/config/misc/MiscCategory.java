@@ -1,39 +1,10 @@
 package com.somefrills.config.misc;
 
-import com.somefrills.features.misc.AutoUpdate;
 import io.github.notenoughupdates.moulconfig.ChromaColour;
 import io.github.notenoughupdates.moulconfig.annotations.*;
 import io.github.notenoughupdates.moulconfig.observer.Property;
-import kotlin.jvm.Transient;
 
 public class MiscCategory {
-    @Accordion
-    @ConfigOption(name = "Auto Update", desc = "Automatically update the mod when a new version is available")
-    public AutoUpdateConfig autoUpdate = new AutoUpdateConfig();
-
-    public static class AutoUpdateConfig {
-
-        @ConfigOption(name = "Update Immediately", desc = "Starts a manual update check")
-        @ConfigEditorButton
-        @Transient
-        public Runnable checkForUpdatesButton = AutoUpdate::checkUpdate;
-
-        @ConfigOption(name = "Enabled", desc = "Automatically update the mod when a new version is available")
-        @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(false);
-
-        @ConfigOption(name = "Show Chat Message", desc = "Show a chat message when an update is available")
-        @ConfigEditorBoolean
-        public boolean showChatMessage = true;
-
-        @ConfigOption(name = "Auto Download", desc = "Automatically download updates without asking")
-        @ConfigEditorBoolean
-        public boolean autoDownload = true;
-
-        @ConfigOption(name = "Auto Apply", desc = "Automatically apply updates after downloading (requires game restart)")
-        @ConfigEditorBoolean
-        public boolean autoApply = false;
-    }
 
     @Accordion
     @ConfigOption(name = "Glow Player", desc = "Make players glow through walls")

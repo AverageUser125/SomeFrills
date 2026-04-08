@@ -5,6 +5,8 @@ import com.somefrills.commands.SomeFrillsCommand;
 import com.somefrills.config.ConfigMapper;
 import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.config.about.ConfigVersionDisplay;
+import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ClientDisconnectEvent;
 import com.somefrills.events.OverlayMsgEvent;
@@ -75,6 +77,7 @@ public class Main implements ClientModInitializer {
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
         var file = FabricLoader.getInstance().getConfigDir().resolve("somefrills.json").toFile();
         var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
+        builder.customProcessor(ConfigVersionDisplay.class, (option, annotation) -> new GuiOptionEditorUpdateCheck(option));
         builder.setCheckExpose(false);
         builder.setMapper(new ConfigMapper());
         config = new ManagedConfig<>(builder);

@@ -1,7 +1,7 @@
 package com.somefrills.config;
 
 import com.somefrills.Main;
-import com.somefrills.misc.UpdateManager;
+import com.somefrills.features.update.UpdateManager;
 import com.terraformersmc.modmenu.api.*;
 import io.github.notenoughupdates.moulconfig.gui.GuiContext;
 import io.github.notenoughupdates.moulconfig.gui.GuiElementComponent;

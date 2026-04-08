@@ -1,5 +1,6 @@
 package com.somefrills.config;
 
+import com.somefrills.config.about.AboutCategory;
 import com.somefrills.config.farming.FarmingCategory;
 import com.somefrills.config.mining.MiningCategory;
 import com.somefrills.config.misc.MiscCategory;
@@ -22,6 +23,8 @@ public class FrillsConfig extends Config {
         return StructuredText.of("Some Frills Config");
     }
 
+    @Category(name = "About", desc = "Information and update settings")
+    public AboutCategory about = new AboutCategory();
     @Category(name = "Solvers", desc = "Settings for puzzle solvers")
     public SolverCategory solvers = new SolverCategory();
     @Category(name = "Tweaks/Fixes", desc = "Settings for various tweaks and fixes")
@@ -32,4 +35,5 @@ public class FrillsConfig extends Config {
     public MiningCategory mining = new MiningCategory();
     @Category(name = "Misc", desc = "Settings for miscellaneous features")
     public MiscCategory misc = new MiscCategory();
+
 }

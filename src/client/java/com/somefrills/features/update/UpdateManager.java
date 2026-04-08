@@ -1,4 +1,4 @@
-package com.somefrills.misc;
+package com.somefrills.features.update;
 
 import moe.nea.libautoupdate.CurrentVersion;
 import moe.nea.libautoupdate.PotentialUpdate;
@@ -51,6 +51,11 @@ public class UpdateManager {
                                 .getFriendlyString();
 
                         String newestVersionString = element.getAsString();
+
+                        // Normalize both versions by removing "v" prefix if present
+                        currentVersionString = normalizeVersion(currentVersionString);
+                        newestVersionString = normalizeVersion(newestVersionString);
+
                         return parseSemanticVersion(currentVersionString) < parseSemanticVersion(newestVersionString);
                     } catch (Exception e) {
                         LOGGER.error("Failed to compare versions", e);
@@ -77,10 +82,18 @@ public class UpdateManager {
     }
 
     public static String getLatestVersion() {
-        if (potentialUpdate != null) {
-            return potentialUpdate.getUpdate().getVersionNumber().getAsString();
+        if (potentialUpdate != null && potentialUpdate.getUpdate() != null) {
+            String version = potentialUpdate.getUpdate().getVersionNumber().getAsString();
+            return normalizeVersion(version);
         }
         return null;
+    }
+
+    private static String normalizeVersion(String version) {
+        if (version != null && version.startsWith("v")) {
+            return version.substring(1);
+        }
+        return version;
     }
 
     public static boolean isUpdateAvailable() {
