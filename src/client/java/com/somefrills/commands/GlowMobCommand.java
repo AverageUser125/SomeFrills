@@ -47,27 +47,52 @@ public class GlowMobCommand {
                     return 1;
                 }))
                 .then(literal("add")
+                        // Path 1: /glowmob add <type> <color>
                         .then(argument("type", StringArgumentType.word())
                                 .suggests(GlowMobCommand::suggestEntityTypes)
-                                // Optional name - path without name
                                 .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
                                     if (!isGlowMobEnabled()) {
                                         Utils.info("GlowMob feature is disabled.");
                                         return 1;
                                     }
-                                    return addRuleWithColor(ctx, null, color);
+                                    String type = StringArgumentType.getString(ctx, "type");
+                                    if (isValidEntityType(type)) {
+                                        return addRule(null, type, color);
+                                    }
+                                    return 0; // Invalid type, fail silently to try other paths
                                 }))
-                                // Optional name - path with name
+                                // Path 2: /glowmob add <type> <name> <color>
                                 .then(argument("name", StringArgumentType.word())
                                         .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
                                             if (!isGlowMobEnabled()) {
                                                 Utils.info("GlowMob feature is disabled.");
                                                 return 1;
                                             }
-                                            return addRuleWithColor(ctx, StringArgumentType.getString(ctx, "name"), color);
+                                            String type = StringArgumentType.getString(ctx, "type");
+                                            String name = StringArgumentType.getString(ctx, "name");
+
+                                            // Normalize "none" aliases to null
+                                            type = normalizeNoneAlias(type);
+                                            name = normalizeNoneAlias(name);
+
+                                            return addRule(name, type, color);
                                         }))
                                 )
                         )
+                )
+                // Path 3: /glowmob add <name> <color> (for non-entity-type names)
+                .then(argument("name", StringArgumentType.word())
+                        .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
+                            if (!isGlowMobEnabled()) {
+                                Utils.info("GlowMob feature is disabled.");
+                                return 1;
+                            }
+                            String name = StringArgumentType.getString(ctx, "name");
+                            if (!isValidEntityType(name)) {
+                                return addRule(name, null, color);
+                            }
+                            return 0; // Is an entity type, so the type+color path should handle it
+                        }))
                 )
                 .then(literal("remove")
                         .then(literal("all").executes(ctx -> {
@@ -103,20 +128,19 @@ public class GlowMobCommand {
         return true;
     }
 
-    private static int addRuleWithColor(CommandContext<FabricClientCommandSource> ctx, String nameParam, RenderColor color) {
-        String type = StringArgumentType.getString(ctx, "type");
-        String name = nameParam;
-
-        // Normalize "none" aliases to null
-        name = normalizeNoneAlias(name);
-        type = normalizeNoneAlias(type);
-
-        // Validate and normalize name and type
-        if ((name == null || name.isEmpty()) && (type == null || type.isEmpty())) {
-            Utils.info("At least one of name or type must be specified (not both 'none').");
-            return 1;
+    private static boolean isValidEntityType(String value) {
+        for (var entityType : Registries.ENTITY_TYPE) {
+            String id = Registries.ENTITY_TYPE.getId(entityType).toString();
+            id = Utils.stripPrefix(id, "minecraft:");
+            if (id.equalsIgnoreCase(value)) {
+                return true;
+            }
         }
+        return false;
+    }
 
+
+    private static int addRule(String name, String type, RenderColor color) {
         boolean added = GlowMob.addRule(name, type, color);
         String colorStr = String.format("#%06X", color.hex);
 
