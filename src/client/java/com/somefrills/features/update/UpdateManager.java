@@ -122,7 +122,10 @@ public class UpdateManager {
             } else {
                 LOGGER.debug("No update available");
             }
-        }, mc);
+        }, mc).exceptionally(e -> {
+            LOGGER.error("[SomeFrills] Failed to check for updates", e);
+            return null;
+        });
     }
 
     public static void queueUpdate() {
