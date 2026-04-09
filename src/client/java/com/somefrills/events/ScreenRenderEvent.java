@@ -2,7 +2,6 @@ package com.somefrills.events;
 
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.somefrills.misc.RenderColor;
-import com.somefrills.misc.Rendering;
 import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.ScreenRect;
@@ -66,8 +65,17 @@ public class ScreenRenderEvent {
         ));
     }
 
+    public static void drawBorder(DrawContext context, int x, int y, int width, int height, int argb) {
+        context.fill(x, y, x + width, y + 1, argb);
+        context.fill(x, y + height - 1, x + width, y + height, argb);
+        context.fill(x, y + 1, x + 1, y + height - 1, argb);
+        context.fill(x + width - 1, y + 1, x + width, y + height - 1, argb);
+    }
+
     public void drawBorder(int slotId, RenderColor color) {
-        this.getSlot(slotId).ifPresent(slot -> Rendering.drawBorder(this.context, slot.x, slot.y, 16, 16, color.argb));
+        this.getSlot(slotId).ifPresent(slot -> {
+            drawBorder(this.context, slot.x, slot.y, 16, 16, color.argb);
+        });
     }
 
     public void drawLabel(int slotId, Text text) {

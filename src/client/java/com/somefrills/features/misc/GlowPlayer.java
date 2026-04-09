@@ -49,7 +49,7 @@ public class GlowPlayer extends Feature {
         for (Entity entity : Utils.getEntities()) {
             if (!(entity instanceof PlayerEntity player)) continue;
             String entityPureName = convertToPureName(player);
-            if (!pureName.equals(entityPureName)) continue;;
+            if (!pureName.equals(entityPureName)) continue;
             Utils.setGlowing(entity, false, RenderColor.white);
             break;
         }
