@@ -185,10 +185,9 @@ public class ExperimentSolver extends Feature {
         switch (experimentType) {
             case Chronomatron:
                 if (!config.chronomatron.enabled) break;
-                if (!rememberPhase) break;
 
-                if (isTerracotta(event.stack) && isValidChronoSlot(event.slot.id)) {
-
+                // Remember phase: collect terracotta items
+                if (rememberPhase && isTerracotta(event.stack) && isValidChronoSlot(event.slot.id)) {
                     currentRoundProgress++;
 
                     // Only add NEW element (the +1 each round)
@@ -202,7 +201,8 @@ public class ExperimentSolver extends Feature {
                     }
                 }
 
-                if (isGlowstone(event.stack)) {
+                // Round finished: clock appears and we have a sequence
+                if (!rememberPhase && isGlowstone(event.stack)) {
                     if (!chronoSequence.isEmpty()) {
                         nextClickIndex = 0;
                         currentRoundProgress = 0;
@@ -216,46 +216,32 @@ public class ExperimentSolver extends Feature {
             case Ultrasequencer:
                 if (!config.ultrasequencer.enabled) break;
 
-                // During reveal phase: collect all dyes as they appear
-                if (rememberPhase && isDye(event.stack)) {
-                    // Find if this slot is already in our solution and update it
-                    boolean found = false;
-                    for (Solution sol : ultraSolution) {
-                        if (sol.slot.id == event.slot.id) {
-                            sol.stack = event.stack.copy();
-                            found = true;
-                            break;
+                // When glowstone appears: scan all slots and collect dyes
+                if (isGlowstone(event.stack)) {
+                    List<Solution> tempSolution = new ArrayList<>();
+                    for (Slot slot : Utils.getContainerSlots(event.handler)) {
+                        if (isDye(slot.getStack())) {
+                            tempSolution.add(new Solution(slot.getStack(), slot));
                         }
                     }
-                    if (!found) {
-                        ultraSolution.add(new Solution(event.stack.copy(), event.slot));
-                    }
-                    LOGGER.info("[Ultrasequencer] Found dye in slot {}: count={}", event.slot.id, event.stack.getCount());
-                }
-
-                // When clock appears: finalize the solution by sorting
-                if (!rememberPhase) {
-                    // Sort by count (ascending order - click smallest stack first)
-                    ultraSolution.sort(Comparator.comparingInt(s -> s.stack.getCount()));
+                    tempSolution.sort(Comparator.comparingInt(s -> s.stack.getCount()));
+                    ultraSolution.clear();
+                    ultraSolution.addAll(tempSolution);
+                    // initialize/reset ultrasequencer initial size when a new solution appears
                     ultraSolutionInitialSize = ultraSolution.size();
-                    LOGGER.info("[Ultrasequencer] Solution finalized with {} items in order", ultraSolution.size());
-                    for (int i = 0; i < ultraSolution.size(); i++) {
-                        LOGGER.info("[Ultrasequencer] Item {}: slot {} count {}", i, ultraSolution.get(i).slot.id, ultraSolution.get(i).stack.getCount());
-                    }
                 }
                 break;
 
             case Superpairs:
                 if (!config.superpairs.enabled) break;
-                if (isPowerup(event.stack)) {
-                    SlotOptions.setBackground(event.slot, RenderColor.fromChroma(config.superpairs.powerupColor));
-                    return;
-                }
                 if (Utils.isStainedGlass(event.stack) || Utils.isStainedGlassPane(event.stack) || event.stack.getItem().equals(Items.AIR)) {
                     break;
                 }
 
-                // Check if current slot matches the first slot of current pair
+                // Spoof this slot to keep it visible
+                SlotOptions.setSpoofed(event.slot, event.stack);
+
+                // Check if current slot matches the last clicked slot (superSlot) - a matched pair!
                 if (superSlot != null && superSlot != event.slot) {
                     if (matchSuperStacks(event.stack, superSlot.getStack())) {
                         var color = RenderColor.fromChroma(config.superpairs.matchedColor);
@@ -263,18 +249,24 @@ public class ExperimentSolver extends Feature {
                         SlotOptions.setBackground(superSlot, color);
                     }
                 }
-                // Check if current slot matches any previously seen card
-                for (Map.Entry<Slot, ItemStack> solution : superRewards.entrySet()) {
-                    if (!SlotOptions.hasBackground(event.slot) && !event.slot.equals(solution.getKey()) && matchSuperStacks(event.stack, solution.getValue())) {
+
+                // Check if current slot matches any previously revealed card - a possible pair!
+                for (Map.Entry<Slot, ItemStack> entry : superRewards.entrySet()) {
+                    if (!event.slot.equals(entry.getKey()) && matchSuperStacks(event.stack, entry.getValue())) {
                         var color = RenderColor.fromChroma(config.superpairs.matchingColor);
                         SlotOptions.setBackground(event.slot, color);
-                        SlotOptions.setBackground(solution.getKey(), color);
+                        SlotOptions.setBackground(entry.getKey(), color);
                     }
                 }
-                // Track this click and set as current slot
+
+                // Check if it's a powerup
+                if (isPowerup(event.stack)) {
+                    SlotOptions.setBackground(event.slot, RenderColor.fromChroma(config.superpairs.powerupColor));
+                }
+
+                // Track this card and set as current slot for next comparison
                 superRewards.put(event.slot, event.stack);
                 superSlot = event.slot;
-                SlotOptions.setSpoofed(event.slot, event.stack);
                 break;
         }
     }
