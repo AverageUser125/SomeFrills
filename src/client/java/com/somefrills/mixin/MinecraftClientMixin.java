@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static com.somefrills.Main.eventBus;
 
-@Mixin(MinecraftClient.class)
+@Mixin(value = MinecraftClient.class, priority = 999)
 public abstract class MinecraftClientMixin {
     @Shadow
     @Nullable

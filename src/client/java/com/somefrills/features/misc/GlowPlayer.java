@@ -7,6 +7,7 @@ import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -74,7 +75,7 @@ public class GlowPlayer extends Feature {
         }
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onEntityUpdate(EntityUpdatedEvent event) {
         if (!isActive()) return;
         var entity = event.entity;

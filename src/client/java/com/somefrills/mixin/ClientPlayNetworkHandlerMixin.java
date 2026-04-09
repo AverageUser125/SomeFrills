@@ -1,4 +1,3 @@
-// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;

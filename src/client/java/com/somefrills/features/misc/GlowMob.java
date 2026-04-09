@@ -35,7 +35,6 @@ public class GlowMob extends Feature {
             Utils.setGlowing(entity, true, rule.color);
             return;
         }
-        Utils.setGlowing(entity, false, RenderColor.white);
     }
 
     /**
@@ -53,11 +52,17 @@ public class GlowMob extends Feature {
      */
     public static boolean removeRule(String name, String type) {
         String ruleKey = generateRuleKey(name, type);
-        boolean removed = rules.remove(ruleKey) != null;
-        if (removed) {
-            updateAllEntities();
+        GlowMobRule removedRule = rules.remove(ruleKey);
+        if (removedRule == null) {
+            return false;
         }
-        return removed;
+        // Clear glow only for entities that matched the removed rule
+        for (Entity entity : Utils.getEntities()) {
+            if (removedRule.matches(entity)) {
+                Utils.setGlowing(entity, false, RenderColor.white);
+            }
+        }
+        return true;
     }
 
     /**
