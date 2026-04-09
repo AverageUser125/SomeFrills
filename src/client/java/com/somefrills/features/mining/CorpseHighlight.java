@@ -31,10 +31,6 @@ public class CorpseHighlight extends Feature {
         config = FrillsConfig.instance.mining.corpseHighlight;
     }
 
-    private boolean active() {
-        return isActive() && Utils.isInArea("Mineshaft");
-    }
-
     private static CorpseType getCorpseType(ArmorStandEntity ent) {
         var armor = Utils.getEntityArmor(ent);
         if (armor.isEmpty()) return CorpseType.None;
@@ -47,16 +43,6 @@ public class CorpseHighlight extends Feature {
             case "Yog Helmet" -> CorpseType.Umber;
             case "Vanguard Helmet" -> CorpseType.Vanguard;
             default -> CorpseType.None;
-        };
-    }
-
-    private ChromaColour getCorpseColor(CorpseType type) {
-        return switch (type) {
-            case Lapis -> config.lapisColor;
-            case Tungsten -> config.mineralColor;
-            case Umber -> config.yogColor;
-            case Vanguard -> config.vanguardColor;
-            default -> null;
         };
     }
 
@@ -78,6 +64,20 @@ public class CorpseHighlight extends Feature {
             }
         }
         return false;
+    }
+
+    private boolean active() {
+        return isActive() && Utils.isInArea("Mineshaft");
+    }
+
+    private ChromaColour getCorpseColor(CorpseType type) {
+        return switch (type) {
+            case Lapis -> config.lapisColor;
+            case Tungsten -> config.mineralColor;
+            case Umber -> config.yogColor;
+            case Vanguard -> config.vanguardColor;
+            default -> null;
+        };
     }
 
     @EventHandler

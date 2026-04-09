@@ -16,6 +16,15 @@ public class AutoWarpHome extends Feature {
         super(FrillsConfig.instance.farming.autoWarpHomeEnabled);
     }
 
+    private static PestStatus checkAliveState(List<String> tabListLines) {
+        for (String line : tabListLines) {
+            if (line.contains("Alive")) {
+                return line.contains("0") ? PestStatus.CLEARED : PestStatus.PRESENT;
+            }
+        }
+        return PestStatus.UNKNOWN;
+    }
+
     @EventHandler
     private void onWorldTick(TabListUpdateEvent event) {
         if (!isActive()) return;
@@ -42,15 +51,6 @@ public class AutoWarpHome extends Feature {
     @EventHandler
     private void onJoin(ServerJoinEvent event) {
         lastStatus = PestStatus.UNKNOWN;
-    }
-
-    private static PestStatus checkAliveState(List<String> tabListLines) {
-        for (String line : tabListLines) {
-            if (line.contains("Alive")) {
-                return line.contains("0") ? PestStatus.CLEARED : PestStatus.PRESENT;
-            }
-        }
-        return PestStatus.UNKNOWN;
     }
 
     public enum PestStatus {

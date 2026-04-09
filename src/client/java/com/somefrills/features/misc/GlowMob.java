@@ -27,23 +27,6 @@ public class GlowMob extends Feature {
         super(FrillsConfig.instance.misc.glowMob.enabled);
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    private void onEntityUpdate(EntityUpdatedEvent event) {
-        if (!isActive()) return;
-
-        Entity entity = event.entity;
-        if (!(entity instanceof LivingEntity)) return;
-
-        applyHighlight(entity);
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    private void onServerJoin(ServerJoinEvent event) {
-        for (Entity entity : Utils.getEntities()) {
-            applyHighlight(entity);
-        }
-    }
-
     private static void applyHighlight(Entity entity) {
         for (GlowMobRule rule : rules.values()) {
             if (!rule.matches(entity)) {
@@ -111,6 +94,23 @@ public class GlowMob extends Feature {
         String n = (name == null || name.isEmpty()) ? "ANY" : name.toLowerCase();
         String t = (type == null || type.isEmpty()) ? "ANY" : type.toLowerCase();
         return n + ":" + t;
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    private void onEntityUpdate(EntityUpdatedEvent event) {
+        if (!isActive()) return;
+
+        Entity entity = event.entity;
+        if (!(entity instanceof LivingEntity)) return;
+
+        applyHighlight(entity);
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    private void onServerJoin(ServerJoinEvent event) {
+        for (Entity entity : Utils.getEntities()) {
+            applyHighlight(entity);
+        }
     }
 
     /**

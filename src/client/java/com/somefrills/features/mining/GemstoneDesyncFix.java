@@ -30,11 +30,6 @@ public class GemstoneDesyncFix extends Feature {
         super(FrillsConfig.instance.mining.gemstoneDesyncFixEnabled);
     }
 
-    public boolean active() {
-        return isActive() && islands.contains(SkyblockData.getArea());
-    }
-
-
     public static boolean isDefaultPane(BlockState state) {
         return Utils.isStainedGlass(state) && !isConnectedPane(state);
     }
@@ -45,6 +40,10 @@ public class GemstoneDesyncFix extends Feature {
 
     public static BlockState asFullPane(BlockState state) {
         return state.with(NORTH, true).with(EAST, true).with(SOUTH, true).with(WEST, true);
+    }
+
+    public boolean active() {
+        return isActive() && islands.contains(SkyblockData.getArea());
     }
 
     @EventHandler

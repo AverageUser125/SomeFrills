@@ -16,9 +16,9 @@ import net.minecraft.util.math.Box;
 
 public class GhostVision extends Feature {
 
-    private final GhostVisionConfig config;
     private static final EntityCache cache = new EntityCache();
     private static boolean inDwarvenMines = false;
+    private final GhostVisionConfig config;
 
     public GhostVision() {
         super(FrillsConfig.instance.mining.ghostVision.enabled);

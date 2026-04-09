@@ -28,9 +28,9 @@ import static com.somefrills.Main.mc;
 public class NpcLocator extends Feature {
     private static final ConcurrentHashMap<String, NpcLocation> npcLocations = new ConcurrentHashMap<>();
     private static RenderColor color = new RenderColor(255, 100, 100, 255);
-    private final NpcLocatorConfig config;
     private static String cachedIsland = null;
     private static Map<String, Vec3d> cachedNpcs = new HashMap<>();
+    private final NpcLocatorConfig config;
 
     public NpcLocator() {
         super(FrillsConfig.instance.misc.npcLocator.enabled);
@@ -41,37 +41,6 @@ public class NpcLocator extends Feature {
 
     private static void onColorConfigChanged(ChromaColour newColor) {
         color = RenderColor.fromChroma(newColor);
-    }
-
-    @EventHandler
-    public void onWorldTick(WorldTickEvent event) {
-        if (!config.autoRemoveWaypoint) return;
-        if (mc.player == null) return;
-        if (npcLocations.isEmpty()) return;
-
-        Vec3d playerPos = mc.player.getEyePos();
-        npcLocations.entrySet().removeIf(entry -> {
-            Vec3d npcPos = entry.getValue().position;
-            double distance = playerPos.distanceTo(npcPos);
-            return distance <= config.waypointRemoveDistance;
-        });
-    }
-
-    @EventHandler
-    public void onRenderEvent(WorldRenderEvent event) {
-        for (var npc : npcLocations.values()) {
-            Vec3d center = npc.position.add(0.5, 0, 0.5);
-            if (config.beaconBeam) {
-                event.drawBeam(center, 255, true, color);
-            }
-            if (config.tracer) {
-                event.drawTracer(center, color);
-            }
-            if (config.outlineBox) {
-                Box box = new Box(npc.position.subtract(0, 1, 0), npc.position.add(1, 1, 1));
-                event.drawOutline(box, true, color);
-            }
-        }
     }
 
     public static void addNpcLocation(String npcName) {
@@ -101,9 +70,6 @@ public class NpcLocator extends Feature {
     public static Set<String> getAvailableNpcsForCurrentIsland() {
         ensureCacheLoaded();
         return cachedNpcs.keySet();
-    }
-
-    public record NpcLocation(String npcName, Vec3d position) {
     }
 
     private static void ensureCacheLoaded() {
@@ -187,6 +153,40 @@ public class NpcLocator extends Feature {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    @EventHandler
+    public void onWorldTick(WorldTickEvent event) {
+        if (!config.autoRemoveWaypoint) return;
+        if (mc.player == null) return;
+        if (npcLocations.isEmpty()) return;
+
+        Vec3d playerPos = mc.player.getEyePos();
+        npcLocations.entrySet().removeIf(entry -> {
+            Vec3d npcPos = entry.getValue().position;
+            double distance = playerPos.distanceTo(npcPos);
+            return distance <= config.waypointRemoveDistance;
+        });
+    }
+
+    @EventHandler
+    public void onRenderEvent(WorldRenderEvent event) {
+        for (var npc : npcLocations.values()) {
+            Vec3d center = npc.position.add(0.5, 0, 0.5);
+            if (config.beaconBeam) {
+                event.drawBeam(center, 255, true, color);
+            }
+            if (config.tracer) {
+                event.drawTracer(center, color);
+            }
+            if (config.outlineBox) {
+                Box box = new Box(npc.position.subtract(0, 1, 0), npc.position.add(1, 1, 1));
+                event.drawOutline(box, true, color);
+            }
+        }
+    }
+
+    public record NpcLocation(String npcName, Vec3d position) {
     }
 }
 

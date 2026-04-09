@@ -22,6 +22,16 @@ public class EntityMixin implements EntityRendering {
     @Unique
     private RenderColor glowColor;
 
+    @Unique
+    private static String formatHealth(float health) {
+        if (health >= 1000.0f) {
+            float thousands = health / 1000.0f;
+            return String.format("%.1fk", thousands);
+        } else {
+            return String.format("%.0f", health);
+        }
+    }
+
     @Override
     public void somefrills_mod$setGlowingColored(boolean glowing, RenderColor color) {
         glowRender = glowing;
@@ -114,16 +124,6 @@ public class EntityMixin implements EntityRendering {
                     .append(Text.literal("❤").styled(style -> style.withColor(Formatting.RED)));
 
             cir.setReturnValue(healthDisplay);
-        }
-    }
-
-    @Unique
-    private static String formatHealth(float health) {
-        if (health >= 1000.0f) {
-            float thousands = health / 1000.0f;
-            return String.format("%.1fk", thousands);
-        } else {
-            return String.format("%.0f", health);
         }
     }
 }

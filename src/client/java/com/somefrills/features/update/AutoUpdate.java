@@ -15,11 +15,6 @@ public class AutoUpdate extends Feature {
         super(FrillsConfig.instance.about.checkForUpdates);
     }
 
-    @EventHandler
-    public void onServerJoin(ServerJoinEvent event) {
-        checkUpdate();
-    }
-
     public static void checkUpdate() {
         if (hasCheckedThisSession) return;
         hasCheckedThisSession = true;
@@ -32,5 +27,10 @@ public class AutoUpdate extends Feature {
         boolean autoQueue = FrillsConfig.instance.about.fullAutoUpdates;
         LOGGER.debug("Performing automatic update check (autoQueue: {})", autoQueue);
         UpdateManager.checkUpdate(autoQueue);
+    }
+
+    @EventHandler
+    public void onServerJoin(ServerJoinEvent event) {
+        checkUpdate();
     }
 }

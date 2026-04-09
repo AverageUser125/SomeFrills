@@ -21,6 +21,16 @@ import static com.somefrills.Main.eventBus;
 
 @Mixin(ClientConnection.class)
 public abstract class ClientConnectionMixin {
+    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
+    private static void onPacketReceive(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
+        if (packet instanceof CommonPingS2CPacket pingPacket && pingPacket.getParameter() != 0) {
+            eventBus.post(new ServerTickEvent());
+        }
+        if (eventBus.post(new ReceivePacketEvent(packet)).isCancelled()) {
+            ci.cancel();
+        }
+    }
+
     @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("HEAD"), cancellable = true)
     private void glowplayer$interceptPackets(Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof CustomPayloadC2SPacket(CustomPayload payload)) {
@@ -30,16 +40,6 @@ public abstract class ClientConnectionMixin {
                 LOGGER.debug("Intercepted mod list packet, cancelling to prevent server from knowing about SomeFrills");
                 ci.cancel();
             }
-        }
-    }
-
-    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
-    private static void onPacketReceive(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
-        if (packet instanceof CommonPingS2CPacket pingPacket && pingPacket.getParameter() != 0) {
-            eventBus.post(new ServerTickEvent());
-        }
-        if (eventBus.post(new ReceivePacketEvent(packet)).isCancelled()) {
-            ci.cancel();
         }
     }
 

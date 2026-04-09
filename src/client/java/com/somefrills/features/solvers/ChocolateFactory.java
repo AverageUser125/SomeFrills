@@ -20,8 +20,8 @@ import net.minecraft.text.Text;
  * Automatically claims stray rabbits in the Chocolate Factory menu.
  */
 public class ChocolateFactory extends Feature {
-    private final ChocolateFactoryConfig config;
     private static final String CHOCOLATE_FACTORY_TITLE = "Chocolate Factory";
+    private final ChocolateFactoryConfig config;
     private long lastClaimTime = 0;
 
     public ChocolateFactory() {

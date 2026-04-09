@@ -7,12 +7,12 @@ import net.minecraft.client.gui.screen.Screen;
 
 public class ModMenuIntegration implements ModMenuApi {
 
+    private static Screen getConfigScreen(Screen previous) {
+        return Utils.getGuiScreen(previous);
+    }
+
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
         return ModMenuIntegration::getConfigScreen;
-    }
-
-    private static Screen getConfigScreen(Screen previous) {
-        return Utils.getGuiScreen(previous);
     }
 }

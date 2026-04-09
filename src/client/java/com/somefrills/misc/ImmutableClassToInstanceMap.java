@@ -6,14 +6,13 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public final class ImmutableClassToInstanceMap<B> {
 
+    @SuppressWarnings("rawtypes")
+    private static final ImmutableClassToInstanceMap<?> EMPTY =
+            new ImmutableClassToInstanceMap<>(new Class[0], new Object[0]);
     private final Class<? extends B>[] keys;
     private final Object[] values;
     private final int[] table; // hash table (indexes into keys[])
     private final int mask;
-
-    @SuppressWarnings("rawtypes")
-    private static final ImmutableClassToInstanceMap<?> EMPTY =
-            new ImmutableClassToInstanceMap<>(new Class[0], new Object[0]);
 
     private ImmutableClassToInstanceMap(Class<? extends B>[] keys, Object[] values) {
         this.keys = keys;
@@ -27,22 +26,6 @@ public final class ImmutableClassToInstanceMap<B> {
 
         for (int i = 0; i < size; i++) {
             insert(keys[i], i);
-        }
-    }
-
-    private void insert(Class<?> key, int index) {
-        int h = smear(key.hashCode());
-        int i = h & mask;
-
-        while (true) {
-            if (table[i] == -1) {
-                table[i] = index;
-                return;
-            }
-            if (keys[table[i]] == key) {
-                throw new IllegalArgumentException("Duplicate key: " + key);
-            }
-            i = (i + 1) & mask;
         }
     }
 
@@ -66,6 +49,22 @@ public final class ImmutableClassToInstanceMap<B> {
 
     public static <B> Builder<B> builder() {
         return new Builder<>();
+    }
+
+    private void insert(Class<?> key, int index) {
+        int h = smear(key.hashCode());
+        int i = h & mask;
+
+        while (true) {
+            if (table[i] == -1) {
+                table[i] = index;
+                return;
+            }
+            if (keys[table[i]] == key) {
+                throw new IllegalArgumentException("Duplicate key: " + key);
+            }
+            i = (i + 1) & mask;
+        }
     }
 
     public <T extends B> T getInstance(Class<T> type) {

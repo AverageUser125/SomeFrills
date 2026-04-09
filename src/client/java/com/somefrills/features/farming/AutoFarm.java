@@ -16,13 +16,6 @@ import org.lwjgl.glfw.GLFW;
 import static com.somefrills.Main.mc;
 
 public class AutoFarm extends Feature {
-    private final AutoFarmConfig config;
-
-    public AutoFarm() {
-        super(FrillsConfig.instance.farming.autoFarm.enabled);
-        config = FrillsConfig.instance.farming.autoFarm;
-    }
-
     private static final float MIN_YAW_SPEED = 2.0f;
     private static final float MAX_YAW_SPEED = 10.0f;
     private static final float MIN_PITCH_SPEED = 1.0f;
@@ -32,68 +25,16 @@ public class AutoFarm extends Feature {
     // --- smooth key press ---
     private static float forwardPress = 0f;
     private static float sidePress = 0f;
-
     private static boolean applied = false;
     private static float lastTargetYaw = Float.NaN;
-
     private static Direction moveState = Direction.RIGHT;
     private static long lastStateChangeMs = 0;
-
     private static boolean isActive = false;
     private static Direction lastExit = Direction.NONE;
-
-    @EventHandler
-    private void onServerJoin(ServerJoinEvent event) {
-        applied = false;
-        lastTargetYaw = Float.NaN;
-    }
-
-    @EventHandler
-    public void onWorldTick(WorldTickEvent event) {
-        ClientPlayerEntity player = mc.player;
-        if (player == null || !isActive || mc.world == null) return;
-        if (!Utils.isOnGardenPlot()) return;
-
-        // --- check held item ---
-        if (!isHoldingHoe()) {
-            reset();
-            return;
-        }
-
-        if (mc.options == null) return;
-
-        // --- facing interpolation ---
-        float targetYaw = getTargetYaw(player);
-        if (Float.isNaN(lastTargetYaw) || Math.abs(angleDiff(targetYaw, lastTargetYaw)) > 1.0f) {
-            applied = false;
-            lastTargetYaw = targetYaw;
-        }
-
-        if (!applied) {
-            if (interpolateFacing(player, targetYaw)) {
-                applied = true;
-                moveState = Direction.RIGHT;
-                lastStateChangeMs = System.currentTimeMillis();
-                lastExit = Direction.NONE;
-            }
-            return;
-        }
-
-        long now = System.currentTimeMillis();
-
-        // --- block detection ---
-        BlockPos forwardPos = player.getBlockPos().add(1, 0, 0);
-        BlockPos rightPos = player.getBlockPos().add(0, 0, 1);  // DIAG_RIGHT
-        BlockPos leftPos = player.getBlockPos().add(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
-        BlockPos behindPos = player.getBlockPos().add(-1, 0, 0); // for RETURN
-
-        boolean diagRightBlocked = isSolidBlockAt(rightPos);
-        boolean diagLeftBlocked = isSolidBlockAt(leftPos);
-        boolean diagForwardBlocked = isSolidBlockAt(forwardPos);
-        boolean behindBlocked = isSolidBlockAt(behindPos);
-
-        // --- call extracted state handler ---
-        updateMovementState(diagRightBlocked, diagLeftBlocked, diagForwardBlocked, behindBlocked, now);
+    private final AutoFarmConfig config;
+    public AutoFarm() {
+        super(FrillsConfig.instance.farming.autoFarm.enabled);
+        config = FrillsConfig.instance.farming.autoFarm;
     }
 
     private static void updateMovementState(boolean diagRightBlocked,
@@ -256,6 +197,60 @@ public class AutoFarm extends Feature {
     private static boolean isHoldingHoe() {
         String skyblockId = Utils.getSkyblockId(Utils.getHeldItem()).toUpperCase();
         return skyblockId.contains("WHEAT") && skyblockId.contains("HOE");
+    }
+
+    @EventHandler
+    private void onServerJoin(ServerJoinEvent event) {
+        applied = false;
+        lastTargetYaw = Float.NaN;
+    }
+
+    @EventHandler
+    public void onWorldTick(WorldTickEvent event) {
+        ClientPlayerEntity player = mc.player;
+        if (player == null || !isActive || mc.world == null) return;
+        if (!Utils.isOnGardenPlot()) return;
+
+        // --- check held item ---
+        if (!isHoldingHoe()) {
+            reset();
+            return;
+        }
+
+        if (mc.options == null) return;
+
+        // --- facing interpolation ---
+        float targetYaw = getTargetYaw(player);
+        if (Float.isNaN(lastTargetYaw) || Math.abs(angleDiff(targetYaw, lastTargetYaw)) > 1.0f) {
+            applied = false;
+            lastTargetYaw = targetYaw;
+        }
+
+        if (!applied) {
+            if (interpolateFacing(player, targetYaw)) {
+                applied = true;
+                moveState = Direction.RIGHT;
+                lastStateChangeMs = System.currentTimeMillis();
+                lastExit = Direction.NONE;
+            }
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+
+        // --- block detection ---
+        BlockPos forwardPos = player.getBlockPos().add(1, 0, 0);
+        BlockPos rightPos = player.getBlockPos().add(0, 0, 1);  // DIAG_RIGHT
+        BlockPos leftPos = player.getBlockPos().add(0, 0, -1); // DIAG_LEFT (or DIAG_LEFT forward + left)
+        BlockPos behindPos = player.getBlockPos().add(-1, 0, 0); // for RETURN
+
+        boolean diagRightBlocked = isSolidBlockAt(rightPos);
+        boolean diagLeftBlocked = isSolidBlockAt(leftPos);
+        boolean diagForwardBlocked = isSolidBlockAt(forwardPos);
+        boolean behindBlocked = isSolidBlockAt(behindPos);
+
+        // --- call extracted state handler ---
+        updateMovementState(diagRightBlocked, diagLeftBlocked, diagForwardBlocked, behindBlocked, now);
     }
 
     @EventHandler

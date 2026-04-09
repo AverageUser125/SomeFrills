@@ -16,40 +16,6 @@ import static com.somefrills.Main.LOGGER;
 import static com.somefrills.Main.mc;
 
 public class UpdateManager {
-    private static volatile CompletableFuture<?> activePromise = null;
-    private static volatile UpdateState updateState = UpdateState.NONE;
-    private static volatile PotentialUpdate potentialUpdate = null;
-    private static volatile boolean hasCheckedThisSession = false;
-
-    public enum UpdateState {
-        AVAILABLE,
-        QUEUED,
-        DOWNLOADED,
-        NONE
-    }
-
-    public static UpdateState getUpdateState() {
-        return updateState;
-    }
-
-    public static String getCurrentVersion() {
-        return FabricLoader.getInstance()
-                .getModContainer(com.somefrills.Main.MOD_ID)
-                .map(mod -> mod.getMetadata().getVersion().getFriendlyString())
-                .orElse("unknown");
-    }
-
-    public static String getLatestVersion() {
-        if (potentialUpdate != null) {
-            return potentialUpdate.getUpdate().getVersionNumber().getAsString();
-        }
-        return getCurrentVersion();
-    }
-
-    public static boolean isUpdateAvailable() {
-        return updateState == UpdateState.AVAILABLE;
-    }
-
     private static final UpdateContext context = new UpdateContext(
             new CustomGithubReleaseUpdateSource("AverageUser125", "SomeFrills"),
             UpdateTarget.deleteAndSaveInTheSameFolder(UpdateManager.class),
@@ -75,6 +41,32 @@ public class UpdateManager {
             },
             com.somefrills.Main.MOD_ID
     );
+    private static volatile CompletableFuture<?> activePromise = null;
+    private static volatile UpdateState updateState = UpdateState.NONE;
+    private static volatile PotentialUpdate potentialUpdate = null;
+    private static volatile boolean hasCheckedThisSession = false;
+
+    public static UpdateState getUpdateState() {
+        return updateState;
+    }
+
+    public static String getCurrentVersion() {
+        return FabricLoader.getInstance()
+                .getModContainer(com.somefrills.Main.MOD_ID)
+                .map(mod -> mod.getMetadata().getVersion().getFriendlyString())
+                .orElse("unknown");
+    }
+
+    public static String getLatestVersion() {
+        if (potentialUpdate != null) {
+            return potentialUpdate.getUpdate().getVersionNumber().getAsString();
+        }
+        return getCurrentVersion();
+    }
+
+    public static boolean isUpdateAvailable() {
+        return updateState == UpdateState.AVAILABLE;
+    }
 
     public static void reset() {
         updateState = UpdateState.NONE;
@@ -202,5 +194,12 @@ public class UpdateManager {
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
+    }
+
+    public enum UpdateState {
+        AVAILABLE,
+        QUEUED,
+        DOWNLOADED,
+        NONE
     }
 }

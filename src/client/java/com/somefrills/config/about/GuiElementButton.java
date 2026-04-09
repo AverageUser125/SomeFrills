@@ -7,10 +7,9 @@ import java.awt.*;
 
 public class GuiElementButton {
 
-    private String text = "";
-
     public static final int HEIGHT = 18 + 5;
     public int width = -1;
+    private String text = "";
 
     public GuiElementButton() {
     }

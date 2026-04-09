@@ -26,20 +26,6 @@ public class GlowPlayer extends Feature {
         return Formatting.strip(player.getGameProfile().name());
     }
 
-    @EventHandler
-    private void onServerJoin(ServerJoinEvent event) {
-        for (Entity entity : Utils.getEntities()) {
-            applyHighlight(entity);
-        }
-    }
-
-    @EventHandler
-    public void onEntityUpdate(EntityUpdatedEvent event) {
-        if (!isActive()) return;
-        var entity = event.entity;
-        applyHighlight(entity);
-    }
-
     private static void applyHighlight(Entity entity) {
         if (!(entity instanceof PlayerEntity player)) return;
         String pureName = convertToPureName(player);
@@ -79,5 +65,19 @@ public class GlowPlayer extends Feature {
 
     public static void setGlowImmediately(AbstractClientPlayerEntity player, RenderColor color) {
         Utils.setGlowing(player, true, color);
+    }
+
+    @EventHandler
+    private void onServerJoin(ServerJoinEvent event) {
+        for (Entity entity : Utils.getEntities()) {
+            applyHighlight(entity);
+        }
+    }
+
+    @EventHandler
+    public void onEntityUpdate(EntityUpdatedEvent event) {
+        if (!isActive()) return;
+        var entity = event.entity;
+        applyHighlight(entity);
     }
 }
