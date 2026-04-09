@@ -1,12 +1,13 @@
 package com.somefrills.features.update;
 
+import com.google.gson.JsonElement;
 import com.somefrills.misc.Utils;
 import moe.nea.libautoupdate.CurrentVersion;
 import moe.nea.libautoupdate.PotentialUpdate;
 import moe.nea.libautoupdate.UpdateContext;
 import moe.nea.libautoupdate.UpdateTarget;
 import net.fabricmc.loader.api.FabricLoader;
-import com.google.gson.JsonElement;
+
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -50,29 +51,29 @@ public class UpdateManager {
     }
 
     private static final UpdateContext context = new UpdateContext(
-        new CustomGithubReleaseUpdateSource("AverageUser125", "SomeFrills"),
-        UpdateTarget.deleteAndSaveInTheSameFolder(UpdateManager.class),
-        new CurrentVersion() {
-            @Override
-            public String display() {
-                return getCurrentVersion();
-            }
-
-            @Override
-            public boolean isOlderThan(JsonElement element) {
-                if (element == null || !element.isJsonPrimitive()) return false;
-                try {
-                    String asString = element.getAsString();
-                    int currentParsed = parseSemanticVersion(getCurrentVersion());
-                    int latestParsed = parseSemanticVersion(asString);
-                    return currentParsed < latestParsed;
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to compare versions", e);
-                    return false;
+            new CustomGithubReleaseUpdateSource("AverageUser125", "SomeFrills"),
+            UpdateTarget.deleteAndSaveInTheSameFolder(UpdateManager.class),
+            new CurrentVersion() {
+                @Override
+                public String display() {
+                    return getCurrentVersion();
                 }
-            }
-        },
-        com.somefrills.Main.MOD_ID
+
+                @Override
+                public boolean isOlderThan(JsonElement element) {
+                    if (element == null || !element.isJsonPrimitive()) return false;
+                    try {
+                        String asString = element.getAsString();
+                        int currentParsed = parseSemanticVersion(getCurrentVersion());
+                        int latestParsed = parseSemanticVersion(asString);
+                        return currentParsed < latestParsed;
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to compare versions", e);
+                        return false;
+                    }
+                }
+            },
+            com.somefrills.Main.MOD_ID
     );
 
     public static void reset() {

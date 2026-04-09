@@ -26,7 +26,6 @@ import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.input.KeyInput;
 import net.minecraft.client.input.MouseInput;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.network.ServerInfo;
@@ -394,9 +393,7 @@ public class Utils {
         if (displayName == null) return false;
 
         String name = Formatting.strip(displayName);
-        if (name.isEmpty() || name.contains(" ")) return false;
-
-        return true;
+        return !name.isEmpty() && !name.contains(" ");
     }
 
     /**

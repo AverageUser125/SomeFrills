@@ -66,7 +66,7 @@ public class RenderColor {
     }
 
     public static RenderColor fromChroma(ChromaColour colour) {
-        if(colour == null) {
+        if (colour == null) {
             return RenderColor.white;
         }
         return RenderColor.ofArgb(colour.getEffectiveColourRGB()).withAlpha(colour.getAlpha() / 255.0f);

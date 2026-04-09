@@ -16,8 +16,6 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 import static com.somefrills.Main.mc;
@@ -70,7 +68,7 @@ public class CorpseHighlight extends Feature {
             default -> "";
         };
         if (id.isEmpty()) return true;
-        if(mc.player == null) return false;
+        if (mc.player == null) return false;
 
         PlayerInventory inv = mc.player.getInventory();
         for (int i = 0; i < 36; i++) {

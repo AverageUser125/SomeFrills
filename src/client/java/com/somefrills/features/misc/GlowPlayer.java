@@ -7,15 +7,12 @@ import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Formatting;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class GlowPlayer extends Feature {
     private static final ConcurrentHashMap<String, RenderColor> forcedGlows = new ConcurrentHashMap<>();

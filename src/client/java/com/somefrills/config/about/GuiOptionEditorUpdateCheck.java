@@ -39,13 +39,13 @@ public class GuiOptionEditorUpdateCheck extends GuiOptionEditor {
             // Render downloaded message if applicable
             if (UpdateManager.getUpdateState() == UpdateManager.UpdateState.DOWNLOADED) {
                 context.drawStringCenteredScaledMaxWidth(
-                    StructuredText.of("§aThe update will be installed after your next restart."),
-                    fr,
-                    widthRemaining / 2f,
-                    40f,
-                    true,
-                    widthRemaining,
-                    -1
+                        StructuredText.of("§aThe update will be installed after your next restart."),
+                        fr,
+                        widthRemaining / 2f,
+                        40f,
+                        true,
+                        widthRemaining,
+                        -1
                 );
             }
 
@@ -60,13 +60,13 @@ public class GuiOptionEditorUpdateCheck extends GuiOptionEditor {
             }
 
             context.drawStringCenteredScaledMaxWidth(
-                StructuredText.of(versionText),
-                fr,
-                widthRemaining / 4f,
-                10f,
-                true,
-                widthRemaining / 2,
-                -1
+                    StructuredText.of(versionText),
+                    fr,
+                    widthRemaining / 4f,
+                    10f,
+                    true,
+                    widthRemaining / 2,
+                    -1
             );
 
             context.popMatrix();
@@ -113,7 +113,8 @@ public class GuiOptionEditorUpdateCheck extends GuiOptionEditor {
                 UpdateManager.UpdateState state = UpdateManager.getUpdateState();
                 switch (state) {
                     case AVAILABLE -> UpdateManager.queueUpdate();
-                    case QUEUED, DOWNLOADED -> {}
+                    case QUEUED, DOWNLOADED -> {
+                    }
                     case NONE -> UpdateManager.checkUpdate();
                 }
                 return true;

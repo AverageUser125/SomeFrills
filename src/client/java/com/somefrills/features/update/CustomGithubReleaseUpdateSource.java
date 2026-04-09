@@ -48,9 +48,9 @@ public class CustomGithubReleaseUpdateSource extends GithubReleaseUpdateSource {
     private GithubReleaseUpdateData createReleaseData(GithubRelease.Download asset, GithubRelease release) {
         String tagName = Utils.stripPrefix(release.getTagName(), "v");
         return new GithubReleaseUpdateData(
-            release.getName() != null ? release.getName() : release.getTagName(),
-            new JsonPrimitive(tagName),
-            null,
+                release.getName() != null ? release.getName() : release.getTagName(),
+                new JsonPrimitive(tagName),
+                null,
                 asset.getBrowserDownloadUrl(),
                 release.getBody(),
                 release.getTargetCommitish(),

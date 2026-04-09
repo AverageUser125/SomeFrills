@@ -2,7 +2,8 @@ package com.somefrills.config.about;
 
 import io.github.notenoughupdates.moulconfig.common.RenderContext;
 import io.github.notenoughupdates.moulconfig.common.text.StructuredText;
-import java.awt.Color;
+
+import java.awt.*;
 
 public class GuiElementButton {
 
