@@ -1,0 +1,23 @@
+{
+  "groups": {
+    "pest": [
+      {
+        "name": "pest",
+        "type": "armor_stand"
+      }
+    ],
+    "undead": [
+      { "type": "zombie" },
+      { "type": "skeleton" },
+      { "type": "wither" },
+      { "type": "drowned" },
+      { "type": "husk" },
+      { "type": "stray" },
+      { "type": "wither_skeleton" },
+      { "type": "zombified_piglin" },
+      { "type": "phantom" },
+      { "type": "zoglin" }
+    ]
+  }
+}
+
