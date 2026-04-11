@@ -1,0 +1,33 @@
+{
+  "groups": {
+    "pest": [
+      { "name": "beetle", "type": "armor_stand" },
+      { "name": "cricket", "type": "armor_stand" },
+      { "name": "earthworm", "type": "armor_stand" },
+      { "name": "field mouse", "type": "armor_stand" },
+      { "name": "firefly", "type": "armor_stand" },
+      { "name": "fly", "type": "armor_stand" },
+      { "name": "dragonfly", "type": "armor_stand" },
+      { "name": "locust", "type": "armor_stand" },
+      { "name": "mite", "type": "armor_stand" },
+      { "name": "mosquito", "type": "armor_stand" },
+      { "name": "moth", "type": "armor_stand" },
+      { "name": "praying mantis", "type": "armor_stand" },
+      { "name": "rat", "type": "armor_stand" },
+      { "name": "slug", "type": "armor_stand" }
+    ],
+
+    "undead": [
+      { "type": "zombie" },
+      { "type": "skeleton" },
+      { "type": "wither" },
+      { "type": "drowned" },
+      { "type": "husk" },
+      { "type": "stray" },
+      { "type": "wither_skeleton" },
+      { "type": "zombified_piglin" },
+      { "type": "phantom" },
+      { "type": "zoglin" }
+    ]
+  }
+}

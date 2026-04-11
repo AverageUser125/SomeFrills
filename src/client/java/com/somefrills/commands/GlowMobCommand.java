@@ -6,12 +6,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.features.misc.GlowMob;
-import com.somefrills.misc.MobType;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.registry.Registries;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -22,59 +22,48 @@ public class GlowMobCommand {
     public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
         return literal("glowmob")
                 .executes(ctx -> {
-                    Utils.info("Usage: /GlowMob <add|remove|list|clear|mobtype>");
+                    Utils.info("Usage: /GlowMob <add|remove|list|clear>");
                     return 1;
                 })
                 .then(literal("list").executes(ctx -> {
-                    listRules();
+                    listRulesAndGroups();
                     return 1;
-                }))
+                })).then(literal("group")
+                        .then(literal("add")
+                                .then(argument("group", StringArgumentType.word())
+                                        .suggests(GlowMobCommand::suggestGroupNamesForAdd)
+                                        .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
+                                            String group = StringArgumentType.getString(ctx, "group");
+                                            boolean added = GlowMob.addGroup(group, color);
+                                            Utils.info(
+                                                    added ? "Added group: " + group
+                                                            : "Group already exists: " + group
+                                            );
+                                            return added
+                                                    ? 1
+                                                    : 0; // Group already exists
+                                        }))
+                                ))
+                        .then(literal("remove")
+                                .then(argument("group", StringArgumentType.word())
+                                        .suggests(GlowMobCommand::suggestGroupNamesForRemove)
+                                        .executes(ctx -> {
+                                            String group = StringArgumentType.getString(ctx, "group");
+                                            boolean removed = GlowMob.removeGroup(group);
+                                            Utils.info(
+                                                    removed
+                                                            ? "Removed group: " + group
+                                                            : "Group not found: " + group
+                                            );
+                                            return removed ? 1 : 0;
+                                        })
+                                )
+                        ))
                 .then(literal("clear").executes(ctx -> {
                     GlowMob.clearRules();
                     Utils.info("Cleared all entity highlight rules.");
                     return 1;
                 }))
-                .then(literal("mobtype")
-                        .then(literal("add")
-                                .then(argument("type", StringArgumentType.word())
-                                        .suggests(GlowMobCommand::suggestMobTypes)
-                                        .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
-                                            String typeStr = StringArgumentType.getString(ctx, "type");
-                                            if (isValidMobType(typeStr)) {
-                                                MobType mobType = MobType.fromName(typeStr);
-                                                boolean added = GlowMob.addMobType(mobType, color);
-                                                String colorStr = String.format("#%06X", color.hex);
-                                                Utils.info(
-                                                        added
-                                                                ? "Added mob type highlighting: " + mobType.symbol + " " + mobType.name() + ", color=" + colorStr
-                                                                : "Mob type already active: " + mobType.name()
-                                                );
-                                                return added ? 1 : 0;
-                                            }
-                                            return 0;
-                                        }))
-                                )
-                        )
-                        .then(literal("remove")
-                                .then(argument("type", StringArgumentType.word())
-                                        .suggests(GlowMobCommand::suggestActiveMobTypes)
-                                        .executes(ctx -> {
-                                            String typeStr = StringArgumentType.getString(ctx, "type");
-                                            if (isValidMobType(typeStr)) {
-                                                MobType mobType = MobType.fromName(typeStr);
-                                                boolean removed = GlowMob.removeMobType(mobType);
-                                                Utils.info(
-                                                        removed
-                                                                ? "Removed mob type highlighting: " + mobType.name()
-                                                                : "Mob type not active: " + mobType.name()
-                                                );
-                                                return removed ? 1 : 0;
-                                            }
-                                            return 0;
-                                        })
-                                )
-                        )
-                )
                 .then(literal("add")
                         // Path 1: /glowmob add <type> <color>
                         .then(argument("type", StringArgumentType.word())
@@ -128,6 +117,33 @@ public class GlowMobCommand {
                 );
     }
 
+    private static CompletableFuture<Suggestions> suggestGroupNamesForAdd(CommandContext<FabricClientCommandSource> fabricClientCommandSourceCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        String remaining = suggestionsBuilder.getRemaining().toLowerCase();
+        var existingGroups = GlowMob.getGroupNames();
+        var activeGroups = GlowMob.getActiveGroupNames();
+        // Suggest groups that start with the remaining input and are not already active
+        var availableGroups = existingGroups.stream()
+                .filter(group -> group.toLowerCase().startsWith(remaining))
+                .filter(group -> !activeGroups.contains(group))
+                .toList();
+        for (String group : availableGroups) {
+            if (group.toLowerCase().startsWith(remaining)) {
+                suggestionsBuilder.suggest(group);
+            }
+        }
+        return suggestionsBuilder.buildFuture();
+    }
+
+    private static CompletableFuture<Suggestions> suggestGroupNamesForRemove(CommandContext<FabricClientCommandSource> fabricClientCommandSourceCommandContext, SuggestionsBuilder suggestionsBuilder) {
+        String remaining = suggestionsBuilder.getRemaining().toLowerCase();
+        for (String group : GlowMob.getActiveGroupNames()) {
+            if (group.toLowerCase().startsWith(remaining)) {
+                suggestionsBuilder.suggest(group);
+            }
+        }
+        return suggestionsBuilder.buildFuture();
+    }
+
     private static boolean isValidEntityType(String value) {
         for (var entityType : Registries.ENTITY_TYPE) {
             String id = Registries.ENTITY_TYPE.getId(entityType).toString();
@@ -137,10 +153,6 @@ public class GlowMobCommand {
             }
         }
         return false;
-    }
-
-    private static boolean isValidMobType(String value) {
-        return MobType.fromName(value) != null;
     }
 
 
@@ -179,9 +191,10 @@ public class GlowMobCommand {
         return 1;
     }
 
-    private static void listRules() {
+    private static void listRulesAndGroups() {
         StringBuilder sb = new StringBuilder();
 
+        // ===== Rules =====
         var rules = GlowMob.getRules();
         sb.append("=== Entity Highlight Rules ===\n");
 
@@ -201,19 +214,22 @@ public class GlowMobCommand {
             }
         }
 
-        // List active mob types
-        var activeMobTypes = GlowMob.getActiveMobTypes();
-        sb.append("\n=== Active Mob Types ===\n");
+        // ===== Groups =====
+        Map<String, RenderColor> groups = GlowMob.getActiveGroups();
+        sb.append("\n=== Active Groups ===\n");
 
-        if (activeMobTypes.isEmpty()) {
+        if (groups.isEmpty()) {
             sb.append("  (none)\n");
         } else {
-            var symbolColors = GlowMob.getSymbolColors();
-            for (MobType mobType : activeMobTypes) {
-                RenderColor color = symbolColors.get(mobType);
-                String colorStr = String.format("#%06X", color.hex);
-                sb.append("  • ").append(mobType.symbol).append(" ")
-                        .append(mobType.name()).append(" (color=").append(colorStr).append(")\n");
+            for (Map.Entry<String, RenderColor> entry : groups.entrySet()) {
+                String group = entry.getKey();
+                RenderColor colorObj = entry.getValue();
+                String color = String.format("#%06X", colorObj.hex);
+
+                sb.append("  • #")
+                        .append(group)
+                        .append(" (color=").append(color).append(")")
+                        .append("\n");
             }
         }
 
@@ -233,38 +249,6 @@ public class GlowMobCommand {
                 builder.suggest(id);
             }
         });
-
-        return builder.buildFuture();
-    }
-
-    private static CompletableFuture<Suggestions> suggestMobTypes(
-            CommandContext<FabricClientCommandSource> ctx,
-            SuggestionsBuilder builder
-    ) {
-        String remaining = builder.getRemaining().toLowerCase();
-
-        for (MobType mobType : MobType.values()) {
-            String name = mobType.name().toLowerCase();
-            if (name.startsWith(remaining)) {
-                builder.suggest(mobType.name().toLowerCase());
-            }
-        }
-
-        return builder.buildFuture();
-    }
-
-    private static CompletableFuture<Suggestions> suggestActiveMobTypes(
-            CommandContext<FabricClientCommandSource> ctx,
-            SuggestionsBuilder builder
-    ) {
-        String remaining = builder.getRemaining().toLowerCase();
-
-        for (MobType mobType : GlowMob.getActiveMobTypes()) {
-            String name = mobType.name().toLowerCase();
-            if (name.startsWith(remaining)) {
-                builder.suggest(mobType.name().toLowerCase());
-            }
-        }
 
         return builder.buildFuture();
     }
