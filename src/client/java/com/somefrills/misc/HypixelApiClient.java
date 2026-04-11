@@ -2,6 +2,7 @@ package com.somefrills.misc;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.somefrills.Main;
 import net.minecraft.util.Util;
 
 import java.net.URI;
@@ -31,7 +32,7 @@ public class HypixelApiClient {
         return CompletableFuture.supplyAsync(() -> {
             String apiKey = KeyManager.getKey("hypixel");
             if (apiKey == null || apiKey.isEmpty()) {
-                System.err.println("Hypixel API key not set. Please configure it in the config.");
+                Main.LOGGER.warn("[HypixelApiClient] Hypixel API key not set for UUID: {}", uuid);
                 return new JsonObject();
             }
 
@@ -47,35 +48,41 @@ public class HypixelApiClient {
 
                 HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
 
-                if (response.statusCode() == 200) {
-                    JsonObject responseJson = GSON.fromJson(response.body(), JsonObject.class);
+                if (response.statusCode() != 200) {
+                    Main.LOGGER.warn("[HypixelApiClient] HTTP {} response for UUID: {} - {}", response.statusCode(), uuid, response.body());
+                    return new JsonObject();
+                }
 
-                    if (responseJson.has("profiles") && !responseJson.get("profiles").isJsonNull()) {
-                        // Get the active profile or the specified profile
-                        var profiles = responseJson.getAsJsonArray("profiles");
-                        if (!profiles.isEmpty()) {
-                            JsonObject profile = profiles.get(0).getAsJsonObject();
+                JsonObject responseJson = GSON.fromJson(response.body(), JsonObject.class);
 
-                            // If profileId specified, find that profile
-                            if (profileId != null && !profileId.isEmpty()) {
-                                for (int i = 0; i < profiles.size(); i++) {
-                                    JsonObject p = profiles.get(i).getAsJsonObject();
-                                    if (p.has("profile_id") && p.get("profile_id").getAsString().equals(profileId)) {
-                                        profile = p;
-                                        break;
-                                    }
-                                }
-                            }
+                if (!responseJson.has("profiles") || responseJson.get("profiles").isJsonNull()) {
+                    Main.LOGGER.warn("[HypixelApiClient] No 'profiles' field in response for UUID: {}", uuid);
+                    return new JsonObject();
+                }
 
-                            return profile;
+                var profiles = responseJson.getAsJsonArray("profiles");
+                if (profiles.isEmpty()) {
+                    Main.LOGGER.warn("[HypixelApiClient] No profiles found for UUID: {}", uuid);
+                    return new JsonObject();
+                }
+
+                JsonObject profile = profiles.get(0).getAsJsonObject();
+
+                if (profileId != null && !profileId.isEmpty()) {
+                    for (int i = 0; i < profiles.size(); i++) {
+                        JsonObject p = profiles.get(i).getAsJsonObject();
+                        if (p.has("profile_id") && p.get("profile_id").getAsString().equals(profileId)) {
+                            profile = p;
+                            break;
                         }
                     }
                 }
-            } catch (Exception e) {
-                System.err.println("Error fetching profile for UUID " + uuid + ": " + e.getMessage());
-            }
 
-            return new JsonObject();
+                return profile;
+            } catch (Exception e) {
+                Main.LOGGER.warn("[HypixelApiClient] Exception fetching profile for UUID {}: {}", uuid, e.getMessage());
+                return new JsonObject();
+            }
         }, Util.getIoWorkerExecutor());
     }
 

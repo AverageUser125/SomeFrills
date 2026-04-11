@@ -1,9 +1,11 @@
 package com.somefrills.config.misc;
 
 import com.google.gson.annotations.Expose;
+import com.somefrills.features.misc.DAPlayerWorth;
 import io.github.notenoughupdates.moulconfig.ChromaColour;
 import io.github.notenoughupdates.moulconfig.annotations.*;
 import io.github.notenoughupdates.moulconfig.observer.Property;
+import kotlin.jvm.Transient;
 
 public class MiscCategory {
 
@@ -107,5 +109,10 @@ public class MiscCategory {
         @ConfigOption(name = "Enabled", desc = "Show the worth of players while in dark auction")
         @ConfigEditorBoolean
         public Property<Boolean> enabled = Property.of(true);
+
+        @Transient
+        @ConfigOption(name = "Run", desc = "Run the player worth command")
+        @ConfigEditorButton(buttonText = "Run Command")
+        public Runnable fetchPlayerWorth = DAPlayerWorth::startFetching;
     }
 }

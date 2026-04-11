@@ -1,5 +1,6 @@
 package com.somefrills.misc;
 
+import com.somefrills.Main;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.PlayerListEntry;
 
@@ -24,10 +25,16 @@ public class LobbyFinancialUtils {
     public static List<UUID> getLobbyPlayerUuids() {
         List<UUID> uuids = new ArrayList<>();
 
-        if (mc.inGameHud == null) return uuids;
+        if (mc.inGameHud == null) {
+            Main.LOGGER.info("[LobbyFinancialUtils] inGameHud is null");
+            return uuids;
+        }
 
         PlayerListHud playerListHud = mc.inGameHud.getPlayerListHud();
-        if (playerListHud == null) return uuids;
+        if (playerListHud == null) {
+            Main.LOGGER.info("[LobbyFinancialUtils] playerListHud is null");
+            return uuids;
+        }
 
         for (PlayerListEntry entry : playerListHud.collectPlayerEntries()) {
             if (entry != null && entry.getProfile() != null) {
@@ -35,6 +42,7 @@ public class LobbyFinancialUtils {
             }
         }
 
+        Main.LOGGER.info("[LobbyFinancialUtils] Found {} players in lobby", uuids.size());
         return uuids;
     }
 
@@ -67,15 +75,25 @@ public class LobbyFinancialUtils {
      * @return List of CompletableFutures, each containing a player's financial data
      */
     public static List<CompletableFuture<LobbyProfileFetcher.PlayerFinancials>> streamLobbyFinancials() {
+        Main.LOGGER.info("[LobbyFinancialUtils] Starting to stream lobby financials");
         List<UUID> lobbyUuids = getLobbyPlayerUuids();
         Map<UUID, String> playerNames = getLobbyPlayersWithNames();
 
+        Main.LOGGER.info("[LobbyFinancialUtils] Creating futures for {} players", lobbyUuids.size());
         return lobbyUuids.stream()
                 .map(uuid -> LobbyProfileFetcher.fetchPlayerFinancials(uuid)
                         .thenApply(data -> {
-                            if (data == null) return null;
+                            if (data == null) {
+                                Main.LOGGER.warn("[LobbyFinancialUtils] Failed to fetch data for UUID: {}", uuid);
+                                return null;
+                            }
                             String name = playerNames.getOrDefault(uuid, data.playerName);
+                            Main.LOGGER.info("[LobbyFinancialUtils] Received data for: {} (wealth: {})", name, data.totalWealth);
                             return new LobbyProfileFetcher.PlayerFinancials(uuid, name, data.purse, data.totalBank);
+                        })
+                        .exceptionally(ex -> {
+                            Main.LOGGER.warn("[LobbyFinancialUtils] Exception fetching data for UUID {}: {}", uuid, ex.getMessage());
+                            return null;
                         })
                 )
                 .collect(Collectors.toList());
@@ -93,12 +111,15 @@ public class LobbyFinancialUtils {
             Consumer<LobbyProfileFetcher.PlayerFinancials> onResult,
             Runnable onComplete) {
 
+        Main.LOGGER.info("[LobbyFinancialUtils] Setting up streaming with callbacks");
         List<CompletableFuture<LobbyProfileFetcher.PlayerFinancials>> futures = streamLobbyFinancials();
+        Main.LOGGER.info("[LobbyFinancialUtils] Created {} futures", futures.size());
 
         // Attach callbacks to each future as it completes
         futures.forEach(future ->
                 future.thenAccept(data -> {
                     if (data != null) {
+                        Main.LOGGER.info("[LobbyFinancialUtils] Processing result for: {}", data.playerName);
                         onResult.accept(data);
                     }
                 })
@@ -107,7 +128,10 @@ public class LobbyFinancialUtils {
         // Return a future that completes when all are done
         @SuppressWarnings("unchecked")
         CompletableFuture<Void> result = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenRun(onComplete);
+                .thenRun(() -> {
+                    Main.LOGGER.info("[LobbyFinancialUtils] All financials streaming completed");
+                    onComplete.run();
+                });
         return result;
     }
 
@@ -119,9 +143,9 @@ public class LobbyFinancialUtils {
      */
     public static CompletableFuture<Void> streamLobbyFinancials(
             Consumer<LobbyProfileFetcher.PlayerFinancials> onResult) {
-
-        return streamLobbyFinancialsWithCallback(onResult, () -> {
-        });
+        Main.LOGGER.info("[LobbyFinancialUtils] Starting streaming lobby financials");
+        return streamLobbyFinancialsWithCallback(onResult, () ->
+            Main.LOGGER.info("[LobbyFinancialUtils] Streaming completed"));
     }
 
     /**

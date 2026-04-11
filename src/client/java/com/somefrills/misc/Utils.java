@@ -1116,6 +1116,32 @@ public class Utils {
         return str;
     }
 
+    /**
+     * Convert a number to human-readable format with suffixes (k, m, b, etc.)
+     * Examples: 1000 -> "1k", 1111 -> "1.11k", 1000000 -> "1m"
+     * @param number The number to format
+     * @return Formatted string with up to 3 decimal places
+     */
+    public static String formatNumber(double number) {
+        if (number == 0) return "0";
+        if (Math.abs(number) < 1000) return String.format("%.0f", number);
+
+        String[] suffixes = {"k", "m", "b", "t"};
+        double absNumber = Math.abs(number);
+        int suffixIndex = 0;
+
+        while (absNumber >= 1000 && suffixIndex < suffixes.length - 1) {
+            absNumber /= 1000;
+            suffixIndex++;
+        }
+
+        // Format with up to 3 decimal places, removing trailing zeros
+        String formatted = String.format("%.3f", absNumber);
+        formatted = formatted.replaceAll("0+$", "").replaceAll("\\.$", "");
+
+        return formatted + suffixes[suffixIndex];
+    }
+
     public static class Symbols {
         public static String zone = "⏣";
         public static String zoneRift = "ф";

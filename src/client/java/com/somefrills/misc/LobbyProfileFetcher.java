@@ -99,18 +99,20 @@ public class LobbyProfileFetcher {
             }
 
             // Extract bank totals
-            if (profileJson.has("bank")) {
-                JsonObject bank = profileJson.getAsJsonObject("bank");
+            if (!profileJson.has("bank")) {
+                return new PlayerFinancials(playerUuid, playerName, purse, totalBank);
+            }
 
-                // Profile bank (shared)
-                if (bank.has("profileBank")) {
-                    totalBank += bank.get("profileBank").getAsLong();
-                }
+            JsonObject bank = profileJson.getAsJsonObject("bank");
 
-                // Solo bank (personal)
-                if (bank.has("soloBank")) {
-                    totalBank += bank.get("soloBank").getAsLong();
-                }
+            // Profile bank (shared)
+            if (bank.has("profileBank")) {
+                totalBank += bank.get("profileBank").getAsLong();
+            }
+
+            // Solo bank (personal)
+            if (bank.has("soloBank")) {
+                totalBank += bank.get("soloBank").getAsLong();
             }
         } catch (Exception e) {
             // Log error but continue with what we could extract
