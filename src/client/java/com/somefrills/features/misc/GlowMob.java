@@ -348,63 +348,63 @@ public class GlowMob extends Feature {
     }
 
     public record GlowMobRule(String name, String type, RenderColor color) {
-            public GlowMobRule(String name, String type, RenderColor color) {
-                this.name = normalizeRuleName(name);
-                this.type = normalizeType(type);
-                this.color = color;
-            }
+        public GlowMobRule(String name, String type, RenderColor color) {
+            this.name = normalizeRuleName(name);
+            this.type = normalizeType(type);
+            this.color = color;
+        }
 
-            private static String normalizeType(String type) {
-                if (type == null || type.isEmpty()) {
-                    return null;
-                }
-                return Utils.stripPrefix(type, "minecraft:").toLowerCase();
+        private static String normalizeType(String type) {
+            if (type == null || type.isEmpty()) {
+                return null;
             }
+            return Utils.stripPrefix(type, "minecraft:").toLowerCase();
+        }
 
-            /**
-             * Check if this rule matches an entity, including group references
-             */
-            public boolean matches(Entity entity) {
-                if (this.name != null && this.name.startsWith("#")) {
-                    // This rule references a group
-                    Collection<GlowMobRule> groupRules = GlowMob.getGroupRules(this.name);
-                    for (GlowMobRule rule : groupRules) {
-                        if (rule.matchesEntity(entity)) {
-                            return true;
-                        }
+        /**
+         * Check if this rule matches an entity, including group references
+         */
+        public boolean matches(Entity entity) {
+            if (this.name != null && this.name.startsWith("#")) {
+                // This rule references a group
+                Collection<GlowMobRule> groupRules = GlowMob.getGroupRules(this.name);
+                for (GlowMobRule rule : groupRules) {
+                    if (rule.matchesEntity(entity)) {
+                        return true;
                     }
+                }
+                return false;
+            }
+
+            return matchesEntity(entity);
+        }
+
+        /**
+         * Check if this rule matches an entity (direct match only, no group references)
+         * <p>
+         * Rules are applied as follows:
+         * - If name is specified: only armor stands can match (by name). The nearby mob will be resolved later.
+         * - If name is not specified: match any entity of the specified type.
+         */
+        boolean matchesEntity(Entity entity) {
+            // If a name is specified, only armor stands with that name can trigger this rule
+            if (this.name != null) {
+                if (!(entity instanceof ArmorStandEntity)) {
                     return false;
                 }
-
-                return matchesEntity(entity);
+                String entityName = Utils.toPlain(entity.getDisplayName()).toLowerCase();
+                return entityName.contains(this.name);
             }
 
-            /**
-             * Check if this rule matches an entity (direct match only, no group references)
-             * <p>
-             * Rules are applied as follows:
-             * - If name is specified: only armor stands can match (by name). The nearby mob will be resolved later.
-             * - If name is not specified: match any entity of the specified type.
-             */
-            boolean matchesEntity(Entity entity) {
-                // If a name is specified, only armor stands with that name can trigger this rule
-                if (this.name != null) {
-                    if (!(entity instanceof ArmorStandEntity)) {
-                        return false;
-                    }
-                    String entityName = Utils.toPlain(entity.getDisplayName()).toLowerCase();
-                    return entityName.contains(this.name);
-                }
-
-                // No name specified: match by type if specified
-                if (this.type != null) {
-                    String entityType = entity.getType().toString();
-                    entityType = Utils.stripPrefix(entityType, "entity.minecraft.").toLowerCase();
-                    return entityType.equals(this.type);
-                }
-
-                // No criteria = match everything
-                return true;
+            // No name specified: match by type if specified
+            if (this.type != null) {
+                String entityType = entity.getType().toString();
+                entityType = Utils.stripPrefix(entityType, "entity.minecraft.").toLowerCase();
+                return entityType.equals(this.type);
             }
+
+            // No criteria = match everything
+            return true;
         }
+    }
 }

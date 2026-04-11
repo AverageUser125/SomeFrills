@@ -97,4 +97,15 @@ public class MiscCategory {
         public Property<Boolean> enabled = Property.of(true);
     }
 
+    @Expose
+    @Accordion
+    @ConfigOption(name = "DA Player Worth", desc = "Show the worth of players while in dark auction")
+    public DAPlayerWorthConfig daPlayerWorth = new DAPlayerWorthConfig();
+
+    public static class DAPlayerWorthConfig {
+        @Expose
+        @ConfigOption(name = "Enabled", desc = "Show the worth of players while in dark auction")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(true);
+    }
 }

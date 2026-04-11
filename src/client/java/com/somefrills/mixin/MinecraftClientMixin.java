@@ -77,6 +77,6 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "stop", at = @At("HEAD"))
     private void beforeStop(CallbackInfo ci) {
-        Main.config.saveToFile();
+        Main.onClose();
     }
 }

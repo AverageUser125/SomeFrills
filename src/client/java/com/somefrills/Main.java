@@ -12,6 +12,7 @@ import com.somefrills.events.OverlayMsgEvent;
 import com.somefrills.events.PartyChatMsgEvent;
 import com.somefrills.features.misc.Aliases;
 import com.somefrills.misc.EntityCache;
+import com.somefrills.misc.KeyManager;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig;
@@ -41,6 +42,11 @@ public class Main implements ClientModInitializer {
     public static MinecraftClient mc;
     public static IEventBus eventBus = new EventBus();
     public static ManagedConfig<FrillsConfig> config;
+
+    public static void onClose() {
+        config.saveToFile();
+        KeyManager.save();
+    }
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         SomeFrillsCommand.init(dispatcher);
@@ -74,11 +80,14 @@ public class Main implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> eventBus.post(new ClientDisconnectEvent()));
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
-        var file = FabricLoader.getInstance().getConfigDir().resolve("somefrills.json").toFile();
+        var configDir = FabricLoader.getInstance().getConfigDir();
+        var file = configDir.resolve("somefrills.json").toFile();
         var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
         builder.customProcessor(ConfigVersionDisplay.class, (option, annotation) -> new GuiOptionEditorUpdateCheck(option));
         config = new ManagedConfig<>(builder);
         FrillsConfig.instance = config.getInstance();
+
+        KeyManager.initialize(configDir);
 
         eventBus.registerLambdaFactory("com.somefrills",
                 (lookupInMethod, klass) -> (MethodHandles.Lookup)

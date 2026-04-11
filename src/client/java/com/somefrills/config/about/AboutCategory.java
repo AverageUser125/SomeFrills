@@ -28,6 +28,11 @@ public class AboutCategory {
     public boolean fullAutoUpdates = false;
 
     @Transient
+    @ConfigOption(name = "API Keys", desc = "Manage API keys for external services")
+    @Accordion
+    public ApiKeysCategory.ApiKeySettings apiKeys = new ApiKeysCategory.ApiKeySettings();
+
+    @Transient
     @ConfigOption(name = "Used Software", desc = "Information about used software and licenses")
     @Accordion
     public Licenses licenses = new Licenses();
