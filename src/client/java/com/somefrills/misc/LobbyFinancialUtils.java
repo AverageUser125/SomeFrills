@@ -41,7 +41,7 @@ public class LobbyFinancialUtils {
                 uuids.add(entry.getProfile().id());
             }
         }
-
+        // TODO: filter mc.player.getUuid() out of the list
         Main.LOGGER.info("[LobbyFinancialUtils] Found {} players in lobby", uuids.size());
         return uuids;
     }

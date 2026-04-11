@@ -1,9 +1,14 @@
 package com.somefrills.features.misc;
 
+import com.google.gson.GsonBuilder;
+import com.somefrills.Main;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.misc.HypixelApiClient;
 import com.somefrills.misc.LobbyFinancialUtils;
 import com.somefrills.misc.Utils;
+
+import static com.somefrills.Main.mc;
 
 public class DAPlayerWorth extends Feature {
     public DAPlayerWorth() {
@@ -14,9 +19,9 @@ public class DAPlayerWorth extends Feature {
      * Start fetching and displaying player financial data
      */
     public static void startFetching() {
-        LobbyFinancialUtils.streamLobbyFinancials(financials -> {
-            String totalMoney = Utils.formatNumber(financials.totalWealth);
-            Utils.infoFormat("{} - {}", financials.playerName, totalMoney);
+        HypixelApiClient.fetchPlayerProfile(mc.player.getUuid()).thenAccept(profile -> {
+            Main.LOGGER.info("[DEBUG] Raw API Response:\n{}", profile.toString());
+            Main.LOGGER.info("[DEBUG] Response (pretty):\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(profile));
         });
     }
 }

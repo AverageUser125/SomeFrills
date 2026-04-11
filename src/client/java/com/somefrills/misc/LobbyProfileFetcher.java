@@ -1,6 +1,7 @@
 package com.somefrills.misc;
 
 import com.google.gson.JsonObject;
+import com.somefrills.Main;
 
 import java.util.List;
 import java.util.Map;
@@ -90,32 +91,46 @@ public class LobbyProfileFetcher {
         long totalBank = 0;
 
         try {
-            // Extract purse from currencies
-            if (profileJson.has("currency")) {
-                JsonObject currency = profileJson.getAsJsonObject("currency");
-                if (currency.has("purse")) {
-                    purse = currency.get("purse").getAsLong();
-                }
-            }
-
-            // Extract bank totals
-            if (!profileJson.has("bank")) {
+            // Get the members object
+            if (!profileJson.has("members")) {
                 return new PlayerFinancials(playerUuid, playerName, purse, totalBank);
             }
 
-            JsonObject bank = profileJson.getAsJsonObject("bank");
+            JsonObject members = profileJson.getAsJsonObject("members");
+            String uuidString = playerUuid.toString().replace("-", "");
 
-            // Profile bank (shared)
-            if (bank.has("profileBank")) {
-                totalBank += bank.get("profileBank").getAsLong();
+            // Get the member data for this UUID
+            if (!members.has(uuidString)) {
+                return new PlayerFinancials(playerUuid, playerName, purse, totalBank);
             }
 
-            // Solo bank (personal)
-            if (bank.has("soloBank")) {
-                totalBank += bank.get("soloBank").getAsLong();
+            JsonObject member = members.getAsJsonObject(uuidString);
+
+            // Extract purse from currencies.coin_purse
+            if (member.has("currencies")) {
+                JsonObject currencies = member.getAsJsonObject("currencies");
+                if (currencies.has("coin_purse")) {
+                    purse = currencies.get("coin_purse").getAsLong();
+                }
+            }
+
+            // Extract profile bank from profile.banking.balance (at profile level)
+            if (profileJson.has("banking")) {
+                JsonObject banking = profileJson.getAsJsonObject("banking");
+                if (banking.has("balance")) {
+                    totalBank += banking.get("balance").getAsLong();
+                }
+            }
+
+            // Extract solo bank from profile.bank_account (at member level)
+            if (member.has("profile")) {
+                JsonObject profile = member.getAsJsonObject("profile");
+                if (profile.has("bank_account")) {
+                    totalBank += profile.get("bank_account").getAsLong();
+                }
             }
         } catch (Exception e) {
-            // Log error but continue with what we could extract
+            Main.LOGGER.debug("[LobbyProfileFetcher] Error extracting financials: {}", e.getMessage());
         }
 
         return new PlayerFinancials(playerUuid, playerName, purse, totalBank);

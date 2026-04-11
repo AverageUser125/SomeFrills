@@ -1,6 +1,7 @@
 package com.somefrills.misc;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.somefrills.Main;
 import net.minecraft.util.Util;
@@ -11,12 +12,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * Handles API calls to fetch SkyBlock player profile data from Hypixel API
  */
 public class HypixelApiClient {
-    private static final String API_BASE_URL = "https://api.hypixel.net";
+    private static final String API_BASE_URL = "https://api.hypixel.net/v2/skyblock";
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private static final Gson GSON = new Gson();
     private static volatile boolean fatalError = false;
@@ -46,7 +48,7 @@ public class HypixelApiClient {
 
             try {
                 String uuidString = uuid.toString().replace("-", "");
-                String url = String.format("%s/skyblock/profiles?uuid=%s", API_BASE_URL, uuidString);
+                String url = String.format("%s/profiles?uuid=%s", API_BASE_URL, uuidString);
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(url))
@@ -73,14 +75,24 @@ public class HypixelApiClient {
 
                 JsonObject responseJson = GSON.fromJson(response.body(), JsonObject.class);
 
+                // DEBUG: Log the raw response
+                Main.LOGGER.info("[HypixelApiClient] DEBUG Raw Response:\n{}", new GsonBuilder().setPrettyPrinting().create().toJson(responseJson));
+
+                // Check if request was successful
+                if (!responseJson.has("success") || !responseJson.get("success").getAsBoolean()) {
+                    Main.LOGGER.warn("[HypixelApiClient] API returned success: false for UUID: {}", uuid);
+                    return new JsonObject();
+                }
+
+                // No profiles field = player has no profile or profile is private
                 if (!responseJson.has("profiles") || responseJson.get("profiles").isJsonNull()) {
-                    Main.LOGGER.warn("[HypixelApiClient] No 'profiles' field in response for UUID: {}", uuid);
+                    Main.LOGGER.info("[HypixelApiClient] No profiles found for UUID: {} (private or no profile)", uuid);
                     return new JsonObject();
                 }
 
                 var profiles = responseJson.getAsJsonArray("profiles");
                 if (profiles.isEmpty()) {
-                    Main.LOGGER.warn("[HypixelApiClient] No profiles found for UUID: {}", uuid);
+                    Main.LOGGER.info("[HypixelApiClient] Profiles array is empty for UUID: {}", uuid);
                     return new JsonObject();
                 }
 
@@ -137,6 +149,8 @@ public class HypixelApiClient {
 
         return futures;
     }
+
+    public static CompletableFuture<JsonObject> fetchPlayerProfile(UUID first) {
+        return fetchPlayerProfile(first, null);
+    }
 }
-
-
