@@ -2,20 +2,19 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.events.EntityUpdatedEvent;
-import com.somefrills.events.ServerJoinEvent;
-import com.somefrills.misc.EntityCache;
+import com.somefrills.events.WorldTickEvent;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.somefrills.Main.mc;
@@ -25,12 +24,11 @@ import static com.somefrills.Main.mc;
  */
 public class GlowMob extends Feature {
 
-    private static final ConcurrentHashMap<String, GlowMobRule> rules = new ConcurrentHashMap<>();
-    // Armor stand cache: caches armor stands for stable mob associations
-    private static final EntityCache armorStandCache = new EntityCache();
-    // Search parameters for finding mobs near armor stands
-    private static final double HORIZONTAL_RADIUS = 0.15;
+    private static final double HORIZONTAL_RADIUS = 0.5;
     private static final double VERTICAL_RANGE = 4.0;
+
+    private final ConcurrentHashMap<String, GlowMobRule> rules = new ConcurrentHashMap<>();
+    private List<Entity> entityList;
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
@@ -40,7 +38,7 @@ public class GlowMob extends Feature {
      * Determines if entity should glow and what color. Single pass through all rules.
      * Returns null if no match found.
      */
-    private static GlowMatchResult findGlowMatch(Entity entity) {
+    private GlowMatchResult findGlowMatch(Entity entity) {
         for (GlowMobRule rule : rules.values()) {
             if (rule.matchesEntity(entity)) {
                 return new GlowMatchResult(rule.color, rule.name != null);
@@ -57,7 +55,7 @@ public class GlowMob extends Feature {
      * Note: This handles both marker and non-marker armor stands, as newly-appearing armor stands
      * may not yet be marked as markers when they're first updated.
      */
-    private static Entity resolveGlowTarget(Entity entity, boolean hasNameRule) {
+    private Entity resolveGlowTarget(Entity entity, boolean hasNameRule) {
         // If it's not a name-based match, return as-is
         if (!hasNameRule) {
             return entity;
@@ -68,63 +66,46 @@ public class GlowMob extends Feature {
             return entity;
         }
 
-        // If it's an armor stand (marker or not), try to find the actual mob nearby
+        // If it's an armor stand with a name rule, try to find the actual mob nearby
         if (entity instanceof ArmorStandEntity armorStand) {
             Entity closestMob = findClosestMobNearby(armorStand);
             if (closestMob != null) {
-                armorStandCache.add(entity);
                 return closestMob;
             }
+            // If no mob found nearby, glow the armor stand itself
+            return entity;
         }
 
         return entity;
     }
 
-    private static Entity findClosestMobNearby(Entity armorStand) {
+    private Entity findClosestMobNearby(Entity armorStand) {
         double asX = armorStand.getX();
         double asY = armorStand.getY();
         double asZ = armorStand.getZ();
 
-        Entity closest = null;
-        double closestDist = Double.MAX_VALUE;
+        if (mc.world == null) return null;
 
-        // Search in both getEntities() and mc.world to catch entities that might not be synced yet
-        Set<Entity> entitiesToSearch = new HashSet<>(getEntities());
-        if (mc.world != null) {
-            for (Entity e : mc.world.getEntities()) {
-                entitiesToSearch.add(e);
-            }
-        }
-
-        for (Entity entity : entitiesToSearch) {
-            if (!(entity instanceof LivingEntity) || entity instanceof ArmorStandEntity) continue;
-
-            // Skip real players
-            if (entity instanceof PlayerEntity && Utils.isPlayer((PlayerEntity) entity)) continue;
-
+        // Search all entities and find the first one that matches criteria
+        for (Entity entity : getEntities()) {
             double entityY = entity.getY();
-
             // Entity must be at or below the armor stand
             if (entityY > asY || asY - entityY > VERTICAL_RANGE) continue;
 
             // Check horizontal distance
             double dx = entity.getX() - asX;
             double dz = entity.getZ() - asZ;
-            double horizontalDist = Math.sqrt(dx * dx + dz * dz);
-            if (horizontalDist > HORIZONTAL_RADIUS) continue;
-
-            double dist = entity.distanceTo(armorStand);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = entity;
+            double horizontalDist = Math.hypot(dx, dz);
+            if (horizontalDist <= HORIZONTAL_RADIUS) {
+                return entity;
             }
         }
 
-        return closest;
+        return null;
     }
 
 
-    private static void applyHighlight(Entity entity) {
+    private void applyHighlight(Entity entity) {
         if (!(entity instanceof LivingEntity)) return;
 
         GlowMatchResult result = findGlowMatch(entity);
@@ -134,55 +115,44 @@ public class GlowMob extends Feature {
         }
     }
 
-    private static void reapplyHighlights() {
-        getEntities().forEach(GlowMob::applyHighlight);
+    private void reapplyHighlights() {
+        // Check already-loaded entities from getEntities()
+        getEntities().forEach(this::applyHighlight);
     }
 
-    public static boolean addRule(String name, String type, RenderColor color) {
+    public boolean addRule(String name, String type, RenderColor color) {
         String key = generateRuleKey(name, type);
-        if (rules.put(key, new GlowMobRule(name, type, color)) != null) {
-            return false; // Rule already existed
-        }
-        reapplyHighlights();
-        return true;
+        return rules.put(key, new GlowMobRule(name, type, color)) == null; // Rule already existed
     }
 
-    public static boolean removeRule(String name, String type) {
+    public boolean removeRule(String name, String type) {
         String key = generateRuleKey(name, type);
         GlowMobRule removed = rules.remove(key);
-        if (removed == null) return false;
-
-        clearGlowForRule(removed);
-        return true;
+        if (removed != null) {
+            // Disable glowing on entities that matched this rule
+            for (Entity entity : getEntities()) {
+                if (removed.matchesEntity(entity)) {
+                    Entity targetEntity = resolveGlowTarget(entity, removed.name != null);
+                    Utils.setGlowing(targetEntity, false, RenderColor.white);
+                }
+            }
+        }
+        return removed != null;
     }
 
-    public static void clearRules() {
-        for (var entity : getEntities()) {
-            if (entity instanceof PlayerEntity) continue;
-            Utils.setGlowing(entity, false, RenderColor.white);
+    public void clearRules() {
+        // Disable glowing on all entities that match any rule before clearing
+        for (Entity entity : getEntities()) {
+            GlowMatchResult result = findGlowMatch(entity);
+            if (result != null) {
+                Entity targetEntity = resolveGlowTarget(entity, result.hasNameRule);
+                Utils.setGlowing(targetEntity, false, RenderColor.white);
+            }
         }
         rules.clear();
     }
 
-    private static void clearGlowForRule(GlowMobRule rule) {
-        // Clear all glow from non-player entities to ensure complete removal
-        Set<Entity> entitiesToClear = new HashSet<>(getEntities());
-        if (mc.world != null) {
-            for (Entity e : mc.world.getEntities()) {
-                entitiesToClear.add(e);
-            }
-        }
-
-        for (Entity entity : entitiesToClear) {
-            if (entity instanceof PlayerEntity) continue;
-            Utils.setGlowing(entity, false, RenderColor.white);
-        }
-
-        // Reapply highlights for all remaining rules
-        reapplyHighlights();
-    }
-
-    public static Collection<GlowMobRule> getRules() {
+    public Collection<GlowMobRule> getRules() {
         return List.copyOf(rules.values());
     }
 
@@ -191,7 +161,6 @@ public class GlowMob extends Feature {
         String normalizedType = (type == null || type.isEmpty()) ? "ANY" : type.toLowerCase();
         return (normalizedName == null ? "ANY" : normalizedName) + ":" + normalizedType;
     }
-
 
     private static String normalizeRuleName(String name) {
         if (name == null) return null;
@@ -202,35 +171,35 @@ public class GlowMob extends Feature {
         return normalized;
     }
 
+    private List<Entity> getEntities() {
+        return entityList != null ? entityList : updateEntities();
+    }
 
-    private static List<Entity> getEntities(){
+    private static List<Entity> updateEntities() {
         var list = Utils.getEntities();
-        if(mc.world == null) return list;
         ArrayList<Entity> entities = new ArrayList<>(list);
-        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
-            var uuid = player.getUuid();
-            if(uuid == null) {
-                entities.add(player);
-                continue;
+
+        // Add all entities from mc.world, filtering out real players
+        if (mc.world != null) {
+            for (Entity entity : mc.world.getEntities()) {
+                // Skip real players, keep everything else
+                if (entity instanceof PlayerEntity player && Utils.isPlayer(player)) {
+                    continue;
+                }
+                entities.add(entity);
             }
-            if (uuid.version() != 4) entities.add(player);
         }
+
         return entities;
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    private void onEntityUpdate(EntityUpdatedEvent event) {
+    private void onWorldTick(WorldTickEvent event) {
         if (!isActive()) return;
-        applyHighlight(event.entity);
+        entityList = getEntities();
+        reapplyHighlights();
     }
 
-    @EventHandler(priority = EventPriority.LOW)
-    private void onServerJoin(ServerJoinEvent ignored) {
-        for (Entity entity : getEntities()) {
-            applyHighlight(entity);
-        }
-    }
-    
     /**
      * Result of glow matching: color and whether it matched a name-based rule
      */

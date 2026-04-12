@@ -5,13 +5,12 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.somefrills.config.Features;
 import com.somefrills.features.misc.GlowMob;
-import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.registry.Registries;
 
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
@@ -30,7 +29,7 @@ public class GlowMobCommand {
                     return 1;
                 }))
                 .then(literal("clear").executes(ctx -> {
-                    GlowMob.clearRules();
+                    get().clearRules();
                     Utils.info("Cleared all entity highlight rules.");
                     return 1;
                 }))
@@ -41,7 +40,7 @@ public class GlowMobCommand {
                                 .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
                                     String type = StringArgumentType.getString(ctx, "type");
                                     if (isValidEntityType(type)) {
-                                        return GlowMob.addRule(null, type, color) ? 1 : 0;
+                                        return get().addRule(null, type, color) ? 1 : 0;
                                     }
                                     return 0; // Invalid type, fail silently to try other paths
                                 }))
@@ -56,7 +55,7 @@ public class GlowMobCommand {
                                             type = normalizeNoneAlias(type);
                                             name = normalizeNoneAlias(name);
 
-                                            boolean added = GlowMob.addRule(name, type, color);
+                                            boolean added = get().addRule(name, type, color);
                                             String colorStr = String.format("#%06X", color.hex);
                                             String nameStr = (name == null || name.isEmpty()) ? "any" : name;
                                             String typeStr = (type == null || type.isEmpty()) ? "any" : type;
@@ -71,14 +70,14 @@ public class GlowMobCommand {
                         .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
                             String name = StringArgumentType.getString(ctx, "name");
                             if (!isValidEntityType(name)) {
-                                return GlowMob.addRule(name, null, color) ? 1 : 0;
+                                return get().addRule(name, null, color) ? 1 : 0;
                             }
                             return 0; // Is an entity type, so the type+color path should handle it
                         }))
                 )
                 .then(literal("remove")
                         .then(literal("all").executes(ctx -> {
-                            GlowMob.clearRules();
+                            get().clearRules();
                             Utils.info("Removed all entity highlight rules.");
                             return 1;
                         }))
@@ -119,7 +118,7 @@ public class GlowMobCommand {
     ) {
         String remaining = builder.getRemaining().toLowerCase();
 
-        for (GlowMob.GlowMobRule rule : GlowMob.getRules()) {
+        for (GlowMob.GlowMobRule rule : get().getRules()) {
             String type = (rule.type() == null || rule.type().isEmpty()) ? "any" : rule.type();
             if (type.toLowerCase().startsWith(remaining)) {
                 builder.suggest(type);
@@ -127,6 +126,10 @@ public class GlowMobCommand {
         }
 
         return builder.buildFuture();
+    }
+
+    private static GlowMob get() {
+        return Features.get(GlowMob.class);
     }
 
     /**
@@ -140,7 +143,7 @@ public class GlowMobCommand {
         String selectedType = StringArgumentType.getString(ctx, "type");
         String normalizedSelectedType = normalizeNoneAlias(selectedType);
 
-        for (GlowMob.GlowMobRule rule : GlowMob.getRules()) {
+        for (GlowMob.GlowMobRule rule : get().getRules()) {
             // Check if this rule matches the selected type
             String ruleType = (rule.type() == null || rule.type().isEmpty()) ? null : rule.type();
 
@@ -180,7 +183,7 @@ public class GlowMobCommand {
         name = normalizeNoneAlias(name);
         type = normalizeNoneAlias(type);
 
-        boolean removed = GlowMob.removeRule(name, type);
+        boolean removed = get().removeRule(name, type);
         String nameStr = (name == null || name.isEmpty()) ? "any" : name;
         String typeStr = (type == null || type.isEmpty()) ? "any" : type;
 
@@ -192,7 +195,7 @@ public class GlowMobCommand {
         StringBuilder sb = new StringBuilder();
         sb.append("=== Entity Highlight Rules ===\n");
 
-        var rules = GlowMob.getRules();
+        var rules = get().getRules();
         if (rules.isEmpty()) {
             sb.append("  (none)\n");
         } else {
