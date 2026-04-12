@@ -1,9 +1,5 @@
 package com.somefrills.features.misc;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.somefrills.Main;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.EntityUpdatedEvent;
@@ -13,81 +9,31 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.JsonHelper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.somefrills.Main.mc;
+
 /**
- * Entity highlighting feature that allows users to highlight entities based on name, type, or groups.
- * Groups are static (JSON-defined only) and can only be toggled on/off.
+ * Entity highlighting feature that allows users to highlight entities based on name or type.
  */
 public class GlowMob extends Feature {
 
     private static final ConcurrentHashMap<String, GlowMobRule> rules = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, RenderColor> activeGroups = new ConcurrentHashMap<>();
     // Armor stand cache: caches armor stands for stable mob associations
     private static final EntityCache armorStandCache = new EntityCache();
     // Search parameters for finding mobs near armor stands
     private static final double HORIZONTAL_RADIUS = 0.15;
     private static final double VERTICAL_RANGE = 4.0;
-    private static ConcurrentHashMap<String, Set<GlowMobRule>> groups;
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
-    }
-
-    private static synchronized void ensureGroupsLoaded() {
-        if (groups != null) return;
-
-        groups = new ConcurrentHashMap<>();
-
-        try (InputStream inputStream = GlowMob.class.getResourceAsStream("/glowmob_groups.json")) {
-            if (inputStream == null) {
-                Main.LOGGER.debug("glowmob_groups.json not found, no static groups loaded.");
-                return;
-            }
-
-            try (InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-                JsonObject root = new Gson().fromJson(reader, JsonObject.class);
-                JsonObject groupsJson = JsonHelper.getObject(root, "groups");
-
-                for (Map.Entry<String, JsonElement> entry : groupsJson.entrySet()) {
-                    String groupName = normalizeGroupName(entry.getKey());
-                    if (groupName == null) continue;
-
-                    Set<GlowMobRule> groupRules = ConcurrentHashMap.newKeySet();
-
-                    if (entry.getValue().isJsonArray()) {
-                        for (JsonElement ruleElement : entry.getValue().getAsJsonArray()) {
-                            if (ruleElement.isJsonObject()) {
-                                JsonObject ruleObj = ruleElement.getAsJsonObject();
-                                String name = JsonHelper.getString(ruleObj, "name", null);
-                                String type = JsonHelper.getString(ruleObj, "type", null);
-                                groupRules.add(new GlowMobRule(name, type, RenderColor.white));
-                            }
-                        }
-                    }
-
-                    groups.put(groupName, groupRules);
-                }
-
-                Main.LOGGER.debug("Loaded {} GlowMob groups.", groups.size());
-            }
-        } catch (IOException e) {
-            Main.LOGGER.error("Failed to load glowmob_groups.json: {}", e.getMessage());
-        }
     }
 
     /**
@@ -95,19 +41,9 @@ public class GlowMob extends Feature {
      * Returns null if no match found.
      */
     private static GlowMatchResult findGlowMatch(Entity entity) {
-        // Check direct rules first
         for (GlowMobRule rule : rules.values()) {
             if (rule.matchesEntity(entity)) {
                 return new GlowMatchResult(rule.color, rule.name != null);
-            }
-        }
-
-        // Then check active groups
-        for (Map.Entry<String, RenderColor> entry : activeGroups.entrySet()) {
-            for (GlowMobRule rule : getGroupRules(entry.getKey())) {
-                if (rule.matchesEntity(entity)) {
-                    return new GlowMatchResult(entry.getValue(), rule.name != null);
-                }
             }
         }
 
@@ -115,30 +51,30 @@ public class GlowMob extends Feature {
     }
 
     /**
-     * If entity is a marker armor stand with a name rule match, find the actual mob to glow.
+     * If entity is an armor stand with a name rule match, find the actual mob to glow.
+     * If entity is a regular living entity with the name on it, return it as-is.
      * Otherwise, return the entity itself.
+     * Note: This handles both marker and non-marker armor stands, as newly-appearing armor stands
+     * may not yet be marked as markers when they're first updated.
      */
     private static Entity resolveGlowTarget(Entity entity, boolean hasNameRule) {
-        if (!(entity instanceof ArmorStandEntity armorStand) || !armorStand.isMarker() || !hasNameRule) {
+        // If it's not a name-based match, return as-is
+        if (!hasNameRule) {
             return entity;
         }
 
-        // Check if we've cached this armor stand and if the associated mob still exists
-        for (Entity cachedStand : armorStandCache.get()) {
-            if (cachedStand.getId() == entity.getId()) {
-                Entity closestMob = findClosestMobNearby(armorStand);
-                if (closestMob != null) {
-                    return closestMob;
-                }
-                break;
-            }
+        // If it's a regular living entity (not an armor stand) with a name, glow it directly
+        if (entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity)) {
+            return entity;
         }
 
-        // Search for closest mob nearby
-        Entity closestMob = findClosestMobNearby(armorStand);
-        if (closestMob != null) {
-            armorStandCache.add(entity);
-            return closestMob;
+        // If it's an armor stand (marker or not), try to find the actual mob nearby
+        if (entity instanceof ArmorStandEntity armorStand) {
+            Entity closestMob = findClosestMobNearby(armorStand);
+            if (closestMob != null) {
+                armorStandCache.add(entity);
+                return closestMob;
+            }
         }
 
         return entity;
@@ -152,8 +88,19 @@ public class GlowMob extends Feature {
         Entity closest = null;
         double closestDist = Double.MAX_VALUE;
 
-        for (Entity entity : Utils.getEntities()) {
+        // Search in both getEntities() and mc.world to catch entities that might not be synced yet
+        Set<Entity> entitiesToSearch = new HashSet<>(getEntities());
+        if (mc.world != null) {
+            for (Entity e : mc.world.getEntities()) {
+                entitiesToSearch.add(e);
+            }
+        }
+
+        for (Entity entity : entitiesToSearch) {
             if (!(entity instanceof LivingEntity) || entity instanceof ArmorStandEntity) continue;
+
+            // Skip real players
+            if (entity instanceof PlayerEntity && Utils.isPlayer((PlayerEntity) entity)) continue;
 
             double entityY = entity.getY();
 
@@ -176,6 +123,7 @@ public class GlowMob extends Feature {
         return closest;
     }
 
+
     private static void applyHighlight(Entity entity) {
         if (!(entity instanceof LivingEntity)) return;
 
@@ -187,7 +135,7 @@ public class GlowMob extends Feature {
     }
 
     private static void reapplyHighlights() {
-        Utils.getEntities().forEach(GlowMob::applyHighlight);
+        getEntities().forEach(GlowMob::applyHighlight);
     }
 
     public static boolean addRule(String name, String type, RenderColor color) {
@@ -209,7 +157,7 @@ public class GlowMob extends Feature {
     }
 
     public static void clearRules() {
-        for (var entity : Utils.getEntities()) {
+        for (var entity : getEntities()) {
             if (entity instanceof PlayerEntity) continue;
             Utils.setGlowing(entity, false, RenderColor.white);
         }
@@ -217,55 +165,25 @@ public class GlowMob extends Feature {
     }
 
     private static void clearGlowForRule(GlowMobRule rule) {
-        for (Entity entity : Utils.getEntities()) {
-            if (rule.matchesEntity(entity)) {
-                // Resolve the actual entity that should be un-glowed
-                Entity targetEntity = resolveGlowTarget(entity, rule.name != null);
-                Utils.setGlowing(targetEntity, false, RenderColor.white);
+        // Clear all glow from non-player entities to ensure complete removal
+        Set<Entity> entitiesToClear = new HashSet<>(getEntities());
+        if (mc.world != null) {
+            for (Entity e : mc.world.getEntities()) {
+                entitiesToClear.add(e);
             }
         }
-    }
 
-    public static boolean addGroup(String group, RenderColor color) {
-        ensureGroupsLoaded();
-
-        String normalized = normalizeGroupName(group);
-        if (normalized == null || !groups.containsKey(normalized)) {
-            return false;
+        for (Entity entity : entitiesToClear) {
+            if (entity instanceof PlayerEntity) continue;
+            Utils.setGlowing(entity, false, RenderColor.white);
         }
 
-        activeGroups.put(normalized, color);
+        // Reapply highlights for all remaining rules
         reapplyHighlights();
-        return true;
     }
 
     public static Collection<GlowMobRule> getRules() {
         return List.copyOf(rules.values());
-    }
-
-    public static boolean removeGroup(String group) {
-        String normalized = normalizeGroupName(group);
-        if (normalized == null) return false;
-
-        if (activeGroups.remove(normalized) == null) {
-            return false;
-        }
-
-        clearGlowForGroup(normalized);
-        return true;
-    }
-
-    private static void clearGlowForGroup(String groupName) {
-        for (Entity entity : Utils.getEntities()) {
-            for (GlowMobRule rule : getGroupRules(groupName)) {
-                if (rule.matchesEntity(entity)) {
-                    // Resolve the actual entity that should be un-glowed
-                    Entity targetEntity = resolveGlowTarget(entity, rule.name != null);
-                    Utils.setGlowing(targetEntity, false, RenderColor.white);
-                    break;
-                }
-            }
-        }
     }
 
     private static String generateRuleKey(String name, String type) {
@@ -274,34 +192,6 @@ public class GlowMob extends Feature {
         return (normalizedName == null ? "ANY" : normalizedName) + ":" + normalizedType;
     }
 
-    public static Collection<GlowMobRule> getGroupRules(String group) {
-        ensureGroupsLoaded();
-
-        String normalized = normalizeGroupName(group);
-        if (normalized == null || groups == null) return List.of();
-
-        Set<GlowMobRule> set = groups.get(normalized);
-        return set == null ? List.of() : List.copyOf(set);
-    }
-
-    public static boolean groupExists(String group) {
-        ensureGroupsLoaded();
-        String normalized = normalizeGroupName(group);
-        return normalized != null && groups.containsKey(normalized);
-    }
-
-    public static Collection<String> getGroupNames() {
-        ensureGroupsLoaded();
-        return groups == null ? List.of() : List.copyOf(groups.keySet());
-    }
-
-    public static Collection<String> getActiveGroupNames() {
-        return List.copyOf(activeGroups.keySet());
-    }
-
-    public static ConcurrentHashMap<String, RenderColor> getActiveGroups() {
-        return activeGroups;
-    }
 
     private static String normalizeRuleName(String name) {
         if (name == null) return null;
@@ -309,23 +199,23 @@ public class GlowMob extends Feature {
         String normalized = name.trim().toLowerCase();
         if (normalized.isEmpty()) return null;
 
-        if (normalized.startsWith("#")) {
-            return "#" + normalizeGroupName(normalized);
-        }
-
         return normalized;
     }
 
-    private static String normalizeGroupName(String group) {
-        if (group == null) return null;
 
-        String normalized = group.trim();
-        if (normalized.startsWith("#")) {
-            normalized = normalized.substring(1);
+    private static List<Entity> getEntities(){
+        var list = Utils.getEntities();
+        if(mc.world == null) return list;
+        ArrayList<Entity> entities = new ArrayList<>(list);
+        for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
+            var uuid = player.getUuid();
+            if(uuid == null) {
+                entities.add(player);
+                continue;
+            }
+            if (uuid.version() != 4) entities.add(player);
         }
-
-        normalized = normalized.trim().toLowerCase();
-        return normalized.isEmpty() ? null : normalized;
+        return entities;
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -336,11 +226,11 @@ public class GlowMob extends Feature {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onServerJoin(ServerJoinEvent ignored) {
-        for (Entity entity : Utils.getEntities()) {
+        for (Entity entity : getEntities()) {
             applyHighlight(entity);
         }
     }
-
+    
     /**
      * Result of glow matching: color and whether it matched a name-based rule
      */
@@ -362,34 +252,16 @@ public class GlowMob extends Feature {
             }
 
             /**
-             * Check if this rule matches an entity, including group references
-             */
-            public boolean matches(Entity entity) {
-                if (this.name != null && this.name.startsWith("#")) {
-                    // This rule references a group
-                    Collection<GlowMobRule> groupRules = GlowMob.getGroupRules(this.name);
-                    for (GlowMobRule rule : groupRules) {
-                        if (rule.matchesEntity(entity)) {
-                            return true;
-                        }
-                    }
-                    return false;
-                }
-
-                return matchesEntity(entity);
-            }
-
-            /**
-             * Check if this rule matches an entity (direct match only, no group references)
+             * Check if this rule matches an entity (direct match only)
              * <p>
              * Rules are applied as follows:
-             * - If name is specified: only armor stands can match (by name). The nearby mob will be resolved later.
+             * - If name is specified: match any living entity with that name (armor stands or direct mobs).
              * - If name is not specified: match any entity of the specified type.
              */
             boolean matchesEntity(Entity entity) {
-                // If a name is specified, only armor stands with that name can trigger this rule
+                // If a name is specified, match any living entity with that name
                 if (this.name != null) {
-                    if (!(entity instanceof ArmorStandEntity)) {
+                    if (!(entity instanceof LivingEntity)) {
                         return false;
                     }
                     String entityName = Utils.toPlain(entity.getDisplayName()).toLowerCase();
