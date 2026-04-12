@@ -183,7 +183,7 @@ public class GlowMob extends Feature {
     }
 
     private static List<Entity> updateEntities() {
-       return Utils.getEntities().stream()
+        return Utils.getEntities().stream()
                 .filter(Utils::isMob)
                 .toList();
     }
@@ -202,45 +202,45 @@ public class GlowMob extends Feature {
     }
 
     public record GlowMobRule(String name, String type, RenderColor color) {
-            public GlowMobRule(String name, String type, RenderColor color) {
-                this.name = normalizeRuleName(name);
-                this.type = normalizeType(type);
-                this.color = color;
-            }
-
-            private static String normalizeType(String type) {
-                if (type == null || type.isEmpty()) {
-                    return null;
-                }
-                return Utils.stripPrefix(type, "minecraft:").toLowerCase();
-            }
-
-            /**
-             * Check if this rule matches an entity (direct match only)
-             * <p>
-             * Rules are applied as follows:
-             * - If name is specified: match any living entity with that name (armor stands or direct mobs).
-             * - If name is not specified: match any entity of the specified type.
-             */
-            boolean matchesEntity(Entity entity) {
-                // If a name is specified, match any living entity with that name
-                if (this.name != null) {
-                    if (!(entity instanceof LivingEntity)) {
-                        return false;
-                    }
-                    String entityName = Utils.toPlain(entity.getDisplayName()).toLowerCase();
-                    return entityName.contains(this.name);
-                }
-
-                // No name specified: match by type if specified
-                if (this.type != null) {
-                    String entityType = entity.getType().toString();
-                    entityType = Utils.stripPrefix(entityType, "entity.minecraft.").toLowerCase();
-                    return entityType.equals(this.type);
-                }
-
-                // No criteria = match everything
-                return true;
-            }
+        public GlowMobRule(String name, String type, RenderColor color) {
+            this.name = normalizeRuleName(name);
+            this.type = normalizeType(type);
+            this.color = color;
         }
+
+        private static String normalizeType(String type) {
+            if (type == null || type.isEmpty()) {
+                return null;
+            }
+            return Utils.stripPrefix(type, "minecraft:").toLowerCase();
+        }
+
+        /**
+         * Check if this rule matches an entity (direct match only)
+         * <p>
+         * Rules are applied as follows:
+         * - If name is specified: match any living entity with that name (armor stands or direct mobs).
+         * - If name is not specified: match any entity of the specified type.
+         */
+        boolean matchesEntity(Entity entity) {
+            // If a name is specified, match any living entity with that name
+            if (this.name != null) {
+                if (!(entity instanceof LivingEntity)) {
+                    return false;
+                }
+                String entityName = Utils.toPlain(entity.getDisplayName()).toLowerCase();
+                return entityName.contains(this.name);
+            }
+
+            // No name specified: match by type if specified
+            if (this.type != null) {
+                String entityType = entity.getType().toString();
+                entityType = Utils.stripPrefix(entityType, "entity.minecraft.").toLowerCase();
+                return entityType.equals(this.type);
+            }
+
+            // No criteria = match everything
+            return true;
+        }
+    }
 }
