@@ -6,10 +6,7 @@ import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.about.ConfigVersionDisplay;
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
-import com.somefrills.events.ChatMsgEvent;
-import com.somefrills.events.ClientDisconnectEvent;
-import com.somefrills.events.OverlayMsgEvent;
-import com.somefrills.events.PartyChatMsgEvent;
+import com.somefrills.events.*;
 import com.somefrills.features.misc.Aliases;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.SkyblockData;
@@ -17,6 +14,8 @@ import com.somefrills.misc.Utils;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfigBuilder;
 import meteordevelopment.orbit.EventBus;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
@@ -44,6 +43,11 @@ public class Main implements ClientModInitializer {
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         SomeFrillsCommand.init(dispatcher);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public static void onGameStop(GameStopEvent event) {
+        Main.config.saveToFile();
     }
 
     @Override
@@ -86,6 +90,7 @@ public class Main implements ClientModInitializer {
 
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
+        eventBus.subscribe(Main.class);
         Features.init();
 
         LOGGER.info("It's time to get real, SomeFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);

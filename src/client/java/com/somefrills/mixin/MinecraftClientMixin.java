@@ -2,7 +2,6 @@ package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.somefrills.Main;
 import com.somefrills.events.*;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -77,6 +76,6 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "stop", at = @At("HEAD"))
     private void beforeStop(CallbackInfo ci) {
-        Main.config.saveToFile();
+        eventBus.post(new GameStopEvent());
     }
 }

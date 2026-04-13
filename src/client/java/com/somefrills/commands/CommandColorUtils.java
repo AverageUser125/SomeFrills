@@ -11,6 +11,7 @@ import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.util.Formatting;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 
@@ -22,34 +23,54 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.arg
 public class CommandColorUtils {
 
     /**
-     * Parse a color string which can be:
-     * - A formatting color name (e.g., "red", "white")
-     * - A 6-char hex color (e.g., "#FFFFFF", "FFFFFF") - RGB format
+     * Parse a color string with Optional return and support for RGB format.
+     * Supports:
+     * - Formatting color names (e.g., "red", "white")
+     * - Hex colors (e.g., "#FFFFFF", "FFFFFF")
+     * - RGB values (e.g., "255 0 0" or space-separated 0-255 values)
+     *
+     * @param colorStr the color string to parse
+     * @return Optional containing the parsed RenderColor, or empty if parsing fails
      */
-    public static RenderColor parseColorString(String colorStr) {
-        if (colorStr == null) return null;
-
-        // Try hex format first (#FFFFFF or FFFFFF)
-        if (colorStr.startsWith("#")) {
-            colorStr = colorStr.substring(1);
+    public static Optional<RenderColor> parseColor(String colorStr) {
+        if (colorStr == null || colorStr.isEmpty()) {
+            return Optional.empty();
         }
 
-        if (colorStr.length() == 6) {
+        // Try hex format
+        String hexStr = colorStr;
+        if (hexStr.startsWith("#")) {
+            hexStr = hexStr.substring(1);
+        }
+        if (hexStr.length() == 6) {
             try {
-                int hex = Integer.parseInt(colorStr, 16);
-                return RenderColor.fromHex(hex);
-            } catch (NumberFormatException e) {
-                // Fall through to formatting check
+                int hex = Integer.parseInt(hexStr, 16);
+                return Optional.of(RenderColor.fromHex(hex));
+            } catch (NumberFormatException ignored) {
             }
         }
 
         // Try formatting color
         Formatting formatting = Utils.parseColor(colorStr);
         if (formatting != null) {
-            return RenderColor.fromFormatting(formatting);
+            return Optional.of(RenderColor.fromFormatting(formatting));
         }
 
-        return null;
+        // Try RGB format (space-separated)
+        String[] parts = colorStr.split("\\s+");
+        if (parts.length == 3) {
+            try {
+                int r = Integer.parseInt(parts[0]);
+                int g = Integer.parseInt(parts[1]);
+                int b = Integer.parseInt(parts[2]);
+                if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+                    return Optional.of(new RenderColor(r, g, b, 255));
+                }
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -101,12 +122,12 @@ public class CommandColorUtils {
                 .suggests(CommandColorUtils::suggestColors)
                 .executes(ctx -> {
                     String colorStr = StringArgumentType.getString(ctx, "color");
-                    RenderColor color = parseColorString(colorStr);
-                    if (color == null) {
+                    Optional<RenderColor> color = parseColor(colorStr);
+                    if (color.isEmpty()) {
                         Utils.info("Invalid color format.");
                         return 1;
                     }
-                    return handler.apply(ctx, color);
+                    return handler.apply(ctx, color.get());
                 })
                 // Also support RGB format
                 .then(buildRGBArguments(handler));

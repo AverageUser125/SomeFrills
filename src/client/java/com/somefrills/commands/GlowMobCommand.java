@@ -3,15 +3,12 @@ package com.somefrills.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.config.Features;
 import com.somefrills.features.misc.GlowMob;
+import com.somefrills.features.misc.matcher.Matcher;
+import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-import net.minecraft.registry.Registries;
-
-import java.util.concurrent.CompletableFuture;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -21,177 +18,55 @@ public class GlowMobCommand {
     public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
         return literal("glowmob")
                 .executes(ctx -> {
-                    Utils.info("Usage: /GlowMob <add|remove|list|clear>");
+                    Utils.info("Usage: /glowmob <add|remove|list|clear>");
                     return 1;
                 })
-                .then(literal("list").executes(ctx -> {
-                    listRules();
-                    return 1;
-                }))
+                .then(literal("list").executes(GlowMobCommand::listRules))
                 .then(literal("clear").executes(ctx -> {
                     get().clearRules();
-                    Utils.info("Cleared all entity highlight rules.");
+                    ctx.getSource().sendFeedback(net.minecraft.text.Text.literal("Cleared all entity highlight rules."));
                     return 1;
                 }))
                 .then(literal("add")
-                        // Path 1: /glowmob add <type> <color>
-                        .then(argument("type", StringArgumentType.word())
-                                .suggests(GlowMobCommand::suggestEntityTypes)
-                                .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
-                                    String type = StringArgumentType.getString(ctx, "type");
-                                    if (isValidEntityType(type)) {
-                                        return get().addRule(null, type, color) ? 1 : 0;
-                                    }
-                                    return 0; // Invalid type, fail silently to try other paths
-                                }))
-                                // Path 2: /glowmob add <type> <name> <color>
-                                .then(argument("name", StringArgumentType.word())
-                                        .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
-
-                                            String type = StringArgumentType.getString(ctx, "type");
-                                            String name = StringArgumentType.getString(ctx, "name");
-
-                                            // Normalize "none" aliases to null
-                                            type = normalizeNoneAlias(type);
-                                            name = normalizeNoneAlias(name);
-
-                                            boolean added = get().addRule(name, type, color);
-                                            String colorStr = String.format("#%06X", color.hex);
-                                            String nameStr = (name == null || name.isEmpty()) ? "any" : name;
-                                            String typeStr = (type == null || type.isEmpty()) ? "any" : type;
-                                            Utils.info(added ? "Added entity highlight rule: name=" + nameStr + ", type=" + typeStr + ", color=" + colorStr : "Rule with this name and type already exists.");
-                                            return added ? 1 : 0;
-                                        }))
+                        .then(argument("id", StringArgumentType.word())
+                                .then(argument("matcher", MatcherArgumentType.matcher())
+                                        .then(literal("color"))
+                                        .then(CommandColorUtils.buildColorArguments(GlowMobCommand::addRuleCommand))
                                 )
                         )
                 )
-                // Path 3: /glowmob add <name> <color> (for non-entity-type names)
-                .then(argument("name", StringArgumentType.word())
-                        .then(CommandColorUtils.buildColorArguments((ctx, color) -> {
-                            String name = StringArgumentType.getString(ctx, "name");
-                            if (!isValidEntityType(name)) {
-                                return get().addRule(name, null, color) ? 1 : 0;
-                            }
-                            return 0; // Is an entity type, so the type+color path should handle it
-                        }))
-                )
                 .then(literal("remove")
-                        .then(literal("all").executes(ctx -> {
-                            get().clearRules();
-                            Utils.info("Removed all entity highlight rules.");
-                            return 1;
-                        }))
-                        .then(argument("type", StringArgumentType.word())
-                                .suggests(GlowMobCommand::suggestRuleTypes)
-                                .then(argument("name", StringArgumentType.word())
-                                        .suggests(GlowMobCommand::suggestRuleNames)
-                                        .executes(GlowMobCommand::removeRule)
-                                )
+                        .then(argument("id", StringArgumentType.word())
+                                .executes(GlowMobCommand::removeRuleCommand)
                         )
                 );
     }
 
+    private static int addRuleCommand(CommandContext<FabricClientCommandSource> ctx, RenderColor color) {
+        String id = StringArgumentType.getString(ctx, "id");
+        Matcher matcher = MatcherArgumentType.getMatcher(ctx, "matcher");
 
-    private static CompletableFuture<Suggestions> suggestEntityTypes(
-            CommandContext<FabricClientCommandSource> ctx,
-            SuggestionsBuilder builder
-    ) {
-        String remaining = builder.getRemaining().toLowerCase();
-
-        Registries.ENTITY_TYPE.forEach(entityType -> {
-            String id = Registries.ENTITY_TYPE.getId(entityType).toString();
-            id = Utils.stripPrefix(id, "minecraft:").toLowerCase();
-            if (id.startsWith(remaining)) {
-                builder.suggest(id);
-            }
-        });
-
-        return builder.buildFuture();
-    }
-
-    /**
-     * Suggest existing rule types for removal
-     */
-    private static CompletableFuture<Suggestions> suggestRuleTypes(
-            CommandContext<FabricClientCommandSource> ctx,
-            SuggestionsBuilder builder
-    ) {
-        String remaining = builder.getRemaining().toLowerCase();
-
-        for (GlowMob.GlowMobRule rule : get().getRules()) {
-            String type = (rule.type() == null || rule.type().isEmpty()) ? "any" : rule.type();
-            if (type.toLowerCase().startsWith(remaining)) {
-                builder.suggest(type);
-            }
+        boolean added = get().addRule(id, matcher, color);
+        if (added) {
+            ctx.getSource().sendFeedback(net.minecraft.text.Text.literal("Added rule '" + id + "' with matcher: " + matcher));
+        } else {
+            ctx.getSource().sendError(net.minecraft.text.Text.literal("Rule '" + id + "' already exists."));
         }
-
-        return builder.buildFuture();
+        return added ? 1 : 0;
     }
 
-    private static GlowMob get() {
-        return Features.get(GlowMob.class);
-    }
-
-    /**
-     * Suggest existing rule names for removal, filtered by the selected type
-     */
-    private static CompletableFuture<Suggestions> suggestRuleNames(
-            CommandContext<FabricClientCommandSource> ctx,
-            SuggestionsBuilder builder
-    ) {
-        String remaining = builder.getRemaining().toLowerCase();
-        String selectedType = StringArgumentType.getString(ctx, "type");
-        String normalizedSelectedType = normalizeNoneAlias(selectedType);
-
-        for (GlowMob.GlowMobRule rule : get().getRules()) {
-            // Check if this rule matches the selected type
-            String ruleType = (rule.type() == null || rule.type().isEmpty()) ? null : rule.type();
-
-            if ((normalizedSelectedType == null && ruleType == null) ||
-                    (normalizedSelectedType != null && normalizedSelectedType.equalsIgnoreCase(ruleType))) {
-
-                String name = (rule.name() == null || rule.name().isEmpty()) ? "any" : rule.name();
-                if (name.toLowerCase().startsWith(remaining)) {
-                    builder.suggest(name);
-                }
-            }
+    private static int removeRuleCommand(CommandContext<FabricClientCommandSource> ctx) {
+        String id = StringArgumentType.getString(ctx, "id");
+        boolean removed = get().removeRule(id);
+        if (removed) {
+            ctx.getSource().sendFeedback(net.minecraft.text.Text.literal("Removed rule '" + id + "'."));
+        } else {
+            ctx.getSource().sendError(net.minecraft.text.Text.literal("Rule '" + id + "' not found."));
         }
-
-        return builder.buildFuture();
-    }
-
-    /**
-     * Normalize "none" aliases to null
-     * Aliases: "none", "ignore", "any", "null", ""
-     */
-    private static String normalizeNoneAlias(String input) {
-        if (input == null) {
-            return null;
-        }
-        String lower = input.toLowerCase();
-        if (lower.equals("none") || lower.equals("ignore") || lower.equals("any") || lower.equals("null") || lower.isEmpty()) {
-            return null;
-        }
-        return input;
-    }
-
-    private static int removeRule(CommandContext<FabricClientCommandSource> ctx) {
-        String name = StringArgumentType.getString(ctx, "name");
-        String type = StringArgumentType.getString(ctx, "type");
-
-        // Normalize "none" aliases to null
-        name = normalizeNoneAlias(name);
-        type = normalizeNoneAlias(type);
-
-        boolean removed = get().removeRule(name, type);
-        String nameStr = (name == null || name.isEmpty()) ? "any" : name;
-        String typeStr = (type == null || type.isEmpty()) ? "any" : type;
-
-        Utils.info(removed ? "Removed entity highlight rule: name=" + nameStr + ", type=" + typeStr : "Rule with this name and type not found.");
         return removed ? 1 : 0;
     }
 
-    private static void listRules() {
+    private static int listRules(CommandContext<FabricClientCommandSource> ctx) {
         StringBuilder sb = new StringBuilder();
         sb.append("=== Entity Highlight Rules ===\n");
 
@@ -200,30 +75,19 @@ public class GlowMobCommand {
             sb.append("  (none)\n");
         } else {
             for (GlowMob.GlowMobRule rule : rules) {
-                String name = (rule.name() == null || rule.name().isEmpty()) ? "any" : rule.name();
-                String type = (rule.type() == null || rule.type().isEmpty()) ? "any" : rule.type();
                 String color = String.format("#%06X", rule.color().hex);
-
-                sb.append("  • ")
-                        .append("name=").append(name)
-                        .append(", type=").append(type)
+                sb.append("  • id=").append(rule.id())
                         .append(", color=").append(color)
                         .append("\n");
             }
         }
 
-        Utils.info(sb.toString());
+        ctx.getSource().sendFeedback(net.minecraft.text.Text.literal(sb.toString()));
+        return 1;
     }
 
-    private static boolean isValidEntityType(String value) {
-        for (var entityType : Registries.ENTITY_TYPE) {
-            String id = Registries.ENTITY_TYPE.getId(entityType).toString();
-            id = Utils.stripPrefix(id, "minecraft:");
-            if (id.equalsIgnoreCase(value)) {
-                return true;
-            }
-        }
-        return false;
+    private static GlowMob get() {
+        return Features.get(GlowMob.class);
     }
 }
 

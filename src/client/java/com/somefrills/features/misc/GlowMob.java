@@ -2,34 +2,78 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.config.misc.MiscCategory;
+import com.somefrills.config.misc.MiscCategory.MobGlowConfig.RuleData;
+import com.somefrills.events.GameStopEvent;
 import com.somefrills.events.WorldTickEvent;
+import com.somefrills.features.misc.matcher.Matcher;
+import com.somefrills.features.misc.matcher.MatcherParser;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.somefrills.Main.mc;
+import java.util.function.Predicate;
 
 /**
- * Entity highlighting feature that allows users to highlight entities based on name or type.
+ * Entity highlighting feature that allows users to highlight entities based on custom matcher expressions.
  */
 public class GlowMob extends Feature {
 
-    private static final double HORIZONTAL_RADIUS = 0.5;
-    private static final double VERTICAL_RANGE = 4.0;
-
-    private final ConcurrentHashMap<String, GlowMobRule> rules = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, GlowMobRule> rules;
     private List<Entity> entityList;
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
+        rules = new ConcurrentHashMap<>();
+        loadRulesFromConfig();
+    }
+
+    /**
+     * Load rules from config if saving is enabled
+     */
+    private void loadRulesFromConfig() {
+        if (!FrillsConfig.instance.misc.glowMob.saveRules.get()) {
+            return;
+        }
+        if (rules == null) {
+            return;
+        }
+
+        List<RuleData> savedRules = FrillsConfig.instance.misc.glowMob.rules;
+        for (RuleData ruleData : savedRules) {
+            try {
+                Matcher matcher = MatcherParser.parse(ruleData.matcherExpression);
+                RenderColor color = RenderColor.fromHex(ruleData.colorHex);
+                addRule(ruleData.id, matcher, color);
+            } catch (MatcherParser.MatcherParseException e) {
+                Utils.infoFormat("Failed to load glow rule '{}': {}", ruleData.id, e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onEnable() {
+        loadRulesFromConfig();
+    }
+
+    @EventHandler
+    public void onLeave(GameStopEvent event) {
+        if (!FrillsConfig.instance.misc.glowMob.saveRules.get()) {
+            return;
+        }
+
+        FrillsConfig.instance.misc.glowMob.rules.clear();
+        for (GlowMobRule rule : rules.values()) {
+            FrillsConfig.instance.misc.glowMob.rules.add(
+                    new MiscCategory.MobGlowConfig.RuleData(rule.id, rule.matcherExpression, rule.color.hex)
+            );
+        }
     }
 
     /**
@@ -37,107 +81,57 @@ public class GlowMob extends Feature {
      * Returns null if no match found.
      */
     private GlowMatchResult findGlowMatch(Entity entity) {
+        if (!(entity instanceof LivingEntity livingEntity)) return null;
+
         for (GlowMobRule rule : rules.values()) {
-            if (rule.matchesEntity(entity)) {
-                return new GlowMatchResult(rule.color, rule.name != null);
+            if (rule.matches(livingEntity)) {
+                return new GlowMatchResult(rule.color, rule.id);
             }
         }
         return null;
     }
-
-    /**
-     * If entity is an armor stand with a name rule match, find the actual mob to glow.
-     * If entity is a regular living entity with the name on it, return it as-is.
-     * Otherwise, return the entity itself.
-     * Note: This handles both marker and non-marker armor stands, as newly-appearing armor stands
-     * may not yet be marked as markers when they're first updated.
-     */
-    private Entity resolveGlowTarget(Entity entity, boolean hasNameRule) {
-        // If it's not a name-based match, return as-is
-        if (!hasNameRule) {
-            return entity;
-        }
-
-        // If it's a regular living entity (not an armor stand) with a name, glow it directly
-        if (entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity)) {
-            return entity;
-        }
-
-        // If it's an armor stand with a name rule, try to find the actual mob nearby
-        if (entity instanceof ArmorStandEntity armorStand) {
-            Entity closestMob = findClosestMobNearby(armorStand);
-            if (closestMob != null) {
-                return closestMob;
-            }
-            // If no mob found nearby, glow the armor stand itself
-            return entity;
-        }
-
-        return entity;
-    }
-
-    private Entity findClosestMobNearby(Entity armorStand) {
-        double asX = armorStand.getX();
-        double asY = armorStand.getY();
-        double asZ = armorStand.getZ();
-
-
-        if (mc.world == null) return null;
-
-        // Search all entities and find the first one that matches criteria
-        for (Entity entity : getEntities()) {
-
-            double entityY = entity.getY();
-            // Entity must be at or below the armor stand
-            if (entityY > asY || asY - entityY >= VERTICAL_RANGE) {
-
-                continue;
-            }
-
-            // Check horizontal distance
-            double dx = entity.getX() - asX;
-            double dz = entity.getZ() - asZ;
-            double horizontalDist = Math.hypot(dx, dz);
-
-            if (horizontalDist <= HORIZONTAL_RADIUS) {
-
-                return entity;
-            }
-        }
-
-
-        return null;
-    }
-
 
     private void applyHighlight(Entity entity) {
         if (!(entity instanceof LivingEntity)) return;
 
         GlowMatchResult result = findGlowMatch(entity);
         if (result != null) {
-
-            Entity targetEntity = resolveGlowTarget(entity, result.hasNameRule);
-
-            Utils.setGlowing(targetEntity, true, result.color);
-        } else {
-
+            Utils.setGlowing(entity, true, result.color);
         }
     }
 
-    public boolean addRule(String name, String type, RenderColor color) {
-        String key = generateRuleKey(name, type);
-        return rules.put(key, new GlowMobRule(name, type, color)) == null; // Rule already existed
+    public boolean addRule(String id, Matcher matcher, RenderColor color) {
+        if (id == null || id.trim().isEmpty() || matcher == null || color == null) {
+            return false;
+        }
+        String normalizedId = id.trim();
+
+        // Check if rule already exists - don't overwrite
+        if (rules.containsKey(normalizedId)) {
+            return false;
+        }
+
+        try {
+            rules.put(normalizedId, new GlowMobRule(normalizedId, matcher, color));
+            return true;
+        } catch (Exception e) {
+            Utils.infoFormat("Failed to add glow rule: {}", e.getMessage());
+            return false;
+        }
     }
 
-    public boolean removeRule(String name, String type) {
-        String key = generateRuleKey(name, type);
-        GlowMobRule removed = rules.remove(key);
+    public boolean removeRule(String id) {
+        if (id == null || id.trim().isEmpty()) {
+            return false;
+        }
+        String normalizedId = id.trim();
+        GlowMobRule removed = rules.remove(normalizedId);
         if (removed != null) {
-            // Disable glowing on entities that matched this rule
+            // Refresh entity list and disable glowing on entities that matched this rule
+            updateEntities();
             for (Entity entity : getEntities()) {
-                if (removed.matchesEntity(entity)) {
-                    Entity targetEntity = resolveGlowTarget(entity, removed.name != null);
-                    Utils.setGlowing(targetEntity, false, RenderColor.white);
+                if (entity instanceof LivingEntity livingEntity && removed.matches(livingEntity)) {
+                    Utils.setGlowing(entity, false, RenderColor.white);
                 }
             }
         }
@@ -145,12 +139,11 @@ public class GlowMob extends Feature {
     }
 
     public void clearRules() {
-        // Disable glowing on all entities that match any rule before clearing
+        updateEntities();
         for (Entity entity : getEntities()) {
             GlowMatchResult result = findGlowMatch(entity);
             if (result != null) {
-                Entity targetEntity = resolveGlowTarget(entity, result.hasNameRule);
-                Utils.setGlowing(targetEntity, false, RenderColor.white);
+                Utils.setGlowing(entity, false, RenderColor.white);
             }
         }
         rules.clear();
@@ -160,87 +153,65 @@ public class GlowMob extends Feature {
         return List.copyOf(rules.values());
     }
 
-    private static String generateRuleKey(String name, String type) {
-        String normalizedName = normalizeRuleName(name);
-        String normalizedType = (type == null || type.isEmpty()) ? "ANY" : type.toLowerCase();
-        return (normalizedName == null ? "ANY" : normalizedName) + ":" + normalizedType;
-    }
-
-    private static String normalizeRuleName(String name) {
-        if (name == null) return null;
-
-        String normalized = name.trim().toLowerCase();
-        if (normalized.isEmpty()) return null;
-
-        return normalized;
-    }
-
     private List<Entity> getEntities() {
         if (entityList == null) {
-            entityList = updateEntities();
+            updateEntities();
         }
         return entityList;
     }
 
-    private static List<Entity> updateEntities() {
+    private static List<Entity> getUpdatedEntities() {
         return Utils.getEntities().stream()
                 .filter(Utils::isMob)
                 .toList();
     }
 
+    private void updateEntities() {
+        entityList = getUpdatedEntities();
+    }
+
     @EventHandler(priority = EventPriority.LOW)
     private void onWorldTick(WorldTickEvent event) {
         if (!isActive()) return;
-        entityList = updateEntities();
+        updateEntities();
         getEntities().forEach(this::applyHighlight);
     }
 
     /**
-     * Result of glow matching: color and whether it matched a name-based rule
+     * Result of glow matching: color and rule ID
      */
-    private record GlowMatchResult(RenderColor color, boolean hasNameRule) {
+    private record GlowMatchResult(RenderColor color, String ruleId) {
     }
 
-    public record GlowMobRule(String name, String type, RenderColor color) {
-        public GlowMobRule(String name, String type, RenderColor color) {
-            this.name = normalizeRuleName(name);
-            this.type = normalizeType(type);
+    /**
+     * Rule definition: ID, matcher expression, and color
+     */
+    public static class GlowMobRule {
+        private final String id;
+        private final String matcherExpression;
+        private final RenderColor color;
+        private final Predicate<LivingEntity> predicate;
+
+        public GlowMobRule(String id, Matcher matcher, RenderColor color) {
+            if (id == null || id.trim().isEmpty() || matcher == null || color == null) {
+                throw new IllegalArgumentException("Invalid rule parameters");
+            }
+            this.id = id;
+            this.matcherExpression = matcher.toString();
             this.color = color;
+            this.predicate = matcher.compile();
         }
 
-        private static String normalizeType(String type) {
-            if (type == null || type.isEmpty()) {
-                return null;
-            }
-            return Utils.stripPrefix(type, "minecraft:").toLowerCase();
+        public String id() {
+            return id;
         }
 
-        /**
-         * Check if this rule matches an entity (direct match only)
-         * <p>
-         * Rules are applied as follows:
-         * - If name is specified: match any living entity with that name (armor stands or direct mobs).
-         * - If name is not specified: match any entity of the specified type.
-         */
-        boolean matchesEntity(Entity entity) {
-            // If a name is specified, match any living entity with that name
-            if (this.name != null) {
-                if (!(entity instanceof LivingEntity)) {
-                    return false;
-                }
-                String entityName = Utils.toPlain(entity.getDisplayName()).toLowerCase();
-                return entityName.contains(this.name);
-            }
+        public RenderColor color() {
+            return color;
+        }
 
-            // No name specified: match by type if specified
-            if (this.type != null) {
-                String entityType = entity.getType().toString();
-                entityType = Utils.stripPrefix(entityType, "entity.minecraft.").toLowerCase();
-                return entityType.equals(this.type);
-            }
-
-            // No criteria = match everything
-            return true;
+        public boolean matches(LivingEntity entity) {
+            return predicate.test(entity);
         }
     }
 }
