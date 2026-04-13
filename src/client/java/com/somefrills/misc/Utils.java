@@ -42,7 +42,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -266,6 +268,18 @@ public class Utils {
 
     public static boolean isStainedGlass(Block block) {
         return block instanceof StainedGlassBlock || block instanceof StainedGlassPaneBlock;
+    }
+
+    public static List<String> getToolTip(ItemStack stack) {
+        List<String> tooltip = new ArrayList<>();
+        if(mc.player == null) return tooltip;
+        Item.TooltipContext context = Item.TooltipContext.create(mc.player.getRegistryManager());
+        List<Text> toolTipLines = stack.getTooltip(context, mc.player, TooltipType.ADVANCED);
+        for (Text line : toolTipLines) {
+            String text = line.getString();
+            tooltip.add(text);
+        }
+        return tooltip;
     }
 
     public static MutableText getTag() {
@@ -939,7 +953,12 @@ public class Utils {
         }
         return "";
     }
-
+    public static String toPlain(String text) {
+        if (text != null) {
+            return Formatting.strip(text);
+        }
+        return "";
+    }
     public static Optional<Style> getStyle(Text text, Predicate<String> predicate) {
         return text.visit((textStyle, textString) -> {
             if (predicate.test(textString)) {
