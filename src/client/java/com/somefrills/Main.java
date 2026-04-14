@@ -6,8 +6,10 @@ import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.about.ConfigVersionDisplay;
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
+import com.somefrills.config.misc.ConfigEditRuleList;
 import com.somefrills.config.misc.ConfigEditTextList;
 import com.somefrills.config.misc.GuiOptionEditorEditTextList;
+import com.somefrills.config.misc.GuiOptionEditorRuleList;
 import com.somefrills.events.*;
 import com.somefrills.features.misc.Aliases;
 import com.somefrills.misc.EntityCache;
@@ -84,6 +86,7 @@ public class Main implements ClientModInitializer {
         var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
         builder.customProcessor(ConfigVersionDisplay.class, (option, annotation) -> new GuiOptionEditorUpdateCheck(option));
         builder.customProcessor(ConfigEditTextList.class, (option, annotation) -> new GuiOptionEditorEditTextList(option, annotation));
+        builder.customProcessor(ConfigEditRuleList.class, (option, annotation) -> new GuiOptionEditorRuleList(option));
         config = new ManagedConfig<>(builder);
         FrillsConfig.instance = config.getInstance();
 

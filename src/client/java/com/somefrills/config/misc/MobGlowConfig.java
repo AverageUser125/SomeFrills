@@ -19,6 +19,8 @@ public class MobGlowConfig {
     public Property<Boolean> saveRules = Property.of(true);
 
     @Expose
+    @ConfigOption(name = "Glow Rules", desc = "Manage entity glow rules")
+    @ConfigEditRuleList
     public List<RuleData> rules = new ArrayList<>();
 
     public static class RuleData {
