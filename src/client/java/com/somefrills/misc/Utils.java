@@ -330,14 +330,14 @@ public class Utils {
     }
 
     /**
-     * Checks if the provided location matches with the current area on the tab list. For example, isInArea("Private Island") is true if "Area: Private Island" is on the tab list.
+     * Checks if the provided Area enum matches the current area on the tab list.
      */
-    public static boolean isInArea(String area) {
-        return SkyblockData.getArea().equals(area);
+    public static boolean isInArea(Area area) {
+        return area != null && SkyblockData.getArea().equals(area.getDisplayName());
     }
 
     public static boolean isInDungeons() {
-        return isInArea("Catacombs");
+        return isInArea(Area.CATACOMBS);
     }
 
     /**
@@ -348,7 +348,7 @@ public class Utils {
     }
 
     public static boolean isInKuudra() {
-        return isInArea("Kuudra");
+        return isInArea(Area.KUUDRA);
     }
 
     public static boolean isInChateau() {
@@ -370,11 +370,11 @@ public class Utils {
      * Returns true if the player is anywhere on their garden
      */
     public static boolean isInGarden() {
-        return isInArea("Garden");
+        return isInArea(Area.GARDEN);
     }
 
     public static boolean isInHub() {
-        return isInArea("Hub");
+        return isInArea(Area.HUB);
     }
 
     public static boolean isInstanceOver() {

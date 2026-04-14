@@ -83,6 +83,11 @@ public class GlowMob extends Feature {
     private GlowMatchResult findGlowMatch(Entity entity) {
         if (!(entity instanceof LivingEntity livingEntity)) return null;
 
+        // Ignore mobs that are in the dying animation
+        if (livingEntity.deathTime > 0) return null;
+        // Ignore mobs that are newly spawned (armor and other visuals haven't loaded yet)
+        if (entity.age <= 2) return null;
+
         for (GlowMobRule rule : rules.values()) {
             if (rule.matches(livingEntity)) {
                 return new GlowMatchResult(rule.color, rule.id);
@@ -126,16 +131,15 @@ public class GlowMob extends Feature {
         }
         String normalizedId = id.trim();
         GlowMobRule removed = rules.remove(normalizedId);
-        if (removed != null) {
-            // Refresh entity list and disable glowing on entities that matched this rule
-            updateEntities();
-            for (Entity entity : getEntities()) {
-                if (entity instanceof LivingEntity livingEntity && removed.matches(livingEntity)) {
-                    Utils.setGlowing(entity, false, RenderColor.white);
-                }
+        if (removed == null) return false;
+        // Refresh entity list and disable glowing on entities that matched this rule
+        updateEntities();
+        for (Entity entity : getEntities()) {
+            if (entity instanceof LivingEntity livingEntity && removed.matches(livingEntity)) {
+                Utils.setGlowing(entity, false, RenderColor.white);
             }
         }
-        return removed != null;
+        return true;
     }
 
     public void clearRules() {

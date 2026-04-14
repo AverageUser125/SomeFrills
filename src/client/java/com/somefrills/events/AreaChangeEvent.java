@@ -1,9 +1,11 @@
 package com.somefrills.events;
 
-public class AreaChangeEvent {
-    public String area;
+import com.somefrills.misc.Area;
 
-    public AreaChangeEvent(String area) {
+public class AreaChangeEvent {
+    public Area area;
+
+    public AreaChangeEvent(Area area) {
         this.area = area;
     }
 }

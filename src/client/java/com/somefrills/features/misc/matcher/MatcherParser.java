@@ -1,31 +1,43 @@
 package com.somefrills.features.misc.matcher;
 
+import com.somefrills.features.misc.matcher.MatcherLexer.LexerException;
+import com.somefrills.features.misc.matcher.MatcherLexer.Token;
+import org.jspecify.annotations.NonNull;
+
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.somefrills.features.misc.matcher.MatcherLexer.Token.Type.*;
 import static com.somefrills.features.misc.matcher.MatcherTypes.*;
 
 /**
  * Parses matcher expressions into Matcher objects.
- * Supports syntax like: "TYPE=zombie AND HELMET+minecraft:diamond_helmet" or "(NAME=foo OR TYPE=bar) AND CHEST+iron_chestplate"
+ * Supports syntax like: "TYPE=zombie AND AREA=\"Private Island\"" or "(NAME=foo OR TYPE=bar) AND HELMET=diamond_helmet"
  * <p>
+ * Uses MatcherLexer for tokenization to support quoted strings and better error messages.
  * Optimization: Within AND chains, NameMatchers are prioritized first for short-circuit evaluation.
  * This prevents expensive armor stand resolution from running if the name doesn't match.
  */
 public class MatcherParser {
-    private final String input;
-    private int pos = 0;
+    private final MatcherLexer lexer;
+    private Token currentToken;
 
     public static Matcher parse(String expression) throws MatcherParseException {
         if (expression == null || expression.trim().isEmpty()) {
             throw new MatcherParseException("Empty expression");
         }
-        return new MatcherParser(expression).parseOr();
+        try {
+            return new MatcherParser(expression).parseOr();
+        } catch (LexerException e) {
+            throw new MatcherParseException("Tokenization error: " + e.getMessage());
+        }
     }
 
-    private MatcherParser(String input) {
-        this.input = input.trim();
+    private MatcherParser(String input) throws LexerException {
+        this.lexer = new MatcherLexer(input);
+        lexer.tokenize();
+        this.currentToken = lexer.peek();
     }
 
     /**
@@ -33,8 +45,8 @@ public class MatcherParser {
      */
     private Matcher parseOr() throws MatcherParseException {
         Matcher left = parseAnd();
-        while (peekKeyword(OR)) {
-            consumeKeyword(OR);
+        while (checkIdentifier(OR)) {
+            consumeIdentifier(OR);
             Matcher right = parseAnd();
             left = new OrMatcher(left, right);
         }
@@ -49,15 +61,14 @@ public class MatcherParser {
         List<Matcher> matchers = new ArrayList<>();
         matchers.add(parsePrimary());
 
-        while (peekKeyword(AND)) {
-            consumeKeyword(AND);
+        while (checkIdentifier(AND)) {
+            consumeIdentifier(AND);
             matchers.add(parsePrimary());
         }
 
         // Check for unexpected matcher after AND chain (missing AND/OR)
-        skipWhitespace();
-        if (pos < input.length() && peekNextIsMatcherStart()) {
-            throw new MatcherParseException("Expected AND or OR before matcher at position " + pos);
+        if (peekNextIsMatcherStart()) {
+            throw new MatcherParseException("Expected AND or OR before matcher at token: " + currentToken);
         }
 
         // Reorder by priority (highest first for short-circuit evaluation)
@@ -74,51 +85,28 @@ public class MatcherParser {
     /**
      * Check if the next token looks like the start of a matcher
      */
-    private boolean peekNextIsMatcherStart() throws MatcherParseException {
-        int savedPos = pos;
-        skipWhitespace();
-
-        if (pos >= input.length() || input.charAt(pos) == ')') {
-            pos = savedPos;
+    private boolean peekNextIsMatcherStart() {
+        Token token = currentToken;
+        if (token.type == Token.Type.EOF || token.type == Token.Type.RPAREN) {
             return false;
         }
 
-        // Read potential matcher key
-        int start = pos;
-        while (pos < input.length()) {
-            char c = input.charAt(pos);
-            if (c == '=' || c == '!' || c == ')' || Character.isWhitespace(c)) {
-                break;
-            }
-            pos++;
-        }
-
-        if (pos == start) {
-            pos = savedPos;
+        if (token.type != Token.Type.IDENTIFIER) {
             return false;
         }
-
-        String key = input.substring(start, pos).toUpperCase();
-        pos = savedPos;
 
         // Check if this looks like a matcher type
-        return MatcherTypes.isMatcher(key) || key.equals(NAKED);
+        return MatcherTypes.isMatcher(token.value.toUpperCase()) || token.value.equalsIgnoreCase(NAKED);
     }
 
     /**
      * Parse primary expressions: parentheses or simple matchers
      */
     private Matcher parsePrimary() throws MatcherParseException {
-        skipWhitespace();
-
-        if (pos < input.length() && input.charAt(pos) == '(') {
-            pos++; // consume '('
+        if (check(LPAREN)) {
+            consume(LPAREN);
             Matcher result = parseOr();
-            skipWhitespace();
-            if (pos >= input.length() || input.charAt(pos) != ')') {
-                throw new MatcherParseException("Expected ')' at position " + pos);
-            }
-            pos++; // consume ')'
+            consume(RPAREN);
             return result;
         }
 
@@ -126,73 +114,55 @@ public class MatcherParser {
     }
 
     /**
-     * Parse a simple matcher: TYPE=value, NAME=value, HELMET=value, NAKED, etc.
+     * Parse a simple matcher: TYPE=value, NAME=value, AREA=value, HELMET=value, NAKED, etc.
      * Also supports != for negation: TYPE!=value, NAME!=value, HELMET!=value
+     * Values can be quoted strings or unquoted identifiers.
      */
     private Matcher parseSimpleMatcher() throws MatcherParseException {
-        skipWhitespace();
-        int start = pos;
-
-        // Read until we hit '=', '!', ')', whitespace, or end
-        while (pos < input.length()) {
-            char c = input.charAt(pos);
-            if (c == '=' || c == '!' || c == ')' || Character.isWhitespace(c)) {
-                break;
-            }
-            pos++;
+        if (currentToken.type != IDENTIFIER) {
+            throw new MatcherParseException("Expected matcher type at token: " + currentToken);
         }
 
-        if (pos == start) {
-            throw new MatcherParseException("Expected matcher at position " + pos);
-        }
-
-        String key = input.substring(start, pos).toUpperCase();
-        skipWhitespace();
+        String key = currentToken.value.toUpperCase();
+        consume(IDENTIFIER);
 
         // Handle special matchers that don't have operators (like NAKED)
         if (key.equals(NAKED)) {
-            if (pos < input.length() && (input.charAt(pos) == '=' || input.charAt(pos) == '!')) {
+            if (check(OPERATOR)) {
                 throw new MatcherParseException("Matcher '" + NAKED + "' does not take any value");
             }
             return new NakedMatcher();
         }
 
-        if (pos >= input.length()) {
-            throw new MatcherParseException("Expected '=' or '!=' after key '" + key + "'");
+        // Expect an operator (= or !=)
+        if (!check(OPERATOR)) {
+            throw new MatcherParseException("Expected '=' or '!=' after matcher type '" + key + "' at token: " + currentToken);
         }
 
-        // Check for != or =
-        boolean negated = false;
-        if (input.charAt(pos) == '!') {
-            if (pos + 1 >= input.length() || input.charAt(pos + 1) != '=') {
-                throw new MatcherParseException("Expected '!=' at position " + pos);
-            }
-            negated = true;
-            pos += 2;
-        } else if (input.charAt(pos) == '=') {
-            pos++;
+        String operator = currentToken.value;
+        consume(OPERATOR);
+        boolean negated = operator.equals("!=");
+
+        // Expect a value (either STRING or IDENTIFIER)
+        String value;
+        if (check(STRING)) {
+            value = currentToken.value;
+            consume(STRING);
+        } else if (check(IDENTIFIER)) {
+            value = currentToken.value;
+            consume(IDENTIFIER);
         } else {
-            throw new MatcherParseException("Expected '=' or '!=' at position " + pos);
+            throw new MatcherParseException("Expected value (string or identifier) after '" + key + operator + "' at token: " + currentToken);
         }
-
-        // Read the value (until whitespace, ')', or end)
-        skipWhitespace();
-        start = pos;
-        while (pos < input.length()) {
-            char c = input.charAt(pos);
-            if (c == ')' || Character.isWhitespace(c)) {
-                break;
-            }
-            pos++;
-        }
-
-        if (pos == start) {
-            throw new MatcherParseException("Expected value after '" + key + (negated ? "!=" : "=") + "'");
-        }
-
-        String value = input.substring(start, pos);
 
         // Create the base matcher
+        Matcher baseMatcher = getBaseMatcher(key, value);
+
+        // Wrap with NotMatcher if negated
+        return negated ? new NotMatcher(baseMatcher) : baseMatcher;
+    }
+
+    private static @NonNull Matcher getBaseMatcher(String key, String value) throws MatcherParseException {
         Matcher baseMatcher;
         if (MatcherTypes.isEquipmentSlot(key)) {
             baseMatcher = new EquipmentMatcher(key, value);
@@ -200,51 +170,52 @@ public class MatcherParser {
             baseMatcher = switch (key) {
                 case TYPE -> new TypeMatcher(value);
                 case NAME -> new NameMatcher(value);
+                case AREA -> {
+                    try {
+                        yield new AreaMatcher(value);
+                    } catch (IllegalArgumentException e) {
+                        throw new MatcherParseException(e.getMessage());
+                    }
+                }
                 default -> throw new MatcherParseException("Unknown matcher type: " + key);
             };
         }
-
-        // Wrap with NotMatcher if negated
-        return negated ? new NotMatcher(baseMatcher) : baseMatcher;
+        return baseMatcher;
     }
 
-    private boolean peekKeyword(String keyword) {
-        int savedPos = pos;
-        skipWhitespace();
-        boolean result = remainingMatches(keyword);
-        pos = savedPos;
-        return result;
+    /**
+     * Check if current token is of given type
+     */
+    private boolean check(Token.Type type) {
+        return currentToken.type == type;
     }
 
-    private void consumeKeyword(String keyword) throws MatcherParseException {
-        skipWhitespace();
-        if (!remainingMatches(keyword)) {
-            throw new MatcherParseException("Expected keyword '" + keyword + "' at position " + pos);
-        }
-        pos += keyword.length();
+    /**
+     * Check if current token is an identifier matching the given value (case-insensitive)
+     */
+    private boolean checkIdentifier(String value) {
+        return currentToken.type == IDENTIFIER &&
+                currentToken.value.equalsIgnoreCase(value);
     }
 
-    private boolean remainingMatches(String keyword) {
-        if (pos + keyword.length() > input.length()) {
-            return false;
+    /**
+     * Consume current token and move to next
+     */
+    private void consume(Token.Type type) throws MatcherParseException {
+        if (currentToken.type != type) {
+            throw new MatcherParseException("Expected " + type + " but got " + currentToken.type + " at token: " + currentToken);
         }
-        String remaining = input.substring(pos, pos + keyword.length());
-        if (!remaining.equalsIgnoreCase(keyword)) {
-            return false;
-        }
-        // Ensure it's a complete word (followed by whitespace, '(', or end)
-        int nextPos = pos + keyword.length();
-        if (nextPos < input.length()) {
-            char next = input.charAt(nextPos);
-            return Character.isWhitespace(next) || next == '(' || next == ')';
-        }
-        return true;
+        currentToken = lexer.next();
     }
 
-    private void skipWhitespace() {
-        while (pos < input.length() && Character.isWhitespace(input.charAt(pos))) {
-            pos++;
+    /**
+     * Consume identifier matching the given value (case-insensitive)
+     */
+    private void consumeIdentifier(String value) throws MatcherParseException {
+        if (!checkIdentifier(value)) {
+            throw new MatcherParseException("Expected identifier '" + value + "' but got '" + currentToken.value + "' at token: " + currentToken);
         }
+        currentToken = lexer.next();
     }
 
     /**
@@ -259,6 +230,3 @@ public class MatcherParser {
         }
     }
 }
-
-
-

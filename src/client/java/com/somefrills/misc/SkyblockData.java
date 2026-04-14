@@ -11,6 +11,7 @@ import net.minecraft.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.somefrills.Main.eventBus;
@@ -19,7 +20,7 @@ import static com.somefrills.Main.mc;
 public class SkyblockData {
     private static final Pattern scoreRegex = Pattern.compile("Team Score: [0-9]* (.*)");
     private static String location = "";
-    private static String area = "";
+    private static Area area = Area.UNKNOWN;
     private static boolean inSkyblock = false;
     private static boolean instanceOver = false;
     private static List<String> tabListLines = new ArrayList<>();
@@ -38,7 +39,7 @@ public class SkyblockData {
     /**
      * Returns the current area from the tab list, such as "Area: Private Island". The area/dungeon prefix is omitted.
      */
-    public static String getArea() {
+    public static Area getArea() {
         return area;
     }
 
@@ -84,8 +85,12 @@ public class SkyblockData {
             if (name.isEmpty()) continue;
 
             if (name.startsWith("Area: ") || name.startsWith("Dungeon: ")) {
-                area = name.split(":", 2)[1].trim();
-                eventBus.post(new AreaChangeEvent(area));
+                String areaStr = name.split(":", 2)[1].trim();
+                Optional<Area> areaOpt = Area.fromString(areaStr);
+                if(areaOpt.isPresent()) {
+                    area = areaOpt.get();
+                    eventBus.post(new AreaChangeEvent(area));
+                }
             }
             lines.add(name);
         }
@@ -161,7 +166,7 @@ public class SkyblockData {
         instanceOver = false;
         inSkyblock = false;
         location = "";
-        area = "";
+        area = Area.UNKNOWN;
         lines.clear();
     }
 
@@ -177,6 +182,29 @@ public class SkyblockData {
     private static void onWorldTick(WorldTickEvent event) {
         updateTabList();
         updateScoreboard();
+    }
+
+    public static String[] getAreas() {
+        return new String[]{
+                "Private Island",
+                "Catacombs",
+                "Kuudra",
+                "Dungeon Hub",
+                "Crimson Isle",
+                "Dragons Nest",
+                "Deep Caverns",
+                "The End",
+                "Garden",
+                "Gold Mine",
+                "Graveyard",
+                "Spider's Den",
+                "Mushroom Gorge",
+                "Dwarven Mines",
+                "Crystal Hollows",
+                "The Mist",
+                "Mineshaft",
+                "Lost Precursor City"
+        };
     }
 
     public static class InstanceType {

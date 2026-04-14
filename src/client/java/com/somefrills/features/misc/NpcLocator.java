@@ -8,6 +8,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MiscCategory.NpcLocatorConfig;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.events.WorldTickEvent;
+import com.somefrills.misc.Area;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
@@ -28,7 +29,7 @@ import static com.somefrills.Main.mc;
 public class NpcLocator extends Feature {
     private static final ConcurrentHashMap<String, NpcLocation> npcLocations = new ConcurrentHashMap<>();
     private static RenderColor color = new RenderColor(255, 100, 100, 255);
-    private static String cachedIsland = null;
+    private static Area cachedIsland = Area.UNKNOWN;
     private static Map<String, Vec3d> cachedNpcs = new HashMap<>();
     private final NpcLocatorConfig config;
 
@@ -73,7 +74,7 @@ public class NpcLocator extends Feature {
     }
 
     private static void ensureCacheLoaded() {
-        String currentIsland = SkyblockData.getArea();
+        Area currentIsland = SkyblockData.getArea();
         if (!Objects.equals(cachedIsland, currentIsland)) {
             cachedIsland = currentIsland;
             cachedNpcs = loadIslandNpcs(currentIsland);
@@ -85,10 +86,10 @@ public class NpcLocator extends Feature {
         return cachedNpcs.get(npcName);
     }
 
-    private static Map<String, Vec3d> loadIslandNpcs(String islandName) {
+    private static Map<String, Vec3d> loadIslandNpcs(Area area) {
         Map<String, Vec3d> npcs = new HashMap<>();
 
-        String locationFileName = islandName.replace(" ", "_").toUpperCase() + ".json";
+        String locationFileName = area.getDisplayName().replace(" ", "_").toUpperCase() + ".json";
         Path locationFile = FabricLoader.getInstance().getConfigDir()
                 .resolve("skyhanni/repo/constants/island_graphs/" + locationFileName);
 
