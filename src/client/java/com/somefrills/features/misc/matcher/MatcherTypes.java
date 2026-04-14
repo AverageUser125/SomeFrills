@@ -37,10 +37,14 @@ public class MatcherTypes {
     /**
      * Get all basic matcher type names (non-equipment).
      *
-     * @return array of basic matcher names (TYPE, NAME, AREA, NAKED)
+     * @return array of basic matcher names (TYPE, NAME, AREA)
      */
     public static String[] getBasicMatchers() {
-        return new String[]{TYPE, NAME, AREA, NAKED};
+        return new String[]{TYPE, NAME, AREA};
+    }
+
+    public static String[] getCompleteMatchers() {
+        return new String[]{NAKED};
     }
 
     /**

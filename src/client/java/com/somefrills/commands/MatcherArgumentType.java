@@ -10,7 +10,6 @@ import com.somefrills.features.misc.matcher.Matcher;
 import com.somefrills.features.misc.matcher.MatcherParser;
 import com.somefrills.features.misc.matcher.MatcherTypes;
 import com.somefrills.misc.Area;
-import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.registry.Registries;
@@ -21,11 +20,6 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.somefrills.features.misc.matcher.MatcherTypes.*;
 
-/**
- * Custom ArgumentType for parsing Matcher expressions.
- * Parses expressions like: "TYPE=zombie", "NAME=Littlefoot", "HELMET=diamond_helmet", etc.
- * Supports complex expressions: "TYPE=zombie AND HELMET=diamond_helmet OR NAME=Boss"
- */
 public class MatcherArgumentType implements ArgumentType<Matcher> {
 
     public static MatcherArgumentType matcher() {
@@ -38,7 +32,6 @@ public class MatcherArgumentType implements ArgumentType<Matcher> {
 
     @Override
     public Matcher parse(StringReader reader) throws CommandSyntaxException {
-        // Greedily read the entire remaining string as the expression
         String expression = readExpression(reader);
 
         if (expression.isEmpty()) {
@@ -55,225 +48,259 @@ public class MatcherArgumentType implements ArgumentType<Matcher> {
     }
 
     @Override
-    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        String remaining = builder.getRemaining();
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> ctx, SuggestionsBuilder builder) {
 
-        // If empty or only whitespace, suggest all matcher types and operators
-        if (remaining.trim().isEmpty()) {
-            builder.suggest(TYPE);
-            builder.suggest(NAME);
-            for (String slot : getEquipmentSlots()) {
-                builder.suggest(slot);
-            }
-            builder.suggest(NAKED);
-            builder.suggest("(");
-            return builder.buildFuture();
-        }
+        String input = builder.getRemaining();
+        String trimmed = input.trim();
 
-        // Check if remaining has trailing whitespace (indicating a complete word)
-        boolean hasTrailingSpace = !remaining.isEmpty() && Character.isWhitespace(remaining.charAt(remaining.length() - 1));
+        String[] parts = trimmed.isEmpty() ? new String[0] : trimmed.split("\\s+");
+        String last = parts.length == 0 ? "" : parts[parts.length - 1];
+        boolean endsWithSpace = input.endsWith(" ");
 
-        String[] words = remaining.trim().split("\\s+");
-        String lastWord = words[words.length - 1];
-        String previousWord = words.length >= 2 ? words[words.length - 2] : null;
-
-        // Build prefix (everything before the last word)
+        // Build prefix from all parts EXCEPT the last one (which is what we're currently typing)
         String prefix = "";
-        if (words.length > 1) {
-            prefix = String.join(" ", java.util.Arrays.copyOfRange(words, 0, words.length - 1)) + " ";
+        if (parts.length > 1) {
+            prefix = String.join(" ", java.util.Arrays.copyOfRange(parts, 0, parts.length - 1)) + " ";
+        } else if (parts.length == 1 && endsWithSpace) {
+            // If only one part and it ends with space, that part is complete
+            prefix = parts[0] + " ";
+            last = "";
         }
 
-        // Build matchers array (TYPE, NAME, HELMET, etc.)
-        String[] allMatchers = getAllMatchers();
+        // If we have a complete matcher followed by space, clear last
+        if (endsWithSpace && isCompleteMatcher(last)) {
+            prefix = String.join(" ", java.util.Arrays.copyOfRange(parts, 0, parts.length)) + " ";
+            last = "";
+        }
 
-        // Step 1: If there's trailing space, treat lastWord as if it's complete
-        if (hasTrailingSpace) {
-            // If lastWord is AND or OR, only suggest matcher types
-            if (isLogicalOperator(lastWord)) {
-                for (String matcher : allMatchers) {
-                    builder.suggest(prefix + lastWord + " " + matcher);
-                }
-                builder.suggest(prefix + lastWord + " " + NAKED);
-                builder.suggest(prefix + lastWord + " (");
-            } else {
-                // After a complete matcher value, only suggest AND/OR
-                builder.suggest(prefix + lastWord + " " + AND);
-                builder.suggest(prefix + lastWord + " " + OR);
-            }
+        // =========================
+        // HARD SAFETY GATE (CRASH FIX)
+        // =========================
+        if (last.equalsIgnoreCase(AND) || last.equalsIgnoreCase(OR)) {
+            suggestMatcherKeys(builder, prefix, "");
             return builder.buildFuture();
         }
 
-        // Step 2: Check if lastWord is a complete matcher type (no operator yet)
-        boolean hasOperator = lastWord.contains("=");
-        if (!hasOperator) {
-            // If lastWord itself is a logical operator, suggest matchers
-            if (isLogicalOperator(lastWord)) {
-                for (String matcher : allMatchers) {
-                    builder.suggest(prefix + lastWord + " " + matcher);
-                }
-                builder.suggest(prefix + lastWord + " " + NAKED);
-                builder.suggest(prefix + lastWord + " (");
-                return builder.buildFuture();
+        State state = determineState(parts, endsWithSpace);
+        switch (state) {
+
+            case EXPECT_TERM -> {
+                suggestMatcherKeys(builder, prefix, "");
             }
 
-            // First, check if lastWord is a partial match for a matcher type
-            boolean foundPartial = false;
-            for (String matcher : allMatchers) {
-                if (matcher.toLowerCase().startsWith(lastWord.toLowerCase())) {
-                    builder.suggest(prefix + matcher);
-                    foundPartial = true;
-                }
-            }
-            // Also check NAKED
-            if (NAKED.startsWith(lastWord.toUpperCase())) {
-                builder.suggest(prefix + NAKED);
-                foundPartial = true;
-            }
-
-            // If we found partials, don't suggest anything else
-            if (foundPartial) {
-                return builder.buildFuture();
-            }
-
-            // Try to match against known matchers (exact match)
-            String matchedMatcher = null;
-            for (String matcher : allMatchers) {
-                if (matcher.equalsIgnoreCase(lastWord)) {
-                    matchedMatcher = matcher;
-                    break;
-                }
-            }
-            // Also check NAKED
-            if (lastWord.equalsIgnoreCase(NAKED)) {
-                matchedMatcher = NAKED;
-            }
-
-            // If exact match, suggest operators
-            if (matchedMatcher != null) {
-                if (matchedMatcher.equals(NAKED)) {
-                    return builder.buildFuture(); // NAKED doesn't take operators
-                }
-                builder.suggest(prefix + matchedMatcher + "=");
-                builder.suggest(prefix + matchedMatcher + "!=");
-                return builder.buildFuture();
-            }
-
-            // Check if previous word is a complete matcher (e.g., "TYPE=zombie")
-            // If so, we must have AND/OR before starting a new matcher
-            boolean previousIsCompleteMatcher = previousWord != null &&
-                                               previousWord.contains("=") &&
-                                               !previousWord.endsWith("=") &&
-                                               !previousWord.endsWith("!=");
-
-            if (previousIsCompleteMatcher) {
-                // After a complete matcher, only suggest AND/OR
-                builder.suggest(prefix + lastWord + " " + AND);
-                builder.suggest(prefix + lastWord + " " + OR);
-                return builder.buildFuture();
-            }
-
-            // If lastWord doesn't match any matchers and has no operator
-            // Check if previous word is AND or OR
-            if (isLogicalOperator(previousWord)) {
-                // After AND/OR, only suggest matcher types
-                for (String matcher : allMatchers) {
-                    builder.suggest(prefix + matcher);
-                }
-                builder.suggest(prefix + NAKED);
+            case EXPECT_NEW_TERM -> {
+                suggestMatchers(builder, prefix);
                 builder.suggest(prefix + "(");
-            } else {
-                // Otherwise suggest AND/OR as logical next step
-                builder.suggest(prefix + AND);
-                builder.suggest(prefix + OR);
             }
-            return builder.buildFuture();
-        }
 
-        // Step 3: We have an operator, now suggest values
-        if (lastWord.startsWith(TYPE + "=") || lastWord.startsWith(TYPE + "!=")) {
-            String typePrefix = prefix + (lastWord.startsWith(TYPE + "!=") ? TYPE + "!=" : TYPE + "=");
-            String entityPrefix = lastWord.substring(lastWord.indexOf('=') + 1).toLowerCase();
-            Registries.ENTITY_TYPE.forEach(entityType -> {
-                String id = Registries.ENTITY_TYPE.getId(entityType).toString();
-                id = Utils.stripPrefix(id, MINECRAFT_PREFIX).toLowerCase();
-                if (id.startsWith(entityPrefix)) {
-                    builder.suggest(typePrefix + id);
-                }
-            });
-            return builder.buildFuture();
-        }
-
-        // If typing "NAME=" or "NAME!=", let user type freely
-        if (lastWord.startsWith(NAME + "=") || lastWord.startsWith(NAME + "!=")) {
-            return builder.buildFuture();
-        }
-
-        // If typing "AREA=" or "AREA!=", suggest common areas
-        if (lastWord.startsWith(AREA + "=") || lastWord.startsWith(AREA + "!=")) {
-            String areaPrefix = prefix + (lastWord.startsWith(AREA + "!=") ? AREA + "!=" : AREA + "=");
-            String valueStart = lastWord.substring(lastWord.indexOf('=') + 1).toLowerCase();
-
-            for (String areaName : Area.getAllDisplayNames()) {
-                if (areaName.toLowerCase().startsWith(valueStart)) {
-                    // Add quotes if the area name contains spaces
-                    String suggestion = areaName.contains(" ") ? "\"" + areaName + "\"" : areaName;
-                    builder.suggest(areaPrefix + suggestion);
-                }
+            case EXPECT_OPERATOR -> {
+                suggestOperatorOnly(builder, prefix, last);
             }
-            return builder.buildFuture();
-        }
 
-        // If typing equipment slot (HELMET=, HELMET!=, CHEST=, etc.), suggest items, "air", "none", and "any"
-        // Check if it's just slot with operator (e.g., "HELMET=" or "CHEST!=") with no value
-        if (lastWord.contains("=")) {
-            int eqIndex = lastWord.indexOf('=');
-            boolean isNegated = eqIndex > 0 && lastWord.charAt(eqIndex - 1) == '!';
-            int slotEndIndex = isNegated ? eqIndex - 1 : eqIndex;
+            case COMPLETE_MATCHER -> {
+                suggestOperatorOnly(builder, prefix, last);
+            }
 
-            if (slotEndIndex > 0) {
-                String slotName = lastWord.substring(0, slotEndIndex).toUpperCase();
+            case IN_MATCHER_KEY -> {
+                suggestMatcherKeys(builder, prefix, last);
+            }
 
-                // If it's a slot matcher
-                if (MatcherTypes.isEquipmentSlot(slotName)) {
-                    String valueStart = eqIndex < lastWord.length() - 1 ? lastWord.substring(eqIndex + 1) : "";
-                    String valuePrefix = valueStart.toLowerCase();
-                    String equipPrefix = prefix + lastWord.substring(0, eqIndex + 1);
-
-                    // Always suggest empty/any slot options first
-                    for (String option : getEmptySlotOptions()) {
-                        if (option.startsWith(valuePrefix)) {
-                            builder.suggest(equipPrefix + option);
-                        }
-                    }
-
-                    // Always suggest items (even if no prefix)
-                    Registries.ITEM.forEach(item -> {
-                        String id = Registries.ITEM.getId(item).toString();
-                        id = Utils.stripPrefix(id, MINECRAFT_PREFIX).toLowerCase();
-                        if (id.startsWith(valuePrefix)) {
-                            builder.suggest(equipPrefix + id);
-                        }
-                    });
-                    return builder.buildFuture();
-                }
+            case IN_MATCHER_VALUE -> {
+                suggestValues(builder, prefix, last);
             }
         }
 
         return builder.buildFuture();
     }
 
-    /**
-     * Check if a word is a logical operator (AND or OR).
-     */
-    private boolean isLogicalOperator(String word) {
-        return MatcherTypes.isLogicalOperator(word);
+    // =========================
+    // STATE MACHINE
+    // =========================
+
+    private enum State {
+        EXPECT_TERM,
+        EXPECT_OPERATOR,
+        EXPECT_NEW_TERM,
+        IN_MATCHER_KEY,
+        IN_MATCHER_VALUE,
+        COMPLETE_MATCHER
     }
 
-    /**
-     * Read matcher expression until we hit the "color" keyword.
-     * When "color" is encountered, we stop parsing and leave the cursor positioned
-     * so that Brigadier can then parse the "color" literal that comes next.
-     */
+    private State determineState(String[] parts, boolean endsWithSpace) {
+        if (parts.length == 0) return State.EXPECT_TERM;
+
+        String last = parts[parts.length - 1];
+
+        if (isLogicalOperator(last)) {
+            return State.EXPECT_NEW_TERM;
+        }
+
+        // Check if this is a partial operator, BUT NOT after a logical operator
+        if (isPartialOperator(last)) {
+            // After AND/OR, "A" or "O" should be treated as matcher key start, not operator continuation
+            if (parts.length >= 2 && isLogicalOperator(parts[parts.length - 2])) {
+                return State.IN_MATCHER_KEY;
+            }
+            return State.EXPECT_OPERATOR;
+        }
+
+        // Complete matcher (with or without space)
+        if (endsWithSpace && isCompleteMatcher(last)) {
+            return State.COMPLETE_MATCHER;
+        }
+
+        // Completed matcher without space on previous token
+        if (parts.length >= 2 && isCompleteMatcher(parts[parts.length - 2])) {
+            return State.EXPECT_OPERATOR;
+        }
+
+        if (endsWithSpace) {
+            if (isLogicalOperator(last)) return State.EXPECT_NEW_TERM;
+            return State.IN_MATCHER_KEY;
+        }
+
+        if (last.contains("=")) return State.IN_MATCHER_VALUE;
+
+
+        return State.IN_MATCHER_KEY;
+    }
+
+    // =========================
+    // HELPERS
+    // =========================
+
+    private boolean isCompleteMatcher(String s) {
+        // Check for complete matchers like NAKED
+        for (String complete : MatcherTypes.getCompleteMatchers()) {
+            if (s.equalsIgnoreCase(complete)) {
+                return true;
+            }
+        }
+        return s.contains("=") && !s.endsWith("=") && !s.endsWith("!=");
+    }
+
+    private boolean isLogicalOperator(String s) {
+        return s.equalsIgnoreCase(AND) || s.equalsIgnoreCase(OR);
+    }
+
+    private boolean isPartialOperator(String s) {
+        return AND.toUpperCase().startsWith(s.toUpperCase())
+                || OR.toUpperCase().startsWith(s.toUpperCase());
+    }
+
+    // =========================
+    // SUGGESTIONS
+    // =========================
+    private void suggestMatcherKeys(SuggestionsBuilder builder, String prefix, String last) {
+
+        // NEVER suggest full matcher list after operator transition
+        if (last.equalsIgnoreCase(AND) || last.equalsIgnoreCase(OR)) {
+            return;
+        }
+
+        for (String m : getAllMatchers()) {
+            if (last.isEmpty() || m.toLowerCase().startsWith(last.toLowerCase())) {
+                builder.suggest(prefix + m);
+            }
+        }
+
+        for (String m : getAllMatchers()) {
+            if (m.equalsIgnoreCase(last)) {
+                builder.suggest(prefix + m + "=");
+                builder.suggest(prefix + m + "!=");
+                return;
+            }
+        }
+
+        // Check complete matchers (like NAKED)
+        for (String complete : MatcherTypes.getCompleteMatchers()) {
+            if (last.isEmpty() || complete.toLowerCase().startsWith(last.toLowerCase())) {
+                builder.suggest(prefix + complete);
+            }
+            if (complete.equalsIgnoreCase(last)) {
+                return;
+            }
+        }
+    }
+
+    private void suggestOperatorOnly(SuggestionsBuilder builder, String prefix, String last) {
+
+        if (!last.isEmpty() && isPartialOperator(last)) {
+            if (AND.startsWith(last.toUpperCase())) {
+                builder.suggest(prefix + AND);
+            }
+            if (OR.startsWith(last.toUpperCase())) {
+                builder.suggest(prefix + OR);
+            }
+            return;
+        }
+
+        builder.suggest(prefix + AND);
+        builder.suggest(prefix + OR);
+    }
+
+    private void suggestValues(SuggestionsBuilder builder, String prefix, String last) {
+
+        int eq = last.indexOf('=');
+        String key = last.substring(0, eq).replace("!", "").toUpperCase();
+        String value = eq < last.length() - 1 ? last.substring(eq + 1).toLowerCase() : "";
+
+        String valuePrefix = prefix + last.substring(0, eq + 1);
+
+        switch (key) {
+
+            case TYPE -> Registries.ENTITY_TYPE.forEach(type -> {
+                String id = Utils.stripPrefix(
+                        Registries.ENTITY_TYPE.getId(type).toString(),
+                        MINECRAFT_PREFIX
+                ).toLowerCase();
+
+                if (id.startsWith(value)) {
+                    builder.suggest(valuePrefix + id);
+                }
+            });
+
+            case NAME -> {
+                // free text
+            }
+
+            case AREA -> {
+                for (String area : Area.getAllDisplayNames()) {
+                    if (area.toLowerCase().startsWith(value)) {
+                        builder.suggest(valuePrefix +
+                                (area.contains(" ") ? "\"" + area + "\"" : area));
+                    }
+                }
+            }
+
+            default -> {
+                if (MatcherTypes.isEquipmentSlot(key)) {
+
+                    for (String opt : getEmptySlotOptions()) {
+                        if (opt.startsWith(value)) {
+                            builder.suggest(valuePrefix + opt);
+                        }
+                    }
+
+                    Registries.ITEM.forEach(item -> {
+                        String id = Utils.stripPrefix(
+                                Registries.ITEM.getId(item).toString(),
+                                MINECRAFT_PREFIX
+                        ).toLowerCase();
+
+                        if (id.startsWith(value)) {
+                            builder.suggest(valuePrefix + id);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    // =========================
+    // PARSER SUPPORT
+    // =========================
+
     private String readExpression(StringReader reader) {
         StringBuilder sb = new StringBuilder();
 
@@ -292,35 +319,44 @@ public class MatcherArgumentType implements ArgumentType<Matcher> {
                 } else {
                     // Not "color", rewind and include the space in our expression
                     reader.setCursor(checkPos);
-                    sb.append(reader.read());
+                    sb.append(reader.read()); // consume the space
+                    sb.append(word); // append the word we already read
                 }
             } else {
                 sb.append(reader.read());
             }
         }
 
-        return sb.toString().trim();
+        return sb.toString();
     }
 
-    /**
-     * Read a word (until space or end)
-     */
     private String readWord(StringReader reader) {
-        StringBuilder sb = new StringBuilder();
-
+        StringBuilder word = new StringBuilder();
         while (reader.canRead() && reader.peek() != ' ') {
-            sb.append(reader.read());
+            word.append(reader.read());
         }
+        return word.toString();
+    }
 
-        return sb.toString();
+    private void suggestMatchers(SuggestionsBuilder builder, String prefix) {
+        for (String matcher : getAllMatchers()) {
+            builder.suggest(prefix + matcher);
+        }
+        for (String complete : MatcherTypes.getCompleteMatchers()) {
+            builder.suggest(prefix + complete);
+        }
     }
 
     @Override
     public Collection<String> getExamples() {
-        return List.of(TYPE + "=zombie", NAME + "=Boss", AREA + "=Private Island", HELMET + "=diamond_helmet", TYPE + "!=zombie", NAKED, TYPE + "=zombie " + AND + " " + NAKED);
+        return List.of(
+                TYPE + "=zombie",
+                NAME + "=Boss",
+                AREA + "=Private Island",
+                HELMET + "=diamond_helmet",
+                TYPE + "!=zombie",
+                NAKED,
+                TYPE + "=zombie " + AND + " " + NAKED
+        );
     }
 }
-
-
-
-
