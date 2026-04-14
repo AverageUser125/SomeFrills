@@ -2,8 +2,8 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.config.misc.MiscCategory;
-import com.somefrills.config.misc.MiscCategory.MobGlowConfig.RuleData;
+import com.somefrills.config.misc.MobGlowConfig;
+import com.somefrills.config.misc.MobGlowConfig.RuleData;
 import com.somefrills.events.GameStopEvent;
 import com.somefrills.events.WorldTickEvent;
 import com.somefrills.features.misc.matcher.Matcher;
@@ -71,7 +71,7 @@ public class GlowMob extends Feature {
         FrillsConfig.instance.misc.glowMob.rules.clear();
         for (GlowMobRule rule : rules.values()) {
             FrillsConfig.instance.misc.glowMob.rules.add(
-                    new MiscCategory.MobGlowConfig.RuleData(rule.id, rule.matcherExpression, rule.color.hex)
+                    new MobGlowConfig.RuleData(rule.id, rule.matcherExpression, rule.color.hex)
             );
         }
     }

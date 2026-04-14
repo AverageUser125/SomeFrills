@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.config.misc.MiscCategory.NpcLocatorConfig;
+import com.somefrills.config.misc.NpcLocatorConfig;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.events.WorldTickEvent;
 import com.somefrills.misc.Area;
