@@ -180,26 +180,39 @@ public class MatcherParser {
         // Read the value (until whitespace, ')', or end)
         skipWhitespace();
         start = pos;
-        while (pos < input.length()) {
-            char c = input.charAt(pos);
-            if (c == ')' || Character.isWhitespace(c)) {
-                break;
+
+        // Check if value is quoted
+        String value;
+        if (pos < input.length() && input.charAt(pos) == '"') {
+            pos++; // skip opening quote
+            start = pos;
+            while (pos < input.length() && input.charAt(pos) != '"') {
+                pos++;
             }
-            pos++;
+            if (pos >= input.length()) {
+                throw new MatcherParseException("Unterminated quoted string at position " + start);
+            }
+            value = input.substring(start, pos);
+            pos++; // skip closing quote
+        } else {
+            // Unquoted value: read until whitespace, ')', or end
+            while (pos < input.length()) {
+                char c = input.charAt(pos);
+                if (c == ')' || Character.isWhitespace(c)) {
+                    break;
+                }
+                pos++;
+            }
+            value = input.substring(start, pos);
         }
 
-        Matcher baseMatcher = getBaseMatcher(start, key, negated);
-
-        // Wrap with NotMatcher if negated
-        return negated ? new NotMatcher(baseMatcher) : baseMatcher;
+        return getMatcher(value, key, negated);
     }
 
-    private @NonNull Matcher getBaseMatcher(int start, String key, boolean negated) throws MatcherParseException {
-        if (pos == start) {
+    private @NonNull Matcher getMatcher(String value, String key, boolean negated) throws MatcherParseException {
+        if (value.isEmpty()) {
             throw new MatcherParseException("Expected value after '" + key + (negated ? "!=" : "=") + "'");
         }
-
-        String value = input.substring(start, pos);
 
         // Create the base matcher
         Matcher baseMatcher;
@@ -213,7 +226,7 @@ public class MatcherParser {
                 default -> throw new MatcherParseException("Unknown matcher type: " + key);
             };
         }
-        return baseMatcher;
+        return negated ? new NotMatcher(baseMatcher) : baseMatcher;
     }
 
     private boolean peekKeyword(String keyword) {

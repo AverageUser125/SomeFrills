@@ -116,21 +116,26 @@ public class MatcherArgumentType implements ArgumentType<Matcher> {
                 return builder.buildFuture();
             }
 
-            // Check if previous word is a complete matcher (e.g., "TYPE=zombie")
-            // If so, we must have AND/OR before starting a new matcher
-            boolean previousIsCompleteMatcher = previousWord != null &&
-                                               previousWord.contains("=") &&
-                                               !previousWord.endsWith("=") &&
-                                               !previousWord.endsWith("!=");
+            // First, check if lastWord is a partial match for a matcher type
+            boolean foundPartial = false;
+            for (String matcher : allMatchers) {
+                if (matcher.toLowerCase().startsWith(lastWord.toLowerCase())) {
+                    builder.suggest(prefix + matcher);
+                    foundPartial = true;
+                }
+            }
+            // Also check NAKED
+            if (NAKED.startsWith(lastWord.toUpperCase())) {
+                builder.suggest(prefix + NAKED);
+                foundPartial = true;
+            }
 
-            if (previousIsCompleteMatcher) {
-                // After a complete matcher, only suggest AND/OR
-                builder.suggest(prefix + lastWord + " " + AND);
-                builder.suggest(prefix + lastWord + " " + OR);
+            // If we found partials, don't suggest anything else
+            if (foundPartial) {
                 return builder.buildFuture();
             }
 
-            // Try to match against known matchers
+            // Try to match against known matchers (exact match)
             String matchedMatcher = null;
             for (String matcher : allMatchers) {
                 if (matcher.equalsIgnoreCase(lastWord)) {
@@ -153,22 +158,17 @@ public class MatcherArgumentType implements ArgumentType<Matcher> {
                 return builder.buildFuture();
             }
 
-            // If partial match for a matcher type, only suggest the matching matchers
-            boolean foundPartial = false;
-            for (String matcher : allMatchers) {
-                if (matcher.toLowerCase().startsWith(lastWord.toLowerCase())) {
-                    builder.suggest(prefix + matcher);
-                    foundPartial = true;
-                }
-            }
-            // Also check NAKED
-            if (NAKED.startsWith(lastWord.toUpperCase())) {
-                builder.suggest(prefix + NAKED);
-                foundPartial = true;
-            }
+            // Check if previous word is a complete matcher (e.g., "TYPE=zombie")
+            // If so, we must have AND/OR before starting a new matcher
+            boolean previousIsCompleteMatcher = previousWord != null &&
+                                               previousWord.contains("=") &&
+                                               !previousWord.endsWith("=") &&
+                                               !previousWord.endsWith("!=");
 
-            // If we found partials, don't suggest anything else
-            if (foundPartial) {
+            if (previousIsCompleteMatcher) {
+                // After a complete matcher, only suggest AND/OR
+                builder.suggest(prefix + lastWord + " " + AND);
+                builder.suggest(prefix + lastWord + " " + OR);
                 return builder.buildFuture();
             }
 
@@ -215,7 +215,9 @@ public class MatcherArgumentType implements ArgumentType<Matcher> {
 
             for (String areaName : Area.getAllDisplayNames()) {
                 if (areaName.toLowerCase().startsWith(valueStart)) {
-                    builder.suggest(areaPrefix + areaName);
+                    // Add quotes if the area name contains spaces
+                    String suggestion = areaName.contains(" ") ? "\"" + areaName + "\"" : areaName;
+                    builder.suggest(areaPrefix + suggestion);
                 }
             }
             return builder.buildFuture();
