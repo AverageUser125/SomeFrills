@@ -1,4 +1,5 @@
 package com.somefrills.features.mining.pingoffsetminer;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 
@@ -53,12 +54,12 @@ public class SpeedCalc {
                 return "minecraft:obsidian";
             if (block == Blocks.GOLD_BLOCK)
                 return "minecraft:gold_block";
-            if  (block == Blocks.DIAMOND_BLOCK)
+            if (block == Blocks.DIAMOND_BLOCK)
                 return "minecraft:diamond_block";
             if (block == Blocks.EMERALD_BLOCK)
                 return "minecraft:emerald_block";
             if (block == Blocks.IRON_BLOCK)
-                return  "minecraft:iron_block";
+                return "minecraft:iron_block";
             if (block == Blocks.LAPIS_BLOCK)
                 return "minecraft:lapis_block";
             if (block == Blocks.REDSTONE_BLOCK)

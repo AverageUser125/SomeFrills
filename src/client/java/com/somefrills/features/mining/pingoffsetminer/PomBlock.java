@@ -27,10 +27,21 @@ public class PomBlock {
         this.block = null;
     }
 
-    public BlockPos getBlockPos() {return this.pos;}
-    public VoxelShape getShape() {return this.shape;}
-    public long getHardness() {return this.hardness;}
-    public String  getName() {return this.name;}
+    public BlockPos getBlockPos() {
+        return this.pos;
+    }
+
+    public VoxelShape getShape() {
+        return this.shape;
+    }
+
+    public long getHardness() {
+        return this.hardness;
+    }
+
+    public String getName() {
+        return this.name;
+    }
 
     public void setBlock() {
         HitResult hr = mc.crosshairTarget;
@@ -44,7 +55,7 @@ public class PomBlock {
             this.block = null;
             return;
         }
-        BlockPos blockPos = ((BlockHitResult)hr).getBlockPos();
+        BlockPos blockPos = ((BlockHitResult) hr).getBlockPos();
 
         BlockState blockState = mc.world.getBlockState(blockPos);
 
@@ -52,7 +63,8 @@ public class PomBlock {
         if (block == this.block) return;
         String blockName = SpeedCalc.getBlockName(block);
 
-        if (block == Blocks.COBBLESTONE && Utils.isInArea("Mineshaft")) blockName = SpeedCalc.getBlockName(Blocks.INFESTED_COBBLESTONE);
+        if (block == Blocks.COBBLESTONE && Utils.isInArea("Mineshaft"))
+            blockName = SpeedCalc.getBlockName(Blocks.INFESTED_COBBLESTONE);
 
         if (FrillsConfig.instance.mining.pingOffsetMiner.blockEnabled.get().getOrDefault(blockName, false)) {
             this.shape = blockState.getCollisionShape(mc.world, blockPos);

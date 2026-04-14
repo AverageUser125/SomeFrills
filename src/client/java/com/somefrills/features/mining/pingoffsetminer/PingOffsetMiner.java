@@ -25,6 +25,13 @@ public class PingOffsetMiner extends Feature {
     private double lastDetectedSpeed = -1;
     private int cooldownTicks = 0;
 
+    // Block break timing
+    private BlockPos currentBlock = null;
+    private int startServerTick = -1;
+    private double ticksNeeded = -1;
+    private boolean timeoutExceeded = false;
+    private boolean soundPlayed = false;
+
     public PingOffsetMiner() {
         super(FrillsConfig.instance.mining.pingOffsetMiner.enabled);
         config = FrillsConfig.instance.mining.pingOffsetMiner;
@@ -37,24 +44,23 @@ public class PingOffsetMiner extends Feature {
             if (speed != -1) {
                 lastDetectedSpeed = speed;
                 miningStats.setSpeed(speed);
-
-                // Log speed if logging enabled
-                if (config.logging) {
-                    double tps = pomTPS.getAverageLatency();
-                    long ping = pomPing.getAverageLatency();
-                    double offset = (20.0 - tps) * config.tpsOffsetMultiplier + ping * config.pingOffsetMultiplier;
-                    Utils.infoFormat("Speed: {} | TPS: {} | Ping: {}ms | Offset: {}",
+            }
+            // Log speed if logging enabled
+            if (config.logging) {
+                double tps = pomTPS.getAverageLatency();
+                long ping = pomPing.getAverageLatency();
+                double offset = (20.0 - tps) * config.tpsOffsetMultiplier + ping * config.pingOffsetMultiplier;
+                Utils.infoFormat("Speed: {} | TPS: {} | Ping: {}ms | Offset: {}",
                         Utils.formatDecimal(speed, 1),
                         Utils.formatDecimal(tps, 2),
                         ping,
                         Utils.formatDecimal(offset, 1)
-                    );
-                }
+                );
+            }
 
-                // Check for ability in tab
-                if (line.contains("speed boost: available!")) {
-                    miningStats.setBoost(false);
-                }
+            // Check for ability in tab
+            if (line.contains("speed boost: available!")) {
+                miningStats.setBoost(false);
             }
         }
     }
@@ -105,6 +111,50 @@ public class PingOffsetMiner extends Feature {
         // Update block targeting
         pomBlock.setBlock();
 
+        if (mc.player == null) return;
+
+        // Check if we switched blocks or stopped mining
+        if (!pomBlock.isEmpty() && currentBlock != null && !currentBlock.equals(pomBlock.getBlockPos())) {
+            resetBlockBreaking();
+        }
+
+        if (pomBlock.isEmpty()) {
+            resetBlockBreaking();
+            return;
+        }
+
+        // Start new block break
+        if (currentBlock == null || !currentBlock.equals(pomBlock.getBlockPos())) {
+            currentBlock = pomBlock.getBlockPos();
+            startServerTick = mc.player.age;
+            soundPlayed = false;
+        }
+
+        // Calculate ticks needed for this block
+        double speed = getCalculatedSpeed();
+        if (speed > 0) {
+            ticksNeeded = getTicksToBreak(pomBlock.getName());
+        }
+
+        // Calculate elapsed ticks since we started mining
+        if (startServerTick >= 0 && ticksNeeded > 0) {
+            int ticksElapsed = mc.player.age - startServerTick;
+
+            // Calculate adjusted time based on TPS and ping
+            double debugTps = config.debug ? 20.0 : pomTPS.getAverageLatency();
+            double pingSec = config.debug ? config.ping / 1000.0 : pomPing.getAverageLatency() / 1000.0;
+            double pingMath = debugTps * pingSec;
+
+            // Determine if block is ready
+            timeoutExceeded = (ticksElapsed - pingMath) >= ticksNeeded;
+
+            // Play sound when ready
+            if (timeoutExceeded && !soundPlayed && config.sound) {
+                Utils.playSound(config.soundpath, 1.0f, 1.0f);
+                soundPlayed = true;
+            }
+        }
+
         // Update cooldown
         if (cooldownTicks > 0) {
             cooldownTicks--;
@@ -114,6 +164,14 @@ public class PingOffsetMiner extends Feature {
         if (lastDetectedSpeed == -1 && config.shouldWarn) {
             Utils.infoFormat("§cMining speed not detected");
         }
+    }
+
+    private void resetBlockBreaking() {
+        currentBlock = null;
+        startServerTick = -1;
+        ticksNeeded = -1;
+        timeoutExceeded = false;
+        soundPlayed = false;
     }
 
 
@@ -159,7 +217,6 @@ public class PingOffsetMiner extends Feature {
         return baseSpeed + offset;
     }
 
-
     @EventHandler
     public void onWorldRender(WorldRenderEvent event) {
         if (mc.player == null || mc.world == null) return;
@@ -168,13 +225,18 @@ public class PingOffsetMiner extends Feature {
         BlockPos blockPos = pomBlock.getBlockPos();
         if (blockPos == null) return;
 
-        // FIXME: we should use the blockstate
         if (pomBlock.getShape() == null) return;
 
         // Get colors from config
         var cfg = FrillsConfig.instance.mining.pingOffsetMiner;
         RenderColor lineColor = RenderColor.fromChroma(cfg.line.color);
         RenderColor highlightColor = RenderColor.fromChroma(cfg.highlight.color);
+
+        // Change to bright green when ready
+        if (timeoutExceeded) {
+            lineColor = RenderColor.fromArgb(0xFF00FF00);
+            highlightColor = RenderColor.fromArgb(0x8800FF00);
+        }
 
         // Draw the block's voxel shape
         for (Box box : pomBlock.getShape().getBoundingBoxes()) {

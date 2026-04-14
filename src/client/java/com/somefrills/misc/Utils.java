@@ -272,7 +272,7 @@ public class Utils {
 
     public static List<String> getToolTip(ItemStack stack) {
         List<String> tooltip = new ArrayList<>();
-        if(mc.player == null) return tooltip;
+        if (mc.player == null) return tooltip;
         Item.TooltipContext context = Item.TooltipContext.create(mc.player.getRegistryManager());
         List<Text> toolTipLines = stack.getTooltip(context, mc.player, TooltipType.ADVANCED);
         for (Text line : toolTipLines) {
@@ -953,12 +953,14 @@ public class Utils {
         }
         return "";
     }
+
     public static String toPlain(String text) {
         if (text != null) {
             return Formatting.strip(text);
         }
         return "";
     }
+
     public static Optional<Style> getStyle(Text text, Predicate<String> predicate) {
         return text.visit((textStyle, textString) -> {
             if (predicate.test(textString)) {
