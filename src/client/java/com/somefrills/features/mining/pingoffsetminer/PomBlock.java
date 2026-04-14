@@ -1,6 +1,7 @@
 package com.somefrills.features.mining.pingoffsetminer;
 
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -63,8 +64,9 @@ public class PomBlock {
         if (block == this.block) return;
         String blockName = SpeedCalc.getBlockName(block);
 
-        if (block == Blocks.COBBLESTONE && Utils.isInArea("Mineshaft"))
+        if (block == Blocks.COBBLESTONE && Utils.isInArea(Area.MINESHAFT)) {
             blockName = SpeedCalc.getBlockName(Blocks.INFESTED_COBBLESTONE);
+        }
 
         if (FrillsConfig.instance.mining.pingOffsetMiner.blockEnabled.get().getOrDefault(blockName, false)) {
             this.shape = blockState.getCollisionShape(mc.world, blockPos);

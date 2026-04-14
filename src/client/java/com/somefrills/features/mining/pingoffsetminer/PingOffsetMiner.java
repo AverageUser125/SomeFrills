@@ -1,5 +1,6 @@
 package com.somefrills.features.mining.pingoffsetminer;
 
+import com.somefrills.Main;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.PingOffsetMinerConfig;
@@ -50,7 +51,7 @@ public class PingOffsetMiner extends Feature {
                 double tps = pomTPS.getAverageLatency();
                 long ping = pomPing.getAverageLatency();
                 double offset = (20.0 - tps) * config.tpsOffsetMultiplier + ping * config.pingOffsetMultiplier;
-                Utils.infoFormat("Speed: {} | TPS: {} | Ping: {}ms | Offset: {}",
+                Main.LOGGER.info("Speed: {} | TPS: {} | Ping: {}ms | Offset: {}",
                         Utils.formatDecimal(speed, 1),
                         Utils.formatDecimal(tps, 2),
                         ping,
@@ -86,7 +87,7 @@ public class PingOffsetMiner extends Feature {
             miningStats.setBoost(true);
             cooldownTicks = miningStats.getCooldown() * 20;
             if (config.logging) {
-                Utils.info("Mining speed ability used!");
+                Main.LOGGER.info("Mining speed ability used!");
             }
         }
     }
@@ -154,7 +155,7 @@ public class PingOffsetMiner extends Feature {
                 Utils.playSound(config.soundpath, 1.0f, 1.0f);
                 soundPlayed = true;
                 if (config.logging) {
-                    Utils.infoFormat("§aBlock ready to break!");
+                    Main.LOGGER.info("§aBlock ready to break!");
                 }
             }
         }
@@ -166,7 +167,7 @@ public class PingOffsetMiner extends Feature {
 
         // Check if speed was found
         if (lastDetectedSpeed == -1 && config.shouldWarn) {
-            Utils.infoFormat("§cMining speed not detected");
+            Main.LOGGER.info("§cMining speed not detected");
         }
     }
 
