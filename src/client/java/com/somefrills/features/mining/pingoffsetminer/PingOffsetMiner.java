@@ -58,9 +58,9 @@ public class PingOffsetMiner extends Feature {
                 );
             }
 
-            // Check for ability in tab
+            // Check for ability in tab - available means ability is ready
             if (line.contains("speed boost: available!")) {
-                miningStats.setBoost(false);
+                miningStats.setBoost(true);
             }
         }
     }
@@ -84,6 +84,7 @@ public class PingOffsetMiner extends Feature {
         String plain = Formatting.strip(event.messagePlain);
         if (plain.contains("you used your mining speed boost pickaxe ability")) {
             miningStats.setBoost(true);
+            cooldownTicks = miningStats.getCooldown() * 20;
             if (config.logging) {
                 Utils.info("Mining speed ability used!");
             }
@@ -152,6 +153,9 @@ public class PingOffsetMiner extends Feature {
             if (timeoutExceeded && !soundPlayed && config.sound) {
                 Utils.playSound(config.soundpath, 1.0f, 1.0f);
                 soundPlayed = true;
+                if (config.logging) {
+                    Utils.infoFormat("§aBlock ready to break!");
+                }
             }
         }
 
