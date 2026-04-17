@@ -6,8 +6,6 @@ import io.github.notenoughupdates.moulconfig.ChromaColour;
 import io.github.notenoughupdates.moulconfig.annotations.*;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
-import java.util.HashMap;
-
 public class MiningCategory {
     @Expose
     @ConfigOption(name = "Gemstone Dsync Fix", desc = "Fix desync issues with gemstones in Dwarven Mines")
@@ -183,27 +181,27 @@ public class MiningCategory {
         @ConfigOption(name = "Block Highlight Rendering", desc = "Render block highlights")
         @Accordion
         public RenderSettingsConfig highlight = new RenderSettingsConfig(true);
-
-        @Expose
-        public Property<HashMap<String, Boolean>> blockEnabled = Property.of(new HashMap<>());
-
-        @Expose
-        public Property<HashMap<String, Boolean>> islandEnabled = Property.of(new HashMap<>());
     }
 
     public static class RenderSettingsConfig {
+
+        public RenderSettingsConfig(boolean active) {
+            this.active = active;
+        }
+
+        public RenderSettingsConfig() {
+            this.active = false;
+        }
+
         @Expose
         @ConfigOption(name = "Active", desc = "Enable this rendering style")
         @ConfigEditorBoolean
-        public boolean active;
+        public boolean active = false;
 
         @Expose
         @ConfigOption(name = "Color", desc = "Render color")
         @ConfigEditorColour
         public ChromaColour color = ChromaColour.fromStaticRGB(0, 200, 200, 128);
 
-        public RenderSettingsConfig(boolean active) {
-            this.active = active;
-        }
     }
 }

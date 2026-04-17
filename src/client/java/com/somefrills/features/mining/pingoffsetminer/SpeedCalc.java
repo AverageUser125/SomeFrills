@@ -74,8 +74,8 @@ public class SpeedCalc {
                 return "skyblock:blue_mithril";
             if (block == Blocks.POLISHED_DIORITE)
                 return "skyblock:titanium";
-
-            if (block == Blocks.CLAY || block == Blocks.INFESTED_COBBLESTONE)
+            if (block == Blocks.CLAY || block == Blocks.INFESTED_COBBLESTONE
+                    || block == Blocks.COBBLESTONE_STAIRS || block == Blocks.COBBLESTONE_SLAB)
                 return "skyblock:tungsten";
             if (block == Blocks.BROWN_TERRACOTTA
                     || block == Blocks.TERRACOTTA

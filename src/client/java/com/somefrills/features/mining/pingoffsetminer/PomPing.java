@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class PomPing {
-
-
     ConcurrentLinkedQueue<Long> latencies = new ConcurrentLinkedQueue<>();
 
     final int MAX_LATENCIES = 20;

@@ -1,6 +1,5 @@
 package com.somefrills.features.mining.pingoffsetminer;
 
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
 import net.minecraft.block.Block;
@@ -44,6 +43,10 @@ public class PomBlock {
         return this.name;
     }
 
+    public Block getBlock() {
+        return this.block;
+    }
+
     public void setBlock() {
         HitResult hr = mc.crosshairTarget;
         if (hr == null || mc.world == null) return;
@@ -68,13 +71,16 @@ public class PomBlock {
             blockName = SpeedCalc.getBlockName(Blocks.INFESTED_COBBLESTONE);
         }
 
-        if (FrillsConfig.instance.mining.pingOffsetMiner.blockEnabled.get().getOrDefault(blockName, false)) {
-            this.shape = blockState.getCollisionShape(mc.world, blockPos);
-            this.pos = blockPos;
-            this.hardness = SpeedCalc.blockHardness.get(blockName);
-            this.name = blockName;
-            this.block = block;
+        // Check if blockName exists in blockHardness map
+        if (!SpeedCalc.blockHardness.containsKey(blockName)) {
+            return; // Ignore the block if not found in the map
         }
+
+        this.hardness = SpeedCalc.blockHardness.get(blockName);
+        this.shape = blockState.getCollisionShape(mc.world, blockPos);
+        this.pos = blockPos;
+        this.name = blockName;
+        this.block = block;
     }
 
     public boolean isEmpty() {

@@ -9,7 +9,6 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
-import net.minecraft.network.packet.s2c.query.PingResultS2CPacket;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -38,6 +37,14 @@ public class PingOffsetMiner extends Feature {
         config = FrillsConfig.instance.mining.pingOffsetMiner;
     }
 
+    @Override
+    public void onEnable() {
+        pomTPS.gameJoin();
+        pomPing.clear();
+        miningStats.reset();
+        lastDetectedSpeed = -1;
+    }
+
     @EventHandler
     public void onTabUpdate(TabListUpdateEvent event) {
         for (String line : event.lines) {
@@ -52,7 +59,7 @@ public class PingOffsetMiner extends Feature {
                 long ping = pomPing.getAverageLatency();
                 double offset = (20.0 - tps) * config.tpsOffsetMultiplier + ping * config.pingOffsetMultiplier;
                 Main.LOGGER.info("Speed: {} | TPS: {} | Ping: {}ms | Offset: {}",
-                        Utils.formatDecimal(speed, 1),
+                        Utils.formatDecimal(speed == -1 ? miningStats.getSpeed() : speed, 1),
                         Utils.formatDecimal(tps, 2),
                         ping,
                         Utils.formatDecimal(offset, 1)
@@ -68,10 +75,7 @@ public class PingOffsetMiner extends Feature {
 
     @EventHandler
     public void onServerJoin(ServerJoinEvent event) {
-        pomTPS.gameJoin();
-        pomPing.clear();
-        miningStats.reset();
-        lastDetectedSpeed = -1;
+        onEnable();
     }
 
     @EventHandler
@@ -93,13 +97,13 @@ public class PingOffsetMiner extends Feature {
     }
 
     @EventHandler
+    public void onPing(PingEvent event) {
+        pomPing.addLatency(event.delta);
+    }
+
+    @EventHandler
     public void onPacket(ReceivePacketEvent event) {
         var packet = event.packet;
-        if (packet instanceof PingResultS2CPacket(long startTime)) {
-            long delta = System.currentTimeMillis() - startTime;
-            pomPing.addLatency(delta);
-            return;
-        }
         if (packet instanceof WorldTimeUpdateS2CPacket) {
             long time = System.currentTimeMillis();
             pomTPS.addLatency(time);
@@ -135,7 +139,7 @@ public class PingOffsetMiner extends Feature {
         // Calculate ticks needed for this block
         double speed = getCalculatedSpeed();
         if (speed > 0) {
-            ticksNeeded = getTicksToBreak(pomBlock.getName());
+            ticksNeeded = getTicksToBreak(pomBlock);
         }
 
         // Calculate elapsed ticks since we started mining
@@ -180,16 +184,12 @@ public class PingOffsetMiner extends Feature {
     }
 
 
-    public double getTicksToBreak(String blockName) {
+    public double getTicksToBreak(PomBlock block) {
         double speed = getCalculatedSpeed();
         if (speed == -1) return -1;
+        String blockName = SpeedCalc.getBlockName(block.getBlock());
         int hardness = SpeedCalc.blockHardness.getOrDefault(blockName, -1);
         return SpeedCalc.getTicksToBreak(hardness, speed);
-    }
-
-    public double getTicksToBreakBlock(net.minecraft.block.Block block) {
-        String blockName = SpeedCalc.getBlockName(block);
-        return getTicksToBreak(blockName);
     }
 
     private double extractSpeedValue(String displayName) {
@@ -198,7 +198,8 @@ public class PingOffsetMiner extends Feature {
             if (parts.length > 1) {
                 return Double.parseDouble(parts[1].replaceAll("[^0-9.]", ""));
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            Main.LOGGER.warn("Failed to parse speed from tab list: {} {}", displayName, e.getMessage());
         }
         return -1;
     }
@@ -217,6 +218,11 @@ public class PingOffsetMiner extends Feature {
 
         double tps = pomTPS.getAverageLatency();
         long ping = pomPing.getAverageLatency();
+
+        // Validate TPS and ping values
+        if (tps < 0 || tps > 20) tps = 20; // Clamp TPS to a valid range
+        if (ping < 0 || ping > 10000) ping = 0; // Clamp ping to a valid range
+
         double offset = (20.0 - tps) * config.tpsOffsetMultiplier + ping * config.pingOffsetMultiplier;
 
         return baseSpeed + offset;
