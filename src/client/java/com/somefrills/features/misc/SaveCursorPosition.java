@@ -1,11 +1,11 @@
 package com.somefrills.features.misc;
 
-import com.somefrills.chestui.ChestUI;
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MiscCategory.SaveCursorPositionConfig;
 import com.somefrills.events.ScreenCloseEvent;
 import com.somefrills.events.ScreenOpenEvent;
+import com.somefrills.features.misc.glowmob.chestui.ChestUI;
 import kotlin.Pair;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;

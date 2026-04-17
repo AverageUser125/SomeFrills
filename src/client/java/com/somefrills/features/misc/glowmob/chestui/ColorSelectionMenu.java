@@ -1,4 +1,4 @@
-package com.somefrills.chestui;
+package com.somefrills.features.misc.glowmob.chestui;
 
 import com.somefrills.misc.MyMapColor;
 import com.somefrills.misc.RenderColor;

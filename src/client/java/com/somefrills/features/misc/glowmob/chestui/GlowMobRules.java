@@ -1,9 +1,9 @@
-package com.somefrills.chestui;
+package com.somefrills.features.misc.glowmob.chestui;
 
 import com.somefrills.config.Features;
 import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
-import com.somefrills.features.misc.GlowMob;
-import com.somefrills.features.misc.matcher.MatchInfo;
+import com.somefrills.features.misc.glowmob.GlowMob;
+import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.misc.Utils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;

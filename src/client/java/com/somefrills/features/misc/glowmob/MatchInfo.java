@@ -1,4 +1,4 @@
-package com.somefrills.features.misc.matcher;
+package com.somefrills.features.misc.glowmob;
 
 import com.google.gson.JsonParseException;
 import com.google.gson.TypeAdapter;

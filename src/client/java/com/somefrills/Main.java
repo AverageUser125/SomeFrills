@@ -8,7 +8,7 @@ import com.somefrills.config.about.ConfigVersionDisplay;
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
 import com.somefrills.events.*;
 import com.somefrills.features.misc.Aliases;
-import com.somefrills.features.misc.matcher.MatchInfo;
+import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;

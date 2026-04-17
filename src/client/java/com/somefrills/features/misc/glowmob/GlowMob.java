@@ -1,10 +1,9 @@
-package com.somefrills.features.misc;
+package com.somefrills.features.misc.glowmob;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
 import com.somefrills.events.WorldTickEvent;
-import com.somefrills.features.misc.matcher.MatchInfo;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;

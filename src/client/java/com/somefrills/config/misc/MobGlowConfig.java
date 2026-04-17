@@ -1,7 +1,7 @@
 package com.somefrills.config.misc;
 
 import com.google.gson.annotations.Expose;
-import com.somefrills.features.misc.matcher.MatchInfo;
+import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.misc.RenderColor;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;

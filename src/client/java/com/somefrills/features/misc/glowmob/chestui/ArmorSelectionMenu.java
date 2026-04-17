@@ -1,7 +1,7 @@
-package com.somefrills.chestui;
+package com.somefrills.features.misc.glowmob.chestui;
 
-import com.somefrills.features.misc.matcher.MatchInfo;
-import com.somefrills.features.misc.matcher.MatchInfo.GearFlag;
+import com.somefrills.features.misc.glowmob.MatchInfo;
+import com.somefrills.features.misc.glowmob.MatchInfo.GearFlag;
 import com.somefrills.misc.Utils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;

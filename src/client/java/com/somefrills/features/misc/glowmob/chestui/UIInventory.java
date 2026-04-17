@@ -1,4 +1,4 @@
-package com.somefrills.chestui;
+package com.somefrills.features.misc.glowmob.chestui;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;

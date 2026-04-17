@@ -1,4 +1,4 @@
-package com.somefrills.chestui;
+package com.somefrills.features.misc.glowmob.chestui;
 
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
