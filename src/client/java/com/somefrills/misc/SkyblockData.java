@@ -85,13 +85,8 @@ public class SkyblockData {
 
             if (name.startsWith("Area: ") || name.startsWith("Dungeon: ")) {
                 String areaStr = name.split(":", 2)[1].trim();
-                var areaOpt = Area.fromString(areaStr);
-                if (areaOpt.isPresent()) {
-                    area = areaOpt.get();
-                    eventBus.post(new AreaChangeEvent(area));
-                } else {
-                    area = Area.UNKNOWN;
-                }
+                area = Area.fromString(areaStr);
+                eventBus.post(new AreaChangeEvent(area));
             }
             lines.add(name);
         }

@@ -1,14 +1,17 @@
 package com.somefrills.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.somefrills.chestui.GlowMobRules;
 import com.somefrills.config.Features;
 import com.somefrills.features.misc.GlowMob;
-import com.somefrills.features.misc.matcher.Matcher;
+import com.somefrills.features.misc.matcher.MatchInfo;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.text.Text;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -18,51 +21,51 @@ public class GlowMobCommand {
     public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
         return literal("glowmob")
                 .executes(ctx -> {
-                    Utils.info("Usage: /glowmob <add|remove|list|clear>");
+                    //Utils.info("Usage: /glowmob <add|remove|list|clear>");
+                    Utils.setScreen(new GlowMobRules());
                     return 1;
                 })
                 .then(literal("list").executes(GlowMobCommand::listRules))
                 .then(literal("clear").executes(ctx -> {
                     get().clearRules();
-                    ctx.getSource().sendFeedback(net.minecraft.text.Text.literal("Cleared all entity highlight rules."));
+                    ctx.getSource().sendFeedback(Text.literal("Cleared all entity highlight rules."));
                     return 1;
                 }))
                 .then(literal("add")
-                        .then(argument("id", StringArgumentType.word())
+                        .then(CommandColorUtils.buildColorArgument()
                                 .then(argument("matcher", MatcherArgumentType.matcher())
-                                        .then(literal("color")
-                                                .then(CommandColorUtils.buildColorArguments(GlowMobCommand::addRuleCommand))
-                                        )
+                                        .executes(ctx -> {
+                                            RenderColor color = CommandColorUtils.getColorArgument(ctx);
+                                            MatchInfo matcher = MatcherArgumentType.getMatcher(ctx, "matcher");
+                                            return addRuleCommand(ctx, color, matcher);
+                                        })
                                 )
                         )
                 )
                 .then(literal("remove")
-                        .then(argument("id", StringArgumentType.word())
+                        .then(argument("id", IntegerArgumentType.integer(1))
                                 .executes(GlowMobCommand::removeRuleCommand)
                         )
                 );
     }
 
-    private static int addRuleCommand(CommandContext<FabricClientCommandSource> ctx, RenderColor color) {
-        String id = StringArgumentType.getString(ctx, "id");
-        Matcher matcher = MatcherArgumentType.getMatcher(ctx, "matcher");
-
-        boolean added = get().addRule(id, matcher, color);
-        if (added) {
-            ctx.getSource().sendFeedback(net.minecraft.text.Text.literal("Added rule '" + id + "' with matcher: " + matcher));
+    private static int addRuleCommand(CommandContext<FabricClientCommandSource> ctx, RenderColor color, MatchInfo matcher) {
+        int addIndex = get().addRule(matcher, color);
+        if (addIndex != -1) {
+            ctx.getSource().sendFeedback(Text.literal("Added rule " + addIndex + " with color " + Utils.colorToString(color) + " and matcher: " + matcher.serialize()));
         } else {
-            ctx.getSource().sendError(net.minecraft.text.Text.literal("Rule '" + id + "' already exists."));
+            ctx.getSource().sendError(Text.literal("Some error"));
         }
-        return added ? 1 : 0;
+        return addIndex == -1 ? 1 : 0;
     }
 
     private static int removeRuleCommand(CommandContext<FabricClientCommandSource> ctx) {
-        String id = StringArgumentType.getString(ctx, "id");
+        int id = IntegerArgumentType.getInteger(ctx, "id");
         boolean removed = get().removeRule(id);
         if (removed) {
-            ctx.getSource().sendFeedback(net.minecraft.text.Text.literal("Removed rule '" + id + "'."));
+            ctx.getSource().sendFeedback(Text.literal("Removed rule '" + id + "'."));
         } else {
-            ctx.getSource().sendError(net.minecraft.text.Text.literal("Rule '" + id + "' not found."));
+            ctx.getSource().sendError(Text.literal("Rule '" + id + "' not found."));
         }
         return removed ? 1 : 0;
     }
@@ -75,15 +78,16 @@ public class GlowMobCommand {
         if (rules.isEmpty()) {
             sb.append("  (none)\n");
         } else {
-            for (GlowMob.GlowMobRule rule : rules) {
-                String color = String.format("#%06X", rule.color().hex);
-                sb.append("  • id=").append(rule.id())
+            for (int idx = 0; idx < rules.size(); idx++) {
+                var rule = rules.get(idx);
+                String color = Utils.colorToString(rule.color());
+                sb.append("  • id=").append(idx + 1)
                         .append(", color=").append(color)
                         .append("\n");
             }
         }
 
-        ctx.getSource().sendFeedback(net.minecraft.text.Text.literal(sb.toString()));
+        ctx.getSource().sendFeedback(Text.literal(sb.toString()));
         return 1;
     }
 

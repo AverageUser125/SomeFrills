@@ -1,8 +1,13 @@
 package com.somefrills.misc;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import io.github.notenoughupdates.moulconfig.ChromaColour;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.ColorHelper;
+
+import java.io.IOException;
 
 public class RenderColor {
     public static final RenderColor white = RenderColor.fromHex(0xffffff);
@@ -97,5 +102,35 @@ public class RenderColor {
 
     public RenderColor withAlpha(float alpha) {
         return new RenderColor(this.r, this.g, this.b, alpha);
+    }
+
+    public float distance(RenderColor formatColor) {
+        float dr = this.r - formatColor.r;
+        float dg = this.g - formatColor.g;
+        float db = this.b - formatColor.b;
+        return (float) Math.sqrt(dr * dr + dg * dg + db * db);
+    }
+
+    public void set(RenderColor color) {
+        this.r = color.r;
+        this.g = color.g;
+        this.b = color.b;
+        this.a = color.a;
+        this.hex = color.hex;
+        this.argb = color.argb;
+    }
+
+    public static class RenderColorTypeAdapter extends TypeAdapter<RenderColor> {
+        @Override
+        public void write(JsonWriter out, RenderColor value) throws IOException {
+            out.value(value.argb);
+        }
+
+        @Override
+        public RenderColor read(JsonReader in) throws IOException {
+            int v = in.nextInt();
+            if (v == -1) return RenderColor.white;
+            return RenderColor.fromArgb(v);
+        }
     }
 }

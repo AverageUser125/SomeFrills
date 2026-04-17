@@ -2,12 +2,9 @@ package com.somefrills.features.misc;
 
 import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.config.misc.MobGlowConfig;
-import com.somefrills.config.misc.MobGlowConfig.RuleData;
-import com.somefrills.events.GameStopEvent;
+import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
 import com.somefrills.events.WorldTickEvent;
-import com.somefrills.features.misc.matcher.Matcher;
-import com.somefrills.features.misc.matcher.MatcherParser;
+import com.somefrills.features.misc.matcher.MatchInfo;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -15,77 +12,34 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 /**
  * Entity highlighting feature that allows users to highlight entities based on custom matcher expressions.
  */
 public class GlowMob extends Feature {
 
-    private final ConcurrentHashMap<String, GlowMobRule> rules;
+    private final List<GlowMobRule> rules;
     private List<Entity> entityList;
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
-        rules = new ConcurrentHashMap<>();
-        loadRulesFromConfig();
-    }
-
-    /**
-     * Load rules from config if saving is enabled
-     */
-    private void loadRulesFromConfig() {
-        if (!FrillsConfig.instance.misc.glowMob.saveRules.get()) {
-            return;
-        }
-        if (rules == null) {
-            return;
-        }
-
-        List<RuleData> savedRules = FrillsConfig.instance.misc.glowMob.rules;
-        for (RuleData ruleData : savedRules) {
-            try {
-                Matcher matcher = MatcherParser.parse(ruleData.matcherExpression);
-                RenderColor color = RenderColor.fromHex(ruleData.colorHex);
-                addRule(ruleData.id, matcher, color);
-            } catch (MatcherParser.MatcherParseException e) {
-                Utils.infoFormat("Failed to load glow rule '{}': {}", ruleData.id, e.getMessage());
-            }
-        }
-    }
-
-    @Override
-    public void onEnable() {
-        loadRulesFromConfig();
-    }
-
-    @EventHandler
-    public void onLeave(GameStopEvent event) {
-        if (!FrillsConfig.instance.misc.glowMob.saveRules.get()) {
-            return;
-        }
-
-        FrillsConfig.instance.misc.glowMob.rules.clear();
-        for (GlowMobRule rule : rules.values()) {
-            FrillsConfig.instance.misc.glowMob.rules.add(
-                    new MobGlowConfig.RuleData(rule.id, rule.matcherExpression, rule.color.hex)
-            );
-        }
+        rules = FrillsConfig.instance.misc.glowMob.rules;
     }
 
     /**
      * Determines if entity should glow and what color. Single pass through all rules.
      * Returns null if no match found.
      */
-    private GlowMatchResult findGlowMatch(Entity entity) {
+    private RenderColor findGlowMatch(Entity entity) {
         if (!(entity instanceof LivingEntity livingEntity)) return null;
 
-        for (GlowMobRule rule : rules.values()) {
+        for (GlowMobRule rule : rules) {
+            if (rule == null) continue;
+            // Skip disabled rules
+            if (!rule.enabled()) continue;
             if (rule.matches(livingEntity)) {
-                return new GlowMatchResult(rule.color, rule.id);
+                return rule.color();
             }
         }
         return null;
@@ -94,38 +48,55 @@ public class GlowMob extends Feature {
     private void applyHighlight(Entity entity) {
         if (!(entity instanceof LivingEntity)) return;
 
-        GlowMatchResult result = findGlowMatch(entity);
-        if (result != null) {
-            Utils.setGlowing(entity, true, result.color);
+        RenderColor color = findGlowMatch(entity);
+        if (color != null) {
+            Utils.setGlowing(entity, true, color);
         }
     }
 
-    public boolean addRule(String id, Matcher matcher, RenderColor color) {
-        if (id == null || id.trim().isEmpty() || matcher == null || color == null) {
-            return false;
+    public int addRule(GlowMobRule rule) {
+        if (rule == null) {
+            return -1;
         }
-        String normalizedId = id.trim();
-
-        // Check if rule already exists - don't overwrite
-        if (rules.containsKey(normalizedId)) {
-            return false;
-        }
-
         try {
-            rules.put(normalizedId, new GlowMobRule(normalizedId, matcher, color));
-            return true;
+            rules.add(rule);
+            return rules.size();
         } catch (Exception e) {
             Utils.infoFormat("Failed to add glow rule: {}", e.getMessage());
-            return false;
+            return -1;
         }
     }
 
-    public boolean removeRule(String id) {
-        if (id == null || id.trim().isEmpty()) {
-            return false;
+    public int addRule(MatchInfo matcher, RenderColor color) {
+        return addRule(new GlowMobRule(matcher, color));
+    }
+
+    public boolean removeRule(GlowMobRule rule) {
+        return removeRule(rules.indexOf(rule) + 1);
+    }
+
+    public void replaceRule(GlowMobRule original, GlowMobRule newVersion) {
+        int idx = rules.indexOf(original);
+        if (idx == -1) {
+            Utils.info("Original rule not found, cannot replace");
+            return;
         }
-        String normalizedId = id.trim();
-        GlowMobRule removed = rules.remove(normalizedId);
+        rules.set(idx, newVersion);
+         // Refresh entity list and update glowing on entities that matched the old or new version of this rule
+        updateEntities();
+        for (Entity entity : getEntities()) {
+            boolean matchesOld = original.matches((LivingEntity) entity);
+            boolean matchesNew = newVersion.matches((LivingEntity) entity);
+            if (matchesOld && !matchesNew) {
+                Utils.setGlowing(entity, false, RenderColor.white);
+            } else if (!matchesOld && matchesNew) {
+                Utils.setGlowing(entity, true, newVersion.color());
+            }
+        }
+    }
+
+    public boolean removeRule(int id) {
+        GlowMobRule removed = rules.remove(id - 1);
         if (removed != null) {
             // Refresh entity list and disable glowing on entities that matched this rule
             updateEntities();
@@ -141,7 +112,7 @@ public class GlowMob extends Feature {
     public void clearRules() {
         updateEntities();
         for (Entity entity : getEntities()) {
-            GlowMatchResult result = findGlowMatch(entity);
+            RenderColor result = findGlowMatch(entity);
             if (result != null) {
                 Utils.setGlowing(entity, false, RenderColor.white);
             }
@@ -149,8 +120,8 @@ public class GlowMob extends Feature {
         rules.clear();
     }
 
-    public Collection<GlowMobRule> getRules() {
-        return List.copyOf(rules.values());
+    public List<GlowMobRule> getRules() {
+        return rules;
     }
 
     private List<Entity> getEntities() {
@@ -177,41 +148,25 @@ public class GlowMob extends Feature {
         getEntities().forEach(this::applyHighlight);
     }
 
-    /**
-     * Result of glow matching: color and rule ID
-     */
-    private record GlowMatchResult(RenderColor color, String ruleId) {
-    }
+    public void toggleRule(int parsedId) {
+        var rule = rules.get(parsedId - 1);
+        if (rule == null) return;
 
-    /**
-     * Rule definition: ID, matcher expression, and color
-     */
-    public static class GlowMobRule {
-        private final String id;
-        private final String matcherExpression;
-        private final RenderColor color;
-        private final Predicate<LivingEntity> predicate;
-
-        public GlowMobRule(String id, Matcher matcher, RenderColor color) {
-            if (id == null || id.trim().isEmpty() || matcher == null || color == null) {
-                throw new IllegalArgumentException("Invalid rule parameters");
+        updateEntities();
+        if(rule.enabled()) {
+            for (Entity entity : getEntities()) {
+                if (entity instanceof LivingEntity livingEntity && rule.matches(livingEntity)) {
+                    Utils.setGlowing(entity, false, RenderColor.white);
+                }
             }
-            this.id = id;
-            this.matcherExpression = matcher.toString();
-            this.color = color;
-            this.predicate = matcher.compile();
+        } else {
+            for (Entity entity : getEntities()) {
+                if (entity instanceof LivingEntity livingEntity && rule.matches(livingEntity)) {
+                    Utils.setGlowing(entity, true, rule.color());
+                }
+            }
         }
-
-        public String id() {
-            return id;
-        }
-
-        public RenderColor color() {
-            return color;
-        }
-
-        public boolean matches(LivingEntity entity) {
-            return predicate.test(entity);
-        }
+        rule.toggle();
     }
+
 }

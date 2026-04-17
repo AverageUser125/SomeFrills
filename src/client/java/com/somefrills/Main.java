@@ -8,11 +8,14 @@ import com.somefrills.config.about.ConfigVersionDisplay;
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
 import com.somefrills.events.*;
 import com.somefrills.features.misc.Aliases;
+import com.somefrills.features.misc.matcher.MatchInfo;
 import com.somefrills.misc.EntityCache;
+import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfigBuilder;
+import kotlin.Unit;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -81,9 +84,21 @@ public class Main implements ClientModInitializer {
         var file = FabricLoader.getInstance().getConfigDir().resolve("somefrills.json").toFile();
         var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
         builder.customProcessor(ConfigVersionDisplay.class, (option, annotation) -> new GuiOptionEditorUpdateCheck(option));
+        builder.setLoadFailed((cfg, ex) -> LOGGER.error("Failed to load config file {}: {}", cfg.getFile().getName(), ex.getMessage()));
+        builder.setSaveFailed((cfg, ex) -> LOGGER.error("Failed to save config file {}: {}", cfg.getFile().getName(), ex.getMessage()));
+        builder.jsonMapper(
+                mapper -> {
+                    mapper.getGsonBuilder().
+                            registerTypeAdapter(MatchInfo.class, new MatchInfo.MatchInfoTypeAdapter())
+                            .registerTypeAdapter(RenderColor.class, new RenderColor.RenderColorTypeAdapter())
+                            .disableHtmlEscaping()
+                            .disableJdkUnsafe();
+                    return Unit.INSTANCE;
+                }
+        );
+
         config = new ManagedConfig<>(builder);
         FrillsConfig.instance = config.getInstance();
-
         eventBus.registerLambdaFactory("com.somefrills",
                 (lookupInMethod, klass) -> (MethodHandles.Lookup)
                         lookupInMethod.invoke(null, klass, MethodHandles.lookup()));

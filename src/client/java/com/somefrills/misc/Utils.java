@@ -62,6 +62,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.entity.SimpleEntityLookup;
+import org.apache.commons.lang3.StringUtils;
 import org.joml.Vector2d;
 
 import java.io.IOException;
@@ -82,11 +83,11 @@ import static com.somefrills.Main.mc;
 @SuppressWarnings("unused")
 public class Utils {
     public static final MessageIndicator someFrillsIndicator = new MessageIndicator(0x5ca0bf, null, Text.of("Message from SomeFrills mod."), "SomeFrills Mod");
-    private static final HashSet<String> lootIslands = Sets.newHashSet(
-            "Catacombs",
-            "Kuudra",
-            "Dungeon Hub",
-            "Crimson Isle"
+    private static final HashSet<Area> lootIslands = Sets.newHashSet(
+            Area.CATACOMBS,
+            Area.KUUDRA,
+            Area.DUNGEON_HUB,
+            Area.CRIMSON_ISLE
     );
     // Helper data and utilities for player/name validation and color parsing
     private static final java.util.Set<String> EXTRA_DISPLAY_NPC_BY_NAME = java.util.Set.of(
@@ -512,6 +513,15 @@ public class Utils {
             }
         }
         return null;
+    }
+
+    /**
+     * Sets the custom data compound of the provided ItemStack.
+     */
+    public static void setCustomData(ItemStack stack, NbtCompound data) {
+        if (stack != null && data != null) {
+            stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(data));
+        }
     }
 
     /**
@@ -1075,7 +1085,84 @@ public class Utils {
 
     public static void showGui() {
         setScreen(getGuiScreen());
+    }
 
+    // if is a Formatting color, return the name, otherwise return hex string
+    // like: #RRGGBB OR "red", "white", etc
+    public static String colorToString(int hex) {
+        for (Formatting f : Formatting.values()) {
+            if (f.isColor() && f.getColorValue() == hex) {
+                return StringUtils.capitalize(f.getName());
+            }
+        }
+        for (MyMapColor mapColor : MyMapColor.values()) {
+            if (mapColor.getColor() == hex) {
+                return capitalizeType(mapColor.name().toLowerCase());
+            }
+        }
+        return String.format("#%06X", hex);
+    }
+
+    public static String colorToString(RenderColor color) {
+        return colorToString(color.hex);
+    }
+
+    public static String capitalizeType(String type) {
+        if (type == null || type.isEmpty()) return type;
+        String[] parts = type.split("_");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) result.append(" ");
+            String part = parts[i];
+            if (!part.isEmpty()) {
+                result.append(part.substring(0, 1).toUpperCase());
+                if (part.length() > 1) {
+                    result.append(part.substring(1));
+                }
+            }
+        }
+        return result.toString();
+    }
+
+    public static Optional<RenderColor> parseRenderColor(String colorStr) {
+        if (colorStr == null || colorStr.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // Try hex format
+        String hexStr = colorStr;
+        if (hexStr.startsWith("#")) {
+            hexStr = hexStr.substring(1);
+        }
+        if (hexStr.length() == 6) {
+            try {
+                int hex = Integer.parseInt(hexStr, 16);
+                return Optional.of(RenderColor.fromHex(hex));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        // Try formatting color
+        Formatting formatting = Utils.parseColor(colorStr);
+        if (formatting != null) {
+            return Optional.of(RenderColor.fromFormatting(formatting));
+        }
+
+        // Try RGB format (space-separated)
+        String[] parts = colorStr.split("\\s+");
+        if (parts.length == 3) {
+            try {
+                int r = Integer.parseInt(parts[0]);
+                int g = Integer.parseInt(parts[1]);
+                int b = Integer.parseInt(parts[2]);
+                if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+                    return Optional.of(new RenderColor(r, g, b, 255));
+                }
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static Screen getGuiScreen() {
@@ -1114,6 +1201,18 @@ public class Utils {
             return str.substring(prefix.length());
         }
         return str;
+    }
+
+    public static void setCustomName(ItemStack stack, Style style, String name) {
+        stack.set(DataComponentTypes.CUSTOM_NAME, Text.literal(name).setStyle(style.withItalic(false)));
+    }
+
+    public static String getPlainCustomName(ItemStack stack) {
+        Text name = stack.get(DataComponentTypes.CUSTOM_NAME);
+        if (name != null) {
+            return toPlain(name);
+        }
+        return "";
     }
 
     public static class Symbols {
