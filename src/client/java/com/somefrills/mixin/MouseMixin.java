@@ -1,6 +1,7 @@
 package com.somefrills.mixin;
 
-import com.somefrills.config.misc.SaveCursorPosition;
+import com.somefrills.config.Features;
+import com.somefrills.features.misc.SaveCursorPosition;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.InputEvent;
 import com.somefrills.features.farming.SpaceFarmer;
@@ -32,7 +33,7 @@ public abstract class MouseMixin {
 
     @Inject(method = "lockCursor", at = @At("HEAD"))
     public void onLockCursor(CallbackInfo ci) {
-        SaveCursorPosition.saveCursorOriginal(x, y);
+        Features.get(SaveCursorPosition.class).saveCursorOriginal(x, y);
     }
 
     @Inject(method = "lockCursor", at = @At(
@@ -41,7 +42,7 @@ public abstract class MouseMixin {
             ordinal = 2
     ))
     public void onLockCursorAfter(CallbackInfo ci) {
-        SaveCursorPosition.saveCursorMiddle(x, y);
+        Features.get(SaveCursorPosition.class).saveCursorMiddle(x, y);
     }
 
     @Inject(method = "unlockCursor", at = @At(
@@ -51,7 +52,7 @@ public abstract class MouseMixin {
     ))
 
     public void onUnlockCursor(CallbackInfo ci) {
-        Pair<Double, Double> cursorPosition = SaveCursorPosition.loadCursor(this.x, this.y);
+        Pair<Double, Double> cursorPosition = Features.get(SaveCursorPosition.class).loadCursor(this.x, this.y);
         if (cursorPosition == null) return;
         this.x = cursorPosition.getFirst();
         this.y = cursorPosition.getSecond();
