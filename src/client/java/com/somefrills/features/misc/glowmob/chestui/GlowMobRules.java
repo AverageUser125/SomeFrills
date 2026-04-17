@@ -150,16 +150,13 @@ public class GlowMobRules extends ChestUI {
         GlowMobRule rule = allRules.get(parsedId - 1);
         if (rule == null) return;
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
-            openRuleEditor(rule);
+        if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+            Features.get(GlowMob.class).toggleRule(parsedId);
+            rebuild();
             return;
         }
-
-        if (button != GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-            return;
-        }
-        Features.get(GlowMob.class).toggleRule(parsedId);
-        rebuild();
+        // both middle-click and left-click will open the editor for the rule
+        openRuleEditor(rule);
     }
 
     @Override

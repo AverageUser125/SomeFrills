@@ -342,7 +342,7 @@ public class MatchInfo {
         }
 
         private boolean isNaked(LivingEntity entity) {
-            if(entity.isDead() || entity.age <= 2) {
+            if(entity.isDead() || entity.age <= 2 || entity.deathTime > 0) {
                 return false;
             }
 
