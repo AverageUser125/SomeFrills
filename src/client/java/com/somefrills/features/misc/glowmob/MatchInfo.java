@@ -31,19 +31,22 @@ public class MatchInfo {
     public Area area;
     @NonNull
     public Set<GearFlag> gear;
+    public int maxHp;
 
     public MatchInfo(MatchInfo info) {
         this.type = info.type;
         this.name = info.name;
         this.area = info.area;
         this.gear = EnumSet.copyOf(info.gear);
+        this.maxHp = 0;
     }
 
-    public MatchInfo(@NonNull String type, @NonNull String name, @Nullable Area area, @NonNull Set<GearFlag> gear) {
+    public MatchInfo(@NonNull String type, @NonNull String name, @Nullable Area area, @NonNull Set<GearFlag> gear, int maxHp) {
         this.type = type;
         this.name = name;
         this.area = area;
         this.gear = gear;
+        this.maxHp = maxHp;
     }
 
     public MatchInfo() {
@@ -51,6 +54,7 @@ public class MatchInfo {
         this.name = "";
         this.area = null;
         this.gear = EnumSet.noneOf(GearFlag.class);
+        this.maxHp = 0;
     }
 
     public static MatchInfo fromString(String str) throws MatcherParseException {
@@ -97,6 +101,13 @@ public class MatchInfo {
                         }
                     }
                 }
+                case "MAXHP" -> {
+                    try {
+                        info.maxHp = Integer.parseInt(value);
+                    } catch (NumberFormatException e) {
+                        throw new MatcherParseException("Invalid MAXHP value: " + value);
+                    }
+                }
                 default -> throw new MatcherParseException("Unknown key: " + key);
             }
         }
@@ -105,7 +116,7 @@ public class MatchInfo {
     }
 
     public boolean isEmpty() {
-        return type.trim().isEmpty() && name.trim().isEmpty() && area == null && gear.isEmpty();
+        return type.trim().isEmpty() && name.trim().isEmpty() && area == null && gear.isEmpty() && maxHp <= 0;
     }
 
     @Override
@@ -153,6 +164,9 @@ public class MatchInfo {
         if (!gear.isEmpty()) {
             predicate = predicate.and(new GearPredicate(gear));
         }
+        if (maxHp > 0) {
+            predicate = predicate.and(new MaxHpPredicate(maxHp));
+        }
         return predicate;
     }
 
@@ -178,6 +192,10 @@ public class MatchInfo {
         if (!gear.isEmpty()) {
             String gearStr = String.join("+", gear.stream().map(Enum::name).toList());
             parts.add("GEAR=" + gearStr);
+        }
+
+        if (maxHp > 0) {
+            parts.add("MAXHP=" + maxHp);
         }
 
         return String.join(",", parts);
@@ -328,6 +346,19 @@ public class MatchInfo {
                     && entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.LEGS).isEmpty()
                     && entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.FEET).isEmpty()
                     && entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.HEAD).isEmpty();
+        }
+    }
+
+    public static class MaxHpPredicate implements Predicate<LivingEntity> {
+        private final int maxHp;
+
+        public MaxHpPredicate(int maxHp) {
+            this.maxHp = maxHp;
+        }
+
+        @Override
+        public boolean test(LivingEntity entity) {
+            return entity.getMaxHealth() == maxHp;
         }
     }
 

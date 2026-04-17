@@ -5,6 +5,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.mining.GhostVision;
 import com.somefrills.misc.EntityRendering;
 import com.somefrills.misc.RenderColor;
+import com.somefrills.misc.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.text.Text;
@@ -21,16 +22,6 @@ public class EntityMixin implements EntityRendering {
     private boolean glowRender = false;
     @Unique
     private RenderColor glowColor;
-
-    @Unique
-    private static String formatHealth(float health) {
-        if (health >= 1000.0f) {
-            float thousands = health / 1000.0f;
-            return String.format("%.1fk", thousands);
-        } else {
-            return String.format("%.0f", health);
-        }
-    }
 
     @Override
     public void somefrills_mod$setGlowingColored(boolean glowing, RenderColor color) {
@@ -58,6 +49,7 @@ public class EntityMixin implements EntityRendering {
         }
         return original;
     }
+
 
     @ModifyReturnValue(method = "isInvisible", at = @At("RETURN"))
     private boolean makeCreeperVisible(boolean original) {
@@ -109,13 +101,11 @@ public class EntityMixin implements EntityRendering {
         }
         if ((Object) this instanceof CreeperEntity creeper) {
             // Only show HP if creeper is not invisible and config enabled
-            float currentHealth = creeper.getHealth();
-            float maxHealth = creeper.getMaxHealth();
+            int currentHealth = (int) creeper.getHealth();
+            int maxHealth = (int) creeper.getMaxHealth();
 
-            String currentHealthText = formatHealth(currentHealth);
-            String maxHealthText = formatHealth(maxHealth);
-            if (currentHealthText.equals("1.0k")) currentHealthText = "1m";
-            if (maxHealthText.equals("1.0k")) maxHealthText = "1m";
+            String currentHealthText = Utils.formatCompact(currentHealth);
+            String maxHealthText = Utils.formatCompact(maxHealth);
 
             Text healthDisplay = Text.literal(currentHealthText)
                     .styled(style -> style.withColor(Formatting.GREEN))

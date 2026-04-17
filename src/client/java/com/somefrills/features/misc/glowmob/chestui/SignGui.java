@@ -34,10 +34,15 @@ public class SignGui extends SignEditScreen {
         this.front = front;
     }
 
-    /**
-     * Open a sign editor with first row pre-filled and cursor starting on row 2.
-     * The provided callback receives a String[4] containing the final lines.
-     */
+    public static void open(String[] rows, Consumer<String[]> onClose) {
+        Text[] textRows = new Text[rows.length];
+        for (int i = 0; i < rows.length; i++) {
+            textRows[i] = Text.of(rows[i]);
+        }
+        SignBlockEntity sign = new FakeSign(textRows);
+        SignGui gui = new SignGui(sign, true, false, onClose);
+        Utils.setScreen(gui);
+    }
     public static void open(Text[] rows, Consumer<String[]> onClose) {
         SignBlockEntity sign = new FakeSign(rows);
         SignGui gui = new SignGui(sign, true, false, onClose);

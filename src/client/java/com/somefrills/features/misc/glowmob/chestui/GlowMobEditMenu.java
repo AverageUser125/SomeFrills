@@ -31,6 +31,11 @@ public class GlowMobEditMenu extends ChestUI {
 
     @Override
     protected void build() {
+        addItem(createChoiceItem(MyMapColor.getClosest(rule.color()).getItem(), "Color",
+                Utils.colorToString(rule.color()),
+                rule.color().hex,
+                "Click to select glow color!"));
+
         addItem(createChoiceItem(Items.CREEPER_SPAWN_EGG, "Entity",
                 Utils.capitalizeType(info.type),
                 "Click to choose entity to glow!"));
@@ -46,14 +51,13 @@ public class GlowMobEditMenu extends ChestUI {
 
         addItem(createGearChoiceItem());
 
+        addItem(createChoiceItem(Items.ENCHANTED_BOOK, "Max HP",
+                info.maxHp > 0 ? Utils.formatCompact(info.maxHp) : null,
+                "Click to set max HP filter!"));
+
         var delete = new ItemStack(Items.CAULDRON);
         Utils.setCustomName(delete, colorStyle(Formatting.RED), "Delete");
         getInventory().setStack(INV_SIZE - 9 + 5, delete);
-
-        addItem(createChoiceItem(MyMapColor.getClosest(rule.color()).getItem(), "Color",
-                Utils.colorToString(rule.color()),
-                rule.color().hex,
-                "Click to select glow color!"));
     }
 
     private ItemStack createGearChoiceItem() {
@@ -154,7 +158,7 @@ public class GlowMobEditMenu extends ChestUI {
             case "Area" -> Utils.setScreen(new AreaSelectionMenu(this, info));
             case "Gear" -> Utils.setScreen(new ArmorSelectionMenu(this, info));
             case "Color" -> Utils.setScreen(new ColorSelectionMenu(this, rule.color()));
-            case "Name" -> SignGui.open(new Text[]{Text.of("Set Name Filter"), Text.of(info.name)}, lines -> {
+            case "Name" -> SignGui.open(new String[]{"Set Name Filter", info.name}, lines -> {
                 // concat all lines except first one, IGNORE THE FIRST LINE
                 // note: lines is a String[]
                 StringBuilder nameBuilder = new StringBuilder();
@@ -166,6 +170,18 @@ public class GlowMobEditMenu extends ChestUI {
                 rebuild();
                 Utils.setScreen(this);
             });
+            case "Max HP" ->
+                    SignGui.open(new String[]{"Enter Max Hp", info.maxHp != 0 ? Utils.formatCompact(info.maxHp) : ""}, lines -> {
+                        if (lines.length < 2) return;
+                        String input = lines[1].trim();
+                        try {
+                            info.maxHp = Utils.parseCompact(input);
+                            rebuild();
+                            Utils.setScreen(this);
+                        } catch (NumberFormatException e) {
+                            // ignore invalid input
+                        }
+                    });
             case "Delete" -> {
                 info.clear();
                 close();

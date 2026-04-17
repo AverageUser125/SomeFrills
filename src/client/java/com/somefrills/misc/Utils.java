@@ -111,6 +111,59 @@ public class Utils {
         );
     }
 
+    // 1,000       -> 1k
+    // 1,250       -> 1.3k
+    // 1,000,000   -> 1m
+    // 9,900,000   -> 9.9m
+    // 9,999,999   -> 10m
+    // 1,000,000,000 -> 1b
+    private static final String[] SUFFIXES = {"k", "m", "b", "t"};
+
+    public static String formatCompact(int health) {
+        if (health < 1000) {
+            return Integer.toString(health);
+        }
+
+        double value = health;
+        int suffixIndex = -1;
+
+        while (value >= 1000 && suffixIndex < SUFFIXES.length - 1) {
+            value /= 1000.0;
+            suffixIndex++;
+        }
+
+        String format = (value >= 10 || value == Math.floor(value))
+                ? "%.0f%s"
+                : "%.1f%s";
+
+        return String.format(format, value, SUFFIXES[suffixIndex]);
+    }
+
+    public static int parseCompact(String input) {
+        if (input == null || input.isBlank()) {
+            return 0;
+        }
+
+        String s = input.trim().toLowerCase().replace(",", "");
+
+        // check suffix
+        for (int i = 0; i < SUFFIXES.length; i++) {
+            String suffix = SUFFIXES[i];
+
+            if (s.endsWith(suffix)) {
+                String numberPart = s.substring(0, s.length() - suffix.length()).trim();
+
+                double value = Double.parseDouble(numberPart);
+                double multiplier = Math.pow(1000, i + 1);
+
+                return (int) Math.round(value * multiplier);
+            }
+        }
+
+        // plain integer
+        return Integer.parseInt(s);
+    }
+
     public static void showTitle(String title, String subtitle, int fadeInTicks, int stayTicks, int fadeOutTicks) {
         mc.inGameHud.setTitle(Text.of(title));
         mc.inGameHud.setSubtitle(Text.of(subtitle));
