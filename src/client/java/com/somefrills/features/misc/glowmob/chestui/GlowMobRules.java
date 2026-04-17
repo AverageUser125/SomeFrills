@@ -150,7 +150,7 @@ public class GlowMobRules extends ChestUI {
         GlowMobRule rule = allRules.get(parsedId - 1);
         if (rule == null) return;
 
-        if(button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
+        if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
             Features.get(GlowMob.class).toggleRule(parsedId);
             rebuild();
             return;

@@ -57,6 +57,7 @@ public class MiscCategory {
     @Accordion
     @ConfigOption(name = "Save Cursor Position", desc = "Save and restore cursor position in chests")
     public SaveCursorPositionConfig saveCursorPosition = new SaveCursorPositionConfig();
+
     public static class SaveCursorPositionConfig {
         @Expose
         @ConfigOption(name = "Enabled", desc = "Save and restore cursor position in chests")

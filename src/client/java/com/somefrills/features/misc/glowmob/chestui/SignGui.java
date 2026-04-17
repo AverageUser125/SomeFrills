@@ -43,6 +43,7 @@ public class SignGui extends SignEditScreen {
         SignGui gui = new SignGui(sign, true, false, onClose);
         Utils.setScreen(gui);
     }
+
     public static void open(Text[] rows, Consumer<String[]> onClose) {
         SignBlockEntity sign = new FakeSign(rows);
         SignGui gui = new SignGui(sign, true, false, onClose);

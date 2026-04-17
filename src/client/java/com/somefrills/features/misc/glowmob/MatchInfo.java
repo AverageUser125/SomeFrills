@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import org.jspecify.annotations.NonNull;
@@ -335,21 +336,21 @@ public class MatchInfo {
                 return isNaked(entity);
             }
 
-            return requiredGear.contains(GearFlag.CHEST) && !entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.CHEST).isEmpty()
-                    || requiredGear.contains(GearFlag.LEGS) && !entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.LEGS).isEmpty()
-                    || requiredGear.contains(GearFlag.FEET) && !entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.FEET).isEmpty()
-                    || requiredGear.contains(GearFlag.HEAD) && !entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.HEAD).isEmpty();
+            return requiredGear.contains(GearFlag.CHEST) && !entity.getEquippedStack(EquipmentSlot.CHEST).isEmpty()
+                    || requiredGear.contains(GearFlag.LEGS) && !entity.getEquippedStack(EquipmentSlot.LEGS).isEmpty()
+                    || requiredGear.contains(GearFlag.FEET) && !entity.getEquippedStack(EquipmentSlot.FEET).isEmpty()
+                    || requiredGear.contains(GearFlag.HEAD) && !entity.getEquippedStack(EquipmentSlot.HEAD).isEmpty();
         }
 
         private boolean isNaked(LivingEntity entity) {
-            if(entity.isDead() || entity.age <= 2 || entity.deathTime > 0) {
+            if (entity.isDead() || entity.age <= 2 || entity.deathTime > 0) {
                 return false;
             }
 
-            return entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.CHEST).isEmpty()
-                    && entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.LEGS).isEmpty()
-                    && entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.FEET).isEmpty()
-                    && entity.getEquippedStack(net.minecraft.entity.EquipmentSlot.HEAD).isEmpty();
+            return entity.getEquippedStack(EquipmentSlot.CHEST).isEmpty()
+                    && entity.getEquippedStack(EquipmentSlot.LEGS).isEmpty()
+                    && entity.getEquippedStack(EquipmentSlot.FEET).isEmpty()
+                    && entity.getEquippedStack(EquipmentSlot.HEAD).isEmpty();
         }
     }
 
