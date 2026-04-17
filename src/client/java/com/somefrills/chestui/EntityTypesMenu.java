@@ -49,7 +49,6 @@ public class EntityTypesMenu extends ChestUI {
         // Add special entries that don't have spawn eggs: armor_stand and player
         entries.add(createEntityItemFromId("armor_stand", new ItemStack(Items.ARMOR_STAND)));
         entries.add(createEntityItemFromId("player", new ItemStack(Items.PLAYER_HEAD)));
-
         // Sort by the plain custom name (case-insensitive). Fallback to empty string if missing.
         entries.sort((a, b) -> {
             String na = Utils.getPlainCustomName(a);
@@ -59,26 +58,10 @@ public class EntityTypesMenu extends ChestUI {
             return na.compareToIgnoreCase(nb);
         });
 
-        // Add to the menu in sorted order
+        addItem(createEntityItemFromId("none", new ItemStack(Items.STRUCTURE_VOID)));
         for (ItemStack entry : entries) {
             addItem(entry);
         }
-    }
-
-    private String formatNameFromId(String entityTypeId) {
-        String[] parts = entityTypeId.split("_");
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < parts.length; i++) {
-            if (i > 0) result.append(" ");
-            String part = parts[i];
-            if (!part.isEmpty()) {
-                result.append(part.substring(0, 1).toUpperCase());
-                if (part.length() > 1) {
-                    result.append(part.substring(1));
-                }
-            }
-        }
-        return result.toString();
     }
 
     private ItemStack createEntityItem(EntityType<?> entityType, ItemStack eggStack) {
@@ -97,18 +80,20 @@ public class EntityTypesMenu extends ChestUI {
         nbt.putString("EntityType", entityTypeId);
         Utils.setCustomData(stack, nbt);
 
-        String displayName = formatNameFromId(entityTypeId);
+        String displayName = Utils.capitalizeType(entityTypeId);
         Utils.setCustomName(stack, Style.EMPTY.withColor(Formatting.GREEN).withItalic(false), displayName);
+        setLore(stack, entityTypeId);
+        return stack;
+    }
 
+    private void setLore(ItemStack stack, String typeId) {
         List<Text> lore = new ArrayList<>();
-        if (info.type.equals(entityTypeId)) {
+        if (info.type.equals(typeId)) {
             lore.add(Text.literal("✓ Currently selected").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
         } else {
             lore.add(Text.literal("Click to select").setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
         }
-
         stack.set(DataComponentTypes.LORE, new LoreComponent(lore, lore));
-        return stack;
     }
 
     @Override
@@ -122,7 +107,11 @@ public class EntityTypesMenu extends ChestUI {
         String entityTypeId = nbt.getString("EntityType").orElse(null);
         if (entityTypeId == null) return;
 
-        info.type = entityTypeId;
+        if(entityTypeId.equals("none")) {
+            info.type = "";
+        } else {
+            info.type = entityTypeId;
+        }
         close();
     }
 }
