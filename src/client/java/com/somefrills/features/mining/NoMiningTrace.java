@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
 
 public class NoMiningTrace extends Feature {
     private final NoMiningTraceConfig config;
-    private static final String[] miningTraceNames = new String[] {
+    private static final String[] miningTraceNames = new String[]{
             "Pickaxe",
             "Shovel",
             "Drill",
@@ -23,8 +23,8 @@ public class NoMiningTrace extends Feature {
     }
 
     private boolean isHoldingTool() {
-        if(!config.onlyWhenHoldingTool) return false;
-        ItemStack mainHand = Utils.getHeldItem();;
+        if (!config.onlyWhenHoldingTool) return false;
+        ItemStack mainHand = Utils.getHeldItem();
         if (mainHand.isEmpty()) return false;
         String itemName = mainHand.getItem().getName().getString();
         for (String traceName : miningTraceNames) {
@@ -45,8 +45,8 @@ public class NoMiningTrace extends Feature {
     }
 
     public boolean canWork(Entity entity) {
-        if(!isActive()) return false;
-        if(!isHoldingTool()) return false;
+        if (!isActive()) return false;
+        if (!isHoldingTool()) return false;
         return isIgnorable(entity);
     }
 }

@@ -1,6 +1,7 @@
 package com.somefrills.config.tweaks;
 
 import com.google.gson.annotations.Expose;
+import io.github.notenoughupdates.moulconfig.annotations.Accordion;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 import io.github.notenoughupdates.moulconfig.observer.Property;
@@ -41,4 +42,26 @@ public class TweaksCategory {
     @ConfigOption(name = "Middle Click Fix", desc = "Fix the issue where middle clicking to swap items doesn't work in certain situations")
     @ConfigEditorBoolean
     public boolean middleClickFixEnabled = true;
+
+    @Expose
+    @ConfigOption(name = "No Ghost Blocks", desc = "Prevent ghost blocks from being placed or broken")
+    @Accordion
+    public NoGhostBlocksConfig noGhostBlocks = new NoGhostBlocksConfig();
+
+    public static class NoGhostBlocksConfig {
+        @ConfigEditorBoolean
+        @Expose
+        @ConfigOption(name = "Enabled", desc = "Prevent ghost blocks from being placed or broken")
+        public Property<Boolean> enabled = Property.of(false);
+
+        @Expose
+        @ConfigOption(name = "Prevent Placing", desc = "Prevent placing ghost blocks")
+        @ConfigEditorBoolean
+        public boolean placing = true;
+
+        @Expose
+        @ConfigOption(name = "Prevent Breaking", desc = "Prevent breaking ghost blocks")
+        @ConfigEditorBoolean
+        public boolean breaking = true;
+    }
 }

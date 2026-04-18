@@ -112,6 +112,7 @@ public class MiningCategory {
     @ConfigOption(name = "No Mining Trace", desc = "Allow mining through entities")
     @Accordion
     public NoMiningTraceConfig noMiningTrace = new NoMiningTraceConfig();
+
     public static class NoMiningTraceConfig {
         @Expose
         @ConfigOption(name = "No Mining Trace", desc = "Allow mining through entities")

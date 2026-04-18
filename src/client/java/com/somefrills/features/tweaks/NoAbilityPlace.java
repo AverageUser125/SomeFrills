@@ -2,8 +2,11 @@ package com.somefrills.features.tweaks;
 
 import com.google.common.collect.Sets;
 import com.somefrills.config.Feature;
+import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.events.PlaceBlockEvent;
 import com.somefrills.misc.Utils;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -26,8 +29,13 @@ public class NoAbilityPlace extends Feature {
         super(FrillsConfig.instance.tweaks.noAbilityPlaceEnabled);
     }
 
+    @EventHandler
+    public static boolean onPlaceBlock(PlaceBlockEvent event) {
+        return hasAbility(event.context);
+    }
+
     public static boolean hasAbility(ItemPlacementContext context) {
-        if (!FrillsConfig.instance.tweaks.noAbilityPlaceEnabled.get()) return false;
+        if (!Features.get(NoAbilityPlace.class).isActive()) return false;
         if (context == null) return false;
         ItemStack stack = context.getStack();
         String id = Utils.getSkyblockId(stack);
