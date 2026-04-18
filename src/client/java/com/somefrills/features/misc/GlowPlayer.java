@@ -11,7 +11,6 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Formatting;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,14 +21,9 @@ public class GlowPlayer extends Feature {
         super(FrillsConfig.instance.misc.glowPlayer.enabled);
     }
 
-    public static String convertToPureName(PlayerEntity player) {
-        if (player == null) return null;
-        return Formatting.strip(player.getGameProfile().name());
-    }
-
     private static void applyHighlight(Entity entity) {
         if (!(entity instanceof PlayerEntity player)) return;
-        String pureName = convertToPureName(player);
+        String pureName = Utils.getPlayerName(player);
         RenderColor color = getColor(pureName);
         if (color != null) {
             Utils.setGlowing(entity, true, color);
@@ -48,7 +42,7 @@ public class GlowPlayer extends Feature {
         }
         for (Entity entity : Utils.getEntities()) {
             if (!(entity instanceof PlayerEntity player)) continue;
-            String entityPureName = convertToPureName(player);
+            String entityPureName = Utils.getPlayerName(player);
             if (!pureName.equals(entityPureName)) continue;
             Utils.setGlowing(entity, false, RenderColor.white);
             break;
@@ -69,7 +63,7 @@ public class GlowPlayer extends Feature {
     public static void clear() {
         for (Entity entity : Utils.getEntities()) {
             if (!(entity instanceof PlayerEntity player)) continue;
-            String pureName = convertToPureName(player);
+            String pureName = Utils.getPlayerName(player);
             if (pureName == null || !forcedGlows.containsKey(pureName)) continue;
             Utils.setGlowing(entity, false, RenderColor.white);
         }

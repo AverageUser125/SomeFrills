@@ -343,14 +343,13 @@ public class MatchInfo {
         }
 
         private boolean isNaked(LivingEntity entity) {
-            if (entity.isDead() || entity.age <= 2 || entity.deathTime > 0) {
+            // FIXME: hurtTime is not good, as it means the mob may flicker, but it should still work
+            // Without this checks, mobs that are dying or recently spawned will be considered naked, which is not ideal
+            if (entity.isDead() || entity.age <= 2 || entity.deathTime > 0 || entity.hurtTime > 0) {
                 return false;
             }
 
-            return entity.getEquippedStack(EquipmentSlot.CHEST).isEmpty()
-                    && entity.getEquippedStack(EquipmentSlot.LEGS).isEmpty()
-                    && entity.getEquippedStack(EquipmentSlot.FEET).isEmpty()
-                    && entity.getEquippedStack(EquipmentSlot.HEAD).isEmpty();
+            return Utils.isNaked(entity);
         }
     }
 

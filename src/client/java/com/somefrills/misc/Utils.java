@@ -555,6 +555,10 @@ public class Utils {
         );
     }
 
+    public static boolean isNaked(LivingEntity entity) {
+        return getEntityArmor(entity).stream().allMatch(ItemStack::isEmpty);
+    }
+
     /**
      * Returns the custom data compound of the provided ItemStack, or else null.
      */
@@ -1063,6 +1067,11 @@ public class Utils {
         return Math.abs(Math.abs(first) - Math.abs(second));
     }
 
+    public static String getPlayerName(PlayerEntity player) {
+        if (player == null) return null;
+        return Formatting.strip(player.getGameProfile().name());
+    }
+
     /**
      * Formats the string by replacing each set of curly brackets "{}" with one of the values in order, similarly to Rust's format macro.
      */
@@ -1266,6 +1275,10 @@ public class Utils {
             return toPlain(name);
         }
         return "";
+    }
+
+    public static String capitalize(String str) {
+        return StringUtils.capitalize(str);
     }
 
     public static class Symbols {

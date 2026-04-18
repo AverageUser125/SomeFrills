@@ -61,14 +61,14 @@ public class MiningCategory {
 
     @Expose
     @Accordion
-    @ConfigOption(name = "Corpse Highlightor", desc = "Settings for corpse highlighter in Dwarven Mines")
+    @ConfigOption(name = "Corpse Highlightor", desc = "Settings for corpse highlighter in mineshafts")
     public CorpseHighlightConfig corpseHighlight = new CorpseHighlightConfig();
 
     public static class CorpseHighlightConfig {
         @Expose
-        @ConfigOption(name = "Enabled", desc = "Enable corpse highlighter in Dwarven Mines")
+        @ConfigOption(name = "Enabled", desc = "Enable corpse highlighter in mineshafts")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(false);
+        public Property<Boolean> enabled = Property.of(true);
 
         @Expose
         @ConfigOption(name = "Hide Opened Corpses", desc = "Hide glow on corpses you've already opened")
@@ -94,5 +94,17 @@ public class MiningCategory {
         @ConfigOption(name = "Vanguard Glow Color", desc = "Glow color for Vanguard Corpses")
         @ConfigEditorColour
         public ChromaColour vanguardColor = ChromaColour.fromStaticRGB(255, 85, 255, 255);
+    }
+
+    @Expose
+    @Accordion
+    @ConfigOption(name = "Corpse Announcer", desc = "Settings for corpse announcer in mineshafts")
+    public CorpseAnnouncerConfig corpseAnnouncer = new CorpseAnnouncerConfig();
+
+    public static class CorpseAnnouncerConfig {
+        @Expose
+        @ConfigOption(name = "Enabled", desc = "Enable corpse announcer in Dwarven Mines")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(true);
     }
 }

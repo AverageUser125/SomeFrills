@@ -241,7 +241,7 @@ public class GlowPlayerCommand {
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
             if (!Utils.IsRealPlayer(player)) continue;
 
-            String playerPureName = GlowPlayer.convertToPureName(player);
+            String playerPureName = Utils.getPlayerName(player);
             if (playerPureName == null || !playerPureName.equals(pureName)) continue;
 
             RenderColor glowColor = GlowPlayer.getColor(pureName);
