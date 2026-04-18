@@ -103,3 +103,4 @@ It's in the name. Simple and effective Hypixel Skyblock mod for modern versions 
 - [clientcommands](https://github.com/Earthcomputer/clientcommands): Taught me rendering magic with mixins.
 - [Guava](https://github.com/google/guava/blob/master/LICENSE): Referenced for "ImmutableClassToInstanceMap"
 - [Skyhanni-REPO](https://github.com/hannibal002/SkyHanni-REPO): For NPC location data, and general Skyblock info.
+- [Meteor Client](https://github.com/MeteorDevelopment/meteor-client): For NoMiningTrace

@@ -107,4 +107,20 @@ public class MiningCategory {
         @ConfigEditorBoolean
         public Property<Boolean> enabled = Property.of(true);
     }
+
+    @Expose
+    @ConfigOption(name = "No Mining Trace", desc = "Allow mining through entities")
+    @Accordion
+    public NoMiningTraceConfig noMiningTrace = new NoMiningTraceConfig();
+    public static class NoMiningTraceConfig {
+        @Expose
+        @ConfigOption(name = "No Mining Trace", desc = "Allow mining through entities")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(false);
+
+        @Expose
+        @ConfigOption(name = "Only When Holding Tool", desc = "Only allow mining through entities when holding a mining tool")
+        @ConfigEditorBoolean
+        public boolean onlyWhenHoldingTool = true;
+    }
 }

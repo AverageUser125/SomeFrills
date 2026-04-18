@@ -62,6 +62,11 @@ public class AboutCategory {
         @ConfigOption(name = "SkyHanni", desc = "SkyHanni is available under the LGPL 2.1 License")
         @ConfigEditorButton(buttonText = "Source")
         public Runnable skyHanni = () -> openBrowser("https://github.com/hannibal002/SkyHanni");
+        
+        @Transient
+        @ConfigOption(name = "Meteor Client", desc = "Meteor Client is available under the GPL-3.0 License")
+        @ConfigEditorButton(buttonText = "Source")
+        public Runnable meteorClient = () -> openBrowser("https://github.com/MeteorDevelopment/meteor-client");
 
         private static void openBrowser(String url) {
             Util.getOperatingSystem().open(url);
