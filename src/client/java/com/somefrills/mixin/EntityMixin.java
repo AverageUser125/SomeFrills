@@ -8,6 +8,7 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,6 +51,10 @@ public class EntityMixin implements EntityRendering {
         return original;
     }
 
+    @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
+    private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
+        if (player == null) info.setReturnValue(false);
+    }
 
     @ModifyReturnValue(method = "isInvisible", at = @At("RETURN"))
     private boolean makeCreeperVisible(boolean original) {
