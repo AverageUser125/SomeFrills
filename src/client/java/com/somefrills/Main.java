@@ -7,9 +7,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.about.ConfigVersionDisplay;
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
 import com.somefrills.events.*;
-import com.somefrills.features.mining.CorpseApi;
 import com.somefrills.features.misc.Aliases;
-import com.somefrills.features.misc.PartyApi;
 import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.RenderColor;
@@ -108,8 +106,6 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
         eventBus.subscribe(Main.class);
-        eventBus.subscribe(CorpseApi.Delegate.class);
-        eventBus.subscribe(PartyApi.class);
         Features.init();
 
         eventBus.post(new GameStartEvent());
