@@ -35,18 +35,9 @@ public class NoMiningTrace extends Feature {
         return false;
     }
 
-    // ignore armor stands and players
-    private boolean isIgnorable(Entity entity) {
-        return switch (entity) {
-            case PlayerEntity playerEntity -> true;
-            case ArmorStandEntity armorStandEntity -> true;
-            case null, default -> false;
-        };
-    }
-
     public boolean canWork(Entity entity) {
         if (!isActive()) return false;
         if (!isHoldingTool()) return false;
-        return isIgnorable(entity);
+        return true;
     }
 }
