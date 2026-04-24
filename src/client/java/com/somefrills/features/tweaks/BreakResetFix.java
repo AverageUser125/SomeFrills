@@ -1,8 +1,8 @@
 package com.somefrills.features.tweaks;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.InventoryUpdateEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.orbit.EventHandler;
 

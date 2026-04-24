@@ -1,12 +1,12 @@
 package com.somefrills.features.farming;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.farming.FarmingCategory.AutoFarmConfig;
 import com.somefrills.events.InputEvent;
 import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.WorldTickEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayerEntity;

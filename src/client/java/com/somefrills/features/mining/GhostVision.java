@@ -1,11 +1,11 @@
 package com.somefrills.features.mining;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.GhostVisionConfig;
 import com.somefrills.events.AreaChangeEvent;
 import com.somefrills.events.EntityUpdatedEvent;
 import com.somefrills.events.WorldRenderEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.RenderColor;
@@ -59,5 +59,4 @@ public class GhostVision extends Feature {
                     RenderColor.fromChroma(config.outline), RenderColor.fromChroma(config.fill));
         }
     }
-
 }

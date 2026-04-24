@@ -2,9 +2,9 @@ package com.somefrills.features.mining;
 
 
 import com.google.common.collect.Sets;
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.BlockUpdateEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;

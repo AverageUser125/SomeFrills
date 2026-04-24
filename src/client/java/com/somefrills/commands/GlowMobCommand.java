@@ -3,7 +3,7 @@ package com.somefrills.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.somefrills.config.Features;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.glowmob.GlowMob;
 import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.features.misc.glowmob.chestui.GlowMobRules;

@@ -1,4 +1,4 @@
-package com.somefrills.config;
+package com.somefrills.features.core;
 
 import com.somefrills.misc.ImmutableClassToInstanceMap;
 

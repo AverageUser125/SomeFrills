@@ -2,7 +2,7 @@ package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.somefrills.config.Features;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.mining.NoMiningTrace;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.util.hit.EntityHitResult;

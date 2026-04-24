@@ -1,8 +1,12 @@
-package com.somefrills.config;
+package com.somefrills.features.core;
 
 import com.somefrills.Main;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
+/**
+ * Keep Feature clean / minimal.
+ * No subscription-state pollution added.
+ */
 public abstract class Feature {
 
     private boolean active = false;
@@ -12,18 +16,20 @@ public abstract class Feature {
     }
 
     private void bind(Property<Boolean> enabledProperty) {
-        enabledProperty.addObserver(this::onToggle);
+        enabledProperty.addObserver(this::onPropertyChanged);
         onToggle(enabledProperty.get());
     }
 
-    private void onToggle(boolean oldValue, boolean newValue) {
-        if (oldValue != active)
-            throw new IllegalStateException("Feature state was changed outside of onToggle! This is not allowed.");
+    private void onPropertyChanged(boolean oldValue, boolean newValue) {
         onToggle(newValue);
     }
 
-    private void onToggle(boolean enabled) {
+    /**
+     * Backwards compatible hook.
+     */
+    protected void onToggle(boolean enabled) {
         if (active == enabled) return;
+
         active = enabled;
 
         if (enabled) {
@@ -45,4 +51,7 @@ public abstract class Feature {
         return active;
     }
 
+    protected void setActive(boolean active) {
+        this.active = active;
+    }
 }

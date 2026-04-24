@@ -1,10 +1,10 @@
 package com.somefrills.features.tweaks;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.tweaks.TweaksCategory.NoGhostBlocksConfig;
 import com.somefrills.events.BreakBlockEvent;
 import com.somefrills.events.PlaceBlockEvent;
+import com.somefrills.features.core.Feature;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 

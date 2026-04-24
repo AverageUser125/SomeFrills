@@ -1,9 +1,9 @@
 package com.somefrills.features.tweaks;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.InteractBlockEvent;
 import com.somefrills.events.InteractItemEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.ItemStack;

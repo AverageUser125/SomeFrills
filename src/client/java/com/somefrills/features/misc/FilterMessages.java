@@ -1,8 +1,8 @@
 package com.somefrills.features.misc;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
+import com.somefrills.features.core.Feature;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.regex.Pattern;

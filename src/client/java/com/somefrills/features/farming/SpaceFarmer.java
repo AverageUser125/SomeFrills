@@ -1,9 +1,9 @@
 package com.somefrills.features.farming;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.InputEvent;
 import com.somefrills.events.ScreenOpenEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import org.lwjgl.glfw.GLFW;

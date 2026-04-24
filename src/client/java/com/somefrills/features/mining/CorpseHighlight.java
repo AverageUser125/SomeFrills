@@ -1,11 +1,11 @@
 package com.somefrills.features.mining;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig;
 import com.somefrills.events.InteractEntityEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.WorldTickEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.ConcurrentHashSet;
 import com.somefrills.misc.RenderColor;

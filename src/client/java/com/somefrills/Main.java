@@ -2,11 +2,11 @@ package com.somefrills;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.somefrills.commands.SomeFrillsCommand;
-import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.about.ConfigVersionDisplay;
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck;
 import com.somefrills.events.*;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.Aliases;
 import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.misc.EntityCache;

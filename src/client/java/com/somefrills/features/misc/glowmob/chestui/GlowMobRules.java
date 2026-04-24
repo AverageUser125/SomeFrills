@@ -1,12 +1,12 @@
 package com.somefrills.features.misc.glowmob.chestui;
 
-import com.somefrills.config.Features;
 import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.glowmob.GlowMob;
 import com.somefrills.features.misc.glowmob.MatchInfo;
-import com.somefrills.misc.Utils;
 import com.somefrills.misc.MyMapColor;
 import com.somefrills.misc.RenderColor;
+import com.somefrills.misc.Utils;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;

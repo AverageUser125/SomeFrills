@@ -1,8 +1,8 @@
 package com.somefrills.features.update;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.GameStartEvent;
+import com.somefrills.features.core.Feature;
 import meteordevelopment.orbit.EventHandler;
 
 import static com.somefrills.Main.LOGGER;

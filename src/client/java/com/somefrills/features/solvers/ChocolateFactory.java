@@ -1,9 +1,9 @@
 package com.somefrills.features.solvers;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ChocolateFactoryConfig;
 import com.somefrills.events.ScreenRenderEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;

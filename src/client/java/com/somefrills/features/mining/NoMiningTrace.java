@@ -1,12 +1,10 @@
 package com.somefrills.features.mining;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.NoMiningTraceConfig;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 
 public class NoMiningTrace extends Feature {

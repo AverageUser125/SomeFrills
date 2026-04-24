@@ -1,8 +1,8 @@
 package com.somefrills.features.misc;
 
 import com.google.gson.JsonObject;
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.features.core.Feature;
 
 public class Aliases extends Feature {
 

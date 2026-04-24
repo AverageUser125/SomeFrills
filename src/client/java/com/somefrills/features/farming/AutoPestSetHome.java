@@ -1,9 +1,9 @@
 package com.somefrills.features.farming;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ServerJoinEvent;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.Formatting;

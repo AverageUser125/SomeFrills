@@ -1,8 +1,8 @@
 package com.somefrills.features.solvers;
 
-import com.somefrills.config.Feature;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
+import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;

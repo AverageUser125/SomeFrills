@@ -1,10 +1,10 @@
 package com.somefrills.features.tweaks;
 
 import com.google.common.collect.Sets;
-import com.somefrills.config.Feature;
-import com.somefrills.config.Features;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.PlaceBlockEvent;
+import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.Features;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
