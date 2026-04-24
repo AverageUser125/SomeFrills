@@ -64,4 +64,17 @@ public class TweaksCategory {
         @ConfigEditorBoolean
         public boolean breaking = true;
     }
+
+
+    @Expose
+    @ConfigOption(name = "Camera Tweaks", desc = "Tweaks to the camera behavior")
+    @Accordion
+    public CameraTweaksConfig cameraTweaks = new CameraTweaksConfig();
+
+    public static class CameraTweaksConfig {
+        @ConfigEditorBoolean
+        @Expose
+        @ConfigOption(name = "Clip", desc = "Prevent the camera from clipping into blocks")
+        public boolean clip = false;
+    }
 }

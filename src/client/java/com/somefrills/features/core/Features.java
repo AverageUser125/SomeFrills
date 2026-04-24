@@ -64,7 +64,7 @@ public class Features {
     /**
      * Get feature by class
      */
-    public static <T extends Feature> T get(Class<T> featureClass) {
+    public static <T extends AbstractFeature> T get(Class<T> featureClass) {
         return FEATURES.getInstance(featureClass);
     }
 

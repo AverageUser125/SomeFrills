@@ -27,6 +27,7 @@
   ],
   "client": [
     "ArmorStandEntityRendererMixin",
+    "CameraMixin",
     "ClientPlayEntityMixin"
   ]
 }
