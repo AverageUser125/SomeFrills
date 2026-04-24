@@ -138,6 +138,27 @@ public class Utils {
 
         return String.format(format, value, SUFFIXES[suffixIndex]);
     }
+    public static String formatCompact(double health) {
+        if (health < 1000) {
+            return (health == Math.floor(health))
+                    ? String.format("%.0f", health)
+                    : String.format("%.1f", health);
+        }
+
+        double value = health;
+        int suffixIndex = -1;
+
+        while (value >= 1000 && suffixIndex < SUFFIXES.length - 1) {
+            value /= 1000.0;
+            suffixIndex++;
+        }
+
+        String format = (value >= 10 || value == Math.floor(value))
+                ? "%.0f%s"
+                : "%.1f%s";
+
+        return String.format(format, value, SUFFIXES[suffixIndex]);
+    }
 
     public static int parseCompact(String input) {
         if (input == null || input.isBlank()) {

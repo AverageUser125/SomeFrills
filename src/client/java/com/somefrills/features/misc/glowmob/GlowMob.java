@@ -11,6 +11,7 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -166,6 +167,36 @@ public class GlowMob extends Feature {
             }
         }
         rule.toggle();
+    }
+
+
+    public static class MatchedEntityEntry {
+        public GlowMobRule rule;
+        public List<LivingEntity> entities;
+    }
+
+    public List<MatchedEntityEntry> getGlowingMobs() {
+        return getGlowingMobs(rules);
+    }
+
+    public List<MatchedEntityEntry> getGlowingMobs(List<GlowMobRule> rules) {
+        updateEntities();
+        ArrayList<MatchedEntityEntry> result = new ArrayList<>();
+        for(GlowMobRule rule : rules) {
+            // TODO: put this check inside the rule.matches method
+            if(!rule.enabled()) continue;
+
+            List<LivingEntity> matchedEntities = getEntities().stream()
+                    .filter(entity -> entity instanceof LivingEntity)
+                    .map(entity -> (LivingEntity) entity)
+                    .filter(rule::matches)
+                    .toList();
+            MatchedEntityEntry entry = new MatchedEntityEntry();
+            entry.rule = rule;
+            entry.entities = matchedEntities;
+            result.add(entry);
+        }
+        return result;
     }
 
 }

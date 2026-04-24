@@ -10,7 +10,10 @@ import com.somefrills.features.misc.glowmob.chestui.GlowMobRules;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.text.Text;
+
+import java.util.List;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
@@ -25,6 +28,17 @@ public class GlowMobCommand {
                     return 1;
                 })
                 .then(literal("list").executes(GlowMobCommand::listRules))
+                .then(literal("listglowing")
+                        .executes(GlowMobCommand::listGlowingMobs)
+                        .then(argument("id", IntegerArgumentType.integer(1))
+                                .executes(ctx ->
+                                        listGlowingMobs(
+                                                ctx,
+                                                IntegerArgumentType.getInteger(ctx, "id")
+                                        )
+                                )
+                        )
+                )
                 .then(literal("clear").executes(ctx -> {
                     get().clearRules();
                     ctx.getSource().sendFeedback(Text.literal("Cleared all entity highlight rules."));
@@ -47,6 +61,72 @@ public class GlowMobCommand {
                         )
                 );
     }
+
+    private static int listGlowingMobs(CommandContext<FabricClientCommandSource> ctx) {
+        return listGlowingMobs(ctx, -1); // -1 = all rules
+    }
+
+    private static int listGlowingMobs(CommandContext<FabricClientCommandSource> ctx, int ruleId) {
+        var manager = get();
+        var rules = manager.getRules();
+
+        if (rules.isEmpty()) {
+            ctx.getSource().sendFeedback(Text.literal("No glow rules found."));
+            return 1;
+        }
+
+        // Validate rule id if provided
+        if (ruleId != -1 && (ruleId < 1 || ruleId > rules.size())) {
+            ctx.getSource().sendFeedback(Text.literal("Invalid rule id."));
+            return 0;
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        // If specific rule requested, pass only that rule
+        var entries = (ruleId == -1)
+                ? manager.getGlowingMobs()
+                : manager.getGlowingMobs(List.of(rules.get(ruleId - 1)));
+
+        for (var entry : entries) {
+            var rule = entry.rule;
+            List<LivingEntity> entities = entry.entities;
+
+            int currentRuleId = rules.indexOf(rule) + 1;
+
+            sb.append("Rule ")
+                    .append(currentRuleId)
+                    .append(" (")
+                    .append(Utils.colorToString(rule.color()))
+                    .append("):\n");
+
+            if (entities.isEmpty()) {
+                sb.append("  - No matching glowing mobs\n");
+                continue;
+            }
+
+            for (var entity : entities) {
+                sb.append("  - ")
+                        .append(Utils.toPlain(entity.getName()))
+                        .append(" (")
+                        .append(entity.getType().getName().getString())
+                        .append(")")
+                        .append(", MaxHP: ")
+                        .append(Utils.formatCompact(entity.getMaxHealth()))
+                        .append(", Pos: [")
+                        .append(Utils.formatCompact(entity.getX()))
+                        .append(", ")
+                        .append(Utils.formatCompact(entity.getY()))
+                        .append(", ")
+                        .append(Utils.formatCompact(entity.getZ()))
+                        .append("]\n");
+            }
+        }
+
+        ctx.getSource().sendFeedback(Text.literal(sb.toString()));
+        return 1;
+    }
+
 
     private static int addRuleCommand(CommandContext<FabricClientCommandSource> ctx, RenderColor color, MatchInfo matcher) {
         int addIndex = get().addRule(matcher, color);
