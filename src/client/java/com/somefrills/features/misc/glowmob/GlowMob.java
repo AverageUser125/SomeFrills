@@ -182,9 +182,9 @@ public class GlowMob extends Feature {
     public List<MatchedEntityEntry> getGlowingMobs(List<GlowMobRule> rules) {
         updateEntities();
         ArrayList<MatchedEntityEntry> result = new ArrayList<>();
-        for(GlowMobRule rule : rules) {
+        for (GlowMobRule rule : rules) {
             // TODO: put this check inside the rule.matches method
-            if(!rule.enabled()) continue;
+            if (!rule.enabled()) continue;
 
             List<LivingEntity> matchedEntities = getEntities().stream()
                     .filter(entity -> entity instanceof LivingEntity)

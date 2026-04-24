@@ -1,29 +1,18 @@
 package com.somefrills.events;
 
+import com.somefrills.misc.KeyAction;
 import net.minecraft.client.input.KeyInput;
-import net.minecraft.client.input.MouseInput;
 
 public class InputEvent extends Cancellable {
-    public int key, modifiers, action;
-    public boolean isKeyboard = false, isMouse = false;
-    public KeyInput keyInput = null;
-    public MouseInput mouseInput = null;
+    public int key, modifiers;
+    public KeyAction action;
+    public KeyInput keyInput;
 
-    public InputEvent(KeyInput input, int action) {
+    public InputEvent(KeyInput input, KeyAction action) {
         this.setCancelled(false);
         this.key = input.key();
         this.modifiers = input.modifiers();
         this.action = action;
-        this.isKeyboard = true;
         this.keyInput = input;
-    }
-
-    public InputEvent(MouseInput input, int action) {
-        this.setCancelled(false);
-        this.key = input.button();
-        this.modifiers = input.modifiers();
-        this.action = action;
-        this.isMouse = true;
-        this.mouseInput = input;
     }
 }

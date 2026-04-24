@@ -1,6 +1,5 @@
 package com.somefrills.features.core;
 
-import com.somefrills.Main;
 import com.somefrills.events.AreaChangeEvent;
 import com.somefrills.misc.Area;
 import io.github.notenoughupdates.moulconfig.observer.Property;

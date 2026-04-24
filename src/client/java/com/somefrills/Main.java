@@ -9,10 +9,7 @@ import com.somefrills.events.*;
 import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.Aliases;
 import com.somefrills.features.misc.glowmob.MatchInfo;
-import com.somefrills.misc.EntityCache;
-import com.somefrills.misc.RenderColor;
-import com.somefrills.misc.SkyblockData;
-import com.somefrills.misc.Utils;
+import com.somefrills.misc.*;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig;
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfigBuilder;
 import kotlin.Unit;
@@ -105,6 +102,7 @@ public class Main implements ClientModInitializer {
 
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
+        eventBus.subscribe(KeybindManager.class);
         eventBus.subscribe(Main.class);
         Features.init();
 

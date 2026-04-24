@@ -33,13 +33,19 @@ public abstract class AbstractFeature {
         }
     }
 
+    public final void toggle() {
+        setActive(!isActive());
+    }
 
     public final boolean isActive() {
         return active;
     }
 
-    protected void onEnable() {}
-    protected void onDisable() {}
+    protected void onEnable() {
+    }
+
+    protected void onDisable() {
+    }
 
     protected abstract void evaluate();
 }

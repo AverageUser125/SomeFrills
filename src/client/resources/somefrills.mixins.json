@@ -22,13 +22,20 @@
     "MouseMixin",
     "PaneBlockMixin",
     "PlayerListHudAccessor",
+    "Vec3dMixin",
     "WorldMixin",
     "WorldRendererMixin"
   ],
   "client": [
     "ArmorStandEntityRendererMixin",
     "CameraMixin",
-    "ClientPlayEntityMixin"
+    "ChunkBorderDebugRendererMixin",
+    "ChunkOcclusionDataBuilderMixin",
+    "ClientPlayerEntityMixin",
+    "CompassStateMixin",
+    "GameOptionsMixin",
+    "GameRendererMixin",
+    "LivingEntityRendererMixin"
   ]
 }
 

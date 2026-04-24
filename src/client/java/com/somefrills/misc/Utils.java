@@ -13,6 +13,8 @@ import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.mixin.BossBarHudAccessor;
 import com.somefrills.mixin.HandledScreenAccessor;
 import com.somefrills.mixin.PlayerListHudAccessor;
+import com.somefrills.mixininterface.EntityRendering;
+import com.somefrills.mixininterface.TitleRendering;
 import io.github.notenoughupdates.moulconfig.gui.GuiContext;
 import io.github.notenoughupdates.moulconfig.gui.GuiElementComponent;
 import io.github.notenoughupdates.moulconfig.platform.MoulConfigScreenComponent;
@@ -64,6 +66,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.entity.SimpleEntityLookup;
 import org.apache.commons.lang3.StringUtils;
 import org.joml.Vector2d;
+import org.joml.Vector3d;
 
 import java.io.IOException;
 import java.net.URI;
@@ -138,6 +141,7 @@ public class Utils {
 
         return String.format(format, value, SUFFIXES[suffixIndex]);
     }
+
     public static String formatCompact(double health) {
         if (health < 1000) {
             return (health == Math.floor(health))
@@ -192,11 +196,11 @@ public class Utils {
     }
 
     public static void showTitleCustom(String title, int stayTicks, int yOffset, float scale, RenderColor color) {
-        ((TitleRendering) mc.inGameHud).somefrills_mod$setRenderTitle(title, stayTicks, yOffset, scale, color);
+        ((TitleRendering) mc.inGameHud).somefrills$setRenderTitle(title, stayTicks, yOffset, scale, color);
     }
 
     public static boolean isRenderingCustomTitle() {
-        return ((TitleRendering) mc.inGameHud).somefrills_mod$isRenderingTitle();
+        return ((TitleRendering) mc.inGameHud).somefrills$isRenderingTitle();
     }
 
     public static boolean isNearlyEqual(double a, double b, double eps) {
@@ -209,6 +213,14 @@ public class Utils {
 
     public static boolean isNearlyEqual(float a, float b) {
         return isNearlyEqual(a, b, 1e-5f);
+    }
+
+    public static Vector3d set(Vector3d vec, Vec3d v) {
+        vec.x = v.x;
+        vec.y = v.y;
+        vec.z = v.z;
+
+        return vec;
     }
 
     public static void playSound(SoundEvent event, float volume, float pitch) {
@@ -1269,14 +1281,14 @@ public class Utils {
     }
 
     public static void setGlowing(Entity ent, boolean shouldGlow, RenderColor color) {
-        ((EntityRendering) ent).somefrills_mod$setGlowingColored(shouldGlow, color);
+        ((EntityRendering) ent).somefrills$setGlowingColored(shouldGlow, color);
     }
 
     /**
      * Checks if an entity is drawing the glow effect. Does not account for vanilla/server applied glows.
      */
     public static boolean isGlowing(Entity ent) {
-        return ((EntityRendering) ent).somefrills_mod$getGlowing();
+        return ((EntityRendering) ent).somefrills$getGlowing();
     }
 
     public static String stripPrefix(String str, String prefix) {

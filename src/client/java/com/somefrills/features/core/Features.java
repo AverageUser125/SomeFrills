@@ -14,6 +14,11 @@ public class Features {
     private static volatile ImmutableClassToInstanceMap<AbstractFeature> FEATURES =
             ImmutableClassToInstanceMap.of();
 
+
+    public static boolean isInitialized() {
+        return FEATURES == null || !FEATURES.isEmpty();
+    }
+
     /**
      * Initialize all features in com.somefrills.features and subpackages
      */
@@ -66,6 +71,11 @@ public class Features {
      */
     public static <T extends AbstractFeature> T get(Class<T> featureClass) {
         return FEATURES.getInstance(featureClass);
+    }
+
+    public static <T extends AbstractFeature> boolean isActive(Class<T> featureClass) {
+        T feature = get(featureClass);
+        return feature != null && feature.isActive();
     }
 
     /**

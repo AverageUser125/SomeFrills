@@ -27,3 +27,4 @@ accessible method net/minecraft/client/gui/screen/ingame/AbstractSignEditScreen 
 accessible field net/minecraft/client/gui/screen/ingame/SignEditScreen model Lnet/minecraft/client/model/Model$SinglePartModel;
 accessible field net/minecraft/client/gui/screen/ingame/AbstractSignEditScreen messages [Ljava/lang/String;
 accessible method net/minecraft/client/gui/screen/ingame/HandledScreen resetTooltipSubmenus (Lnet/minecraft/screen/slot/Slot;)V
+accessible field net/minecraft/client/option/KeyBinding boundKey Lnet/minecraft/client/util/InputUtil$Key;

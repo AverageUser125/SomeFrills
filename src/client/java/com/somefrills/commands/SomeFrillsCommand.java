@@ -27,6 +27,9 @@ public class SomeFrillsCommand {
             ),
             new ModCommand("locatenpc", "Alias for npclocator.",
                     NpcLocatorCommand.getBuilder("locatenpc")
+            ),
+            new ModCommand("freecam", "Toggle freecam mode.",
+                    FreecamCommand.getBuilder()
             )
     };
 

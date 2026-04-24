@@ -2,10 +2,12 @@ package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.mining.GhostVision;
-import com.somefrills.misc.EntityRendering;
+import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
+import com.somefrills.mixininterface.EntityRendering;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,7 +17,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static com.somefrills.Main.mc;
 
 @Mixin(value = Entity.class, priority = 500)
 public class EntityMixin implements EntityRendering {
@@ -25,13 +30,13 @@ public class EntityMixin implements EntityRendering {
     private RenderColor glowColor;
 
     @Override
-    public void somefrills_mod$setGlowingColored(boolean glowing, RenderColor color) {
+    public void somefrills$setGlowingColored(boolean glowing, RenderColor color) {
         glowRender = glowing;
         glowColor = color;
     }
 
     @Override
-    public boolean somefrills_mod$getGlowing() {
+    public boolean somefrills$getGlowing() {
         return glowRender;
     }
 
@@ -119,6 +124,19 @@ public class EntityMixin implements EntityRendering {
                     .append(Text.literal("❤").styled(style -> style.withColor(Formatting.RED)));
 
             cir.setReturnValue(healthDisplay);
+        }
+    }
+
+
+    @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
+    private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+        if ((Object) this != mc.player) return;
+
+        var freecam = Features.get(Freecam.class);
+
+        if (freecam.isActive()) {
+            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+            ci.cancel();
         }
     }
 }

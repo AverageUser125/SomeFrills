@@ -1,9 +1,12 @@
 package com.somefrills.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.somefrills.events.HudRenderEvent;
 import com.somefrills.events.HudTickEvent;
+import com.somefrills.features.core.Features;
+import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
-import com.somefrills.misc.TitleRendering;
+import com.somefrills.mixininterface.TitleRendering;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -37,7 +40,7 @@ public abstract class InGameHudMixin implements TitleRendering {
     public abstract TextRenderer getTextRenderer();
 
     @Override
-    public void somefrills_mod$setRenderTitle(String title, int stayTicks, int yOffset, float scale, RenderColor color) {
+    public void somefrills$setRenderTitle(String title, int stayTicks, int yOffset, float scale, RenderColor color) {
         titleString = title;
         titleTicks = stayTicks;
         titleOffset = yOffset;
@@ -46,7 +49,7 @@ public abstract class InGameHudMixin implements TitleRendering {
     }
 
     @Override
-    public boolean somefrills_mod$isRenderingTitle() {
+    public boolean somefrills$isRenderingTitle() {
         return titleTicks > 0;
     }
 
@@ -73,6 +76,11 @@ public abstract class InGameHudMixin implements TitleRendering {
             context.getMatrices().popMatrix();
         }
 
+    }
+
+    @ModifyExpressionValue(method = "renderCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/Perspective;isFirstPerson()Z"))
+    private boolean alwaysRenderCrosshairInFreecam(boolean firstPerson) {
+        return Features.get(Freecam.class).isActive() || firstPerson;
     }
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/DebugHud;<init>(Lnet/minecraft/client/MinecraftClient;)V"))

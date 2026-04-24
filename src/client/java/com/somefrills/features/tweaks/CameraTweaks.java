@@ -6,6 +6,7 @@ import com.somefrills.features.core.PassiveFeature;
 
 public class CameraTweaks extends PassiveFeature {
     private final CameraTweaksConfig config;
+
     public CameraTweaks() {
         super();
         config = FrillsConfig.instance.tweaks.cameraTweaks;

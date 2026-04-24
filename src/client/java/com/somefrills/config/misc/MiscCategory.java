@@ -71,4 +71,8 @@ public class MiscCategory {
 
     }
 
+    @Expose
+    @Accordion
+    @ConfigOption(name = "Freecam", desc = "Enable freecam mode to move your camera independently of your player")
+    public FreecamConfig freecam = new FreecamConfig();
 }

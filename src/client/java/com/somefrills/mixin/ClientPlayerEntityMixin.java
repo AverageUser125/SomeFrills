@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(ClientPlayerEntity.class)
-public class ClientPlayEntityMixin {
+public class ClientPlayerEntityMixin {
     // https://github.com/MeteorDevelopment/meteor-client/blob/master/src/main/java/meteordevelopment/meteorclient/mixin/ClientPlayerEntityMixin.java#L123
     @ModifyReturnValue(method = "getCrosshairTarget(Lnet/minecraft/entity/Entity;DDF)Lnet/minecraft/util/hit/HitResult;", at = @At("RETURN"))
     private static HitResult onUpdateTargetedEntity(HitResult original, @Local HitResult hitResult) {
