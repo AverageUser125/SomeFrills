@@ -5,6 +5,8 @@ import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
 import com.somefrills.features.misc.glowmob.GlowMob;
 import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.misc.Utils;
+import com.somefrills.misc.MyMapColor;
+import com.somefrills.misc.RenderColor;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
@@ -190,6 +192,8 @@ public class GlowMobRules extends ChestUI {
 
     private void createNewRule() {
         session = new RuleEditSession(null);
+        session.workingCopy = new GlowMobRule(session.workingCopy.info(), RenderColor.fromHex(MyMapColor.WHITE.getHex()));
+        session.workingCopy.toggle(); // new rules start as enabled by default
         Utils.setScreen(new GlowMobEditMenu(this, session.workingCopy));
     }
 
