@@ -5,7 +5,7 @@ import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig;
 import com.somefrills.events.InteractEntityEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.WorldTickEvent;
-import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.AreaFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.ConcurrentHashSet;
 import com.somefrills.misc.RenderColor;
@@ -22,7 +22,7 @@ import java.util.Set;
 import static com.somefrills.Main.mc;
 
 
-public class CorpseHighlight extends Feature {
+public class CorpseHighlight extends AreaFeature {
     private final Set<Integer> openedCorpses = new ConcurrentHashSet<>();
     private final CorpseHighlightConfig config;
 
@@ -66,10 +66,6 @@ public class CorpseHighlight extends Feature {
         return false;
     }
 
-    private boolean active() {
-        return isActive() && Utils.isInArea(Area.MINESHAFT);
-    }
-
     private ChromaColour getCorpseColor(CorpseType type) {
         return switch (type) {
             case Lapis -> config.lapisColor;
@@ -82,24 +78,21 @@ public class CorpseHighlight extends Feature {
 
     @EventHandler
     private void onTick(WorldTickEvent event) {
-        if (active()) {
-            for (Entity ent : Utils.getEntities()) {
-                if (!(ent instanceof ArmorStandEntity stand) || stand.isInvisible()) continue;
-                if (openedCorpses.contains(stand.getId())) {
-                    continue;
-                }
-                var colour = getCorpseColor(getCorpseType(stand));
-                if (colour == null) continue;
-                RenderColor color = RenderColor.fromChroma(colour);
-                Utils.setGlowing(stand, true, color);
+        for (Entity ent : Utils.getEntities()) {
+            if (!(ent instanceof ArmorStandEntity stand) || stand.isInvisible()) continue;
+            if (openedCorpses.contains(stand.getId())) {
+                continue;
             }
-
+            var colour = getCorpseColor(getCorpseType(stand));
+            if (colour == null) continue;
+            RenderColor color = RenderColor.fromChroma(colour);
+            Utils.setGlowing(stand, true, color);
         }
     }
 
     @EventHandler
     private void onInteractEntity(InteractEntityEvent event) {
-        if (active() && config.hideOpened && event.entity instanceof ArmorStandEntity stand) {
+        if (config.hideOpened && event.entity instanceof ArmorStandEntity stand) {
             CorpseType type = getCorpseType(stand);
             if (!type.equals(CorpseType.None) && hasKeyForCorpse(type)) {
                 openedCorpses.add(stand.getId());
@@ -111,6 +104,11 @@ public class CorpseHighlight extends Feature {
     @EventHandler
     private void onJoin(ServerJoinEvent event) {
         openedCorpses.clear();
+    }
+
+    @Override
+    protected boolean checkArea(Area area) {
+        return area.equals(Area.MINESHAFT);
     }
 
     public enum CorpseType {

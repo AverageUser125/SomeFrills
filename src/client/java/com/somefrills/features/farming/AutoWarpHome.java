@@ -3,13 +3,14 @@ package com.somefrills.features.farming;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.TabListUpdateEvent;
-import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.AreaFeature;
+import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.List;
 
-public class AutoWarpHome extends Feature {
+public class AutoWarpHome extends AreaFeature {
     private static PestStatus lastStatus = PestStatus.UNKNOWN; // -1 = unknown
 
     public AutoWarpHome() {
@@ -27,9 +28,6 @@ public class AutoWarpHome extends Feature {
 
     @EventHandler
     private void onWorldTick(TabListUpdateEvent event) {
-        if (!isActive()) return;
-        if (!Utils.isOnGardenPlot()) return;
-
         PestStatus status = checkAliveState(event.lines);
         if (status == PestStatus.UNKNOWN) return;
 
@@ -51,6 +49,11 @@ public class AutoWarpHome extends Feature {
     @EventHandler
     private void onJoin(ServerJoinEvent event) {
         lastStatus = PestStatus.UNKNOWN;
+    }
+
+    @Override
+    protected boolean checkArea(Area area) {
+        return area.equals(Area.GARDEN) && Utils.isOnGardenPlot();
     }
 
     public enum PestStatus {

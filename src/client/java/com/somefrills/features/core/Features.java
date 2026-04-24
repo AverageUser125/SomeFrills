@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 public class Features {
-    private static volatile ImmutableClassToInstanceMap<Feature> FEATURES =
+    private static volatile ImmutableClassToInstanceMap<AbstractFeature> FEATURES =
             ImmutableClassToInstanceMap.of();
 
     /**
@@ -23,18 +23,18 @@ public class Features {
         try {
             List<Class<?>> classes = getClasses(packageName);
 
-            ImmutableClassToInstanceMap.Builder<Feature> builder =
+            ImmutableClassToInstanceMap.Builder<AbstractFeature> builder =
                     ImmutableClassToInstanceMap.builder();
 
             for (Class<?> clazz : classes) {
                 // Skip anything that does NOT extend Feature
-                if (!Feature.class.isAssignableFrom(clazz)) continue;
+                if (!AbstractFeature.class.isAssignableFrom(clazz)) continue;
 
                 // Skip abstract classes
                 if (Modifier.isAbstract(clazz.getModifiers())) continue;
 
                 try {
-                    addFeature(builder, clazz.asSubclass(Feature.class));
+                    addFeature(builder, clazz.asSubclass(AbstractFeature.class));
                 } catch (NoSuchMethodException e) {
                     throw new IllegalStateException(
                             "Feature class " + clazz.getName() + " must have a no-arg constructor", e
@@ -50,8 +50,8 @@ public class Features {
         }
     }
 
-    private static <T extends Feature> void addFeature(
-            ImmutableClassToInstanceMap.Builder<Feature> builder,
+    private static <T extends AbstractFeature> void addFeature(
+            ImmutableClassToInstanceMap.Builder<AbstractFeature> builder,
             Class<T> clazz) throws Exception {
 
         var constructor = clazz.getDeclaredConstructor();

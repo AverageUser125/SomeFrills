@@ -4,8 +4,8 @@ package com.somefrills.features.mining;
 import com.google.common.collect.Sets;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.BlockUpdateEvent;
-import com.somefrills.features.core.Feature;
-import com.somefrills.misc.SkyblockData;
+import com.somefrills.features.core.AreaFeature;
+import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
@@ -16,14 +16,14 @@ import java.util.HashSet;
 import static com.somefrills.Main.mc;
 import static net.minecraft.block.HorizontalConnectingBlock.*;
 
-public class GemstoneDesyncFix extends Feature {
+public class GemstoneDesyncFix extends AreaFeature {
 
-    private static final HashSet<String> islands = Sets.newHashSet(
-            "Dwarven Mines",
-            "Crystal Hollows",
-            "Mineshaft",
-            "Crimson Isle",
-            "The Rift"
+    private static final HashSet<Area> islands = Sets.newHashSet(
+            Area.DWARVEN_MINES,
+            Area.CRYSTAL_HOLLOWS,
+            Area.MINESHAFT,
+            Area.CRIMSON_ISLE,
+            Area.THE_RIFT
     );
 
     public GemstoneDesyncFix() {
@@ -42,14 +42,15 @@ public class GemstoneDesyncFix extends Feature {
         return state.with(NORTH, true).with(EAST, true).with(SOUTH, true).with(WEST, true);
     }
 
-    public boolean active() {
-        return isActive() && islands.contains(SkyblockData.getArea());
-    }
-
     @EventHandler
     private void onBlock(BlockUpdateEvent event) {
-        if (active() && event.newState.isAir() && Utils.isStainedGlass(event.oldState)) {
+        if (event.newState.isAir() && Utils.isStainedGlass(event.oldState)) {
             event.newState.updateNeighbors(mc.world, event.pos, Block.NOTIFY_ALL);
         }
+    }
+
+    @Override
+    protected boolean checkArea(Area area) {
+        return islands.contains(area);
     }
 }

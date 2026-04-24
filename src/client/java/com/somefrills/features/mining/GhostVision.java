@@ -2,10 +2,9 @@ package com.somefrills.features.mining;
 
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.GhostVisionConfig;
-import com.somefrills.events.AreaChangeEvent;
 import com.somefrills.events.EntityUpdatedEvent;
 import com.somefrills.events.WorldRenderEvent;
-import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.AreaFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.RenderColor;
@@ -15,10 +14,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.util.math.Box;
 
-public class GhostVision extends Feature {
+public class GhostVision extends AreaFeature {
 
     private static final EntityCache cache = new EntityCache();
-    private static boolean inDwarvenMines = false;
     private final GhostVisionConfig config;
 
     public GhostVision() {
@@ -33,8 +31,6 @@ public class GhostVision extends Feature {
 
     @EventHandler
     private void onEntity(EntityUpdatedEvent event) {
-        if (!isActive()) return;
-        if (!inDwarvenMines) return;
         if (!(event.entity instanceof CreeperEntity creeper)) return;
         if (!isGhost(creeper)) return;
         if (config.removeCharge) {
@@ -43,20 +39,18 @@ public class GhostVision extends Feature {
         cache.add(event.entity);
     }
 
-
-    @EventHandler
-    private void onScoreboardUpdate(AreaChangeEvent event) {
-        inDwarvenMines = event.area.equals(Area.DWARVEN_MINES);
-    }
-
     @EventHandler
     private void onRender(WorldRenderEvent event) {
-        if (!inDwarvenMines) return;
         for (Entity ent : cache.get()) {
             if (!ent.isAlive()) continue;
             Box box = Utils.getLerpedBox(ent, event);
             event.drawStyled(box, config.style, false,
                     RenderColor.fromChroma(config.outline), RenderColor.fromChroma(config.fill));
         }
+    }
+
+    @Override
+    protected boolean checkArea(Area area) {
+        return area.equals(Area.DWARVEN_MINES);
     }
 }
