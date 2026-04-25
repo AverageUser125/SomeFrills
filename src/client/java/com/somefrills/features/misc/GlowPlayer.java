@@ -87,7 +87,6 @@ public class GlowPlayer extends Feature {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityUpdate(EntityUpdatedEvent event) {
-        if (!isActive()) return;
         var entity = event.entity;
         applyHighlight(entity);
     }

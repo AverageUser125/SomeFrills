@@ -9,7 +9,7 @@ public abstract class Feature extends AbstractFeature {
     }
 
     @Override
-    protected final void evaluate() {
-        setActive(isEnabled());
+    protected final boolean evaluate() {
+        return true;
     }
 }

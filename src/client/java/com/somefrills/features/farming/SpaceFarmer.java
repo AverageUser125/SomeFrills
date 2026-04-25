@@ -20,7 +20,7 @@ public class SpaceFarmer extends Feature {
 
     @EventHandler
     public void onKey(InputEvent event) {
-        if (!isActive() || event.key != GLFW.GLFW_KEY_SPACE) {
+        if (event.key != GLFW.GLFW_KEY_SPACE) {
             return;
         }
         if (mc.currentScreen != null && spaceHeld) {
@@ -45,7 +45,7 @@ public class SpaceFarmer extends Feature {
 
     @EventHandler
     public void onScreen(ScreenOpenEvent event) {
-        if (isActive() && spaceHeld) {
+        if (spaceHeld) {
             spaceHeld = false;
             mc.options.attackKey.setPressed(false);
         }

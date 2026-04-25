@@ -3,10 +3,9 @@ package com.somefrills.features.misc;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.FreecamConfig;
 import com.somefrills.events.*;
-import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.ToggleFeature;
 import com.somefrills.misc.Input;
 import com.somefrills.misc.KeyAction;
-import com.somefrills.misc.KeybindManager;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -23,7 +22,7 @@ import org.lwjgl.glfw.GLFW;
 import static com.somefrills.Main.mc;
 import static com.somefrills.misc.Utils.info;
 
-public class Freecam extends Feature {
+public class Freecam extends ToggleFeature {
     private final FreecamConfig config;
 
     public final Vector3d pos = new Vector3d();
@@ -41,9 +40,8 @@ public class Freecam extends Feature {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(FrillsConfig.instance.misc.freecam.enabled);
+        super(FrillsConfig.instance.misc.freecam.enabled, FrillsConfig.instance.misc.freecam.keybind);
         config = FrillsConfig.instance.misc.freecam;
-        KeybindManager.register(config.keybind, this::toggle);
     }
 
     @Override
@@ -248,10 +246,8 @@ public class Freecam extends Feature {
                 info("Toggled off because you took damage.");
             }
         } else if (event.packet instanceof PlayerRespawnS2CPacket) {
-            if (isActive()) {
-                toggle();
-                info("Toggled off because you changed dimensions.");
-            }
+            toggle();
+            info("Toggled off because you changed dimensions.");
         }
     }
 

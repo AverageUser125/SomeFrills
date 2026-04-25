@@ -16,7 +16,6 @@ public class BreakResetFix extends Feature {
 
     @EventHandler
     public void onBreakReset(InventoryUpdateEvent event) {
-        if (!isActive()) return;
         if (mc.player != null && mc.interactionManager != null) {
             if (event.slotId >= 36 && event.slotId <= 44 && mc.player.getInventory().getSelectedSlot() == event.slotId - 36) {
                 ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).setStack(event.stack);

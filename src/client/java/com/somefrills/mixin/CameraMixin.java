@@ -31,13 +31,13 @@ public class CameraMixin {
 
     @ModifyVariable(method = "clipToSpace", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float modifyClipToSpace(float d) {
-        if (Features.get(Freecam.class).isActive()) return 0;
+        if (Features.isActive(Freecam.class)) return 0;
         return d;
     }
 
     @Inject(method = "update", at = @At("TAIL"))
     private void onUpdateTail(World area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickProgress, CallbackInfo ci) {
-        if (Features.get(Freecam.class).isActive()) {
+        if (Features.isActive(Freecam.class)) {
             this.thirdPerson = true;
         }
     }

@@ -143,7 +143,6 @@ public class GlowMob extends Feature {
 
     @EventHandler(priority = EventPriority.LOW)
     private void onWorldTick(WorldTickEvent event) {
-        if (!isActive()) return;
         updateEntities();
         getEntities().forEach(this::applyHighlight);
     }

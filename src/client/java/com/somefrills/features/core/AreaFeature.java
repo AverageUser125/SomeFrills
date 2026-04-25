@@ -19,8 +19,8 @@ public abstract class AreaFeature extends AbstractFeature {
     protected abstract boolean checkArea(Area area);
 
     @Override
-    protected final void evaluate() {
-        setActive(isEnabled() && inArea);
+    protected final boolean evaluate() {
+        return inArea;
     }
 
     @Override
@@ -41,15 +41,17 @@ public abstract class AreaFeature extends AbstractFeature {
         }
 
         inArea = false;
-        setActive(false);
     }
 
     private final class AreaDelegator {
 
         @EventHandler
         private void onAreaChange(AreaChangeEvent event) {
-            inArea = checkArea(event.area);
-            evaluate();
+            boolean isInArea = checkArea(event.area);
+            if (isInArea != inArea) {
+                inArea = isInArea;
+                sync();
+            }
         }
     }
 }

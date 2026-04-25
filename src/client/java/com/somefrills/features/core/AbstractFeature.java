@@ -1,9 +1,9 @@
 package com.somefrills.features.core;
 
 import io.github.notenoughupdates.moulconfig.observer.Property;
-
 import static com.somefrills.Main.eventBus;
 
+// Invariant: the state "enabled = false" and "active = true" cannot happen
 public abstract class AbstractFeature {
 
     private final Property<Boolean> enabledProperty;
@@ -12,16 +12,32 @@ public abstract class AbstractFeature {
     protected AbstractFeature(Property<Boolean> enabledProperty) {
         this.enabledProperty = enabledProperty;
 
-        enabledProperty.addObserver((o, n) -> evaluate());
-        evaluate();
+        enabledProperty.addObserver((o, n) -> sync());
+        sync();
     }
 
-    protected final boolean isEnabled() {
+    public final boolean isEnabled() {
         return enabledProperty.get();
     }
 
-    protected final void setActive(boolean value) {
-        if (value == isActive()) return;
+    public final boolean isActive() {
+        return active;
+    }
+
+    public void setEnabled(boolean enabled) {
+        enabledProperty.set(enabled);
+    }
+
+    public void toggle() {
+        setEnabled(!isEnabled());
+    }
+
+    private void setActive(boolean value) {
+        if (!isEnabled() && value) {
+            throw new IllegalStateException("Cannot activate disabled feature: " + getClass().getSimpleName());
+        }
+        if (value == active) return;
+
         active = value;
 
         if (value) {
@@ -33,19 +49,23 @@ public abstract class AbstractFeature {
         }
     }
 
-    public final void toggle() {
-        setActive(!isActive());
+    protected final void sync() {
+        if (!isEnabled()) {
+            setActive(false);
+            return;
+        }
+
+        setActive(evaluate());
     }
 
-    public final boolean isActive() {
-        return active;
-    }
+    /**
+     * Subclasses only describe conditions.
+     */
+    protected abstract boolean evaluate();
 
     protected void onEnable() {
     }
 
     protected void onDisable() {
     }
-
-    protected abstract void evaluate();
 }

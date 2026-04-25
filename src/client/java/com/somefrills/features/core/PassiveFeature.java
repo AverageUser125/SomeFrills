@@ -8,6 +8,7 @@ public class PassiveFeature extends AbstractFeature {
     }
 
     @Override
-    protected void evaluate() {
+    protected boolean evaluate() {
+        return false;
     }
 }
