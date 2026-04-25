@@ -46,6 +46,7 @@ public class Freecam extends ToggleFeature {
 
     @Override
     public void onEnable() {
+        super.onEnable();
         fovScale = mc.options.getFovEffectScale().getValue();
         bobView = mc.options.getBobView().getValue();
         if (config.staticView) {
@@ -80,7 +81,6 @@ public class Freecam extends ToggleFeature {
 
         unpress();
         if (config.reloadChunks) mc.worldRenderer.reload();
-
     }
 
     @Override

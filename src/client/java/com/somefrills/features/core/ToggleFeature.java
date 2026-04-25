@@ -21,6 +21,13 @@ public abstract class ToggleFeature extends AbstractFeature {
         return keybindActive;
     }
 
+
+    @Override
+    protected void onEnable() {
+        keybindActive = false;
+        super.onEnable();
+    }
+
     @Override
     protected void onDisable() {
         keybindActive = false;
