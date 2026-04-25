@@ -76,6 +76,7 @@ public class GlowBlock extends Feature {
     @EventHandler
     public void onWorldRender(WorldRenderEvent event) {
         if (mc.world == null || event.camera == null) return;
+        if (blockScanner == null) return;
         if (targetBlocks.isEmpty()) return;
 
         Set<BlockPos> glowingBlocks = blockScanner.scanRenderedChunks(targetBlocks);

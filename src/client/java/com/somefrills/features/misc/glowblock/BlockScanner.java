@@ -12,12 +12,16 @@ import java.util.Set;
 import static com.somefrills.Main.mc;
 
 public class BlockScanner {
+
     private final Set<ChunkPos> scannedChunks = new HashSet<>();
     private final Set<BlockPos> glowingBlocks = new HashSet<>();
+
+    private ChunkPos lastCenter;
 
     public void reset() {
         scannedChunks.clear();
         glowingBlocks.clear();
+        lastCenter = null;
     }
 
     public void clearResultsOnly() {
@@ -35,41 +39,50 @@ public class BlockScanner {
             return glowingBlocks;
         }
 
-        ChunkPos centerChunk = new ChunkPos(mc.player.getBlockPos());
+        ChunkPos center = new ChunkPos(mc.player.getBlockPos());
         int radius = mc.options.getViewDistance().getValue();
 
+        // optional: reset scan memory when player moves chunk
+        if (lastCenter == null || !lastCenter.equals(center)) {
+            lastCenter = center;
+        }
+
+        // scan ONLY 1 chunk per frame
+        ChunkPos toScan = null;
+
+        outer:
         for (int dx = -radius; dx <= radius; dx++) {
             for (int dz = -radius; dz <= radius; dz++) {
 
-                ChunkPos chunkPos = new ChunkPos(centerChunk.x + dx, centerChunk.z + dz);
+                ChunkPos cp = new ChunkPos(center.x + dx, center.z + dz);
 
-                if (scannedChunks.contains(chunkPos)) {
-                    continue;
-                }
+                if (scannedChunks.contains(cp)) continue;
+                if (!mc.world.isChunkLoaded(cp.x, cp.z)) continue;
 
-                if (!mc.world.isChunkLoaded(chunkPos.x, chunkPos.z)) {
-                    continue;
-                }
+                toScan = cp;
+                break outer;
+            }
+        }
 
-                scannedChunks.add(chunkPos);
+        if (toScan == null) return glowingBlocks;
 
-                WorldChunk chunk = mc.world.getChunk(chunkPos.x, chunkPos.z);
-                BlockPos basePos = chunk.getPos().getStartPos();
+        scannedChunks.add(toScan);
 
-                for (int x = 0; x < 16; x++) {
-                    for (int z = 0; z < 16; z++) {
+        WorldChunk chunk = mc.world.getChunk(toScan.x, toScan.z);
+        BlockPos basePos = chunk.getPos().getStartPos();
 
-                        int worldX = basePos.getX() + x;
-                        int worldZ = basePos.getZ() + z;
+        for (int x = 0; x < 16; x++) {
+            for (int z = 0; z < 16; z++) {
 
-                        for (int y = chunk.getBottomY(); y <= chunk.getTopYInclusive(); y++) {
+                int worldX = basePos.getX() + x;
+                int worldZ = basePos.getZ() + z;
 
-                            BlockPos pos = new BlockPos(worldX, y, worldZ);
+                for (int y = chunk.getBottomY(); y <= chunk.getTopYInclusive(); y++) {
 
-                            if (targetBlocks.contains(mc.world.getBlockState(pos).getBlock())) {
-                                glowingBlocks.add(pos);
-                            }
-                        }
+                    BlockPos pos = new BlockPos(worldX, y, worldZ);
+
+                    if (targetBlocks.contains(mc.world.getBlockState(pos).getBlock())) {
+                        glowingBlocks.add(pos);
                     }
                 }
             }
