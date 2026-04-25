@@ -36,9 +36,10 @@ public class KeybindManager {
         register(new Keybind(keybind, o));
     }
 
-    public static void register(Property<Integer> keybind, Runnable o) {
-        keybind.addObserver(new Observer<>() {
-            private Keybind currentKeybind;
+    public static void register(Property<Integer> property, Runnable o) {
+        Keybind keybind = new Keybind(property.get(), o);
+        property.addObserver(new Observer<>() {
+            private Keybind currentKeybind = keybind;
             @Override
             public void observeChange(Integer oldValue, Integer newValue) {
                 if (currentKeybind != null) {
@@ -49,7 +50,7 @@ public class KeybindManager {
             }
         });
 
-        register(new Keybind(keybind.get(), o));
+        register(keybind);
     }
 
 
