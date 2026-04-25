@@ -102,7 +102,7 @@ public class Main implements ClientModInitializer {
 
         eventBus.subscribe(SkyblockData.class);
         eventBus.subscribe(EntityCache.class);
-        eventBus.subscribe(KeybindManager.class);
+        eventBus.subscribe(Input.class);
         eventBus.subscribe(Main.class);
         Features.init();
 

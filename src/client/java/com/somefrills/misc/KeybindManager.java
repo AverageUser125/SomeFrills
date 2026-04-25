@@ -1,10 +1,7 @@
 package com.somefrills.misc;
 
-import com.somefrills.events.InputEvent;
 import io.github.notenoughupdates.moulconfig.observer.Observer;
 import io.github.notenoughupdates.moulconfig.observer.Property;
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +11,10 @@ import static com.somefrills.Main.mc;
 public class KeybindManager {
     private static final List<Keybind> keybinds = new ArrayList<>();
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public static void onInput(InputEvent event) {
-        // TODO: fix holding the key triggering the keybind multiple times per second
-        // FIXME: Using Input here from an InputEvent is a bit jank
-        // TOCONSIDER: should this call Input or just access event.key directly?
+    public static void onKeyPressed(int key) {
         if (mc.currentScreen != null) return; // don't trigger keybinds while in a GUI
-
         for (Keybind keybind : keybinds) {
-            if (Input.isKeyPressed(keybind.key())) {
+            if (keybind.key == key) {
                 keybind.trigger();
             }
         }
@@ -57,7 +49,6 @@ public class KeybindManager {
 
         register(keybind);
     }
-
 
     private static class Keybind {
         private final int key;
