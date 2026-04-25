@@ -85,6 +85,7 @@ public class Freecam extends ToggleFeature {
 
     @Override
     public void onDisable() {
+        super.onDisable();
         if (config.reloadChunks) {
             mc.execute(mc.worldRenderer::reload);
         }

@@ -20,4 +20,10 @@ public abstract class ToggleFeature extends AbstractFeature {
     protected boolean evaluate() {
         return keybindActive;
     }
+
+    @Override
+    protected void onDisable() {
+        keybindActive = false;
+        super.onDisable();
+    }
 }
