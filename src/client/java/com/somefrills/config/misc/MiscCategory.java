@@ -75,6 +75,7 @@ public class MiscCategory {
     @Accordion
     @ConfigOption(name = "Glow Block", desc = "Highlight blocks based on name, type, or both")
     public GlowBlockConfig glowBlock = new GlowBlockConfig();
+
     public static class GlowBlockConfig {
         @Expose
         @ConfigOption(name = "Enabled", desc = "Highlight blocks based on name, type, or both")

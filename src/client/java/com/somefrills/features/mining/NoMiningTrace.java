@@ -35,7 +35,6 @@ public class NoMiningTrace extends Feature {
 
     public boolean canWork(Entity entity) {
         if (!isActive()) return false;
-        if (!isHoldingTool()) return false;
-        return true;
+        return isHoldingTool();
     }
 }

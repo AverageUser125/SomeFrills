@@ -1,15 +1,16 @@
 package com.somefrills.features.misc.glowblock;
 
+import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.WorldChunk;
-import net.minecraft.block.Block;
 
 import java.util.HashSet;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 import static com.somefrills.Main.mc;
+
 public class BlockScanner {
     private final Set<ChunkPos> scannedChunks = new HashSet<>();
     private final Set<BlockPos> glowingBlocks = new HashSet<>();

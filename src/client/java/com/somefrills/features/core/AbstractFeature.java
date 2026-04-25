@@ -1,6 +1,7 @@
 package com.somefrills.features.core;
 
 import io.github.notenoughupdates.moulconfig.observer.Property;
+
 import static com.somefrills.Main.eventBus;
 
 // Invariant: the state "enabled = false" and "active = true" cannot happen

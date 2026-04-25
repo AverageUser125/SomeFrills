@@ -19,13 +19,14 @@ import static com.somefrills.Main.mc;
 public class GlowBlock extends Feature {
     private BlockScanner blockScanner;
     private final List<Block> targetBlocks = new ArrayList<>();
+
     public GlowBlock() {
         super(FrillsConfig.instance.misc.glowBlock.enabled);
     }
 
     @Override
     public void onEnable() {
-        if(blockScanner == null) {
+        if (blockScanner == null) {
             this.blockScanner = new BlockScanner();
         }
         blockScanner.reset();
@@ -33,7 +34,7 @@ public class GlowBlock extends Feature {
 
     @Override
     public void onDisable() {
-        if(blockScanner != null) {
+        if (blockScanner != null) {
             blockScanner.clearResultsOnly();
         }
     }

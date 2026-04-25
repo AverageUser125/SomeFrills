@@ -5,6 +5,7 @@ import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public abstract class ToggleFeature extends AbstractFeature {
     private boolean keybindActive;
+
     public ToggleFeature(Property<Boolean> enabledProperty, Property<Integer> keybindProperty) {
         super(enabledProperty);
         keybindActive = false;
