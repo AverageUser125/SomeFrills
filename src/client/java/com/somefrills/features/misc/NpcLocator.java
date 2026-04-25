@@ -5,8 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.NpcLocatorConfig;
+import com.somefrills.events.TickEventPost;
 import com.somefrills.events.WorldRenderEvent;
-import com.somefrills.events.WorldTickEvent;
 import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.RenderColor;
@@ -157,7 +157,7 @@ public class NpcLocator extends Feature {
     }
 
     @EventHandler
-    public void onWorldTick(WorldTickEvent event) {
+    public void onWorldTick(TickEventPost event) {
         if (!config.autoRemoveWaypoint) return;
         if (mc.player == null) return;
         if (npcLocations.isEmpty()) return;

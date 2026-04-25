@@ -1,6 +1,6 @@
 package com.somefrills.misc;
 
-import com.somefrills.events.WorldTickEvent;
+import com.somefrills.events.TickEventPost;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
 import org.lwjgl.glfw.GLFW;
@@ -24,7 +24,7 @@ public class Input {
     }
 
     @EventHandler
-    public static void update(WorldTickEvent event) {
+    public static void update(TickEventPost event) {
         long now = System.currentTimeMillis();
 
         for (int i = 0; i < keys.length; i++) {

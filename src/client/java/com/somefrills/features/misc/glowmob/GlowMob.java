@@ -2,7 +2,7 @@ package com.somefrills.features.misc.glowmob;
 
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
-import com.somefrills.events.WorldTickEvent;
+import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
@@ -142,7 +142,7 @@ public class GlowMob extends Feature {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    private void onWorldTick(WorldTickEvent event) {
+    private void onWorldTick(TickEventPost event) {
         updateEntities();
         getEntities().forEach(this::applyHighlight);
     }

@@ -4,7 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig;
 import com.somefrills.events.InteractEntityEvent;
 import com.somefrills.events.ServerJoinEvent;
-import com.somefrills.events.WorldTickEvent;
+import com.somefrills.events.TickEventPre;
 import com.somefrills.features.core.AreaFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.ConcurrentHashSet;
@@ -77,7 +77,7 @@ public class CorpseHighlight extends AreaFeature {
     }
 
     @EventHandler
-    private void onTick(WorldTickEvent event) {
+    private void onTick(TickEventPre event) {
         for (Entity ent : Utils.getEntities()) {
             if (!(ent instanceof ArmorStandEntity stand) || stand.isInvisible()) continue;
             if (openedCorpses.contains(stand.getId())) {

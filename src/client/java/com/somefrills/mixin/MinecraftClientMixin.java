@@ -81,6 +81,13 @@ public abstract class MinecraftClientMixin {
         eventBus.post(new GameStopEvent());
     }
 
+    @Inject(at = @At("HEAD"), method = "tick")
+    private void onPreTick(CallbackInfo info) {
+        Profilers.get().push(Main.MOD_ID + "_pre_update");
+        eventBus.post(new TickEventPre());
+        Profilers.get().pop();
+    }
+
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         Profilers.get().push(Main.MOD_ID + "_post_update");

@@ -51,16 +51,12 @@ public class KeybindManager {
     }
 
     private static class Keybind {
-        private final int key;
-        private final Runnable callback;
+        public final int key;
+        public final Runnable callback;
 
         public Keybind(int key, Runnable callback) {
             this.key = key;
             this.callback = callback;
-        }
-
-        public int key() {
-            return key;
         }
 
         public void trigger() {

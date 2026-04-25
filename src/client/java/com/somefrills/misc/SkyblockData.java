@@ -178,7 +178,7 @@ public class SkyblockData {
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
-    private static void onWorldTick(WorldTickEvent event) {
+    private static void onWorldTick(TickEventPost event) {
         updateTabList();
         updateScoreboard();
     }

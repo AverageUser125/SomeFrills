@@ -44,6 +44,11 @@ public class TweaksCategory {
     public boolean middleClickFixEnabled = true;
 
     @Expose
+    @ConfigOption(name = "Anti Packet Kick", desc = "Prevent being kicked for corrupted packets")
+    @ConfigEditorBoolean
+    public Property<Boolean> antiPacketKick;
+
+    @Expose
     @ConfigOption(name = "No Ghost Blocks", desc = "Prevent ghost blocks from being placed or broken")
     @Accordion
     public NoGhostBlocksConfig noGhostBlocks = new NoGhostBlocksConfig();
@@ -64,7 +69,6 @@ public class TweaksCategory {
         @ConfigEditorBoolean
         public boolean breaking = true;
     }
-
 
     @Expose
     @ConfigOption(name = "Camera Tweaks", desc = "Tweaks to the camera behavior")
