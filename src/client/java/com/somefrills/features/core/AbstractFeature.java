@@ -14,7 +14,14 @@ public abstract class AbstractFeature {
         this.enabledProperty = enabledProperty;
 
         enabledProperty.addObserver((o, n) -> sync());
-        sync();
+        if (enabledProperty.get()) {
+            onEnable();
+            if (evaluate()) {
+                eventBus.subscribe(this);
+            }
+        } else {
+            onDisable();
+        }
     }
 
     public final boolean isEnabled() {

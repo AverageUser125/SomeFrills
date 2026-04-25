@@ -2,6 +2,7 @@ package com.somefrills.features.core;
 
 import com.somefrills.events.AreaChangeEvent;
 import com.somefrills.misc.Area;
+import com.somefrills.misc.SkyblockData;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 import meteordevelopment.orbit.EventHandler;
 
@@ -29,6 +30,11 @@ public abstract class AreaFeature extends AbstractFeature {
         if (delegator == null) {
             delegator = new AreaDelegator();
             eventBus.subscribe(delegator);
+        }
+        if (checkArea(SkyblockData.getArea())) {
+            inArea = true;
+            // DO NOT CALL sync() HERE, AbstractFeature will
+            // call evaluate() soon after onEnable() and we want to avoid double sync.
         }
     }
 
