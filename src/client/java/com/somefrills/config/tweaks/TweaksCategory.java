@@ -81,4 +81,16 @@ public class TweaksCategory {
         @ConfigOption(name = "Clip", desc = "Prevent the camera from clipping into blocks")
         public boolean clip = false;
     }
+
+    @Expose
+    @ConfigOption(name = "No Render", desc = "Prevent certain things from rendering (experimental, may cause issues)")
+    @Accordion
+    public NoRenderConfig noRender;
+
+    public static class NoRenderConfig {
+        @ConfigEditorBoolean
+        @Expose
+        @ConfigOption(name = "No Obfuscation", desc = "Prevent obfuscation from rendering in text")
+        public boolean noObfuscation = false;
+    }
 }

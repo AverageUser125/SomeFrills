@@ -35,7 +35,8 @@
     "CompassStateMixin",
     "GameOptionsMixin",
     "GameRendererMixin",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "TextRendererMixin"
   ]
 }
 
