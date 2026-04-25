@@ -30,6 +30,9 @@ public class SomeFrillsCommand {
             ),
             new ModCommand("freecam", "Toggle freecam mode.",
                     FreecamCommand.getBuilder()
+            ),
+            new ModCommand("glowblock", "Manage glowing blocks.",
+                    GlowBlockCommand.getBuilder()
             )
     };
 

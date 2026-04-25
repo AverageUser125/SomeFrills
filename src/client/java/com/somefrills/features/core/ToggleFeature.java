@@ -3,7 +3,7 @@ package com.somefrills.features.core;
 import com.somefrills.misc.KeybindManager;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
-public class ToggleFeature extends AbstractFeature {
+public abstract class ToggleFeature extends AbstractFeature {
     private boolean keybindActive;
     public ToggleFeature(Property<Boolean> enabledProperty, Property<Integer> keybindProperty) {
         super(enabledProperty);

@@ -73,6 +73,17 @@ public class MiscCategory {
 
     @Expose
     @Accordion
+    @ConfigOption(name = "Glow Block", desc = "Highlight blocks based on name, type, or both")
+    public GlowBlockConfig glowBlock = new GlowBlockConfig();
+    public static class GlowBlockConfig {
+        @Expose
+        @ConfigOption(name = "Enabled", desc = "Highlight blocks based on name, type, or both")
+        @ConfigEditorBoolean
+        public Property<Boolean> enabled = Property.of(false);
+    }
+
+    @Expose
+    @Accordion
     @ConfigOption(name = "Freecam", desc = "Enable freecam mode to move your camera independently of your player")
     public FreecamConfig freecam = new FreecamConfig();
 }
