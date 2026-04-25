@@ -12,11 +12,13 @@ public abstract class AbstractFeature {
 
     protected AbstractFeature(Property<Boolean> enabledProperty) {
         this.enabledProperty = enabledProperty;
+        active = false;
 
         enabledProperty.addObserver((o, n) -> sync());
         if (enabledProperty.get()) {
             onEnable();
             if (evaluate()) {
+                active = true;
                 eventBus.subscribe(this);
             }
         } else {
@@ -49,8 +51,8 @@ public abstract class AbstractFeature {
         active = value;
 
         if (value) {
-            eventBus.subscribe(this);
             onEnable();
+            eventBus.subscribe(this);
         } else {
             eventBus.unsubscribe(this);
             onDisable();

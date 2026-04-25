@@ -10,8 +10,8 @@ import static com.somefrills.Main.eventBus;
 
 public abstract class AreaFeature extends AbstractFeature {
 
-    private AreaDelegator delegator;
-    private boolean inArea;
+    private AreaDelegator delegator = null;
+    private boolean inArea = false;
 
     public AreaFeature(Property<Boolean> enabledProperty) {
         super(enabledProperty);
@@ -31,11 +31,7 @@ public abstract class AreaFeature extends AbstractFeature {
             delegator = new AreaDelegator();
             eventBus.subscribe(delegator);
         }
-        if (checkArea(SkyblockData.getArea())) {
-            inArea = true;
-            // DO NOT CALL sync() HERE, AbstractFeature will
-            // call evaluate() soon after onEnable() and we want to avoid double sync.
-        }
+        inArea = checkArea(SkyblockData.getArea());
     }
 
     @Override
