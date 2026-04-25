@@ -49,7 +49,7 @@ public class GlowBlock extends Feature {
         targetBlocks.add(block);
 
         if (blockScanner != null) {
-            blockScanner.reset();
+            blockScanner.clearChunksOnly();
         }
     }
 

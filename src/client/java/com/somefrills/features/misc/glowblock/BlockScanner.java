@@ -19,8 +19,12 @@ public class BlockScanner {
     private ChunkPos lastCenter;
 
     public void reset() {
+        clearResultsOnly();
+        clearChunksOnly();
+    }
+
+    public void clearChunksOnly() {
         scannedChunks.clear();
-        glowingBlocks.clear();
         lastCenter = null;
     }
 
