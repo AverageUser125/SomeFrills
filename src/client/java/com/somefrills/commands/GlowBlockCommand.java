@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.glowblock.GlowBlock;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -25,8 +24,7 @@ public class GlowBlockCommand {
         return LiteralArgumentBuilder.<FabricClientCommandSource>literal("glowblock")
 
                 .executes(ctx -> {
-                    var enabledProperty = FrillsConfig.instance.misc.glowBlock.enabled;
-                    enabledProperty.set(!enabledProperty.get());
+                    Features.get(GlowBlock.class).toggle();
                     return 1;
                 })
 

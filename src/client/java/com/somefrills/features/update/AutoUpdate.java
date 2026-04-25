@@ -1,6 +1,7 @@
 package com.somefrills.features.update;
 
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.config.about.AboutCategory;
 import com.somefrills.events.GameStartEvent;
 import com.somefrills.features.core.Feature;
 import meteordevelopment.orbit.EventHandler;
@@ -8,28 +9,16 @@ import meteordevelopment.orbit.EventHandler;
 import static com.somefrills.Main.LOGGER;
 
 public class AutoUpdate extends Feature {
-    private static boolean hasCheckedThisSession = false;
+    private final AboutCategory config;
 
     public AutoUpdate() {
         super(FrillsConfig.instance.about.checkForUpdates);
-    }
-
-    public static void checkUpdate() {
-        if (hasCheckedThisSession) return;
-        hasCheckedThisSession = true;
-
-        if (!FrillsConfig.instance.about.checkForUpdates.get()) {
-            LOGGER.debug("Check for updates is disabled");
-            return;
-        }
-
-        boolean autoQueue = FrillsConfig.instance.about.fullAutoUpdates;
-        LOGGER.debug("Performing automatic update check (autoQueue: {})", autoQueue);
-        UpdateManager.checkUpdate(autoQueue);
+        config = FrillsConfig.instance.about;
     }
 
     @EventHandler
     public void onGameStart(GameStartEvent event) {
-        checkUpdate();
+        LOGGER.debug("Performing automatic update check (autoQueue: {})", config.fullAutoUpdates);
+        UpdateManager.checkUpdate(config.fullAutoUpdates);
     }
 }

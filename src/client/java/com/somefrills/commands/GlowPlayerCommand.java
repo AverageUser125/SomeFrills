@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import com.somefrills.config.FrillsConfig;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.GlowPlayer;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
@@ -97,7 +97,7 @@ public class GlowPlayerCommand {
     }
 
     private static boolean isGlowPlayerEnabled() {
-        if (!FrillsConfig.instance.misc.glowPlayer.enabled.get()) {
+        if (!Features.isActive(GlowPlayer.class)) {
             Utils.info("GlowPlayer feature is disabled.");
             return false;
         }

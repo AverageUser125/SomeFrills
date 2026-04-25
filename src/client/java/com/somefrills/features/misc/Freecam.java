@@ -29,7 +29,6 @@ public class Freecam extends ToggleFeature {
     public final Vector3d prevPos = new Vector3d();
 
     private Perspective perspective = null;
-    private double speedValue;
 
     public float yaw, pitch;
     public float lastYaw, lastPitch;
@@ -47,6 +46,10 @@ public class Freecam extends ToggleFeature {
     @Override
     public void onEnable() {
         super.onEnable();
+        if (mc.options == null || mc.player == null || mc.gameRenderer == null || mc.gameRenderer.getCamera() == null) {
+            return;
+        }
+
         fovScale = mc.options.getFovEffectScale().getValue();
         bobView = mc.options.getBobView().getValue();
         if (config.staticView) {
@@ -57,7 +60,7 @@ public class Freecam extends ToggleFeature {
         pitch = mc.player.getPitch();
 
         perspective = mc.options.getPerspective();
-        speedValue = config.speed;
+        config.speed = config.speed;
 
         Utils.set(pos, mc.gameRenderer.getCamera().getCameraPos());
         Utils.set(prevPos, mc.gameRenderer.getCamera().getCameraPos());
@@ -137,25 +140,25 @@ public class Freecam extends ToggleFeature {
 
         boolean a = false;
         if (this.forward) {
-            velX += forward.x * s * speedValue;
-            velZ += forward.z * s * speedValue;
+            velX += forward.x * s * config.speed;
+            velZ += forward.z * s * config.speed;
             a = true;
         }
         if (this.backward) {
-            velX -= forward.x * s * speedValue;
-            velZ -= forward.z * s * speedValue;
+            velX -= forward.x * s * config.speed;
+            velZ -= forward.z * s * config.speed;
             a = true;
         }
 
         boolean b = false;
         if (this.right) {
-            velX += right.x * s * speedValue;
-            velZ += right.z * s * speedValue;
+            velX += right.x * s * config.speed;
+            velZ += right.z * s * config.speed;
             b = true;
         }
         if (this.left) {
-            velX -= right.x * s * speedValue;
-            velZ -= right.z * s * speedValue;
+            velX -= right.x * s * config.speed;
+            velZ -= right.z * s * config.speed;
             b = true;
         }
 
@@ -166,10 +169,10 @@ public class Freecam extends ToggleFeature {
         }
 
         if (this.up) {
-            velY += s * speedValue;
+            velY += s * config.speed;
         }
         if (this.down) {
-            velY -= s * speedValue;
+            velY -= s * config.speed;
         }
 
         prevPos.set(pos);
@@ -217,8 +220,8 @@ public class Freecam extends ToggleFeature {
     @EventHandler(priority = EventPriority.LOW)
     private void onMouseScroll(MouseScrollEvent event) {
         if (config.speedScrollSensitivity > 0 && mc.currentScreen == null) {
-            speedValue += event.value * 0.25 * (config.speedScrollSensitivity * speedValue);
-            if (speedValue < 0.1) speedValue = 0.1;
+            config.speed += event.value * 0.25 * (config.speedScrollSensitivity * config.speed);
+            if (config.speed < 0.1) config.speed = 0.1;
 
             event.cancel();
         }

@@ -21,6 +21,11 @@ public abstract class ToggleFeature extends AbstractFeature {
         return keybindActive;
     }
 
+    @Override
+    public void toggle() {
+        keybindActive = !keybindActive;
+        sync();
+    }
 
     @Override
     protected void onEnable() {

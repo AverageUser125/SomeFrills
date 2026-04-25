@@ -2,10 +2,11 @@ package com.somefrills.features.misc;
 
 import com.google.gson.JsonObject;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.config.misc.MiscCategory.CommandAliasesConfig;
 import com.somefrills.features.core.Feature;
 
 public class Aliases extends Feature {
-
+    private final CommandAliasesConfig config;
     private static final JsonObject aliases;
 
     static {
@@ -42,23 +43,27 @@ public class Aliases extends Feature {
 
     public Aliases() {
         super(FrillsConfig.instance.misc.commandAliases.enabled);
+        config = FrillsConfig.instance.misc.commandAliases;
     }
 
-    public static String convertCommand(String message) {
-        if (!FrillsConfig.instance.misc.commandAliases.enabled.get()) return message;
+    public String convertCommand(String message) {
+        if (!config.enabled.get()) return message;
         if (message == null || message.isEmpty()) return message;
 
         JsonObject obj = aliases;
-        if (obj != null && obj.has(message)) {
-            try {
-                var element = obj.get(message);
-                if (element != null && element.isJsonPrimitive()) {
-                    return element.getAsString();
-                }
-            } catch (Exception e) {
-                return message;
-            }
+        if (!obj.has(message)) {
+            return message;
         }
+
+        try {
+            var element = obj.get(message);
+            if (element != null && element.isJsonPrimitive()) {
+                return element.getAsString();
+            }
+        } catch (Exception e) {
+            return message;
+        }
+
         return message;
     }
 }

@@ -71,7 +71,7 @@ public class FreecamConfig {
             desc = "Automatically toggle freecam on when you die"
     )
     @ConfigEditorBoolean
-    public boolean toggleOnDeath;
+    public boolean toggleOnDeath = true;
 
     @Expose
     @ConfigOption(
@@ -79,5 +79,5 @@ public class FreecamConfig {
             desc = "Automatically toggle freecam on when you take damage"
     )
     @ConfigEditorBoolean
-    public boolean toggleOnDamage;
+    public boolean toggleOnDamage = true;
 }
