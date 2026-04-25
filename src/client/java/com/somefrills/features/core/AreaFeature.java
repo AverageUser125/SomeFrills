@@ -46,7 +46,6 @@ public abstract class AreaFeature extends AbstractFeature {
     }
 
     private final class AreaDelegator {
-
         @EventHandler
         private void onAreaChange(AreaChangeEvent event) {
             boolean isInArea = checkArea(event.area);

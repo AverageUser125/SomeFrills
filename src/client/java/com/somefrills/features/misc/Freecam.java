@@ -28,7 +28,7 @@ public class Freecam extends ToggleFeature {
     public final Vector3d pos = new Vector3d();
     public final Vector3d prevPos = new Vector3d();
 
-    private Perspective perspective;
+    private Perspective perspective = null;
     private double speedValue;
 
     public float yaw, pitch;
@@ -86,7 +86,7 @@ public class Freecam extends ToggleFeature {
     @Override
     public void onDisable() {
         super.onDisable();
-        if (config == null) return;
+        if (perspective == null) return;
         if (config.reloadChunks) {
             mc.execute(mc.worldRenderer::reload);
         }
@@ -98,6 +98,7 @@ public class Freecam extends ToggleFeature {
             mc.options.getBobView().setValue(bobView);
         }
 
+        perspective = null;
         //isSneaking = false;
     }
 

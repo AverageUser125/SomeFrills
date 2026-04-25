@@ -4,7 +4,7 @@ import io.github.notenoughupdates.moulconfig.observer.Property;
 
 import static com.somefrills.Main.eventBus;
 
-// Invariant: the state "enabled = false" and "active = true" cannot happen
+// Invariant: enabled = false && active = true cannot happen
 public abstract class AbstractFeature {
 
     private final Property<Boolean> enabledProperty;
@@ -12,8 +12,14 @@ public abstract class AbstractFeature {
 
     protected AbstractFeature(Property<Boolean> enabledProperty) {
         this.enabledProperty = enabledProperty;
-        active = false;
+        this.active = false;
+    }
 
+    /**
+     * Step 2 initialization.
+     * Must be called once after construction.
+     */
+    final void initialize() {
         enabledProperty.addObserver((o, n) -> sync());
         if (enabledProperty.get()) {
             onEnable();
@@ -44,8 +50,11 @@ public abstract class AbstractFeature {
 
     private void setActive(boolean value) {
         if (!isEnabled() && value) {
-            throw new IllegalStateException("Cannot activate disabled feature: " + getClass().getSimpleName());
+            throw new IllegalStateException(
+                    "Cannot activate disabled feature: " + getClass().getSimpleName()
+            );
         }
+
         if (value == active) return;
 
         active = value;
@@ -68,9 +77,6 @@ public abstract class AbstractFeature {
         setActive(evaluate());
     }
 
-    /**
-     * Subclasses only describe conditions.
-     */
     protected abstract boolean evaluate();
 
     protected void onEnable() {

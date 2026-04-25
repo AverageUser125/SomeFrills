@@ -63,6 +63,7 @@ public class Features {
         constructor.setAccessible(true);
 
         T instance = clazz.cast(constructor.newInstance());
+        instance.initialize();
         builder.put(clazz, instance);
     }
 
