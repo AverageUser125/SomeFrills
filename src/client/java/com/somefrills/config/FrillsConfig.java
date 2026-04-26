@@ -12,7 +12,7 @@ import io.github.notenoughupdates.moulconfig.annotations.Category;
 import io.github.notenoughupdates.moulconfig.common.text.StructuredText;
 
 public class FrillsConfig extends Config {
-    public static FrillsConfig instance;
+    public static FrillsConfig instance = null;
 
     @Override
     public boolean isValidRunnable(int runnableId) {

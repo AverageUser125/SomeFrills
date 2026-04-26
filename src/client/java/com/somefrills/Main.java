@@ -77,7 +77,6 @@ public class Main implements ClientModInitializer {
         // Post ClientDisconnectEvent on Fabric disconnect and save config
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> eventBus.post(new ClientDisconnectEvent()));
 
-        ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
         var file = FabricLoader.getInstance().getConfigDir().resolve("somefrills.json").toFile();
         var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
         builder.customProcessor(ConfigVersionDisplay.class, (option, annotation) -> new GuiOptionEditorUpdateCheck(option));
@@ -107,6 +106,8 @@ public class Main implements ClientModInitializer {
         Features.init();
 
         eventBus.post(new GameStartEvent());
+
+        ClientSendMessageEvents.MODIFY_COMMAND.register(Features.get(Aliases.class)::convertCommand);
 
         LOGGER.info("It's time to get real, SomeFrills mod initialized in {}ms.", Util.getMeasuringTimeMs() - start);
     }

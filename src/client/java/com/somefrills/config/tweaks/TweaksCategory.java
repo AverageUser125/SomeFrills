@@ -44,11 +44,6 @@ public class TweaksCategory {
     public boolean middleClickFixEnabled = true;
 
     @Expose
-    @ConfigOption(name = "Anti Packet Kick", desc = "Prevent being kicked for corrupted packets")
-    @ConfigEditorBoolean
-    public Property<Boolean> antiPacketKick;
-
-    @Expose
     @ConfigOption(name = "No Ghost Blocks", desc = "Prevent ghost blocks from being placed or broken")
     @Accordion
     public NoGhostBlocksConfig noGhostBlocks = new NoGhostBlocksConfig();
@@ -85,7 +80,7 @@ public class TweaksCategory {
     @Expose
     @ConfigOption(name = "No Render", desc = "Prevent certain things from rendering (experimental, may cause issues)")
     @Accordion
-    public NoRenderConfig noRender;
+    public NoRenderConfig noRender = new NoRenderConfig();
 
     public static class NoRenderConfig {
         @ConfigEditorBoolean

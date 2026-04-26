@@ -38,7 +38,7 @@ public class NpcLocatorConfig {
     @Expose
     @ConfigOption(name = "Auto Remove Waypoint", desc = "Automatically remove NPC waypoints when you get close to them")
     @ConfigEditorBoolean
-    public boolean autoRemoveWaypoint;
+    public boolean autoRemoveWaypoint = true;
 
     @Expose
     @ConfigOption(name = "Waypoint Remove Distance", desc = "Distance threshold for automatically removing NPC waypoints")

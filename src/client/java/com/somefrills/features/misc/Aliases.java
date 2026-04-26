@@ -47,12 +47,7 @@ public class Aliases extends Feature {
         config = FrillsConfig.instance.misc.commandAliases;
     }
 
-    public static String convertCommand(String message) {
-        if (!Features.isInitialized()) return message;
-        return Features.get(Aliases.class).aliasCommand(message);
-    }
-
-    private String aliasCommand(String message) {
+    public String convertCommand(String message) {
         if (!config.enabled.get()) return message;
         if (message == null || message.isEmpty()) return message;
 

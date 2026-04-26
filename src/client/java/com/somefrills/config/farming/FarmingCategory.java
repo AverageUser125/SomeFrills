@@ -38,6 +38,6 @@ public class FarmingCategory {
         @Expose
         @ConfigOption(name = "Toggle Key", desc = "Key to toggle AutoFarm on/off")
         @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_GRAVE_ACCENT)
-        public int toggleKey;
+        public int toggleKey = GLFW.GLFW_KEY_GRAVE_ACCENT;
     }
 }
