@@ -3,9 +3,9 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.core.Features;
+import net.minecraft.client.font.TextRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import net.minecraft.client.font.TextRenderer;
 
 @Mixin(TextRenderer.class)
 public class TextRendererMixin {

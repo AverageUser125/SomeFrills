@@ -26,15 +26,15 @@ import static com.somefrills.Main.mc;
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin implements TitleRendering {
     @Unique
-    private static String titleString;
+    private static String titleString = "";
     @Unique
     private static int titleTicks = 0;
     @Unique
-    private static int titleOffset;
+    private static int titleOffset = 0;
     @Unique
-    private static float titleScale;
+    private static float titleScale = 1;
     @Unique
-    private static int titleColor;
+    private static int titleColor = 0xFFFFFFFF;
 
     @Shadow
     public abstract TextRenderer getTextRenderer();

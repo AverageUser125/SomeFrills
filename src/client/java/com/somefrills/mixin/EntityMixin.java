@@ -27,7 +27,7 @@ public class EntityMixin implements EntityRendering {
     @Unique
     private boolean glowRender = false;
     @Unique
-    private RenderColor glowColor;
+    private RenderColor glowColor = null;
 
     @Override
     public void somefrills$setGlowingColored(boolean glowing, RenderColor color) {

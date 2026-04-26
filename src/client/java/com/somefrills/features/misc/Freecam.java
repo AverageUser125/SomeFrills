@@ -30,13 +30,13 @@ public class Freecam extends ToggleFeature {
 
     private Perspective perspective = null;
 
-    public float yaw, pitch;
-    public float lastYaw, lastPitch;
+    public float yaw = 0, pitch = 0;
+    public float lastYaw = 0, lastPitch = 0;
 
-    private double fovScale;
-    private boolean bobView;
+    private double fovScale = 1;
+    private boolean bobView = false;
 
-    private boolean forward, backward, right, left, up, down;
+    private boolean forward = false, backward = false, right = false, left = false, up = false, down = false;
 
     public Freecam() {
         super(FrillsConfig.instance.misc.freecam.enabled, FrillsConfig.instance.misc.freecam.keybind);

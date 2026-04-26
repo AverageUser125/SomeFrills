@@ -15,7 +15,7 @@ public class AboutCategory {
     @Transient
     @ConfigOption(name = "Current Version", desc = "The SomeFrills version you are currently running")
     @ConfigVersionDisplay
-    public Unit currentVersion = null;
+    public Unit currentVersion = Unit.INSTANCE;
 
     @Expose
     @ConfigOption(name = "Check for Updates", desc = "Automatically check for updates on startup")

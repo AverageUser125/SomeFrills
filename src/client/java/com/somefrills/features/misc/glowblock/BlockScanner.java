@@ -16,7 +16,7 @@ public class BlockScanner {
     private final Set<ChunkPos> scannedChunks = new HashSet<>();
     private final Set<BlockPos> glowingBlocks = new HashSet<>();
 
-    private ChunkPos lastCenter;
+    private ChunkPos lastCenter = null;
 
     public void reset() {
         clearResultsOnly();

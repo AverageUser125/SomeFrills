@@ -15,8 +15,8 @@ import static com.somefrills.Main.mc;
 
 public final class SaveCursorPosition extends Feature {
     private final SaveCursorPositionConfig config;
-    private Pair<Double, Double> savedPositionedP1;
-    private SavedPosition savedPosition;
+    private Pair<Double, Double> savedPositionedP1 = null;
+    private SavedPosition savedPosition = null;
 
     private SaveCursorPosition() {
         super(FrillsConfig.instance.misc.saveCursorPosition.enabled);

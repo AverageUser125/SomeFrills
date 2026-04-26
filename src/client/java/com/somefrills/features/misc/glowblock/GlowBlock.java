@@ -17,7 +17,7 @@ import java.util.Set;
 import static com.somefrills.Main.mc;
 
 public class GlowBlock extends Feature {
-    private BlockScanner blockScanner;
+    private BlockScanner blockScanner = null;
     private final List<Block> targetBlocks = new ArrayList<>();
 
     public GlowBlock() {

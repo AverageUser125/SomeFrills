@@ -37,9 +37,9 @@ public class Main implements ClientModInitializer {
     public static final String MOD_ID = "somefrills";
 
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    public static MinecraftClient mc;
+    public static MinecraftClient mc = null;
     public static IEventBus eventBus = new EventBus();
-    public static ManagedConfig<FrillsConfig> config;
+    public static ManagedConfig<FrillsConfig> config = null;
 
     public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
         SomeFrillsCommand.init(dispatcher);

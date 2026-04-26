@@ -22,7 +22,7 @@ import java.util.List;
 
 public class GlowMobRules extends ChestUI {
     private final List<GlowMobRule> allRules;
-    private RuleEditSession session;
+    private RuleEditSession session = null;
 
     public GlowMobRules() {
         super("GlowMob Rules");

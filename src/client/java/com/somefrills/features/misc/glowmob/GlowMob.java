@@ -20,7 +20,7 @@ import java.util.List;
 public class GlowMob extends Feature {
 
     private final List<GlowMobRule> rules;
-    private List<Entity> entityList;
+    private List<Entity> entityList = List.of();
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
@@ -172,6 +172,11 @@ public class GlowMob extends Feature {
     public static class MatchedEntityEntry {
         public GlowMobRule rule;
         public List<LivingEntity> entities;
+
+        public MatchedEntityEntry(GlowMobRule rule, List<LivingEntity> entities) {
+            this.rule = rule;
+            this.entities = entities;
+        }
     }
 
     public List<MatchedEntityEntry> getGlowingMobs() {
@@ -190,10 +195,7 @@ public class GlowMob extends Feature {
                     .map(entity -> (LivingEntity) entity)
                     .filter(rule::matches)
                     .toList();
-            MatchedEntityEntry entry = new MatchedEntityEntry();
-            entry.rule = rule;
-            entry.entities = matchedEntities;
-            result.add(entry);
+            result.add(new MatchedEntityEntry(rule, matchedEntities));
         }
         return result;
     }
