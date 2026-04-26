@@ -257,6 +257,26 @@ public class Freecam extends ToggleFeature {
         }
     }
 
+    @EventHandler
+    public void onInteractBlock(InteractBlockEvent event) {
+        event.cancel();
+    }
+
+    @EventHandler
+    public void onInteractEntity(InteractEntityEvent event) {
+        event.cancel();
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onAttackEntity(AttackEntityEvent event) {
+        event.cancel();
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
+        event.cancel();
+    }
+
     public double getX(float tickDelta) {
         return MathHelper.lerp(tickDelta, prevPos.x, pos.x);
     }
