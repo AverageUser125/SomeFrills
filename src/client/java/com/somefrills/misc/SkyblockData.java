@@ -182,14 +182,4 @@ public class SkyblockData {
         updateTabList();
         updateScoreboard();
     }
-
-    public static class InstanceType {
-        public String name;
-        public String type;
-
-        public InstanceType(String name, String type) {
-            this.name = name;
-            this.type = type;
-        }
-    }
 }
