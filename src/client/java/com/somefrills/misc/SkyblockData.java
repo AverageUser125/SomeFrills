@@ -73,7 +73,7 @@ public class SkyblockData {
 
     private static void updateTabListIfDirty() {
         List<String> lines = new ArrayList<>();
-        if (mc.inGameHud == null) return;
+        if (mc.inGameHud == null || mc.player == null || mc.player.networkHandler == null) return;
         var playerListHud = mc.inGameHud.getPlayerListHud();
         if (playerListHud == null) return;
 
