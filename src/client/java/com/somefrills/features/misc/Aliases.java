@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MiscCategory.CommandAliasesConfig;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.Features;
 
 public class Aliases extends Feature {
     private final CommandAliasesConfig config;
@@ -46,7 +47,12 @@ public class Aliases extends Feature {
         config = FrillsConfig.instance.misc.commandAliases;
     }
 
-    public String convertCommand(String message) {
+    public static String convertCommand(String message) {
+        if (!Features.isInitialized()) return message;
+        return Features.get(Aliases.class).aliasCommand(message);
+    }
+
+    private String aliasCommand(String message) {
         if (!config.enabled.get()) return message;
         if (message == null || message.isEmpty()) return message;
 

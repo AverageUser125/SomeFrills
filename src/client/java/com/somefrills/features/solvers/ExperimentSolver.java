@@ -2,9 +2,10 @@ package com.somefrills.features.solvers;
 
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
+import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -94,14 +95,10 @@ public class ExperimentSolver extends Feature {
         return isTerracotta(s.getStack());
     }
 
-    @Override
-    protected void onEnable() {
-        ClientTickEvents.END_CLIENT_TICK.register(this::onTick);
-    }
-
-    private void onTick(MinecraftClient client) {
-        if (client == null || client.player == null) return;
-        ClientPlayerEntity player = client.player;
+    @EventHandler
+    private void onTick(TickEventPost event) {
+        if (mc.player == null) return;
+        ClientPlayerEntity player = mc.player;
         ScreenHandler handler = player.currentScreenHandler;
         if (handler == null) return;
 

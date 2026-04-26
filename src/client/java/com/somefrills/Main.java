@@ -77,7 +77,7 @@ public class Main implements ClientModInitializer {
         // Post ClientDisconnectEvent on Fabric disconnect and save config
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> eventBus.post(new ClientDisconnectEvent()));
 
-        ClientSendMessageEvents.MODIFY_COMMAND.register(Features.get(Aliases.class)::convertCommand);
+        ClientSendMessageEvents.MODIFY_COMMAND.register(Aliases::convertCommand);
         var file = FabricLoader.getInstance().getConfigDir().resolve("somefrills.json").toFile();
         var builder = new ManagedConfigBuilder<>(file, FrillsConfig.class);
         builder.customProcessor(ConfigVersionDisplay.class, (option, annotation) -> new GuiOptionEditorUpdateCheck(option));
@@ -85,8 +85,8 @@ public class Main implements ClientModInitializer {
         builder.setSaveFailed((cfg, ex) -> LOGGER.error("Failed to save config file {}: {}", cfg.getFile().getName(), ex.getMessage()));
         builder.jsonMapper(
                 mapper -> {
-                    mapper.getGsonBuilder().
-                            registerTypeAdapter(MatchInfo.class, new MatchInfo.MatchInfoTypeAdapter())
+                    mapper.getGsonBuilder()
+                            .registerTypeAdapter(MatchInfo.class, new MatchInfo.MatchInfoTypeAdapter())
                             .registerTypeAdapter(RenderColor.class, new RenderColor.RenderColorTypeAdapter())
                             .disableHtmlEscaping()
                             .disableJdkUnsafe();
