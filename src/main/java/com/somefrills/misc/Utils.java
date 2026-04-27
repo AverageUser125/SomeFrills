@@ -468,7 +468,7 @@ public class Utils {
     /**
      * Checks if a PlayerEntity is a real player, and not an enemy or NPC. Some NPCs might falsely return true for a few seconds after spawning.
      */
-    public static boolean IsRealPlayer(PlayerEntity entity) {
+    public static boolean isRealPlayer(PlayerEntity entity) {
         ClientPlayNetworkHandler handler = mc.getNetworkHandler();
         if (handler == null) return entity == mc.player;
 
@@ -490,7 +490,7 @@ public class Utils {
      */
     public static boolean isMob(Entity entity) {
         if (entity instanceof PlayerEntity player) {
-            return !IsRealPlayer(player);
+            return !isRealPlayer(player);
         }
         return entity instanceof LivingEntity;
     }

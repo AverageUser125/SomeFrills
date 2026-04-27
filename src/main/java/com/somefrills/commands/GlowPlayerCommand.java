@@ -221,7 +221,7 @@ public class GlowPlayerCommand {
         String remaining = builder.getRemaining().toLowerCase();
 
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
-            if (Utils.IsRealPlayer(player)) {
+            if (Utils.isRealPlayer(player)) {
                 String name = player.getName().getString();
                 if (name.toLowerCase().startsWith(remaining)) {
                     builder.suggest(name);
@@ -239,7 +239,7 @@ public class GlowPlayerCommand {
 
         // Find and apply glow to all matching players
         for (AbstractClientPlayerEntity player : mc.world.getPlayers()) {
-            if (!Utils.IsRealPlayer(player)) continue;
+            if (!Utils.isRealPlayer(player)) continue;
 
             String playerPureName = Utils.getPlayerName(player);
             if (playerPureName == null || !playerPureName.equals(pureName)) continue;

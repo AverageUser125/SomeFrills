@@ -5,6 +5,9 @@ import com.somefrills.config.mining.MiningCategory.NoMiningTraceConfig;
 import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
 
 public class NoMiningTrace extends Feature {
@@ -18,6 +21,19 @@ public class NoMiningTrace extends Feature {
     public NoMiningTrace() {
         super(FrillsConfig.instance.mining.noMiningTrace.enabled);
         config = FrillsConfig.instance.mining.noMiningTrace;
+    }
+
+    private boolean isPassable(Entity entity) {
+        if (entity instanceof ArmorStandEntity stand) {
+            if (stand.isInvisible()) return true;
+        }
+        if (entity instanceof PlayerEntity player) {
+            if (Utils.isRealPlayer(player)) return true;
+        }
+        if (entity instanceof ProjectileEntity) {
+            return true;
+        }
+        return false;
     }
 
     private boolean isHoldingTool() {
@@ -36,6 +52,6 @@ public class NoMiningTrace extends Feature {
     public boolean canWork(Entity entity) {
         if (!isActive()) return false;
         if (!isHoldingTool()) return false;
-        return true;
+        return isPassable(entity);
     }
 }
