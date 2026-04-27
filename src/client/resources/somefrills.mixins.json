@@ -4,6 +4,7 @@
   "package": "com.somefrills.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "BaseObservableAccessor",
     "BlockItemMixin",
     "BossBarHudAccessor",
     "ClientConnectionMixin",

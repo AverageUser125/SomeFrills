@@ -4,16 +4,15 @@ import com.somefrills.misc.KeybindManager;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 public abstract class ToggleFeature extends AbstractFeature {
-    private boolean keybindActive;
+    private final Property<Integer> keybindProperty;
 
-    public ToggleFeature(Property<Boolean> enabledProperty, Property<Integer> keybindProperty) {
+    private KeybindManager.Subscription sub = null;
+    private boolean keybindActive = false;
+
+    public ToggleFeature(Property<Boolean> enabledProperty,
+                         Property<Integer> keybindProperty) {
         super(enabledProperty);
-        keybindActive = false;
-        // If the property is changed, KeybindManager will automatically update the keybind, so we don't need to do anything here
-        KeybindManager.register(keybindProperty, () -> {
-            keybindActive = !keybindActive;
-            sync();
-        });
+        this.keybindProperty = keybindProperty;
     }
 
     @Override
@@ -22,20 +21,28 @@ public abstract class ToggleFeature extends AbstractFeature {
     }
 
     @Override
-    public void toggle() {
+    public final void toggle() {
+        if (!isEnabled()) return;
+
         keybindActive = !keybindActive;
         sync();
     }
 
     @Override
-    protected void onEnable() {
-        keybindActive = false;
-        super.onEnable();
+    protected final void onEnable() {
+        if (sub != null) {
+            sub.unregister();
+            sub = null;
+        }
+        sub = KeybindManager.register(keybindProperty, this::toggle);
     }
 
     @Override
-    protected void onDisable() {
+    protected final void onDisable() {
+        if (sub != null) {
+            sub.unregister();
+            sub = null;
+        }
         keybindActive = false;
-        super.onDisable();
     }
 }

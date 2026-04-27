@@ -44,8 +44,8 @@ public class Freecam extends ToggleFeature {
     }
 
     @Override
-    public void onEnable() {
-        super.onEnable();
+    public void onActivate() {
+        super.onActivate();
         if (mc.options == null || mc.player == null || mc.gameRenderer == null || mc.gameRenderer.getCamera() == null) {
             return;
         }
@@ -87,8 +87,8 @@ public class Freecam extends ToggleFeature {
     }
 
     @Override
-    public void onDisable() {
-        super.onDisable();
+    public void onDeactivate() {
+        super.onDeactivate();
         if (perspective == null) return;
         if (config.reloadChunks) {
             mc.execute(mc.worldRenderer::reload);

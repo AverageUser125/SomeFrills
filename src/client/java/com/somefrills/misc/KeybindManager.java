@@ -1,5 +1,6 @@
 package com.somefrills.misc;
 
+import com.somefrills.mixin.BaseObservableAccessor;
 import io.github.notenoughupdates.moulconfig.observer.Observer;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
@@ -11,55 +12,60 @@ import static com.somefrills.Main.mc;
 public class KeybindManager {
     private static final List<Keybind> keybinds = new ArrayList<>();
 
+    public interface Subscription {
+        void unregister();
+    }
+
     public static void onKeyPressed(int key) {
-        if (mc.currentScreen != null) return; // don't trigger keybinds while in a GUI
-        for (Keybind keybind : keybinds) {
+        if (mc.currentScreen != null) return;
+
+        for (Keybind keybind : new ArrayList<>(keybinds)) {
             if (keybind.key == key) {
                 keybind.trigger();
             }
         }
     }
 
-    private static void register(Keybind keybind) {
+    private static Subscription register(Keybind keybind) {
         keybinds.add(keybind);
+        return () -> keybinds.remove(keybind);
     }
 
-    private static void unregister(Keybind keybind) {
-        keybinds.remove(keybind);
+    public static Subscription register(int key, Runnable action) {
+        return register(new Keybind(key, action));
     }
 
-    public static void register(int keybind, Runnable o) {
-        register(new Keybind(keybind, o));
-    }
+    @SuppressWarnings("unchecked")
+    public static Subscription register(Property<Integer> property, Runnable action) {
+        Keybind initial = new Keybind(property.get(), action);
+        Subscription[] current = new Subscription[]{register(initial)};
 
-    public static void register(Property<Integer> property, Runnable o) {
-        Keybind keybind = new Keybind(property.get(), o);
-        property.addObserver(new Observer<>() {
-            private Keybind currentKeybind = keybind;
-
+        var observer = new Observer<Integer>() {
             @Override
             public void observeChange(Integer oldValue, Integer newValue) {
-                if (currentKeybind != null) {
-                    unregister(currentKeybind);
-                }
-                currentKeybind = new Keybind(newValue, o);
-                register(currentKeybind);
+                Subscription old = current[0];
+                current[0] = register(new Keybind(newValue, action));
+                if (old != null) old.unregister();
             }
-        });
+        };
+        property.addObserver(observer);
 
-        register(keybind);
+        return () -> {
+            ((BaseObservableAccessor<Integer>) property).getObservers().remove(observer);
+            current[0].unregister();
+        };
     }
 
     private static class Keybind {
-        public final int key;
-        public final Runnable callback;
+        final int key;
+        final Runnable callback;
 
-        public Keybind(int key, Runnable callback) {
+        Keybind(int key, Runnable callback) {
             this.key = key;
             this.callback = callback;
         }
 
-        public void trigger() {
+        void trigger() {
             callback.run();
         }
     }

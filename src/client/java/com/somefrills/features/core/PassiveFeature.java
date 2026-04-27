@@ -11,4 +11,21 @@ public class PassiveFeature extends AbstractFeature {
     protected boolean evaluate() {
         return false;
     }
+
+    @Override
+    protected final void onActivate() {
+    }
+
+    @Override
+    protected final void onDeactivate() {
+    }
+
+    @Override
+    protected final void onEnable() {
+    }
+
+    @Override
+    protected final void onDisable() {
+    }
+
 }

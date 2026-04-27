@@ -25,7 +25,7 @@ public class GlowBlock extends Feature {
     }
 
     @Override
-    public void onEnable() {
+    public void onActivate() {
         if (blockScanner == null) {
             this.blockScanner = new BlockScanner();
         }
@@ -33,7 +33,7 @@ public class GlowBlock extends Feature {
     }
 
     @Override
-    public void onDisable() {
+    public void onDeactivate() {
         if (blockScanner != null) {
             blockScanner.clearResultsOnly();
         }

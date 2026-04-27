@@ -20,16 +20,15 @@ public abstract class AbstractFeature {
      * Must be called once after construction.
      */
     final void initialize() {
-        enabledProperty.addObserver((o, n) -> sync());
-        if (enabledProperty.get()) {
-            onEnable();
-            if (evaluate()) {
-                active = true;
-                eventBus.subscribe(this);
+        enabledProperty.addObserver((o, n) -> {
+            if (n) {
+                onEnable();
+            } else {
+                onDisable();
             }
-        } else {
-            onDisable();
-        }
+            sync();
+        });
+        setEnabled(isEnabled());
     }
 
     public final boolean isEnabled() {
@@ -49,22 +48,17 @@ public abstract class AbstractFeature {
     }
 
     private void setActive(boolean value) {
-        if (!isEnabled() && value) {
-            throw new IllegalStateException(
-                    "Cannot activate disabled feature: " + getClass().getSimpleName()
-            );
-        }
+        if (!isEnabled() && value) return;
 
         if (value == active) return;
-
         active = value;
 
         if (value) {
-            onEnable();
+            onActivate();
             eventBus.subscribe(this);
         } else {
             eventBus.unsubscribe(this);
-            onDisable();
+            onDeactivate();
         }
     }
 
@@ -83,5 +77,11 @@ public abstract class AbstractFeature {
     }
 
     protected void onDisable() {
+    }
+
+    protected void onActivate() {
+    }
+
+    protected void onDeactivate() {
     }
 }

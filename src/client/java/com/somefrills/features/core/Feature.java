@@ -12,4 +12,12 @@ public abstract class Feature extends AbstractFeature {
     protected final boolean evaluate() {
         return true;
     }
+
+    @Override
+    protected final void onEnable() {
+    }
+
+    @Override
+    protected final void onDisable() {
+    }
 }

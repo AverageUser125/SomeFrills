@@ -18,12 +18,12 @@ public abstract class AreaFeature extends AbstractFeature {
     }
 
     @Override
-    protected void onEnable() {
+    protected final void onEnable() {
         EventSubscriptions.register(this, AreaChangeEvent.class);
     }
 
     @Override
-    protected void onDisable() {
+    protected final void onDisable() {
         EventSubscriptions.unregister(this);
     }
 }
