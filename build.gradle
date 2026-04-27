@@ -34,12 +34,9 @@ repositories {
 }
 
 loom {
-    splitEnvironmentSourceSets()
-
     mods {
         "somefrills" {
             sourceSet sourceSets.main
-            sourceSet sourceSets.client
         }
     }
 }
@@ -95,14 +92,6 @@ java {
 
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
-}
-
-sourceSets {
-    client {
-        java {
-            exclude "com/somefrills/PingOffsetMiner/**"
-        }
-    }
 }
 
 jar {
