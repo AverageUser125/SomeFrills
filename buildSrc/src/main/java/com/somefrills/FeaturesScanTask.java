@@ -5,14 +5,20 @@ import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.nodeTypes.NodeWithName;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.*;
+import org.gradle.api.tasks.InputDirectory;
+import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class FeaturesScanTask extends DefaultTask {
 
@@ -33,8 +39,6 @@ public abstract class FeaturesScanTask extends DefaultTask {
 
         List<File> javaFiles = new ArrayList<>();
         collectJavaFiles(sourceRoot, javaFiles);
-
-        Set<String> coreTypes = new HashSet<>();
         Set<String> featureClasses = new LinkedHashSet<>();
 
         ParserConfiguration config = new ParserConfiguration()
@@ -42,28 +46,6 @@ public abstract class FeaturesScanTask extends DefaultTask {
 
         JavaParser parser = new JavaParser(config);
 
-        // PASS 1: CORE TYPES
-        for (File file : javaFiles) {
-
-            String code = Files.readString(file.toPath());
-
-            CompilationUnit cu = parser.parse(code)
-                    .getResult()
-                    .orElseThrow(() -> new RuntimeException("Parse error"));
-
-            String packageName = cu.getPackageDeclaration()
-                    .map(NodeWithName::getNameAsString)
-                    .orElse("");
-
-            if (!packageName.equals(CORE_PACKAGE)) continue;
-
-            cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cls -> {
-                if (cls.isInterface()) return;
-                coreTypes.add(cls.getNameAsString());
-            });
-        }
-
-        // PASS 2: FEATURES
         for (File file : javaFiles) {
 
             String code = Files.readString(file.toPath());
@@ -80,19 +62,16 @@ public abstract class FeaturesScanTask extends DefaultTask {
             if (!packageName.startsWith(ROOT_PACKAGE)) continue;
 
             cu.findAll(ClassOrInterfaceDeclaration.class).forEach(cls -> {
-
                 if (cls.isInterface()) return;
                 if (cls.isAbstract()) return;
-                if (cls.getExtendedTypes().isEmpty()) return;
 
                 String className = cls.getNameAsString();
                 String fullName = packageName + "." + className;
 
-                String parent = cls.getExtendedTypes(0).getNameAsString();
-
-                if (coreTypes.contains(parent)) {
-                    featureClasses.add(fullName);
-                }
+                cls.getExtendedTypes().stream()
+                        .map(NodeWithSimpleName::getNameAsString)
+                        .filter(n -> n.endsWith("Feature"))
+                        .findAny().ifPresent(n -> featureClasses.add(fullName));
             });
         }
 
