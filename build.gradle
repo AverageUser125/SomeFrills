@@ -128,7 +128,8 @@ publishing {
 }
 
 tasks.register("scanFeatures", FeaturesScanTask) {
-    outputs.file(layout.buildDirectory.file("tmp/features-list.txt").get())
+    sourceDir.set(layout.projectDirectory.dir("src/main/java/com/somefrills/features"))
+    outputFile.set(layout.buildDirectory.file("tmp/features-list.txt"))
 }
 
 tasks.register("generateFeatures", FeaturesGenerateTask) {
