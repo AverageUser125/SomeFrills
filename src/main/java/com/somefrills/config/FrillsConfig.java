@@ -8,16 +8,29 @@ import com.somefrills.config.misc.MiscCategory;
 import com.somefrills.config.solvers.SolverCategory;
 import com.somefrills.config.tweaks.TweaksCategory;
 import io.github.notenoughupdates.moulconfig.Config;
+import io.github.notenoughupdates.moulconfig.Social;
 import io.github.notenoughupdates.moulconfig.annotations.Category;
+import io.github.notenoughupdates.moulconfig.common.MyResourceLocation;
 import io.github.notenoughupdates.moulconfig.common.text.StructuredText;
+
+import java.util.List;
 
 public class FrillsConfig extends Config {
     public static FrillsConfig instance = null;
+    private final List<Social> socials = List.of(
+            Social.forLink(StructuredText.of("Github"), new MyResourceLocation("somefrills", "social/github.png"), "https://github.com/AverageUser125/SomeFrills")
+    );
+
+    @Override
+    public List<Social> getSocials() {
+        return socials;
+    }
 
     @Override
     public boolean isValidRunnable(int runnableId) {
         return false;
     }
+
 
     @Override
     public StructuredText getTitle() {
