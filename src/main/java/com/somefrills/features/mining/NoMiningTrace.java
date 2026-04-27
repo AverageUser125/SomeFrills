@@ -21,7 +21,7 @@ public class NoMiningTrace extends Feature {
     }
 
     private boolean isHoldingTool() {
-        if (!config.onlyWhenHoldingTool) return false;
+        if (!config.onlyWhenHoldingTool) return true;
         ItemStack mainHand = Utils.getHeldItem();
         if (mainHand.isEmpty()) return false;
         String itemName = mainHand.getItem().getName().getString();
@@ -35,6 +35,7 @@ public class NoMiningTrace extends Feature {
 
     public boolean canWork(Entity entity) {
         if (!isActive()) return false;
-        return isHoldingTool();
+        if (!isHoldingTool()) return false;
+        return true;
     }
 }
