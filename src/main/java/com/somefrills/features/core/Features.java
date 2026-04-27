@@ -1,5 +1,7 @@
 package com.somefrills.features.core;
 
+import org.jspecify.annotations.NonNull;
+
 public final class Features {
 
     private static final AbstractFeature[] INSTANCES = FeaturesRegistry.INSTANCES;
@@ -19,9 +21,11 @@ public final class Features {
         initialized = true;
     }
 
-    public static <T extends AbstractFeature> T get(Class<T> clazz) {
+    public static @NonNull <T extends AbstractFeature> T get(Class<T> clazz) {
         AbstractFeature feature = CLASS_TO_INSTANCE.get(clazz);
-        if (feature == null) return null;
+        if (feature == null) {
+            throw new IllegalArgumentException("No feature found for class: " + clazz.getName());
+        }
 
         @SuppressWarnings("unchecked")
         T instance = (T) feature;
@@ -30,8 +34,6 @@ public final class Features {
     }
 
     public static <T extends AbstractFeature> boolean isActive(Class<T> clazz) {
-        var instance = get(clazz);
-        if (instance == null) return false;
-        return instance.isActive();
+        return get(clazz).isActive();
     }
 }
