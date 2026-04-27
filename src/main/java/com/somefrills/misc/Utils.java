@@ -77,9 +77,11 @@ import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.somefrills.Main.mc;
 
@@ -508,6 +510,14 @@ public class Utils {
      */
     public static Box getLerpedBox(Entity entity, float tickProgress) {
         return entity.getDimensions(EntityPose.STANDING).getBoxAt(entity.getLerpedPos(tickProgress));
+    }
+
+    public static <T, R extends T> Function<T, Stream<R>> filterAndCast(Class<R> clazz) {
+        return t -> clazz.isInstance(t) ? Stream.of(clazz.cast(t)) : Stream.empty();
+    }
+
+    public static <T> Stream<T> getStreamEntities(Class<T> clazz) {
+        return getEntities().stream().flatMap(filterAndCast(clazz));
     }
 
     public static List<Entity> getEntities() {

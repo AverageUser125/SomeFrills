@@ -2,28 +2,19 @@ package com.somefrills.features.mining;
 
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig;
-import com.somefrills.events.InteractEntityEvent;
-import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.TickEventPre;
 import com.somefrills.features.core.AreaFeature;
 import com.somefrills.misc.Area;
-import com.somefrills.misc.ConcurrentHashSet;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import io.github.notenoughupdates.moulconfig.ChromaColour;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 
-import java.util.Set;
-
-import static com.somefrills.Main.mc;
-
+import java.util.List;
 
 public class CorpseHighlight extends AreaFeature {
-    private final Set<Integer> openedCorpses = new ConcurrentHashSet<>();
     private final CorpseHighlightConfig config;
 
     public CorpseHighlight() {
@@ -46,25 +37,6 @@ public class CorpseHighlight extends AreaFeature {
         };
     }
 
-    private static boolean hasKeyForCorpse(CorpseType type) {
-        String id = switch (type) {
-            case Tungsten -> "TUNGSTEN_KEY";
-            case Umber -> "UMBER_KEY";
-            case Vanguard -> "SKELETON_KEY";
-            default -> "";
-        };
-        if (id.isEmpty()) return true;
-        if (mc.player == null) return false;
-
-        PlayerInventory inv = mc.player.getInventory();
-        for (int i = 0; i < 36; i++) {
-            ItemStack stack = inv.getStack(i);
-            if (!stack.isEmpty() && Utils.getSkyblockId(stack).equals(id)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     private ChromaColour getCorpseColor(CorpseType type) {
         return switch (type) {
@@ -76,34 +48,22 @@ public class CorpseHighlight extends AreaFeature {
         };
     }
 
+
     @EventHandler
     private void onTick(TickEventPre event) {
-        for (Entity ent : Utils.getEntities()) {
-            if (!(ent instanceof ArmorStandEntity stand) || stand.isInvisible()) continue;
-            if (openedCorpses.contains(stand.getId())) {
-                continue;
-            }
+        List<ArmorStandEntity> stands = Utils.getStreamEntities(ArmorStandEntity.class)
+                .filter(stand -> {
+                    if (stand.isInvisible()) return false;
+                    if (!stand.shouldShowArms()) return false;
+                    return !stand.shouldShowBasePlate();
+                }).toList();
+
+        for (ArmorStandEntity stand : stands) {
             var colour = getCorpseColor(getCorpseType(stand));
             if (colour == null) continue;
             RenderColor color = RenderColor.fromChroma(colour);
             Utils.setGlowing(stand, true, color);
         }
-    }
-
-    @EventHandler
-    private void onInteractEntity(InteractEntityEvent event) {
-        if (config.hideOpened && event.entity instanceof ArmorStandEntity stand) {
-            CorpseType type = getCorpseType(stand);
-            if (!type.equals(CorpseType.None) && hasKeyForCorpse(type)) {
-                openedCorpses.add(stand.getId());
-                Utils.setGlowing(stand, false, RenderColor.white);
-            }
-        }
-    }
-
-    @EventHandler
-    private void onJoin(ServerJoinEvent event) {
-        openedCorpses.clear();
     }
 
     @Override
