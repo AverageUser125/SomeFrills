@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+
+    // Java AST parsing (needed for inheritance resolution)
+    implementation "com.github.javaparser:javaparser-core:3.26.2"
+}
+
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add("-Xlint:deprecation")
+}
+
+java {
+    toolchain {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+}

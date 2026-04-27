@@ -1,3 +1,6 @@
+import com.somefrills.FeaturesGenerateTask
+import com.somefrills.FeaturesScanTask
+
 plugins {
     id 'fabric-loom' version "${loom_version}"
     id 'maven-publish'
@@ -122,4 +125,27 @@ publishing {
         // The repositories here will be used for publishing your artifact, not for
         // retrieving dependencies.
     }
+}
+
+tasks.register("scanFeatures", FeaturesScanTask) {
+    outputs.file(layout.buildDirectory.file("tmp/features-list.txt").get())
+}
+
+tasks.register("generateFeatures", FeaturesGenerateTask) {
+    inputFile.set(layout.buildDirectory.file("tmp/features-list.txt"))
+    outputDir.set(layout.projectDirectory.dir("src/main/java/com/somefrills/features/core"))
+
+    dependsOn("scanFeatures")
+}
+
+tasks.named("compileJava") {
+    dependsOn("generateFeatures")
+}
+
+tasks.named("sourcesJar") {
+    dependsOn("generateFeatures")
+}
+
+tasks.named("jar") {
+    dependsOn("generateFeatures")
 }

@@ -18,7 +18,7 @@ public final class SaveCursorPosition extends Feature {
     private Pair<Double, Double> savedPositionedP1 = null;
     private SavedPosition savedPosition = null;
 
-    private SaveCursorPosition() {
+    public SaveCursorPosition() {
         super(FrillsConfig.instance.misc.saveCursorPosition.enabled);
         config = FrillsConfig.instance.misc.saveCursorPosition;
     }
