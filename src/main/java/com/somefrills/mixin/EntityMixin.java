@@ -3,9 +3,9 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.core.Features;
-import com.somefrills.features.mining.GhostVision;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
+import com.somefrills.misc.SkyblockData;
 import com.somefrills.misc.Utils;
 import com.somefrills.mixininterface.EntityRendering;
 import net.minecraft.entity.Entity;
@@ -64,7 +64,7 @@ public class EntityMixin implements EntityRendering {
     @ModifyReturnValue(method = "isInvisible", at = @At("RETURN"))
     private boolean makeCreeperVisible(boolean original) {
         // Make invisible creepers fully visible (client-side) if config enabled
-        if ((Object) this instanceof CreeperEntity creeper) {
+        if ((Object) this instanceof CreeperEntity) {
             var cfg = FrillsConfig.instance.mining.ghostVision;
 
             // Make all creepers visible if config enabled
@@ -73,7 +73,7 @@ public class EntityMixin implements EntityRendering {
             }
 
             // Make ghost creepers visible if config enabled
-            if (cfg.enabled.get() && cfg.makeCreepersVisible && GhostVision.isGhost(creeper)) {
+            if (cfg.enabled.get() && cfg.makeCreepersVisible && SkyblockData.getLocation().contains("MIST")) {
                 return false;
             }
         }
@@ -116,6 +116,14 @@ public class EntityMixin implements EntityRendering {
 
             String currentHealthText = Utils.formatCompact(currentHealth);
             String maxHealthText = Utils.formatCompact(maxHealth);
+            // FIXME: this is a hack, since it should be 1m but hypixel says 1024 for some reason.
+            // Skyhanni, EntityCompact has an if(entityHealth == 1024f), so maybe this is intentional?
+            if (currentHealthText.equals("1.0k")) {
+                currentHealthText = "1.0m";
+            }
+            if (maxHealthText.equals("1.0k")) {
+                maxHealthText = "1.0m";
+            }
 
             Text healthDisplay = Text.literal(currentHealthText)
                     .styled(style -> style.withColor(Formatting.GREEN))

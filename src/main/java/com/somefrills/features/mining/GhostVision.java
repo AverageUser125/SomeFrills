@@ -24,15 +24,9 @@ public class GhostVision extends AreaFeature {
         config = FrillsConfig.instance.mining.ghostVision;
     }
 
-
-    public static boolean isGhost(CreeperEntity creeper) {
-        return creeper.getY() < 100 && creeper.isCharged();
-    }
-
     @EventHandler
     private void onEntity(EntityUpdatedEvent event) {
         if (!(event.entity instanceof CreeperEntity creeper)) return;
-        if (!isGhost(creeper)) return;
         if (config.removeCharge) {
             creeper.getDataTracker().set(CreeperEntity.CHARGED, false);
         }
