@@ -18,6 +18,10 @@ public class SortedList<T> implements List<T> {
         Arrays.sort(this.array);
     }
 
+    public SortedList(SortedList<T> list) {
+        this.array = Arrays.copyOf(list.array, list.array.length);
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public SortedList() {
         this.array = (T[]) new Comparable[0];

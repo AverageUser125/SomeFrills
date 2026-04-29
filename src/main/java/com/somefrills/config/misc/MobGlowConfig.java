@@ -53,7 +53,7 @@ public class MobGlowConfig {
 
         public GlowMobRule(GlowMobRule other) {
             this.info = new MatchInfo(other.info);
-            this.color = new RenderColor(other.color.r, other.color.g, other.color.b, other.color.a);
+            this.color = new RenderColor(other.color);
             this.enabled = other.enabled;
             this.predicate = other.predicate; // predicate can be shared since it's derived from info
         }
@@ -63,8 +63,8 @@ public class MobGlowConfig {
         }
 
         public GlowMobRule(@NonNull MatchInfo info, @NonNull RenderColor color, boolean enabled) {
-            this.info = info;
-            this.color = color;
+            this.info = new MatchInfo(info);
+            this.color = new RenderColor(color);
             this.enabled = enabled;
             this.predicate = null;
         }

@@ -33,7 +33,7 @@ public class MatchInfo {
     public int maxHp;
 
     public MatchInfo(MatchInfo info) {
-        this.type = info.type;
+        this.type = new SortedList<>(info.type);
         this.name = info.name;
         this.area = info.area;
         this.gear = EnumSet.copyOf(info.gear);

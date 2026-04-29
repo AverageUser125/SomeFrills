@@ -6,6 +6,7 @@ import com.google.gson.stream.JsonWriter;
 import io.github.notenoughupdates.moulconfig.ChromaColour;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.ColorHelper;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 
@@ -43,6 +44,10 @@ public class RenderColor {
         int ai = (int) (this.a * 255f);
         this.hex = (ri << 16) | (gi << 8) | bi; // RGB hex
         this.argb = ColorHelper.getArgb(ai, ri, gi, bi);
+    }
+
+    public RenderColor(@NonNull RenderColor color) {
+        set(color);
     }
 
     public static RenderColor fromHex(int hex) {
