@@ -22,13 +22,19 @@ import static com.somefrills.Main.mc;
 public abstract class ChestUI extends GenericContainerScreen {
     protected static final int INV_SIZE = 9 * 6;
     private static final long CLICK_COOLDOWN_MS = 50L;
+
     protected final List<ItemStack> allItems = new ArrayList<>();
+    protected final List<ItemStack> filteredItems = new ArrayList<>();
+
     protected final ChestUI previousScreen;
+
     protected int nextSlot = 0;
     protected int currentPage = 0;
     protected int totalPages = 1;
-    // Click cooldown to avoid handling rapid repeated clicks (milliseconds)
+
     protected long lastClickTimestamp = 0L;
+
+    protected String searchQuery = null;
 
     public ChestUI(String title) {
         this(title, null);
@@ -62,6 +68,20 @@ public abstract class ChestUI extends GenericContainerScreen {
         allItems.clear();
         build();
 
+        filteredItems.clear();
+
+        if (searchQuery == null || searchQuery.isEmpty()) {
+            filteredItems.addAll(allItems);
+        } else {
+            String query = searchQuery.toLowerCase();
+            for (ItemStack stack : allItems) {
+                String name = Utils.getPlainCustomName(stack);
+                if (name != null && name.toLowerCase().contains(query)) {
+                    filteredItems.add(stack);
+                }
+            }
+        }
+
         renderPage();
         updateNavigationArrows(getInventory());
     }
@@ -73,16 +93,20 @@ public abstract class ChestUI extends GenericContainerScreen {
     }
 
     protected void renderPage() {
+        List<ItemStack> source = (searchQuery == null || searchQuery.isEmpty())
+                ? allItems
+                : filteredItems;
+
         int perPage = getUsableSlotsPerPage();
-        totalPages = (int) Math.ceil((double) allItems.size() / perPage);
+        totalPages = (int) Math.ceil((double) source.size() / perPage);
 
         int start = currentPage * perPage;
-        int end = Math.min(start + perPage, allItems.size());
+        int end = Math.min(start + perPage, source.size());
 
         nextSlot = 0;
 
         for (int i = start; i < end; i++) {
-            placeItem(getInventory(), allItems.get(i));
+            placeItem(getInventory(), source.get(i));
         }
     }
 
@@ -113,9 +137,15 @@ public abstract class ChestUI extends GenericContainerScreen {
     }
 
     protected void updateNavigationArrows(Inventory inventory) {
+        int searchSlot = INV_SIZE - 9 + 2;
         int backSlot = INV_SIZE - 9 + 3;
-        int forwardSlot = INV_SIZE - 9 + 5;
         int closeSlot = INV_SIZE - 9 + 4;
+        int forwardSlot = INV_SIZE - 9 + 5;
+        int clearSlot = INV_SIZE - 9 + 6;
+
+        ItemStack searchItem = new ItemStack(Items.COMPASS);
+        Utils.setCustomName(searchItem, Style.EMPTY, "Search");
+        inventory.setStack(searchSlot, searchItem);
 
         if (currentPage > 0) {
             ItemStack backArrow = new ItemStack(Items.ARROW);
@@ -132,6 +162,12 @@ public abstract class ChestUI extends GenericContainerScreen {
             ItemStack forwardArrow = new ItemStack(Items.ARROW);
             Utils.setCustomName(forwardArrow, Style.EMPTY, "Next Page");
             inventory.setStack(forwardSlot, forwardArrow);
+        }
+
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            ItemStack clear = new ItemStack(Items.PAPER);
+            Utils.setCustomName(clear, Style.EMPTY, "Clear Search");
+            inventory.setStack(clearSlot, clear);
         }
     }
 
@@ -162,7 +198,6 @@ public abstract class ChestUI extends GenericContainerScreen {
     public void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {
         if (slot == null || !slot.hasStack()) return;
 
-        // Enforce click cooldown: ignore clicks occurring within CLICK_COOLDOWN_MS of the last handled click
         long now = System.currentTimeMillis();
         if (now - this.lastClickTimestamp < CLICK_COOLDOWN_MS) return;
         this.lastClickTimestamp = now;
@@ -170,6 +205,7 @@ public abstract class ChestUI extends GenericContainerScreen {
         ItemStack stack = slot.getStack();
         String name = Utils.getPlainCustomName(stack);
         if (name == null || name.isEmpty()) return;
+
         switch (name) {
             case "Previous Page" -> {
                 if (currentPage > 0) {
@@ -187,6 +223,25 @@ public abstract class ChestUI extends GenericContainerScreen {
             }
             case "Close" -> {
                 this.close();
+                return;
+            }
+            case "Search" -> {
+                SignGui.open(new String[]{"Search Entity Types"}, input -> {
+                    if (input.length > 1) {
+                        this.searchQuery = input[1];
+                    } else {
+                        this.searchQuery = null;
+                    }
+                    this.currentPage = 0;
+                    rebuild();
+                    Utils.setScreen(this);
+                });
+                return;
+            }
+            case "Clear Search" -> {
+                this.searchQuery = null;
+                this.currentPage = 0;
+                rebuild();
                 return;
             }
         }
