@@ -87,7 +87,6 @@ public class UIInventory implements Inventory {
     @Override
     public void clear() {
         this.stacks.clear();
-        this.stacks.addAll(DefaultedList.ofSize(this.size, ItemStack.EMPTY));
         this.markDirty();
     }
 

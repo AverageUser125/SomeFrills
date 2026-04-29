@@ -27,6 +27,7 @@ public class GlowMobRules extends ChestUI {
     public GlowMobRules() {
         super("GlowMob Rules");
         allRules = Features.get(GlowMob.class).getRules();
+        addAddon(new PagingAddon());
         rebuild();
     }
 
@@ -37,7 +38,6 @@ public class GlowMobRules extends ChestUI {
 
     @Override
     protected void build() {
-        nextSlot = 0;
         for (int i = 0; i < allRules.size(); i++) {
             GlowMobRule rule = allRules.get(i);
             ItemStack stack = new ItemStack(rule.enabled() ? Items.GREEN_TERRACOTTA : Items.RED_TERRACOTTA);
@@ -184,7 +184,7 @@ public class GlowMobRules extends ChestUI {
         }
 
         session = null;
-        rebuild();
+        super.onReturn();
     }
 
     private void openRuleEditor(GlowMobRule rule) {

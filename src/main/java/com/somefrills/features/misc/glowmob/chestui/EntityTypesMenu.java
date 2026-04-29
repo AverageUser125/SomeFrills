@@ -23,6 +23,8 @@ public class EntityTypesMenu extends ChestUI {
     public EntityTypesMenu(ChestUI previousMenu, MatchInfo info) {
         super("Select Entity Type", previousMenu);
         this.info = info;
+        addAddon(new SearchAddon());
+        addAddon(new PagingAddon());
         rebuild();
     }
 
