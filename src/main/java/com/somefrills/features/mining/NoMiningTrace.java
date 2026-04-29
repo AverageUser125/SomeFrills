@@ -9,14 +9,11 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.registry.tag.ItemTags;
 
 public class NoMiningTrace extends Feature {
     private final NoMiningTraceConfig config;
-    private static final String[] miningTraceNames = new String[]{
-            "Pickaxe",
-            "Shovel",
-            "Drill",
-    };
 
     public NoMiningTrace() {
         super(FrillsConfig.instance.mining.noMiningTrace.enabled);
@@ -25,7 +22,10 @@ public class NoMiningTrace extends Feature {
 
     private boolean isPassable(Entity entity) {
         if (entity instanceof ArmorStandEntity stand) {
-            if (stand.isInvisible()) return true;
+            if (stand.isInvisible()) {
+                // Do not pass through mineshaft entrance armor stand. As they are naked and invisible.
+                if (!Utils.isNaked(stand)) return true;
+            }
         }
         if (entity instanceof PlayerEntity player) {
             if (Utils.isRealPlayer(player)) return true;
@@ -40,12 +40,9 @@ public class NoMiningTrace extends Feature {
         if (!config.onlyWhenHoldingTool) return true;
         ItemStack mainHand = Utils.getHeldItem();
         if (mainHand.isEmpty()) return false;
-        String itemName = mainHand.getItem().getName().getString();
-        for (String traceName : miningTraceNames) {
-            if (itemName.contains(traceName)) {
-                return true;
-            }
-        }
+        if (mainHand.isOf(Items.PRISMARINE_SHARD)) return true; // For drills, DO NOT FIX THIS!
+        if (mainHand.isIn(ItemTags.PICKAXES)) return true; // For pickaxe
+        if (mainHand.isIn(ItemTags.SHOVELS)) return true; // For shovels
         return false;
     }
 
