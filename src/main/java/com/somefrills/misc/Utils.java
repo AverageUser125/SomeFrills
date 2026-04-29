@@ -115,6 +115,34 @@ public class Utils {
                 mc.player
         );
     }
+    
+    public static String wrapByDelimiter(String input, int maxLen, String delimiter) {
+        if (input == null || input.isEmpty()) return input;
+        if (maxLen <= 0) throw new IllegalArgumentException("maxLen must be > 0");
+
+        String[] parts = input.split("\\s*" + Pattern.quote(delimiter) + "\\s*");
+        StringBuilder result = new StringBuilder();
+
+        int lineLen = 0;
+        String sep = delimiter + " ";
+
+        for (String part : parts) {
+            if (part.isEmpty()) continue;
+
+            if (lineLen == 0) {
+                result.append(part);
+                lineLen = part.length();
+            } else if (lineLen + sep.length() + part.length() <= maxLen) {
+                result.append(sep).append(part);
+                lineLen += sep.length() + part.length();
+            } else {
+                result.append("\n").append(part);
+                lineLen = part.length();
+            }
+        }
+
+        return result.toString();
+    }
 
     // 1,000       -> 1k
     // 1,250       -> 1.3k

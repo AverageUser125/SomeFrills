@@ -88,8 +88,9 @@ public class EntityTypesMenu extends ChestUI {
 
     private void setLore(ItemStack stack, String typeId) {
         List<Text> lore = new ArrayList<>();
-        if (info.type.equals(typeId)) {
+        if (info.type.contains(typeId)) {
             lore.add(Text.literal("✓ Currently selected").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)));
+            stack.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true);
         } else {
             lore.add(Text.literal("Click to select").setStyle(Style.EMPTY.withColor(Formatting.GRAY)));
         }
@@ -108,11 +109,16 @@ public class EntityTypesMenu extends ChestUI {
         if (entityTypeId == null) return;
 
         if (entityTypeId.equals("none")) {
-            info.type = "";
+            info.type.clear();
         } else {
-            info.type = entityTypeId;
+            entityTypeId = Utils.stripPrefix(entityTypeId, "minecraft:");
+            if(info.type.contains(entityTypeId)) {
+                info.type.remove(entityTypeId);
+            } else {
+                info.type.add(entityTypeId);
+            }
         }
-        close();
+        rebuild();
     }
 }
 

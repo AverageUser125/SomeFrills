@@ -73,9 +73,12 @@ public class GlowMobRules extends ChestUI {
         lines.add(Text.literal("Conditions: ").setStyle(colorStyle(Formatting.GREEN)));
 
         if (!matchInfo.type.isEmpty()) {
-            String typeDisplay = Utils.capitalizeType(matchInfo.type);
+            String[] typeLines = Utils.wrapByDelimiter(matchInfo.type.toString(), 20, ",").split("\n");
             lines.add(Text.literal("Type: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(typeDisplay).setStyle(colorStyle(Formatting.YELLOW))));
+                    .append(Text.literal(typeLines[0]).setStyle(colorStyle(Formatting.YELLOW))));
+            for (int i = 1; i < typeLines.length; i++) {
+                lines.add(Text.literal(typeLines[i]).setStyle(colorStyle(Formatting.YELLOW)));
+            }
         }
 
         if (!matchInfo.name.isEmpty()) {
@@ -164,7 +167,6 @@ public class GlowMobRules extends ChestUI {
     @Override
     protected void onReturn() {
         GlowMob glowMob = Features.get(GlowMob.class);
-
         if (session == null) {
             rebuild();
             return;

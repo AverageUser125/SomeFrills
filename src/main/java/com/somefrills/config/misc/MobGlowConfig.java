@@ -59,7 +59,7 @@ public class MobGlowConfig {
         }
 
         public GlowMobRule(MatchInfo info, RenderColor color) {
-            this(info, color, true);
+            this(info, color, false);
         }
 
         public GlowMobRule(@NonNull MatchInfo info, @NonNull RenderColor color, boolean enabled) {

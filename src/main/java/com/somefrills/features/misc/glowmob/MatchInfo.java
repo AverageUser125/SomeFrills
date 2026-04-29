@@ -5,6 +5,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.somefrills.misc.Area;
+import com.somefrills.misc.SortedList;
 import com.somefrills.misc.Utils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -14,10 +15,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Serial;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class MatchInfo {
@@ -25,7 +23,7 @@ public class MatchInfo {
     private static final double VERTICAL_RANGE = 4.0;
 
     @NonNull
-    public String type;
+    public SortedList<String> type;
     @NonNull
     public String name;
     @Nullable
@@ -42,8 +40,8 @@ public class MatchInfo {
         this.maxHp = 0;
     }
 
-    public MatchInfo(@NonNull String type, @NonNull String name, @Nullable Area area, @NonNull Set<GearFlag> gear, int maxHp) {
-        this.type = type;
+    public MatchInfo(@NonNull List<String> type, @NonNull String name, @Nullable Area area, @NonNull Set<GearFlag> gear, int maxHp) {
+        this.type = new SortedList<>(type);
         this.name = name;
         this.area = area;
         this.gear = gear;
@@ -51,7 +49,7 @@ public class MatchInfo {
     }
 
     public MatchInfo() {
-        this.type = "";
+        this.type = new SortedList<>();
         this.name = "";
         this.area = null;
         this.gear = EnumSet.noneOf(GearFlag.class);
@@ -86,11 +84,15 @@ public class MatchInfo {
             }
 
             switch (key) {
-                case "TYPE" -> info.type = value;
-                case "NAME" -> info.name = value;
-                case "AREA" -> {
-                    info.area = Area.fromString(value);
+                case "TYPE" -> {
+                    String[] types = value.split("\\+");
+                    info.type = new SortedList<>();
+                    for (String t : types) {
+                        info.type.add(t.trim());
+                    }
                 }
+                case "NAME" -> info.name = value;
+                case "AREA" -> info.area = Area.fromString(value);
                 case "GEAR" -> {
                     info.gear = EnumSet.noneOf(GearFlag.class);
                     String[] gearValues = value.split("\\+");
@@ -117,7 +119,7 @@ public class MatchInfo {
     }
 
     public boolean isEmpty() {
-        return type.trim().isEmpty() && name.trim().isEmpty() && area == null && gear.isEmpty() && maxHp <= 0;
+        return type.isEmpty() && name.trim().isEmpty() && area == null && gear.isEmpty() && maxHp <= 0;
     }
 
     @Override
@@ -145,7 +147,7 @@ public class MatchInfo {
     }
 
     public void clear() {
-        this.type = "";
+        this.type = new SortedList<>();
         this.name = "";
         this.area = null;
         this.gear.clear();
@@ -156,8 +158,8 @@ public class MatchInfo {
         if (area != null) {
             predicate = predicate.and(new AreaPredicate(area));
         }
-        if (!type.trim().isEmpty()) {
-            predicate = predicate.and(new TypePredicate(type));
+        if (!type.isEmpty()) {
+            predicate = predicate.and(new MultiTypePredicate(type));
         }
         if (!name.trim().isEmpty()) {
             predicate = predicate.and(new NamePredicate(name));
@@ -176,10 +178,9 @@ public class MatchInfo {
     }
 
     public String serialize() {
-        List<String> parts = new java.util.ArrayList<>();
-
+        List<String> parts = new ArrayList<>();
         if (!type.isEmpty()) {
-            parts.add("TYPE=" + type);
+            parts.add("TYPE=" + String.join("+", type));
         }
 
         if (!name.isEmpty()) {
@@ -241,31 +242,6 @@ public class MatchInfo {
         @Override
         public boolean test(LivingEntity entity) {
             return Utils.isInArea(area);
-        }
-    }
-
-    public static class TypePredicate implements Predicate<LivingEntity> {
-        private static final int PREFIX_LENGTH = "entity.minecraft.".length();
-        private final String entityType;
-
-        public TypePredicate(String entityType) {
-            this.entityType = Utils.stripPrefix(entityType, "minecraft:").toLowerCase();
-        }
-
-        @Override
-        public boolean test(LivingEntity entity) {
-            String entityTypeStr = entity.getType().toString();
-            if (entityTypeStr.length() - PREFIX_LENGTH != this.entityType.length()) {
-                return false;
-            }
-            for (int i = 0; i < this.entityType.length(); i++) {
-                char c1 = entityTypeStr.charAt(i + PREFIX_LENGTH);
-                char c2 = this.entityType.charAt(i);
-                if (c1 != c2) {
-                    return false;
-                }
-            }
-            return true;
         }
     }
 
@@ -378,6 +354,35 @@ public class MatchInfo {
 
         public MatcherParseException(String message) {
             super(message);
+        }
+    }
+
+    public static class MultiTypePredicate implements Predicate<LivingEntity> {
+        private final List<String> entityTypes;
+        private static final int PREFIX_LENGTH = "entity.minecraft.".length();
+
+        public MultiTypePredicate(List<String> entityTypes) {
+            this.entityTypes = entityTypes;
+        }
+
+        @Override
+        public boolean test(LivingEntity entity) {
+            String entityTypeStr = entity.getType().toString().toLowerCase();
+            return entityTypes.stream().anyMatch(s -> specializedEquals(entityTypeStr, s));
+        }
+
+        public static boolean specializedEquals(String entityTypeStr, String entityType) {
+            if (entityTypeStr.length() - PREFIX_LENGTH != entityType.length()) {
+                return false;
+            }
+            for (int i = 0; i < entityType.length(); i++) {
+                char c1 = entityTypeStr.charAt(i + PREFIX_LENGTH);
+                char c2 = entityType.charAt(i);
+                if (c1 != c2) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

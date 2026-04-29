@@ -37,7 +37,7 @@ public class GlowMobEditMenu extends ChestUI {
                 "Click to select glow color!"));
 
         addItem(createChoiceItem(Items.CREEPER_SPAWN_EGG, "Entity",
-                Utils.capitalizeType(info.type),
+                Utils.wrapByDelimiter(info.type.toString(), 20, ","),
                 "Click to choose entity to glow!"));
 
         addItem(createChoiceItem(Items.NAME_TAG, "Name",
@@ -123,8 +123,12 @@ public class GlowMobEditMenu extends ChestUI {
 
         List<Text> lore = new ArrayList<>();
         if (chosen != null && !chosen.isEmpty()) {
+            String[] lines = chosen.split("\n");
             lore.add(Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(chosen).setStyle(colorStyle(chosenColor))));
+                    .append(Text.literal(lines[0]).setStyle(colorStyle(chosenColor))));
+            for (int i = 1; i < lines.length; i++) {
+                lore.add(Text.literal(lines[i]).setStyle(colorStyle(chosenColor)));
+            }
         } else {
             lore.add(Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
                     .append(Text.literal("None").setStyle(colorStyle(Formatting.RED))));
