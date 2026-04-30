@@ -8,60 +8,97 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
-/**
- * Entity highlighting feature that allows users to highlight entities based on custom matcher expressions.
- */
 public class GlowMob extends Feature {
 
     private final List<GlowMobRule> rules;
-    private List<Entity> entityList = List.of();
+    private List<LivingEntity> entityList = List.of();
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
         rules = FrillsConfig.instance.misc.glowMob.rules;
     }
 
-    private static List<Entity> getUpdatedEntities() {
-        return Utils.getEntities().stream()
+    /* ---------------- ENTITY CACHE ---------------- */
+
+    private List<LivingEntity> getEntities() {
+        if (entityList == null) updateEntities();
+        return entityList;
+    }
+
+    private void updateEntities() {
+        entityList = Utils.getEntities().stream()
                 .filter(Utils::isMob)
+                .map(LivingEntity.class::cast)
                 .toList();
     }
 
-    /**
-     * Determines if entity should glow and what color. Single pass through all rules.
-     * Returns null if no match found.
-     */
-    private RenderColor findGlowMatch(Entity entity) {
-        if (!(entity instanceof LivingEntity livingEntity)) return null;
+    /* ---------------- CORE MATCHING ---------------- */
+
+    private RenderColor findGlowMatch(LivingEntity living) {
         for (GlowMobRule rule : rules) {
-            if (rule == null) continue;
-            // Skip disabled rules
-            if (!rule.enabled()) continue;
-            if (rule.matches(livingEntity)) {
-                return rule.color();
-            }
+            if (rule == null || !rule.enabled()) continue;
+            if (rule.matches(living)) return rule.color();
         }
         return null;
     }
 
-    private void applyHighlight(Entity entity) {
-        RenderColor color = findGlowMatch(entity);
+    private void applyHighlight(LivingEntity living) {
+        RenderColor color = findGlowMatch(living);
         if (color != null) {
-            Utils.setGlowing(entity, true, color);
+            Utils.setGlowing(living, true, color);
         }
     }
 
-    public int addRule(GlowMobRule rule) {
-        if (!isActive()) return -1;
-        if (rule == null) {
-            return -1;
+    private void forEachMatching(GlowMobRule rule, Consumer<LivingEntity> action) {
+        if (rule == null) return;
+
+        for (LivingEntity living : getEntities()) {
+            if (rule.matches(living)) {
+                action.accept(living);
+            }
         }
+    }
+
+    private void clearGlow(LivingEntity living) {
+        Utils.setGlowing(living, false, RenderColor.white);
+    }
+
+    private void applyGlow(LivingEntity living, GlowMobRule rule) {
+        Utils.setGlowing(living, true, rule.color());
+    }
+
+    /* ---------------- LIFECYCLE ---------------- */
+
+    @Override
+    protected void onDeactivate() {
+        updateEntities();
+        for (LivingEntity living : getEntities()) {
+            for (GlowMobRule rule : rules) {
+                if (rule.matches(living)) {
+                    clearGlow(living);
+                    break;
+                }
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    private void onWorldTick(TickEventPost event) {
+        updateEntities();
+        getEntities().forEach(this::applyHighlight);
+    }
+
+    /* ---------------- RULE MANAGEMENT ---------------- */
+
+    public int addRule(GlowMobRule rule) {
+        if (!isActive() || rule == null) return -1;
+
         try {
             rules.add(rule);
             return rules.size();
@@ -79,97 +116,76 @@ public class GlowMob extends Feature {
         return removeRule(rules.indexOf(rule) + 1);
     }
 
-    public void replaceRule(GlowMobRule original, GlowMobRule newVersion) {
+    public boolean removeRule(int id) {
+        if (!isActive()) return false;
+
+        GlowMobRule removed = rules.remove(id - 1);
+        if (removed == null) return false;
+
+        updateEntities();
+        forEachMatching(removed, this::clearGlow);
+
+        return true;
+    }
+
+    public void replaceRule(GlowMobRule original, GlowMobRule replacement) {
         if (!isActive()) return;
+
         int idx = rules.indexOf(original);
         if (idx == -1) {
             Utils.info("Original rule not found, cannot replace");
             return;
         }
-        rules.set(idx, newVersion);
-        // Refresh entity list and update glowing on entities that matched the old or new version of this rule
-        updateEntities();
-        for (Entity entity : getEntities()) {
-            boolean matchesOld = original.matches((LivingEntity) entity);
-            boolean matchesNew = newVersion.matches((LivingEntity) entity);
-            if (matchesOld && !matchesNew) {
-                Utils.setGlowing(entity, false, RenderColor.white);
-            } else if (!matchesOld && matchesNew) {
-                Utils.setGlowing(entity, true, newVersion.color());
-            }
-        }
-    }
 
-    public boolean removeRule(int id) {
-        if (!isActive()) return false;
-        GlowMobRule removed = rules.remove(id - 1);
-        if (removed != null) {
-            // Refresh entity list and disable glowing on entities that matched this rule
-            updateEntities();
-            for (Entity entity : getEntities()) {
-                if (entity instanceof LivingEntity livingEntity && removed.matches(livingEntity)) {
-                    Utils.setGlowing(entity, false, RenderColor.white);
-                }
+        rules.set(idx, replacement);
+        updateEntities();
+
+        for (LivingEntity living : getEntities()) {
+            boolean oldMatch = original.matches(living);
+            boolean newMatch = replacement.matches(living);
+
+            if (oldMatch && !newMatch) {
+                clearGlow(living);
+            } else if (!oldMatch && newMatch) {
+                applyGlow(living, replacement);
             }
         }
-        return removed != null;
     }
 
     public void clearRules() {
         if (!isActive()) return;
+
         updateEntities();
-        for (Entity entity : getEntities()) {
-            RenderColor result = findGlowMatch(entity);
-            if (result != null) {
-                Utils.setGlowing(entity, false, RenderColor.white);
-            }
+
+        for (GlowMobRule rule : rules) {
+            forEachMatching(rule, this::clearGlow);
         }
+
         rules.clear();
-    }
-
-    public List<GlowMobRule> getRules() {
-        return rules;
-    }
-
-    private List<Entity> getEntities() {
-        if (entityList == null) {
-            updateEntities();
-        }
-        return entityList;
-    }
-
-    private void updateEntities() {
-        entityList = getUpdatedEntities();
-    }
-
-    @EventHandler(priority = EventPriority.LOW)
-    private void onWorldTick(TickEventPost event) {
-        updateEntities();
-        getEntities().forEach(this::applyHighlight);
     }
 
     public void toggleRule(int parsedId) {
         if (!isActive()) return;
-        var rule = rules.get(parsedId - 1);
+
+        GlowMobRule rule = rules.get(parsedId - 1);
         if (rule == null) return;
 
         updateEntities();
+
         if (rule.enabled()) {
-            for (Entity entity : getEntities()) {
-                if (entity instanceof LivingEntity livingEntity && rule.matches(livingEntity)) {
-                    Utils.setGlowing(entity, false, RenderColor.white);
-                }
-            }
+            forEachMatching(rule, this::clearGlow);
         } else {
-            for (Entity entity : getEntities()) {
-                if (entity instanceof LivingEntity livingEntity && rule.matches(livingEntity)) {
-                    Utils.setGlowing(entity, true, rule.color());
-                }
-            }
+            forEachMatching(rule, living -> applyGlow(living, rule));
         }
+
         rule.toggle();
     }
 
+    /* ---------------- QUERY API ---------------- */
+
+    public List<GlowMobRule> getRules() {
+        return rules;
+    }
 
     public static class MatchedEntityEntry {
         public GlowMobRule rule;
@@ -187,19 +203,19 @@ public class GlowMob extends Feature {
 
     public List<MatchedEntityEntry> getGlowingMobs(List<GlowMobRule> rules) {
         updateEntities();
+
         ArrayList<MatchedEntityEntry> result = new ArrayList<>();
+
         for (GlowMobRule rule : rules) {
-            // TODO: put this check inside the rule.matches method
             if (!rule.enabled()) continue;
 
             List<LivingEntity> matchedEntities = getEntities().stream()
-                    .filter(entity -> entity instanceof LivingEntity)
-                    .map(entity -> (LivingEntity) entity)
                     .filter(rule::matches)
                     .toList();
+
             result.add(new MatchedEntityEntry(rule, matchedEntities));
         }
+
         return result;
     }
-
 }
