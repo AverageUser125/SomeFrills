@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.features.misc.glowmob.MatchInfo;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+
 import java.util.concurrent.CompletableFuture;
 
 public class MatcherArgumentType implements ArgumentType<MatchInfo> {

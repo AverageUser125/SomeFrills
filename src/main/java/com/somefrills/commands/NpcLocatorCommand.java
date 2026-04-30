@@ -41,13 +41,6 @@ public class NpcLocatorCommand {
                         )
                 )
                 .then(literal("remove")
-                        .then(literal("all")
-                                .executes(ctx -> {
-                                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
-                                    if (checkResult != null) return checkResult;
-                                    return clearAllNpcLocations();
-                                })
-                        )
                         .then(argument("npc_name", StringArgumentType.greedyString())
                                 .suggests(NpcLocatorCommand::suggestTrackedNpcs)
                                 .executes(ctx -> {

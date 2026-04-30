@@ -74,15 +74,17 @@ public class GlowPlayerCommand {
                                 }))
                         )
                 )
+                .then(literal("clear"))
+                .executes(ctx -> {
+                    if (!isGlowPlayerEnabled()) {
+                        Utils.info("GlowPlayer feature is disabled.");
+                        return 1;
+                    }
+                    GlowPlayer.clear();
+                    Utils.info("Cleared all forced glows.");
+                    return 1;
+                })
                 .then(literal("remove")
-                        .then(literal("all").executes(ctx -> {
-                            if (!isGlowPlayerEnabled()) {
-                                return 1;
-                            }
-                            GlowPlayer.clear();
-                            Utils.info("Cleared all forced glows.");
-                            return 1;
-                        }))
                         .then(argument("player", StringArgumentType.word())
                                 .suggests(GlowPlayerCommand::suggestOnlinePlayers)
                                 .executes(ctx -> {

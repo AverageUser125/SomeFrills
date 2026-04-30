@@ -6,7 +6,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.glowblock.GlowBlock;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.command.argument.BlockArgumentParser;
@@ -18,6 +17,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.somefrills.Main.mc;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class GlowBlockCommand {
     public static LiteralArgumentBuilder<FabricClientCommandSource> getBuilder() {
@@ -28,8 +29,8 @@ public class GlowBlockCommand {
                     return 1;
                 })
 
-                .then(ClientCommandManager.literal("add")
-                        .then(ClientCommandManager.argument("block", StringArgumentType.greedyString())
+                .then(literal("add")
+                        .then(argument("block", StringArgumentType.word())
                                 .suggests((ctx, builder) -> {
                                     if (mc.world == null || mc.world.getRegistryManager() == null) {
                                         return builder.buildFuture();
@@ -56,18 +57,14 @@ public class GlowBlockCommand {
                                     return 1;
                                 }))
                 )
-
-                .then(ClientCommandManager.literal("remove")
-
-                        .then(ClientCommandManager.literal("all")
-                                .executes(ctx -> {
-                                    get().clear();
-                                    ctx.getSource().sendFeedback(Text.literal("Cleared all glow blocks."));
-                                    return 1;
-                                })
-                        )
-
-                        .then(ClientCommandManager.argument("block", StringArgumentType.greedyString())
+                .then(literal("clear"))
+                .executes(ctx -> {
+                    get().clear();
+                    ctx.getSource().sendFeedback(Text.literal("Cleared all glow blocks."));
+                    return 1;
+                })
+                .then(literal("remove")
+                        .then(argument("block", StringArgumentType.word())
                                 .suggests(GlowBlockCommand::suggestTrackedBlocks)
                                 .executes(ctx -> {
                                     if (mc.world == null || mc.world.getRegistryManager() == null) {
@@ -86,7 +83,7 @@ public class GlowBlockCommand {
                                 }))
                 )
 
-                .then(ClientCommandManager.literal("list")
+                .then(literal("list")
                         .executes(ctx -> {
                             GlowBlock glowBlock = get();
 
