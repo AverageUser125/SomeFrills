@@ -24,6 +24,10 @@ public class GlowMobCommand {
         return literal("glowmob")
                 .executes(ctx -> {
                     //Utils.info("Usage: /glowmob <add|remove|list|clear>");
+                    if (!get().isActive()) {
+                        ctx.getSource().sendError(Text.literal("GlowMob feature is not active."));
+                        return 0;
+                    }
                     Utils.setScreen(new GlowMobRules());
                     return 1;
                 })

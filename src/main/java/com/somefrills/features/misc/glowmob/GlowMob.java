@@ -39,7 +39,6 @@ public class GlowMob extends Feature {
      */
     private RenderColor findGlowMatch(Entity entity) {
         if (!(entity instanceof LivingEntity livingEntity)) return null;
-
         for (GlowMobRule rule : rules) {
             if (rule == null) continue;
             // Skip disabled rules
@@ -52,8 +51,6 @@ public class GlowMob extends Feature {
     }
 
     private void applyHighlight(Entity entity) {
-        if (!(entity instanceof LivingEntity)) return;
-
         RenderColor color = findGlowMatch(entity);
         if (color != null) {
             Utils.setGlowing(entity, true, color);
@@ -61,6 +58,7 @@ public class GlowMob extends Feature {
     }
 
     public int addRule(GlowMobRule rule) {
+        if (!isActive()) return -1;
         if (rule == null) {
             return -1;
         }
@@ -82,6 +80,7 @@ public class GlowMob extends Feature {
     }
 
     public void replaceRule(GlowMobRule original, GlowMobRule newVersion) {
+        if (!isActive()) return;
         int idx = rules.indexOf(original);
         if (idx == -1) {
             Utils.info("Original rule not found, cannot replace");
@@ -102,6 +101,7 @@ public class GlowMob extends Feature {
     }
 
     public boolean removeRule(int id) {
+        if (!isActive()) return false;
         GlowMobRule removed = rules.remove(id - 1);
         if (removed != null) {
             // Refresh entity list and disable glowing on entities that matched this rule
@@ -116,6 +116,7 @@ public class GlowMob extends Feature {
     }
 
     public void clearRules() {
+        if (!isActive()) return;
         updateEntities();
         for (Entity entity : getEntities()) {
             RenderColor result = findGlowMatch(entity);
@@ -148,6 +149,7 @@ public class GlowMob extends Feature {
     }
 
     public void toggleRule(int parsedId) {
+        if (!isActive()) return;
         var rule = rules.get(parsedId - 1);
         if (rule == null) return;
 

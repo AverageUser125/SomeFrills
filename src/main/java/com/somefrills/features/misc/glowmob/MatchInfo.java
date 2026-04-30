@@ -1,7 +1,6 @@
 package com.somefrills.features.misc.glowmob;
 
-import com.google.gson.JsonParseException;
-import com.google.gson.TypeAdapter;
+import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.somefrills.misc.Area;
@@ -13,9 +12,11 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.Serial;
-import java.util.*;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class MatchInfo {
@@ -54,68 +55,6 @@ public class MatchInfo {
         this.area = null;
         this.gear = EnumSet.noneOf(GearFlag.class);
         this.maxHp = 0;
-    }
-
-    public static MatchInfo fromString(String str) throws MatcherParseException {
-        if (str == null || str.trim().isEmpty()) {
-            throw new MatcherParseException("Empty matcher expression");
-        }
-
-        MatchInfo info = new MatchInfo();
-        String[] pairs = str.split(",");
-
-        for (String pair : pairs) {
-            pair = pair.trim();
-            if (pair.isEmpty()) continue;
-
-            int eqIndex = pair.indexOf('=');
-            if (eqIndex == -1) continue;
-
-            String key = pair.substring(0, eqIndex).trim().toUpperCase();
-            String value = pair.substring(eqIndex + 1).trim();
-
-            // Handle quoted strings
-            if (value.startsWith("\"") && value.endsWith("\"")) {
-                value = value.substring(1, value.length() - 1);
-            }
-
-            if (value.isEmpty()) {
-                continue;
-            }
-
-            switch (key) {
-                case "TYPE" -> {
-                    String[] types = value.split("\\+");
-                    info.type = new SortedList<>();
-                    for (String t : types) {
-                        info.type.add(t.trim());
-                    }
-                }
-                case "NAME" -> info.name = value;
-                case "AREA" -> info.area = Area.fromString(value);
-                case "GEAR" -> {
-                    info.gear = EnumSet.noneOf(GearFlag.class);
-                    String[] gearValues = value.split("\\+");
-                    for (String gearValue : gearValues) {
-                        try {
-                            info.gear.add(GearFlag.valueOf(gearValue.trim().toUpperCase()));
-                        } catch (IllegalArgumentException e) {
-                            throw new MatcherParseException("Unknown gear: " + gearValue);
-                        }
-                    }
-                }
-                case "MAXHP" -> {
-                    try {
-                        info.maxHp = Integer.parseInt(value);
-                    } catch (NumberFormatException e) {
-                        throw new MatcherParseException("Invalid MAXHP value: " + value);
-                    }
-                }
-                default -> throw new MatcherParseException("Unknown key: " + key);
-            }
-        }
-
-        return info;
     }
 
     public boolean isEmpty() {
@@ -177,34 +116,95 @@ public class MatchInfo {
         return predicate;
     }
 
-    public String serialize() {
-        List<String> parts = new ArrayList<>();
+    public JsonObject toJson() {
+        JsonObject obj = new JsonObject();
+
         if (!type.isEmpty()) {
-            parts.add("TYPE=" + String.join("+", type));
+            JsonArray types = new JsonArray();
+            for (String t : type) {
+                types.add(t);
+            }
+            obj.add("type", types);
         }
 
         if (!name.isEmpty()) {
-            if (name.contains(",") || name.contains(" ")) {
-                parts.add("NAME=\"" + name + "\"");
-            } else {
-                parts.add("NAME=" + name);
-            }
+            obj.addProperty("name", name);
         }
 
         if (area != null) {
-            parts.add("AREA=" + area.getDisplayName());
+            obj.addProperty("area", area.getDisplayName());
         }
 
         if (!gear.isEmpty()) {
-            String gearStr = String.join("+", gear.stream().map(Enum::name).toList());
-            parts.add("GEAR=" + gearStr);
+            JsonArray gears = new JsonArray();
+            for (GearFlag g : gear) {
+                gears.add(g.name());
+            }
+            obj.add("gear", gears);
         }
 
         if (maxHp > 0) {
-            parts.add("MAXHP=" + maxHp);
+            obj.addProperty("maxHp", maxHp);
         }
 
-        return String.join(",", parts);
+        return obj;
+    }
+
+    public String serialize() {
+        return toJson().toString();
+    }
+
+    public static MatchInfo fromString(String str) throws MatcherParseException {
+        if (str == null || str.trim().isEmpty()) {
+            throw new MatcherParseException("Empty matcher expression");
+        }
+        try {
+            JsonObject obj = JsonParser.parseString(str).getAsJsonObject();
+            return fromJson(obj);
+        } catch (JsonSyntaxException | IllegalStateException e) {
+            throw new MatcherParseException("Invalid JSON format: " + e.getMessage());
+        }
+    }
+
+    public static MatchInfo fromJson(JsonObject obj) throws MatcherParseException {
+        MatchInfo info = new MatchInfo();
+
+        if (obj.has("type")) {
+            info.type = new SortedList<>();
+            for (JsonElement el : obj.getAsJsonArray("type")) {
+                info.type.add(el.getAsString());
+            }
+        }
+
+        if (obj.has("name")) {
+            info.name = obj.get("name").getAsString();
+        }
+
+        if (obj.has("area")) {
+            info.area = Area.fromString(obj.get("area").getAsString());
+        }
+
+        if (obj.has("gear")) {
+            info.gear = EnumSet.noneOf(GearFlag.class);
+
+            for (JsonElement el : obj.getAsJsonArray("gear")) {
+                try {
+                    info.gear.add(GearFlag.valueOf(el.getAsString().toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    throw new MatcherParseException("Unknown gear: " + el.getAsString());
+                }
+            }
+        }
+
+        if (obj.has("maxHp")) {
+            try {
+                info.maxHp = obj.get("maxHp").getAsInt();
+            } catch (NumberFormatException e) {
+                throw new MatcherParseException("Invalid maxHp value");
+            }
+        }
+
+        return info;
     }
 
     public enum GearFlag {
@@ -216,16 +216,17 @@ public class MatchInfo {
     }
 
     public static class MatchInfoTypeAdapter extends TypeAdapter<MatchInfo> {
+        private final Gson gson = new Gson();
         @Override
-        public void write(JsonWriter out, MatchInfo value) throws IOException {
-            out.value(value.serialize());
+        public void write(JsonWriter out, MatchInfo value) {
+            gson.toJson(value.toJson(), out);
         }
 
         @Override
-        public MatchInfo read(JsonReader in) throws IOException {
-            String str = in.nextString();
+        public MatchInfo read(JsonReader in) {
+            JsonObject obj = JsonParser.parseReader(in).getAsJsonObject();
             try {
-                return fromString(str);
+                return MatchInfo.fromJson(obj);
             } catch (MatcherParseException e) {
                 throw new JsonParseException("Failed to parse MatchInfo: " + e.getMessage(), e);
             }
