@@ -41,11 +41,13 @@ public class NpcLocatorCommand {
                         )
                 )
                 .then(literal("remove")
-                        .then(literal("all").executes(ctx -> {
-                            Integer checkResult = checkNpcLocatorEnabledOrWarn();
-                            if (checkResult != null) return checkResult;
-                            return clearAllNpcLocations();
-                        }))
+                        .then(literal("all")
+                                .executes(ctx -> {
+                                    Integer checkResult = checkNpcLocatorEnabledOrWarn();
+                                    if (checkResult != null) return checkResult;
+                                    return clearAllNpcLocations();
+                                })
+                        )
                         .then(argument("npc_name", StringArgumentType.greedyString())
                                 .suggests(NpcLocatorCommand::suggestTrackedNpcs)
                                 .executes(ctx -> {
@@ -84,9 +86,7 @@ public class NpcLocatorCommand {
             Utils.info("No NPCs are currently being tracked.");
         } else {
             Utils.info("Tracked NPCs:");
-            locations.forEach(location -> {
-                Utils.info(Utils.format("  - {}", location.npcName()));
-            });
+            locations.forEach(location -> Utils.info(Utils.format("  - {}", location.npcName())));
         }
         return 1;
     }
@@ -129,7 +129,3 @@ public class NpcLocatorCommand {
         return builder.buildFuture();
     }
 }
-
-
-
-

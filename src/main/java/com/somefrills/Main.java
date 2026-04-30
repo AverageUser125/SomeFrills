@@ -1,6 +1,5 @@
 package com.somefrills;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.somefrills.commands.SomeFrillsCommand;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.about.ConfigVersionDisplay;
@@ -19,13 +18,11 @@ import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,9 +38,6 @@ public class Main implements ClientModInitializer {
     public static IEventBus eventBus = new EventBus();
     public static ManagedConfig<FrillsConfig> config = null;
 
-    public static void registerCommands(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess access) {
-        SomeFrillsCommand.init(dispatcher);
-    }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public static void onGameStop(GameStopEvent event) {
@@ -55,7 +49,7 @@ public class Main implements ClientModInitializer {
         long start = Util.getMeasuringTimeMs();
         mc = MinecraftClient.getInstance();
 
-        ClientCommandRegistrationCallback.EVENT.register(Main::registerCommands);
+        ClientCommandRegistrationCallback.EVENT.register((SomeFrillsCommand::init));
 
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             String msg = Utils.toPlain(message);

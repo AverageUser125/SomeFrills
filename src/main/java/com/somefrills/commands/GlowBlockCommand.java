@@ -30,15 +30,22 @@ public class GlowBlockCommand {
 
                 .then(ClientCommandManager.literal("add")
                         .then(ClientCommandManager.argument("block", StringArgumentType.greedyString())
-                                .suggests((ctx, builder) ->
-                                        BlockArgumentParser.getSuggestions(
-                                                mc.world.getRegistryManager().getOrThrow(RegistryKeys.BLOCK),
-                                                builder,
-                                                false,
-                                                false
-                                        )
-                                )
+                                .suggests((ctx, builder) -> {
+                                    if (mc.world == null || mc.world.getRegistryManager() == null) {
+                                        return builder.buildFuture();
+                                    }
+                                    return BlockArgumentParser.getSuggestions(
+                                            mc.world.getRegistryManager().getOrThrow(RegistryKeys.BLOCK),
+                                            builder,
+                                            false,
+                                            false
+                                    );
+                                })
                                 .executes(ctx -> {
+                                    if (mc.world == null || mc.world.getRegistryManager() == null) {
+                                        ctx.getSource().sendError(Text.literal("World or RegistryManager is unavailable."));
+                                        return 0;
+                                    }
                                     var result = BlockArgumentParser.block(
                                             mc.world.getRegistryManager().getOrThrow(RegistryKeys.BLOCK),
                                             StringArgumentType.getString(ctx, "block"),
@@ -55,6 +62,7 @@ public class GlowBlockCommand {
                         .then(ClientCommandManager.literal("all")
                                 .executes(ctx -> {
                                     get().clear();
+                                    ctx.getSource().sendFeedback(Text.literal("Cleared all glow blocks."));
                                     return 1;
                                 })
                         )
@@ -62,6 +70,10 @@ public class GlowBlockCommand {
                         .then(ClientCommandManager.argument("block", StringArgumentType.greedyString())
                                 .suggests(GlowBlockCommand::suggestTrackedBlocks)
                                 .executes(ctx -> {
+                                    if (mc.world == null || mc.world.getRegistryManager() == null) {
+                                        ctx.getSource().sendError(Text.literal("World or RegistryManager is unavailable."));
+                                        return 0;
+                                    }
                                     var result = BlockArgumentParser.block(
                                             mc.world.getRegistryManager().getOrThrow(RegistryKeys.BLOCK),
                                             StringArgumentType.getString(ctx, "block"),
@@ -69,6 +81,7 @@ public class GlowBlockCommand {
                                     );
 
                                     get().removeBlock(result.blockState().getBlock());
+                                    ctx.getSource().sendFeedback(Text.literal("Removed glow block."));
                                     return 1;
                                 }))
                 )

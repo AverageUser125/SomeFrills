@@ -7,32 +7,50 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.command.CommandRegistryAccess;
+
+import java.util.function.Supplier;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class SomeFrillsCommand {
     public static final ModCommand[] commands = {
-            new ModCommand("settings", "Opens the settings GUI.",
-                    ClientCommandManager.literal("settings")
+            new ModCommand(
+                    "settings",
+                    "Opens the settings GUI.",
+                    () -> ClientCommandManager.literal("settings")
                             .executes(SomeFrillsCommand::executeSettings)
             ),
-            new ModCommand("glowplayer", "Manage glowing players.",
-                    GlowPlayerCommand.getBuilder()
+            new ModCommand(
+                    "glowplayer",
+                    "Manage glowing players.",
+                    GlowPlayerCommand::getBuilder
             ),
-            new ModCommand("glowmob", "Manage glowing mobs/entities.",
-                    GlowMobCommand.getBuilder()
+            new ModCommand(
+                    "glowmob",
+                    "Manage glowing mobs/entities.",
+                    GlowMobCommand::getBuilder
             ),
-            new ModCommand("npclocator", "Track NPC locations.",
-                    NpcLocatorCommand.getBuilder("npclocator")
+            new ModCommand(
+                    "npclocator",
+                    "Track NPC locations.",
+                    () -> NpcLocatorCommand.getBuilder("npclocator")
             ),
-            new ModCommand("locatenpc", "Alias for npclocator.",
-                    NpcLocatorCommand.getBuilder("locatenpc")
+
+            new ModCommand(
+                    "locatenpc",
+                    "Alias for npclocator.",
+                    () -> NpcLocatorCommand.getBuilder("locatenpc")
             ),
-            new ModCommand("freecam", "Toggle freecam mode.",
-                    FreecamCommand.getBuilder()
+            new ModCommand(
+                    "freecam",
+                    "Toggle freecam mode.",
+                    FreecamCommand::getBuilder
             ),
-            new ModCommand("glowblock", "Manage glowing blocks.",
-                    GlowBlockCommand.getBuilder()
+            new ModCommand(
+                    "glowblock",
+                    "Manage glowing blocks.",
+                    GlowBlockCommand::getBuilder
             )
     };
 
@@ -52,8 +70,7 @@ public class SomeFrillsCommand {
         return SINGLE_SUCCESS;
     }
 
-    public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher) {
-
+    public static void init(CommandDispatcher<FabricClientCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
         LiteralArgumentBuilder<FabricClientCommandSource> helpArg =
                 ClientCommandManager.literal("help").executes(context -> {
                     Utils.info("§7Printing command list...");
@@ -80,8 +97,8 @@ public class SomeFrillsCommand {
 
         // Add all commands as subcommands to both main and short aliases
         for (ModCommand command : commands) {
-            commandMain.then(command.builder);
-            commandShort.then(command.builder);
+            commandMain.then(command.builder());
+            commandShort.then(command.builder());
         }
 
         dispatcher.register(commandMain);
@@ -90,7 +107,7 @@ public class SomeFrillsCommand {
         // Register top-level aliases for each command (if not already registered)
         for (ModCommand command : commands) {
             if (!commandExists(dispatcher, command.command)) {
-                dispatcher.register(command.builder);
+                dispatcher.register(command.builder());
             }
         }
     }
@@ -98,12 +115,22 @@ public class SomeFrillsCommand {
     public static class ModCommand {
         public String command;
         public String description;
-        public LiteralArgumentBuilder<FabricClientCommandSource> builder;
+        private final Supplier<LiteralArgumentBuilder<FabricClientCommandSource>> factory;
+        private LiteralArgumentBuilder<FabricClientCommandSource> cached;
 
-        public ModCommand(String command, String description, LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+        public ModCommand(String command, String description,
+                          Supplier<LiteralArgumentBuilder<FabricClientCommandSource>> factory) {
             this.command = command;
             this.description = description;
-            this.builder = builder;
+            this.factory = factory;
+            this.cached = null;
+        }
+
+        public LiteralArgumentBuilder<FabricClientCommandSource> builder() {
+            if (cached == null) {
+                cached = factory.get();
+            }
+            return cached;
         }
     }
 }

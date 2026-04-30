@@ -60,6 +60,13 @@ public class GlowMobCommand {
                         )
                 )
                 .then(literal("remove")
+                        .then(literal("all")
+                                .executes(ctx -> {
+                                    get().clearRules();
+                                    ctx.getSource().sendFeedback(Text.literal("Cleared all entity highlight rules."));
+                                    return 1;
+                                })
+                        )
                         .then(argument("id", IntegerArgumentType.integer(1))
                                 .executes(GlowMobCommand::removeRuleCommand)
                         )
@@ -178,4 +185,3 @@ public class GlowMobCommand {
         return Features.get(GlowMob.class);
     }
 }
-
