@@ -97,7 +97,7 @@ public class MiningCategory {
 
         @Expose
         @ConfigOption(name = "Force Skyhanni Waypoints", desc = "Force skyhanni corpse locator to run")
-        @ConfigEditorColour
+        @ConfigEditorBoolean
         public boolean forceSkyhanni = false;
     }
 
