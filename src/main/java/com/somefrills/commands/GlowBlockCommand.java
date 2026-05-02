@@ -30,7 +30,7 @@ public class GlowBlockCommand {
                 })
 
                 .then(literal("add")
-                        .then(argument("block", StringArgumentType.word())
+                        .then(argument("block", StringArgumentType.greedyString())
                                 .suggests((ctx, builder) -> {
                                     if (mc.world == null || mc.world.getRegistryManager() == null) {
                                         return builder.buildFuture();
