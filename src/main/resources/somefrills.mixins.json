@@ -25,7 +25,8 @@
     "PlayerListHudAccessor",
     "Vec3dMixin",
     "WorldMixin",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "skyhanni.CorpseLocatorMixin"
   ],
   "client": [
     "ArmorStandEntityRendererMixin",

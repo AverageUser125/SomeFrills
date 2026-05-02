@@ -24,3 +24,4 @@ target/
 Thumbs.db
 /src/client/java/com/somefrills/PingOffsetMiner
 src/main/java/com/somefrills/features/core/FeaturesRegistry.java
+!vendor/*

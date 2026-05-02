@@ -94,6 +94,11 @@ public class MiningCategory {
         @ConfigOption(name = "Vanguard Glow Color", desc = "Glow color for Vanguard Corpses")
         @ConfigEditorColour
         public ChromaColour vanguardColor = ChromaColour.fromStaticRGB(255, 85, 255, 255);
+
+        @Expose
+        @ConfigOption(name = "Force Skyhanni Waypoints", desc = "Force skyhanni corpse locator to run")
+        @ConfigEditorColour
+        public boolean forceSkyhanni = false;
     }
 
     @Expose
