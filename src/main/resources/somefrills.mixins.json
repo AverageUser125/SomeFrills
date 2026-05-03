@@ -26,6 +26,7 @@
     "Vec3dMixin",
     "WorldMixin",
     "WorldRendererMixin",
+    "YggdrasilServicesKeyInfoMixin",
     "skyhanni.CorpseLocatorMixin"
   ],
   "client": [
