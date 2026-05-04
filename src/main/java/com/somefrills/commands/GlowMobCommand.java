@@ -116,13 +116,13 @@ public class GlowMobCommand {
                         .append(entity.getType().getName().getString())
                         .append(")")
                         .append(", MaxHP: ")
-                        .append(Utils.formatCompact(entity.getMaxHealth()))
+                        .append(String.format("%.1f", entity.getMaxHealth()))
                         .append(", Pos: [")
-                        .append(Utils.formatCompact(entity.getX()))
+                        .append(String.format("%.1f", entity.getX()))
                         .append(", ")
-                        .append(Utils.formatCompact(entity.getY()))
+                        .append(String.format("%.1f", entity.getY()))
                         .append(", ")
-                        .append(Utils.formatCompact(entity.getZ()))
+                        .append(String.format("%.1f", entity.getZ()))
                         .append("]\n");
             }
         }

@@ -11,6 +11,7 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.jspecify.annotations.NonNull;
 
@@ -61,6 +62,17 @@ public class GlowPlayerCommand {
                                     }
                                     return addGlowWithRenderColor(ctx, color);
                                 }))
+                        )
+                )
+                .then(literal("listglowing")
+                        .executes(GlowPlayerCommand::listGlowingPlayers)
+                        .then(argument("name", StringArgumentType.word())
+                                .executes(ctx ->
+                                        listGlowingPlayers(
+                                                ctx,
+                                                StringArgumentType.getString(ctx, "name")
+                                        )
+                                )
                         )
                 )
                 .then(literal("color")
@@ -270,6 +282,41 @@ public class GlowPlayerCommand {
                 get().setGlowImmediately(player, glowColor);
             }
         }
+    }
+
+    public static int listGlowingPlayers(CommandContext<FabricClientCommandSource> ctx) {
+        return listGlowingPlayers(ctx, "");
+    }
+
+    public static int listGlowingPlayers(CommandContext<FabricClientCommandSource> ctx, String name) {
+        if (mc.world == null) return 1;
+
+        StringBuilder sb = new StringBuilder("Currently glowing players:\n");
+        var forcedNames = get().getForcedNames();
+        for (var player : mc.world.getPlayers()) {
+            if (!Utils.isRealPlayer(player)) continue;
+
+            String playerPureName = Utils.getPlayerName(player);
+            if (!name.isEmpty()) {
+                if (playerPureName == null || !playerPureName.toLowerCase().contains(name.toLowerCase())) continue;
+            }
+            if (!forcedNames.contains(playerPureName)) continue;
+
+            sb.append("  - ")
+                    .append(playerPureName)
+                    .append("(")
+                    .append(Utils.colorToString(get().getColor(playerPureName)))
+                    .append(")")
+                    .append(", Pos: [")
+                    .append(String.format("%.1f", player.getX()))
+                    .append(", ")
+                    .append(String.format("%.1f", player.getY()))
+                    .append(", ")
+                    .append(String.format("%.1f", player.getZ()))
+                    .append("]\n");
+        }
+        ctx.getSource().sendFeedback(Text.literal(sb.toString()));
+        return 1;
     }
 
     public static @NonNull GlowPlayer get() {
