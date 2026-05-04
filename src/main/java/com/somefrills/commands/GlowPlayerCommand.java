@@ -12,6 +12,7 @@ import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.util.Formatting;
+import org.jspecify.annotations.NonNull;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -74,19 +75,19 @@ public class GlowPlayerCommand {
                                 }))
                         )
                 )
-                .then(literal("clear"))
+                .then(literal("clear")
                 .executes(ctx -> {
                     if (!isGlowPlayerEnabled()) {
                         Utils.info("GlowPlayer feature is disabled.");
                         return 1;
                     }
-                    GlowPlayer.clear();
+                    get().clear();
                     Utils.info("Cleared all forced glows.");
                     return 1;
-                })
+                }))
                 .then(literal("remove")
                         .then(argument("player", StringArgumentType.word())
-                                .suggests(GlowPlayerCommand::suggestOnlinePlayers)
+                                .suggests(GlowPlayerCommand::suggestGlowingPlayers)
                                 .executes(ctx -> {
                                     if (!isGlowPlayerEnabled()) {
                                         Utils.info("GlowPlayer feature is disabled.");
@@ -97,6 +98,7 @@ public class GlowPlayerCommand {
                         )
                 );
     }
+
 
     private static boolean isGlowPlayerEnabled() {
         if (!Features.isActive(GlowPlayer.class)) {
@@ -116,7 +118,7 @@ public class GlowPlayerCommand {
         }
 
         RenderColor renderColor = RenderColor.fromFormatting(color);
-        boolean added = GlowPlayer.addPlayer(name, renderColor);
+        boolean added = get().addPlayer(name, renderColor);
         Utils.info(
                 added
                         ? name + " will now glow (" + color.getName() + ")."
@@ -134,7 +136,7 @@ public class GlowPlayerCommand {
             return 1;
         }
 
-        boolean added = GlowPlayer.addPlayer(name, color);
+        boolean added = get().addPlayer(name, color);
         String colorStr = String.format("#%06X", color.hex);
         Utils.info(
                 added
@@ -155,7 +157,7 @@ public class GlowPlayerCommand {
 
         // Set color even if the player wasn't previously added
         RenderColor renderColor = RenderColor.fromFormatting(color);
-        GlowPlayer.addPlayer(name, renderColor);
+        get().addPlayer(name, renderColor);
         Utils.info(name + " glow color set to " + color.getName() + ".");
         applyGlowToOnlinePlayer(name);
         return 1;
@@ -169,7 +171,7 @@ public class GlowPlayerCommand {
             return 1;
         }
 
-        GlowPlayer.addPlayer(name, color);
+        get().addPlayer(name, color);
         String colorStr = String.format("#%06X", color.hex);
         Utils.info(name + " glow color set to " + colorStr + ".");
         applyGlowToOnlinePlayer(name);
@@ -183,7 +185,7 @@ public class GlowPlayerCommand {
             return 1;
         }
 
-        boolean removed = GlowPlayer.removePlayer(name);
+        boolean removed = get().removePlayer(name);
         Utils.info(
                 removed
                         ? name + " will no longer glow."
@@ -197,7 +199,7 @@ public class GlowPlayerCommand {
     /* ---------------- Listing ---------------- */
 
     private static void listGlows() {
-        java.util.Set<String> names = GlowPlayer.getForcedNames();
+        java.util.Set<String> names = get().getForcedNames();
         if (names.isEmpty()) {
             Utils.info("No forced glows.");
             return;
@@ -205,7 +207,7 @@ public class GlowPlayerCommand {
 
         StringBuilder sb = new StringBuilder("Forced glows:\n");
         for (String name : names) {
-            RenderColor color = GlowPlayer.getColor(name);
+            RenderColor color = get().getColor(name);
             String colorStr = color == null ? "none" : String.format("#%06X", color.hex);
             sb.append(name).append(" (").append(colorStr).append(")\n");
         }
@@ -234,6 +236,23 @@ public class GlowPlayerCommand {
         return builder.buildFuture();
     }
 
+    private static CompletableFuture<Suggestions> suggestGlowingPlayers(
+            CommandContext<FabricClientCommandSource> ctx,
+            SuggestionsBuilder builder) {
+        if (mc.world == null) return builder.buildFuture();
+
+        String remaining = builder.getRemaining().toLowerCase();
+
+        for (String name : get().getForcedNames()) {
+            if (name.toLowerCase().startsWith(remaining)) {
+                builder.suggest(name);
+            }
+        }
+
+        return builder.buildFuture();
+
+    }
+
     /* ---------------- Utilities ---------------- */
 
     private static void applyGlowToOnlinePlayer(String pureName) {
@@ -246,10 +265,14 @@ public class GlowPlayerCommand {
             String playerPureName = Utils.getPlayerName(player);
             if (playerPureName == null || !playerPureName.equals(pureName)) continue;
 
-            RenderColor glowColor = GlowPlayer.getColor(pureName);
+            RenderColor glowColor = get().getColor(pureName);
             if (glowColor != null) {
-                GlowPlayer.setGlowImmediately(player, glowColor);
+                get().setGlowImmediately(player, glowColor);
             }
         }
+    }
+
+    public static @NonNull GlowPlayer get() {
+        return Features.get(GlowPlayer.class);
     }
 }
