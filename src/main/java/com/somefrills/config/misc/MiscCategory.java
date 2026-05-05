@@ -22,7 +22,7 @@ public class MiscCategory {
     @Expose
     @Accordion
     @ConfigOption(name = "Mob Glow", desc = "Highlight entities based on name, type, or both")
-    public MobGlowConfig glowMob = new MobGlowConfig();
+    public GlowMobConfig glowMob = new GlowMobConfig();
 
     @Expose
     @Accordion

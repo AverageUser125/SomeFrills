@@ -1,7 +1,8 @@
 package com.somefrills.features.misc.glowmob;
 
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
+import com.somefrills.config.misc.GlowMobConfig;
+import com.somefrills.config.misc.GlowMobConfig.GlowMobRule;
 import com.somefrills.events.GameStopEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
@@ -16,13 +17,14 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class GlowMob extends Feature {
-
+    private final GlowMobConfig config;
     private final List<GlowMobRule> rules;
     private List<LivingEntity> entityList = List.of();
 
     public GlowMob() {
         super(FrillsConfig.instance.misc.glowMob.enabled);
-        rules = FrillsConfig.instance.misc.glowMob.rules;
+        config = FrillsConfig.instance.misc.glowMob;
+        rules = config.rules;
     }
 
     /* ---------------- ENTITY CACHE ---------------- */
@@ -97,7 +99,7 @@ public class GlowMob extends Feature {
 
     @EventHandler
     private void onGameClose(GameStopEvent event) {
-        if (FrillsConfig.instance.misc.glowMob.saveRules) return;
+        if (config.saveRules) return;
         clearRules();
     }
 

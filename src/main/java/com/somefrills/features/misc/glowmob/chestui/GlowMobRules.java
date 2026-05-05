@@ -1,6 +1,6 @@
 package com.somefrills.features.misc.glowmob.chestui;
 
-import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
+import com.somefrills.config.misc.GlowMobConfig.GlowMobRule;
 import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.glowmob.GlowMob;
 import com.somefrills.features.misc.glowmob.MatchInfo;

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-public class MobGlowConfig {
+public class GlowMobConfig {
     @Expose
     @ConfigOption(name = "Enabled", desc = "Highlight entities based on name, type, or both")
     @ConfigEditorBoolean
