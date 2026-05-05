@@ -2,6 +2,7 @@ package com.somefrills.features.misc.glowmob;
 
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MobGlowConfig.GlowMobRule;
+import com.somefrills.events.GameStopEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
 import com.somefrills.misc.RenderColor;
@@ -92,6 +93,12 @@ public class GlowMob extends Feature {
     private void onWorldTick(TickEventPost event) {
         updateEntities();
         getEntities().forEach(this::applyHighlight);
+    }
+
+    @EventHandler
+    private void onGameClose(GameStopEvent event) {
+        if (FrillsConfig.instance.misc.glowMob.saveRules) return;
+        clearRules();
     }
 
     /* ---------------- RULE MANAGEMENT ---------------- */

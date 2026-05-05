@@ -25,7 +25,7 @@ public class MobGlowConfig {
     @Expose
     @ConfigOption(name = "Save Rules", desc = "Save and restore glow rules between sessions")
     @ConfigEditorBoolean
-    public Property<Boolean> saveRules = Property.of(true);
+    public boolean saveRules = true;
 
     @Expose
     public List<GlowMobRule> rules = new ArrayList<>();
