@@ -26,10 +26,10 @@
     "fabricloader": ">=0.16.14",
     "minecraft": "~1.21.11",
     "java": ">=21",
-    "fabric-api": "*",
-    "skyhanni" : ">=7.11.0"
+    "fabric-api": "*"
   },
   "suggests": {
-    "modmenu": "*"
+    "modmenu": "*",
+    "skyhanni": ">=7.11.0"
   }
 }

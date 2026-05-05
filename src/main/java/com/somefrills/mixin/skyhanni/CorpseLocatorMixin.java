@@ -5,11 +5,13 @@ import at.hannibal2.skyhanni.utils.HypixelCommands;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.mining.CorpseHighlight;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+@Pseudo
 @Mixin(CorpseLocator.class)
 public class CorpseLocatorMixin {
     // I can't figure out redirecting the method, so this will do
