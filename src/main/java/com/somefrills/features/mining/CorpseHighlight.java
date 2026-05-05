@@ -1,5 +1,7 @@
 package com.somefrills.features.mining;
 
+import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoint;
+import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoints;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig;
 import com.somefrills.events.TickEventPre;
@@ -12,7 +14,9 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class CorpseHighlight extends AreaFeature {
     private final CorpseHighlightConfig config;
@@ -77,5 +81,29 @@ public class CorpseHighlight extends AreaFeature {
         Umber,
         Vanguard,
         None
+    }
+
+
+    private static List<String> shareAllWaypoints(Predicate<MineshaftWaypoint> filter) {
+        ArrayList<String> sb = new ArrayList<>();
+        var waypoints = MineshaftWaypoints.INSTANCE.getWaypoints();
+        for (MineshaftWaypoint waypoint : waypoints) {
+            if (!filter.test(waypoint)) continue;
+            var location = waypoint.getLocation().toChatFormat();
+            var type = waypoint.getWaypointType().getDisplayText();
+
+            String message = String.format("%s | (%s)", location, type);
+            sb.add(message);
+            waypoint.setShared(true);
+        }
+        return sb;
+    }
+
+    public static List<String> shareAllWaypointsForce() {
+        return shareAllWaypoints(MineshaftWaypoint::isCorpse);
+    }
+
+    public static List<String> shareAllWaypoints() {
+        return shareAllWaypoints(waypoint -> !waypoint.getShared() && waypoint.isCorpse());
     }
 }
