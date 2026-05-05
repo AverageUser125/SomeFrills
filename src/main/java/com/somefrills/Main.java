@@ -97,6 +97,7 @@ public class Main implements ClientModInitializer {
         eventBus.subscribe(EntityCache.class);
         eventBus.subscribe(Input.class);
         eventBus.subscribe(Main.class);
+        eventBus.subscribe(DelayedRun.class);
         Features.init();
 
         eventBus.post(new GameStartEvent());

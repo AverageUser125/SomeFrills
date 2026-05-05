@@ -5,7 +5,7 @@ import com.somefrills.config.misc.GlowMobConfig;
 import com.somefrills.config.misc.GlowMobConfig.GlowMobRule;
 import com.somefrills.events.GameStopEvent;
 import com.somefrills.events.TickEventPost;
-import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.DelayedFeature;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class GlowMob extends Feature {
+public class GlowMob extends DelayedFeature {
     private final GlowMobConfig config;
     private final List<GlowMobRule> rules;
     private List<LivingEntity> entityList = List.of();
