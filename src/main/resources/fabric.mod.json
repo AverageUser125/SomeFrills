@@ -7,6 +7,13 @@
   "authors": [
     "NaorVaninu"
   ],
+  "contributors" : [
+    "ItsRealHim"
+  ],
+  "contact": {
+    "sources": "https://github.com/AverageUser125/SomeFrills",
+    "issues": "https://github.com/AverageUser125/SomeFrills/issues"
+  },
   "license": "GPLv3",
   "icon": "icon.png",
   "environment": "client",
@@ -17,6 +24,16 @@
     "modmenu": [
       "com.somefrills.config.ModMenuIntegration"
     ]
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.github_releases" : "https://github.com/AverageUser125/SomeFrills/releases"
+      }
+    },
+    "mc-publish": {
+      "loaders": ["fabric"]
+    }
   },
   "mixins": [
     "somefrills.mixins.json"

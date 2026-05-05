@@ -1305,7 +1305,16 @@ public class Utils {
     public static Screen getGuiScreen(Screen previous) {
         var editor = Main.config.getEditor();
         GuiContext guiContext = new GuiContext(new GuiElementComponent(editor));
-        return new MoulConfigScreenComponent(Text.empty(), guiContext, previous);
+        return new MoulConfigScreenComponent(Text.empty(), guiContext, previous) {
+            @Override
+            public void close() {
+                if(previous == null) {
+                    super.close();
+                } else {
+                    Utils.setScreen(previous);
+                }
+            }
+        };
     }
 
     public static void runCommand(String string) {
