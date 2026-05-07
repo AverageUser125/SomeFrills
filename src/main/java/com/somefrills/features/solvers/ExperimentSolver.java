@@ -2,245 +2,239 @@ package com.somefrills.features.solvers;
 
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
+import com.somefrills.events.MouseClickEvent;
+import com.somefrills.events.ReceivePacketEvent;
+import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.item.DyeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.somefrills.Main.mc;
 
-/**
- * Fabric 1.21.10 port of the Kotlin AutoExperiments module.
- * Mirrors the exact behavior: tracks state transitions and only clicks when new items appear.
- * Uses AllConfig for dynamic settings.
- */
 public class ExperimentSolver extends Feature {
     private final ExperimentSolverConfig config;
+    private long lastClick = 0;
 
-    private final Map<Integer, Integer> ultrasequencerOrder = new HashMap<>();
-    private final List<Integer> chronomatronOrder = new ArrayList<>();
-    private long lastClickTime = 0;
-    private boolean hasAdded = false;
-    private int lastAdded = 0;
-    private int clicks = 0;
+    private final Random rand = new Random();
+
+    private ExperimentState current = null;
 
     public ExperimentSolver() {
         super(FrillsConfig.instance.solvers.experimentSolver.enabled);
-        config = FrillsConfig.instance.solvers.experimentSolver;
+        this.config = FrillsConfig.instance.solvers.experimentSolver;
     }
 
-    public static ExperimentType getExperimentType() {
-        if (Utils.isOnPrivateIsland() && mc.currentScreen instanceof GenericContainerScreen container) {
-            String title = container.getTitle().getString();
-            if (title.startsWith("Chronomatron (")) return ExperimentType.Chronomatron;
-            if (title.startsWith("Ultrasequencer (")) return ExperimentType.Ultrasequencer;
-            if (title.startsWith("Superpairs (")) return ExperimentType.Superpairs;
+    @EventHandler
+    private void onScreenOpen(ScreenOpenEvent event) {
+        if (!Utils.isOnPrivateIsland()) return;
+        if (!(event.screen instanceof GenericContainerScreen screen)) return;
+        String title = screen.getTitle().getString();
+
+        if (title.startsWith("Chronomatron (")) {
+            current = new ChronomatronState();
+            current.reset();
+        } else if (title.startsWith("Ultrasequencer (")) {
+            current = new UltrasequencerState();
+            current.reset();
+        } else {
+            current = null;
         }
-        return ExperimentType.None;
     }
 
-    private static boolean isValidChronoSlot(int idx) {
-        return (11 <= idx && idx <= 19) || (30 <= idx && idx <= 38);
+    @EventHandler
+    private void onMouseClick(MouseClickEvent event) {
+        if (current != null) {
+            event.setCancelled(true);
+        }
     }
 
-    private static boolean isGlowstone(ItemStack stack) {
-        return stack.getItem().equals(Items.GLOWSTONE);
-    }
-
-    private static boolean isClock(ItemStack stack) {
-        return stack.getItem().equals(Items.CLOCK);
-    }
-
-    private static boolean isGlowstone(Slot s) {
-        return isGlowstone(s.getStack());
-    }
-
-    private static boolean isClock(Slot s) {
-        return isClock(s.getStack());
-    }
-
-    private static boolean isDye(ItemStack stack) {
-        Item item = stack.getItem();
-        return item instanceof DyeItem
-                || item.equals(Items.INK_SAC)
-                || item.equals(Items.BONE_MEAL)
-                || item.equals(Items.LAPIS_LAZULI)
-                || item.equals(Items.COCOA_BEANS);
-    }
-
-    private static boolean isDye(Slot s) {
-        return isDye(s.getStack());
-    }
-
-    private static boolean isTerracotta(ItemStack stack) {
-        return stack.getItem().toString().endsWith("terracotta");
-    }
-
-    private static boolean isTerracotta(Slot s) {
-        return isTerracotta(s.getStack());
+    @EventHandler
+    private void onPacketReceive(ReceivePacketEvent event) {
+        if (current == null) return;
+        if (!(event.packet instanceof ClientCommandC2SPacket)) return;
+        if (mc.player == null) return;
+        ScreenHandler handler = mc.player.currentScreenHandler;
+        if (handler == null) return;
+        // let the current state observe the screen/handler to update its internal state
+        current.onObserve(handler);
     }
 
     @EventHandler
     private void onTick(TickEventPost event) {
         if (mc.player == null) return;
-        ClientPlayerEntity player = mc.player;
-        ScreenHandler handler = player.currentScreenHandler;
+        if (current == null) return;
+        ScreenHandler handler = mc.player.currentScreenHandler;
         if (handler == null) return;
 
-        var type = getExperimentType();
-        if (type == ExperimentType.None) {
-            reset();
-            return;
+        long now = System.currentTimeMillis();
+        if (now - lastClick < delay()) return;
+
+        Integer next = current.next();
+        if (next != null) {
+            MinecraftClient client = MinecraftClient.getInstance();
+            if (client.interactionManager != null && client.player != null) {
+                client.interactionManager.clickSlot(handler.syncId, next, 0, SlotActionType.PICKUP, client.player);
+                lastClick = now;
+            }
         }
-        // Determine which experiment type
-        if (config.chronomatron.enabled && type == ExperimentType.Chronomatron) {
-            solveChronomatron(handler);
-        } else if (config.ultrasequencer.enabled && type == ExperimentType.Ultrasequencer) {
-            solveUltraSequencer(handler);
+
+        if (current.shouldClose()) {
+            if (mc.player != null) mc.player.closeHandledScreen();
+            current = null;
         }
     }
 
-    private void solveChronomatron(ScreenHandler handler) {
-        List<Slot> invSlots = handler.slots;
-        int maxChronomatron = config.chronomatron.closeThreshold;
+    private long delay() {
+        int a = Math.min(config.minDelay, config.maxDelay);
+        int b = Math.max(config.minDelay, config.maxDelay);
+        return (a + rand.nextInt(b - a + 1));
+    }
 
-        // Check if slot 49 is glowstone AND last added slot is not enchanted (click registered)
-        Slot slot49 = invSlots.get(49);
-        Slot lastAddedSlot = invSlots.get(lastAdded);
-        boolean slot49IsGlowstone = slot49.getStack() != null && isGlowstone(slot49);
-        boolean lastAddedNotEnchanted = lastAddedSlot.getStack() != null && !isEnchanted(lastAddedSlot.getStack());
+    private interface ExperimentState {
+        void reset();
 
-        if (slot49IsGlowstone && lastAddedNotEnchanted) {
-            if (config.chronomatron.shouldClose && chronomatronOrder.size() > maxChronomatron) {
-                ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                if (player != null) {
-                    player.closeHandledScreen();
-                }
-            }
-            hasAdded = false;
+        void onObserve(ScreenHandler handler);
+
+        Integer next();
+
+        boolean shouldClose();
+    }
+
+    private class ChronomatronState implements ExperimentState {
+        private final List<Integer> order = new ArrayList<>();
+        private int last = -1;
+        private boolean ready = false;
+        private int clicks = 0;
+        private boolean bool = false; // matches Kotlin naming
+
+        @Override
+        public void reset() {
+            order.clear();
+            last = -1;
+            ready = false;
+            clicks = 0;
+            bool = false;
         }
 
-        // Detect new item entering: slot 49 is clock
-        if (!hasAdded && slot49.getStack() != null && isClock(slot49)) {
-            for (int i = 11; i < 57; i++) { // Scan the colored glass/terracotta area (slots 11-56)
-                if (!isValidChronoSlot(i)) continue;
-                Slot s = invSlots.get(i);
+        @Override
+        public void onObserve(ScreenHandler handler) {
+            if (handler == null || handler.slots == null) return;
+            if (handler.slots.size() <= 49) return;
+
+            ItemStack center = handler.slots.get(49).getStack();
+
+            if (last != -1) {
+                ItemStack lastStack = handler.slots.get(last).getStack();
+                if (center != null && center.getItem() == Items.GLOWSTONE && (lastStack == null || !lastStack.hasGlint())) {
+                    // determine close threshold based on config if desired; use config.chronomatron.closeThreshold
+                    int threshold = config.chronomatron.closeThreshold;
+                    // emulate Kotlin behavior: set bool based on threshold logic; keep simple: compare size
+                    bool = order.size() > threshold;
+                    ready = false;
+                    return;
+                }
+            }
+
+            if (ready) return;
+            if (center == null || center.getItem() != Items.CLOCK) return;
+
+            // find first glinted slot in 10..43
+            for (int i = 10; i <= 43 && i < handler.slots.size(); i++) {
+                Slot s = handler.slots.get(i);
                 ItemStack stack = s.getStack();
                 if (stack == null || stack.isEmpty()) continue;
-                if (!isEnchanted(stack)) continue;
-                if (!isTerracotta(stack)) continue;
-                chronomatronOrder.add(i);
-            }
-
-            if (!chronomatronOrder.isEmpty()) {
-                lastAdded = chronomatronOrder.getLast();
-                hasAdded = true;
+                if (!stack.hasGlint() && (stack.getEnchantments() == null || stack.getEnchantments().isEmpty()))
+                    continue;
+                order.add(i);
+                last = i;
+                ready = true;
                 clicks = 0;
+                break;
             }
         }
 
-        // Perform clicking: slot 49 is clock AND we have items to click
-        if (hasAdded && slot49.getStack() != null && isClock(slot49)
-                && chronomatronOrder.size() > clicks && System.currentTimeMillis() - lastClickTime > config.clickDelay) {
-            int slotToClick = chronomatronOrder.get(clicks);
-            sendClickPacket(handler, slotToClick);
-            lastClickTime = System.currentTimeMillis();
-            clicks++;
+        @Override
+        public Integer next() {
+            if (!ready) return null;
+            if (clicks < order.size()) {
+                return order.get(clicks++);
+            }
+            return null;
+        }
+
+        @Override
+        public boolean shouldClose() {
+            return config.chronomatron.shouldClose && bool && clicks >= order.size();
         }
     }
 
-    private void solveUltraSequencer(ScreenHandler handler) {
-        List<Slot> invSlots = handler.slots;
-        int maxUltraSequencer = config.ultrasequencer.closeThreshold;
+    private class UltrasequencerState implements ExperimentState {
+        private final Map<Integer, Integer> order = new HashMap<>();
+        private boolean ready = false;
+        private int clicks = 0;
 
-        // Reset when slot 49 becomes clock (new round)
-        Slot slot49 = invSlots.get(49);
-        if (slot49.getStack() != null && isClock(slot49)) {
-            hasAdded = false;
-        }
-
-        // Detect and rebuild map when slot 49 becomes glowstone
-        if (!hasAdded && slot49.getStack() != null && isGlowstone(slot49)) {
-            ultrasequencerOrder.clear();
-
-            for (int i = 0; i < invSlots.size(); i++) {
-                Slot s = invSlots.get(i);
-                if (s.getStack() != null && !s.getStack().isEmpty()) {
-                    int stackSize = s.getStack().getCount();
-                    if (isDye(s)) {
-                        int idx = stackSize - 1;
-                        ultrasequencerOrder.put(idx, i);
-                    }
-                }
-            }
-
-            hasAdded = true;
+        @Override
+        public void reset() {
+            order.clear();
+            ready = false;
             clicks = 0;
+        }
 
-            if (ultrasequencerOrder.size() > maxUltraSequencer && config.ultrasequencer.shouldClose) {
-                ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                if (player != null) {
-                    player.closeHandledScreen();
+        @Override
+        public void onObserve(ScreenHandler handler) {
+            if (handler == null || handler.slots == null) return;
+            if (handler.slots.size() <= 49) return;
+
+            ItemStack center = handler.slots.get(49).getStack();
+            if (center != null && center.getItem() == Items.CLOCK) {
+                ready = false;
+                return;
+            }
+
+            if (ready) return;
+            if (center == null || center.getItem() != Items.GLOWSTONE) return;
+
+            order.clear();
+            for (int i = 9; i <= 44 && i < handler.slots.size(); i++) {
+                Slot s = handler.slots.get(i);
+                ItemStack stack = s.getStack();
+                if (stack == null || stack.isEmpty()) continue;
+                String name = stack.getName().getString();
+                String stripped = name.replaceAll("§.", "");
+                if (stripped.matches("\\d+")) {
+                    int idx = stack.getCount() - 1;
+                    order.put(idx, i);
                 }
             }
+            ready = true;
+            clicks = 0;
         }
 
-        // Perform clicking: slot 49 is clock AND we have dyes to click
-        if (slot49.getStack() != null && isClock(slot49)
-                && ultrasequencerOrder.containsKey(clicks) && System.currentTimeMillis() - lastClickTime > config.clickDelay) {
-            Integer slotToClick = ultrasequencerOrder.get(clicks);
-            if (slotToClick != null) {
-                sendClickPacket(handler, slotToClick);
-            }
-            lastClickTime = System.currentTimeMillis();
+        @Override
+        public Integer next() {
+            if (!ready) return null;
+            Integer slot = order.get(clicks);
             clicks++;
-        }
-    }
-
-    private void sendClickPacket(ScreenHandler handler, int slotIdx) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (client.interactionManager == null || client.player == null) {
-            return;
+            return slot;
         }
 
-        client.interactionManager.clickSlot(
-                handler.syncId,
-                slotIdx,
-                0,
-                SlotActionType.PICKUP,
-                client.player
-        );
-    }
-
-    private boolean isEnchanted(ItemStack stack) {
-        if (stack == null || stack.isEmpty()) return false;
-        return stack.hasEnchantments() || stack.hasGlint();
-    }
-
-    private void reset() {
-        ultrasequencerOrder.clear();
-        chronomatronOrder.clear();
-        hasAdded = false;
-        lastAdded = 0;
-        clicks = 0;
-    }
-
-    public enum ExperimentType {
-        Chronomatron, Ultrasequencer, Superpairs, None
+        @Override
+        public boolean shouldClose() {
+            int threshold = config.ultrasequencer.closeThreshold;
+            return config.ultrasequencer.shouldClose && order.size() > threshold;
+        }
     }
 }
+
+

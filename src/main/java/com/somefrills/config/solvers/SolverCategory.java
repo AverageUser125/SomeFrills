@@ -19,9 +19,14 @@ public class SolverCategory {
         public Property<Boolean> enabled = Property.of(true);
 
         @Expose
-        @ConfigOption(name = "Click Delay", desc = "Click delay")
+        @ConfigOption(name = "Min Click Delay", desc = "")
         @ConfigEditorSlider(minValue = 0, maxValue = 1000, minStep = 50)
-        public int clickDelay = 400;
+        public int minDelay = 200;
+
+        @Expose
+        @ConfigOption(name = "Max Click Delay", desc = "")
+        @ConfigEditorSlider(minValue = 0, maxValue = 1000, minStep = 50)
+        public int maxDelay = 250;
 
         @Expose
         @ConfigOption(name = "Chronomatron", desc = "Settings for the Chronomatron puzzle")
