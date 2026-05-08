@@ -16,6 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static com.somefrills.Main.mc;
+
 @Pseudo
 @Mixin(MineshaftWaypoints.class)
 public abstract class MineshaftWaypointsMixin {
@@ -27,6 +29,7 @@ public abstract class MineshaftWaypointsMixin {
         if (!FrillsConfig.instance.mining.corpseHighlight.forceSkyhanni) {
             return;
         }
+        if (mc.currentScreen != null) return;
         if (!Utils.isInArea(Area.MINESHAFT)) return;
         if (event.getKeyCode() != getConfig().getShareWaypointLocation()) return;
 
