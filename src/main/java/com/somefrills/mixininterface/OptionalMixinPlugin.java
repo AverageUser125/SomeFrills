@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Set;
 
 public class OptionalMixinPlugin implements IMixinConfigPlugin {
+    private int mixinPackageLength = 0;
+    
     @Override
     public void onLoad(String mixinPackage) {
-
+        mixinPackageLength = mixinPackage.length();
     }
 
     @Override
@@ -21,10 +23,21 @@ public class OptionalMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.contains("skyhanni")) {
-            return FabricLoader.getInstance().isModLoaded("skyhanni");
-        }
-        return true;
+        String modId = getModIdFromMixinClassName(mixinClassName);
+        if (modId.isEmpty()) return true;
+        return FabricLoader.getInstance().isModLoaded(modId);
+    }
+
+    // com.somefrills.mixin.skyhanni.SkyHanniMixin -> skyhanni
+    // com.somefrills.mixin.SomeFrillsMixin -> ""
+    private String getModIdFromMixinClassName(String mixinClassName) {
+        int startIndex = mixinPackageLength + 1; // character after the '.' following the mixin package
+        if (startIndex >= mixinClassName.length()) return "";
+
+        int endIndex = mixinClassName.indexOf('.', startIndex);
+        if (endIndex == -1) return "";
+
+        return mixinClassName.substring(startIndex, endIndex);
     }
 
     @Override
