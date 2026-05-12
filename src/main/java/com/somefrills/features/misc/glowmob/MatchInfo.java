@@ -38,7 +38,7 @@ public class MatchInfo {
         this.name = info.name;
         this.area = info.area;
         this.gear = EnumSet.copyOf(info.gear);
-        this.maxHp = 0;
+        this.maxHp = info.maxHp;
     }
 
     public MatchInfo(@NonNull List<String> type, @NonNull String name, @Nullable Area area, @NonNull Set<GearFlag> gear, int maxHp) {

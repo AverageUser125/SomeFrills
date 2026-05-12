@@ -21,12 +21,14 @@ import java.util.Set;
 public class GlowMobEditMenu extends ChestUI {
     private final GlowMobRule rule;
     private final MatchInfo info;
+    private final boolean isNewRule;
     private boolean revertRequested = false;
 
-    public GlowMobEditMenu(ChestUI previousMenu, GlowMobRule rule) {
+    public GlowMobEditMenu(ChestUI previousMenu, GlowMobRule rule, boolean isNewRule) {
         super("GlowMob Edit Menu", previousMenu);
         this.rule = rule;
         this.info = rule.info();
+        this.isNewRule = isNewRule;
         rebuild();
     }
 
@@ -69,8 +71,8 @@ public class GlowMobEditMenu extends ChestUI {
                 "Leave empty for any health",
                 "Click to set max HP filter"));
 
-        // Add revert button if this is an edit session (not creating new)
-        if (previousScreen instanceof GlowMobRules) {
+        // Add revert/cancel button
+        if (!isNewRule) {
             var revert = new ItemStack(Items.REDSTONE);
             Utils.setCustomName(revert, colorStyle(Formatting.GOLD), "Revert Changes");
             List<Text> revertLore = new ArrayList<>();
@@ -80,6 +82,16 @@ public class GlowMobEditMenu extends ChestUI {
             revert.set(DataComponentTypes.LORE, new LoreComponent(revertLore, revertLore));
             revert.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
             getInventory().setStack(INV_SIZE - 9 + 3, revert);
+        } else {
+            var cancel = new ItemStack(Items.BARRIER);
+            Utils.setCustomName(cancel, colorStyle(Formatting.RED), "Cancel");
+            List<Text> cancelLore = new ArrayList<>();
+            cancelLore.add(Text.literal("Discard changes").setStyle(colorStyle(Formatting.GRAY)));
+            cancelLore.add(Text.literal("").setStyle(colorStyle(Formatting.GRAY)));
+            cancelLore.add(Text.literal("Click to cancel").setStyle(colorStyle(Formatting.YELLOW)));
+            cancel.set(DataComponentTypes.LORE, new LoreComponent(cancelLore, cancelLore));
+            cancel.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
+            getInventory().setStack(INV_SIZE - 9 + 3, cancel);
         }
 
         var delete = new ItemStack(Items.CAULDRON);
@@ -244,7 +256,7 @@ public class GlowMobEditMenu extends ChestUI {
                         rebuild();
                         Utils.setScreen(this);
                     });
-            case "Revert Changes" -> {
+            case "Revert Changes", "Cancel" -> {
                 revertRequested = true;
                 close();
             }

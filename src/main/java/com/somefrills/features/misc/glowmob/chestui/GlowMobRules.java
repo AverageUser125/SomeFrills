@@ -202,7 +202,7 @@ public class GlowMobRules extends ChestUI {
 
     private void openRuleEditor(GlowMobRule rule) {
         session = new RuleEditSession(rule);
-        session.menu = new GlowMobEditMenu(this, session.workingCopy);
+        session.menu = new GlowMobEditMenu(this, session.workingCopy, false);
         Utils.setScreen(session.menu);
     }
 
@@ -210,7 +210,7 @@ public class GlowMobRules extends ChestUI {
         session = new RuleEditSession(null);
         session.workingCopy = new GlowMobRule(session.workingCopy.info(), RenderColor.fromHex(MyMapColor.WHITE.getHex()));
         session.workingCopy.toggle(); // new rules start as enabled by default
-        session.menu = new GlowMobEditMenu(this, session.workingCopy);
+        session.menu = new GlowMobEditMenu(this, session.workingCopy, true);
         Utils.setScreen(session.menu);
     }
 
