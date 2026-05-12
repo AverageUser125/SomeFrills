@@ -78,6 +78,7 @@ public class GlowMobEditMenu extends ChestUI {
             revertLore.add(Text.literal("").setStyle(colorStyle(Formatting.GRAY)));
             revertLore.add(Text.literal("Click to revert").setStyle(colorStyle(Formatting.YELLOW)));
             revert.set(DataComponentTypes.LORE, new LoreComponent(revertLore, revertLore));
+            revert.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
             getInventory().setStack(INV_SIZE - 9 + 3, revert);
         }
 
@@ -94,7 +95,7 @@ public class GlowMobEditMenu extends ChestUI {
 
         // NONE
         if (gear.isEmpty()) {
-            text = "None";
+            text = "(Unset)";
             color = Formatting.RED.getColorValue();
             return createChoiceItem(
                     Items.IRON_CHESTPLATE,
