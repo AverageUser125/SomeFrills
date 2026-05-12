@@ -1,10 +1,8 @@
 package com.somefrills.mixin;
 
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.MouseClickEvent;
 import com.somefrills.events.MouseScrollEvent;
 import com.somefrills.features.core.Features;
-import com.somefrills.features.farming.SpaceFarmer;
 import com.somefrills.features.misc.SaveCursorPosition;
 import com.somefrills.misc.Input;
 import com.somefrills.misc.KeyAction;
@@ -22,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.somefrills.Main.eventBus;
-import static com.somefrills.Main.mc;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
 @Mixin(Mouse.class)
