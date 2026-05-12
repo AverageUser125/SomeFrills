@@ -28,7 +28,8 @@
     "WorldRendererMixin",
     "YggdrasilServicesKeyInfoMixin",
     "skyhanni.CorpseLocatorMixin",
-    "skyhanni.MineshaftWaypointsMixin"
+    "skyhanni.MineshaftWaypointsMixin",
+    "skyhanni.ThunderSparkHighlightMixin"
   ],
   "client": [
     "ArmorStandEntityRendererMixin",

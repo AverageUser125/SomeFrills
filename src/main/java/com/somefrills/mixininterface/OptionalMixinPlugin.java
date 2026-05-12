@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class OptionalMixinPlugin implements IMixinConfigPlugin {
     private int mixinPackageLength = 0;
-    
+
     @Override
     public void onLoad(String mixinPackage) {
         mixinPackageLength = mixinPackage.length();
