@@ -33,6 +33,7 @@ public class BlockScanner {
     }
 
     public void removeBlockFromResults(Block block) {
+        if (mc.world == null) return;
         glowingBlocks.removeIf(pos ->
                 mc.world.getBlockState(pos).getBlock() == block
         );

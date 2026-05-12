@@ -57,9 +57,8 @@ public class KeybindManager {
     }
 
     private record Keybind(int key, Runnable callback) {
-
         void trigger() {
-                callback.run();
-            }
+            callback.run();
         }
+    }
 }
