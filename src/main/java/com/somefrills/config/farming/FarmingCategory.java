@@ -3,10 +3,8 @@ package com.somefrills.config.farming;
 import com.google.gson.annotations.Expose;
 import io.github.notenoughupdates.moulconfig.annotations.Accordion;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorKeybind;
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
 import io.github.notenoughupdates.moulconfig.observer.Property;
-import org.lwjgl.glfw.GLFW;
 
 public class FarmingCategory {
     @Expose

@@ -3,7 +3,9 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.Main;
+import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.*;
+import com.somefrills.features.core.Features;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -11,8 +13,11 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profilers;
+import net.minecraft.world.RaycastContext;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static com.somefrills.Main.eventBus;
+import static com.somefrills.Main.mc;
 
 @Mixin(value = MinecraftClient.class, priority = 999)
 public abstract class MinecraftClientMixin {
@@ -30,7 +36,36 @@ public abstract class MinecraftClientMixin {
     public ClientWorld world;
 
     @Shadow
+    public HitResult crosshairTarget;
+
+    @Shadow
     public abstract void setScreen(@Nullable Screen screen);
+
+    @Inject(method = "doAttack", at = @At("HEAD"))
+    private void onAttack(CallbackInfoReturnable<Boolean> cir) {
+        if (!FrillsConfig.instance.mining.noMiningTrace.enabled.get()) return;
+        if (!(crosshairTarget instanceof EntityHitResult)) return;
+        if (mc.player == null || mc.world == null) return;
+
+        Vec3d start = mc.player.getCameraPosVec(1.0F);
+        Vec3d rotation = mc.player.getRotationVec(1.0F);
+        double reach = 5.0D;
+        Vec3d end = start.add(rotation.x * reach, rotation.y * reach, rotation.z * reach);
+
+        // raycast for blocks only (ignoring entities)
+        BlockHitResult blockHitResult = mc.world.raycast(new RaycastContext(
+                start,
+                end,
+                RaycastContext.ShapeType.OUTLINE,
+                RaycastContext.FluidHandling.NONE,
+                mc.player
+        ));
+
+        // If there's a solid block behind the entity, attack the block instead
+        if (blockHitResult != null && !mc.world.getBlockState(blockHitResult.getBlockPos()).isAir()) {
+            crosshairTarget = blockHitResult;
+        }
+    }
 
     @ModifyReturnValue(method = "hasOutline", at = @At("RETURN"))
     private boolean hasOutline(boolean original, Entity entity) {
