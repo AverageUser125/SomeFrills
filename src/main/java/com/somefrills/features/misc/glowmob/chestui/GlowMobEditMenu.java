@@ -34,26 +34,35 @@ public class GlowMobEditMenu extends ChestUI {
         addItem(createChoiceItem(MyMapColor.getClosest(rule.color()).getItem(), "Color",
                 Utils.colorToString(rule.color()),
                 rule.color().hex,
-                "Click to select glow color!"));
+                "Sets the glow color",
+                "Click to change color"));
 
         addItem(createChoiceItem(Items.CREEPER_SPAWN_EGG, "Entity",
                 Utils.wrapByDelimiter(info.type.toString(), 20, ","),
-                "Click to choose entity to glow!"));
+                "Filters by mob type (zombie, creeper, etc.)",
+                "Leave empty to match all types",
+                "Click to choose entities"));
 
         addItem(createChoiceItem(Items.NAME_TAG, "Name",
                 info.name,
-                "Click to set name filter!"));
+                "Matches custom names from armor stands",
+                "Searches nearby name tags above mobs",
+                "Click to set name filter"));
 
         addItem(createChoiceItem(Items.CARVED_PUMPKIN, "Area",
                 info.area != null ? info.area.getDisplayName() : null,
                 info.area != null ? info.area.getColorHex() : null,
-                "Click to select area!"));
+                "Only glows mobs in specific areas",
+                "Leave empty for all locations",
+                "Click to select area"));
 
         addItem(createGearChoiceItem());
 
         addItem(createChoiceItem(Items.ENCHANTED_BOOK, "Max HP",
                 info.maxHp > 0 ? Utils.formatCompact(info.maxHp) : null,
-                "Click to set max HP filter!"));
+                "Only glows mobs with this exact max health",
+                "Leave empty for any health",
+                "Click to set max HP filter"));
 
         var delete = new ItemStack(Items.CAULDRON);
         Utils.setCustomName(delete, colorStyle(Formatting.RED), "Delete");
@@ -75,7 +84,9 @@ public class GlowMobEditMenu extends ChestUI {
                     "Gear",
                     text,
                     color,
-                    "Click to toggle armor filter!"
+                    "Filters by equipped armor",
+                    "Leave empty for any armor state",
+                    "Click to toggle armor filter"
             );
         }
 
@@ -86,7 +97,9 @@ public class GlowMobEditMenu extends ChestUI {
                     Items.CHAINMAIL_CHESTPLATE,
                     "Gear",
                     text,
-                    "Click to toggle armor filter!"
+                    "Filters by equipped armor",
+                    "Only matches mobs with no armor",
+                    "Click to toggle armor filter"
             );
         }
 
@@ -109,19 +122,23 @@ public class GlowMobEditMenu extends ChestUI {
                 "Gear",
                 text,
                 color,
-                "Click to toggle armor filter!"
+                "Filters by equipped armor",
+                "Matches mobs wearing selected pieces",
+                "Click to toggle armor filter"
         );
     }
 
-    private ItemStack createChoiceItem(Item item, String label, String chosen, String bottomText) {
-        return createChoiceItem(item, label, chosen, Formatting.YELLOW.getColorValue(), bottomText);
+    private ItemStack createChoiceItem(Item item, String label, String chosen, String... descriptions) {
+        return createChoiceItem(item, label, chosen, Formatting.YELLOW.getColorValue(), descriptions);
     }
 
-    private ItemStack createChoiceItem(Item item, String label, String chosen, Integer chosenColor, String bottomText) {
+    private ItemStack createChoiceItem(Item item, String label, String chosen, Integer chosenColor, String... descriptions) {
         ItemStack stack = new ItemStack(item);
         Utils.setCustomName(stack, colorStyle(Formatting.GREEN).withItalic(false), label);
 
         List<Text> lore = new ArrayList<>();
+
+        // Display chosen value
         if (chosen != null && !chosen.isEmpty()) {
             String[] lines = chosen.split("\n");
             lore.add(Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
@@ -131,10 +148,25 @@ public class GlowMobEditMenu extends ChestUI {
             }
         } else {
             lore.add(Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal("None").setStyle(colorStyle(Formatting.RED))));
+                    .append(Text.literal("(Unset)").setStyle(colorStyle(Formatting.DARK_GRAY))));
         }
+
         lore.add(Text.literal(""));
-        lore.add(Text.literal(bottomText).setStyle(colorStyle(Formatting.YELLOW)));
+
+        // Add descriptions with proper formatting
+        if (descriptions.length > 0) {
+            for (int i = 0; i < descriptions.length; i++) {
+                String desc = descriptions[i];
+                if (i == descriptions.length - 1) {
+                    // Last line: action text in YELLOW
+                    lore.add(Text.literal(desc).setStyle(colorStyle(Formatting.YELLOW)));
+                } else {
+                    // Middle lines: help text in GRAY
+                    lore.add(Text.literal(desc).setStyle(colorStyle(Formatting.GRAY)));
+                }
+            }
+        }
+
         stack.set(DataComponentTypes.LORE, new LoreComponent(lore, lore));
         stack.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS);
         return stack;
@@ -175,16 +207,24 @@ public class GlowMobEditMenu extends ChestUI {
                 Utils.setScreen(this);
             });
             case "Max HP" ->
-                    SignGui.open(new String[]{"Enter Max Hp", info.maxHp != 0 ? Utils.formatCompact(info.maxHp) : ""}, lines -> {
+                    SignGui.open(new String[]{"Enter Max Hp", info.maxHp > 0 ? Utils.formatCompact(info.maxHp) : ""}, lines -> {
                         if (lines.length < 2) return;
                         String input = lines[1].trim();
-                        try {
-                            info.maxHp = Utils.parseCompact(input);
-                            rebuild();
-                            Utils.setScreen(this);
-                        } catch (NumberFormatException e) {
-                            // ignore invalid input
+
+                        // If empty, clear the filter
+                        if (input.isEmpty()) {
+                            info.maxHp = 0;
+                        } else {
+                            try {
+                                info.maxHp = Utils.parseCompact(input);
+                            } catch (NumberFormatException e) {
+                                // Invalid input - don't update
+                                Utils.setScreen(this);
+                                return;
+                            }
                         }
+                        rebuild();
+                        Utils.setScreen(this);
                     });
             case "Delete" -> {
                 info.clear();
