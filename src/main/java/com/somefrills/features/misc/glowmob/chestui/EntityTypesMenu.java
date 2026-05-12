@@ -114,7 +114,7 @@ public class EntityTypesMenu extends ChestUI {
             info.type.clear();
         } else {
             entityTypeId = Utils.stripPrefix(entityTypeId, "minecraft:");
-            if(info.type.contains(entityTypeId)) {
+            if (info.type.contains(entityTypeId)) {
                 info.type.remove(entityTypeId);
             } else {
                 info.type.add(entityTypeId);

@@ -217,6 +217,7 @@ public class MatchInfo {
 
     public static class MatchInfoTypeAdapter extends TypeAdapter<MatchInfo> {
         private final Gson gson = new Gson();
+
         @Override
         public void write(JsonWriter out, MatchInfo value) {
             gson.toJson(value.toJson(), out);
@@ -246,63 +247,61 @@ public class MatchInfo {
         }
     }
 
-    private static class NamePredicate implements Predicate<LivingEntity> {
-        private final String name;
-
-        public NamePredicate(String name) {
-            this.name = name.toLowerCase();
-        }
-
-        private static List<LivingEntity> getNearbyEntities(LivingEntity entity) {
-            var world = entity.getEntityWorld();
-            if (world == null) {
-                return Collections.emptyList();
+    private record NamePredicate(String name) implements Predicate<LivingEntity> {
+            private NamePredicate(String name) {
+                this.name = name.toLowerCase();
             }
 
-            var box = entity.getBoundingBox()
-                    .expand(HORIZONTAL_RADIUS * 2, VERTICAL_RANGE, HORIZONTAL_RADIUS * 2);
-
-            return world.getEntitiesByClass(ArmorStandEntity.class, box, e -> true)
-                    .stream()
-                    .map(e -> (LivingEntity) e)
-                    .toList();
-        }
-
-        @Override
-        public boolean test(LivingEntity entity) {
-            return hasNamedArmorStandAbove(entity);
-        }
-
-        private boolean hasNamedArmorStandAbove(LivingEntity entity) {
-            double eX = entity.getX();
-            double eY = entity.getY();
-            double eZ = entity.getZ();
-
-            for (LivingEntity nearby : getNearbyEntities(entity)) {
-                if (!(nearby instanceof ArmorStandEntity armorStand)) {
-                    continue;
+            private static List<LivingEntity> getNearbyEntities(LivingEntity entity) {
+                var world = entity.getEntityWorld();
+                if (world == null) {
+                    return Collections.emptyList();
                 }
 
-                double asY = armorStand.getY();
-                if (asY < eY || asY - eY >= VERTICAL_RANGE) {
-                    continue;
-                }
+                var box = entity.getBoundingBox()
+                        .expand(HORIZONTAL_RADIUS * 2, VERTICAL_RANGE, HORIZONTAL_RADIUS * 2);
 
-                double dx = armorStand.getX() - eX;
-                double dz = armorStand.getZ() - eZ;
-                double horizontalDist = Math.hypot(dx, dz);
+                return world.getEntitiesByClass(ArmorStandEntity.class, box, e -> true)
+                        .stream()
+                        .map(e -> (LivingEntity) e)
+                        .toList();
+            }
 
-                if (horizontalDist <= HORIZONTAL_RADIUS) {
-                    String asName = Utils.toPlain(armorStand.getDisplayName()).toLowerCase();
-                    if (asName.contains(this.name)) {
-                        return true;
+            @Override
+            public boolean test(LivingEntity entity) {
+                return hasNamedArmorStandAbove(entity);
+            }
+
+            private boolean hasNamedArmorStandAbove(LivingEntity entity) {
+                double eX = entity.getX();
+                double eY = entity.getY();
+                double eZ = entity.getZ();
+
+                for (LivingEntity nearby : getNearbyEntities(entity)) {
+                    if (!(nearby instanceof ArmorStandEntity armorStand)) {
+                        continue;
+                    }
+
+                    double asY = armorStand.getY();
+                    if (asY < eY || asY - eY >= VERTICAL_RANGE) {
+                        continue;
+                    }
+
+                    double dx = armorStand.getX() - eX;
+                    double dz = armorStand.getZ() - eZ;
+                    double horizontalDist = Math.hypot(dx, dz);
+
+                    if (horizontalDist <= HORIZONTAL_RADIUS) {
+                        String asName = Utils.toPlain(armorStand.getDisplayName()).toLowerCase();
+                        if (asName.contains(this.name)) {
+                            return true;
+                        }
                     }
                 }
-            }
 
-            return false;
+                return false;
+            }
         }
-    }
 
     public static class GearPredicate implements Predicate<LivingEntity> {
         private final Set<GearFlag> requiredGear;

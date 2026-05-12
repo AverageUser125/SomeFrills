@@ -88,15 +88,15 @@ public class GlowPlayerCommand {
                         )
                 )
                 .then(literal("clear")
-                .executes(ctx -> {
-                    if (!isGlowPlayerEnabled()) {
-                        Utils.info("GlowPlayer feature is disabled.");
-                        return 1;
-                    }
-                    get().clear();
-                    Utils.info("Cleared all forced glows.");
-                    return 1;
-                }))
+                        .executes(ctx -> {
+                            if (!isGlowPlayerEnabled()) {
+                                Utils.info("GlowPlayer feature is disabled.");
+                                return 1;
+                            }
+                            get().clear();
+                            Utils.info("Cleared all forced glows.");
+                            return 1;
+                        }))
                 .then(literal("remove")
                         .then(argument("player", StringArgumentType.word())
                                 .suggests(GlowPlayerCommand::suggestGlowingPlayers)

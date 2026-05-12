@@ -2,7 +2,6 @@ package com.somefrills.features.misc.glowmob.chestui;
 
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -26,7 +25,9 @@ public abstract class ChestUI extends GenericContainerScreen {
     protected final ChestUI previousScreen;
     protected long lastClickTimestamp = 0L;
 
-    public ChestUI(String title) { this(title, null); }
+    public ChestUI(String title) {
+        this(title, null);
+    }
 
     public ChestUI(String title, ChestUI previousScreen) {
         super(getHandler(INV_SIZE), Objects.requireNonNull(mc.player).getInventory(), Text.of(title));
@@ -101,7 +102,8 @@ public abstract class ChestUI extends GenericContainerScreen {
         return slotIndex < 9 || slotIndex >= INV_SIZE - 9 || slotIndex % 9 == 0 || slotIndex % 9 == 8;
     }
 
-    protected void onItemClick(ItemStack stack, int button) {}
+    protected void onItemClick(ItemStack stack, int button) {
+    }
 
     @Override
     public void onMouseClick(Slot slot, int slotId, int button, SlotActionType actionType) {

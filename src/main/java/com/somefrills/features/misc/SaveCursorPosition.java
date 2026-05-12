@@ -86,17 +86,6 @@ public final class SaveCursorPosition extends Feature {
         return null;
     }
 
-    public static final class SavedPosition {
-        public final Pair<Double, Double> middle;
-        public final Pair<Double, Double> cursor;
-        public final long savedAt;
-
-        public SavedPosition(Pair<Double, Double> middle,
-                             Pair<Double, Double> cursor,
-                             long savedAt) {
-            this.middle = middle;
-            this.cursor = cursor;
-            this.savedAt = savedAt;
-        }
+    public record SavedPosition(Pair<Double, Double> middle, Pair<Double, Double> cursor, long savedAt) {
     }
 }

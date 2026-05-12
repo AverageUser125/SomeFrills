@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.Main;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.*;
-import com.somefrills.features.core.Features;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;

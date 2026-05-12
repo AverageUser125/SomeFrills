@@ -20,7 +20,7 @@ public class NoGhostBlocks extends Feature {
 
     @EventHandler
     private void onBreakBlock(BreakBlockEvent event) {
-        if (mc.isInSingleplayer() || !config.breaking) return;
+        if (mc.isInSingleplayer() || mc.world == null || !config.breaking) return;
         event.cancel();
         BlockState blockState = mc.world.getBlockState(event.blockPos);
         blockState.getBlock().onBreak(mc.world, event.blockPos, blockState, mc.player);

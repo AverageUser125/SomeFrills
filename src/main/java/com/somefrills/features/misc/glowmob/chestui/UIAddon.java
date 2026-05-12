@@ -2,6 +2,7 @@ package com.somefrills.features.misc.glowmob.chestui;
 
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+
 import java.util.List;
 
 public interface UIAddon {

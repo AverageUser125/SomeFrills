@@ -34,7 +34,7 @@ public abstract class MineshaftWaypointsMixin {
         if (event.getKeyCode() != getConfig().getShareWaypointLocation()) return;
 
         var messages = CorpseHighlight.shareAllWaypointsForce();
-        for(var message : messages) {
+        for (var message : messages) {
             if (!PartyApi.INSTANCE.getPartyMembers().isEmpty()) {
                 HypixelCommands.INSTANCE.partyChat(message, false);
             } else {

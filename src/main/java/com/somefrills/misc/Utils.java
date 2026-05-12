@@ -115,7 +115,7 @@ public class Utils {
                 mc.player
         );
     }
-    
+
     public static String wrapByDelimiter(String input, int maxLen, String delimiter) {
         if (input == null || input.isEmpty()) return input;
         if (maxLen <= 0) throw new IllegalArgumentException("maxLen must be > 0");
@@ -1308,7 +1308,7 @@ public class Utils {
         return new MoulConfigScreenComponent(Text.empty(), guiContext, previous) {
             @Override
             public void close() {
-                if(previous == null) {
+                if (previous == null) {
                     super.close();
                 } else {
                     Utils.setScreen(previous);

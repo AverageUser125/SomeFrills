@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public final class EventSubscriptions {
-    private EventSubscriptions() {}
+    private EventSubscriptions() {
+    }
 
     private static final Map<Object, IListener> listeners = new HashMap<>();
 

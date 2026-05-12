@@ -1,9 +1,9 @@
 package com.somefrills.features.core;
 
 import com.somefrills.events.AreaChangeEvent;
+import com.somefrills.misc.Area;
 import com.somefrills.misc.KeybindManager;
 import com.somefrills.misc.SkyblockData;
-import com.somefrills.misc.Area;
 import io.github.notenoughupdates.moulconfig.observer.Property;
 
 /**

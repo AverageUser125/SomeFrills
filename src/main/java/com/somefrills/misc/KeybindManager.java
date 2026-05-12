@@ -56,17 +56,10 @@ public class KeybindManager {
         };
     }
 
-    private static class Keybind {
-        final int key;
-        final Runnable callback;
-
-        Keybind(int key, Runnable callback) {
-            this.key = key;
-            this.callback = callback;
-        }
+    private record Keybind(int key, Runnable callback) {
 
         void trigger() {
-            callback.run();
+                callback.run();
+            }
         }
-    }
 }
