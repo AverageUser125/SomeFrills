@@ -171,6 +171,19 @@ public class GlowMobRules extends ChestUI {
             rebuild();
             return;
         }
+
+        // Check if revert was requested
+        if (session.menu != null && session.menu.isRevertRequested()) {
+            // Restore working copy from original
+            if (!session.isNew()) {
+                session.workingCopy = new GlowMobRule(session.original);
+                session.workingCopy.recompilePredicate();
+            } else {
+                // For new rules, just clear the working copy
+                session.workingCopy = new GlowMobRule();
+            }
+        }
+
         if (session.isNew()) {
             if (!session.workingCopy.info().isEmpty()) {
                 glowMob.addRule(session.workingCopy);
@@ -189,19 +202,22 @@ public class GlowMobRules extends ChestUI {
 
     private void openRuleEditor(GlowMobRule rule) {
         session = new RuleEditSession(rule);
-        Utils.setScreen(new GlowMobEditMenu(this, session.workingCopy));
+        session.menu = new GlowMobEditMenu(this, session.workingCopy);
+        Utils.setScreen(session.menu);
     }
 
     private void createNewRule() {
         session = new RuleEditSession(null);
         session.workingCopy = new GlowMobRule(session.workingCopy.info(), RenderColor.fromHex(MyMapColor.WHITE.getHex()));
         session.workingCopy.toggle(); // new rules start as enabled by default
-        Utils.setScreen(new GlowMobEditMenu(this, session.workingCopy));
+        session.menu = new GlowMobEditMenu(this, session.workingCopy);
+        Utils.setScreen(session.menu);
     }
 
     private static class RuleEditSession {
         GlowMobRule original;        // null if creating new
         GlowMobRule workingCopy;
+        GlowMobEditMenu menu;        // reference to track revert flag
 
         RuleEditSession(GlowMobRule original) {
             this.original = original;
