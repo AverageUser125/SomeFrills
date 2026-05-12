@@ -79,13 +79,6 @@ public abstract class MouseMixin {
         this.y = cursorPosition.getSecond();
     }
 
-    @Inject(method = "updateMouse", at = @At("HEAD"), cancellable = true)
-    private void onMouseMove(double timeDelta, CallbackInfo ci) {
-        if (FrillsConfig.instance.farming.spaceFarmerEnabled.get() && SpaceFarmer.spaceHeld && mc.options.attackKey.isPressed()) {
-            ci.cancel();
-        }
-    }
-
     @Inject(method = "onMouseScroll", at = @At("HEAD"), cancellable = true)
     private void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo info) {
         if (eventBus.post(new MouseScrollEvent(vertical)).isCancelled()) info.cancel();

@@ -19,25 +19,26 @@ public class FarmingCategory {
     @ConfigEditorBoolean
     public Property<Boolean> autoPestSetHomeEnabled = Property.of(false);
 
-    @Expose
-    @ConfigOption(name = "Space farmer", desc = "Farm with space bar while holding shift ")
-    @ConfigEditorBoolean
-    public Property<Boolean> spaceFarmerEnabled = Property.of(false);
 
     @Expose
+    @ConfigOption(name = "Space farmer", desc = "Keybind to farm")
     @Accordion
-    @ConfigOption(name = "Auto Farm", desc = "Automatically farm wheat")
-    public AutoFarmConfig autoFarm = new AutoFarmConfig();
+    public SpaceFarmerConfig spaceFarmer = new SpaceFarmerConfig();
 
-    public static class AutoFarmConfig {
+    public static class SpaceFarmerConfig {
         @Expose
-        @ConfigOption(name = "Enabled", desc = "Automatically farm wheat")
+        @ConfigOption(name = "Space farmer", desc = "Farm with space bar while holding shift ")
         @ConfigEditorBoolean
         public Property<Boolean> enabled = Property.of(false);
 
         @Expose
-        @ConfigOption(name = "Toggle Key", desc = "Key to toggle AutoFarm on/off")
-        @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_GRAVE_ACCENT)
-        public int toggleKey = GLFW.GLFW_KEY_GRAVE_ACCENT;
+        @ConfigOption(name = "Keybind", desc = "Keybind to farm (default: space)")
+        @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_SPACE)
+        public Property<Integer> keybind = Property.of(GLFW.GLFW_KEY_SPACE);
+
+        @Expose
+        @ConfigOption(name = "Hold forward key", desc = "Hold forward key while farming")
+        @ConfigEditorBoolean
+        public boolean forwardKey;
     }
 }

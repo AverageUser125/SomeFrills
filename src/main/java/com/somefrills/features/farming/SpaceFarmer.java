@@ -1,53 +1,37 @@
 package com.somefrills.features.farming;
 
 import com.somefrills.config.FrillsConfig;
-import com.somefrills.events.InputEvent;
+import com.somefrills.config.farming.FarmingCategory.SpaceFarmerConfig;
 import com.somefrills.events.ScreenOpenEvent;
-import com.somefrills.features.core.Feature;
-import com.somefrills.misc.KeyAction;
-import com.somefrills.misc.Utils;
+import com.somefrills.events.TickEventPost;
+import com.somefrills.features.core.ToggleFeature;
 import meteordevelopment.orbit.EventHandler;
-import org.lwjgl.glfw.GLFW;
 
 import static com.somefrills.Main.mc;
 
-public class SpaceFarmer extends Feature {
-    public static boolean spaceHeld = false;
+public class SpaceFarmer extends ToggleFeature {
+    private static SpaceFarmerConfig config() {
+        return FrillsConfig.instance.farming.spaceFarmer;
+    }
 
     public SpaceFarmer() {
-        super(FrillsConfig.instance.farming.spaceFarmerEnabled);
+        super(config().enabled, config().keybind);
+    }
+
+    @Override
+    protected void onDeactivate() {
+        mc.options.attackKey.setPressed(false);
+        if(config().forwardKey) mc.options.forwardKey.setPressed(false);
     }
 
     @EventHandler
-    public void onKey(InputEvent event) {
-        if (event.key != GLFW.GLFW_KEY_SPACE) {
-            return;
-        }
-        if (mc.currentScreen != null && spaceHeld) {
-            spaceHeld = false;
-            mc.options.attackKey.setPressed(false);
-            return;
-        }
-        if (event.action == KeyAction.Press && mc.options.sneakKey.isPressed() && Utils.isOnGardenPlot()) {
-            spaceHeld = true;
-            mc.options.attackKey.setPressed(true);
-            event.cancel();
-        } else if (event.action == KeyAction.Release && spaceHeld) {
-            spaceHeld = false;
-            if (mc.options.attackKey.isPressed()) {
-                mc.options.attackKey.setPressed(false);
-            }
-            event.cancel();
-        } else if (spaceHeld) {
-            event.cancel();
-        }
+    public void onKey(TickEventPost event) {
+        mc.options.attackKey.setPressed(true);
+        if(config().forwardKey) mc.options.forwardKey.setPressed(true);
     }
 
     @EventHandler
     public void onScreen(ScreenOpenEvent event) {
-        if (spaceHeld) {
-            spaceHeld = false;
-            mc.options.attackKey.setPressed(false);
-        }
+        toggle();
     }
 }
