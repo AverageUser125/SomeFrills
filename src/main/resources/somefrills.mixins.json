@@ -28,6 +28,7 @@
     "WorldRendererMixin",
     "YggdrasilServicesKeyInfoMixin",
     "skyhanni.CorpseLocatorMixin",
+    "skyhanni.FishingHookDisplayMixin",
     "skyhanni.MineshaftWaypointsMixin",
     "skyhanni.SeaCreatureFeaturesMixin",
     "skyhanni.ThunderSparkHighlightMixin"

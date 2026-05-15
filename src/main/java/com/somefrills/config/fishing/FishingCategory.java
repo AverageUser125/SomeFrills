@@ -13,7 +13,6 @@ public class FishingCategory {
     @ConfigEditorBoolean
     public Property<Boolean> rareSeaCreatureAlert = Property.of(true);
 
-    // auto fish by mixin into skyhanni "real now", add random delay too
     @Expose
     @Accordion
     @ConfigOption(name = "Auto Fish", desc = "Automatically reel in and cast out when fishing")
@@ -24,15 +23,5 @@ public class FishingCategory {
         @ConfigOption(name = "Enabled", desc = "Automatically reel in and cast out when fishing")
         @ConfigEditorBoolean
         public boolean enabled = false;
-
-        @Expose
-        @ConfigOption(name = "Min Delay", desc = "Minimum delay (ms) between catching a fish and recasting")
-        @ConfigEditorSlider(minValue = 0, maxValue = 100, minStep = 10)
-        public int minDelay = 100;
-
-        @Expose
-        @ConfigOption(name = "Max Delay", desc = "Maximum delay (ms) between catching a fish and recasting")
-        @ConfigEditorSlider(minValue = 0, maxValue = 100, minStep = 10)
-        public int maxDelay = 300;
     }
 }
