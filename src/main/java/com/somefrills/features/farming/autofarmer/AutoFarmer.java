@@ -78,6 +78,7 @@ public class AutoFarmer extends AreaToggleFeature {
     @EventHandler
     public void onScreen(ScreenOpenEvent event) {
         savedState = currentState;
+        toggleActive();
         stopFarming();
     }
 
@@ -89,6 +90,5 @@ public class AutoFarmer extends AreaToggleFeature {
         mc.options.leftKey.setPressed(false);
         mc.options.rightKey.setPressed(false);
         currentState = MovementState.noMovement();
-        toggleActive();
     }
 }
