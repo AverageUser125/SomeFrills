@@ -29,6 +29,7 @@
     "YggdrasilServicesKeyInfoMixin",
     "skyhanni.CorpseLocatorMixin",
     "skyhanni.MineshaftWaypointsMixin",
+    "skyhanni.SeaCreatureFeaturesMixin",
     "skyhanni.ThunderSparkHighlightMixin"
   ],
   "client": [
