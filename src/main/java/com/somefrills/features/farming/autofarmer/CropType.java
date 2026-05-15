@@ -24,7 +24,11 @@ public enum CropType {
 
     // Mushroom pattern: always forward, move right, then left when hitting front wall
     // Movement: Forward+Right → Forward only (hit right wall) → Forward+Left (hit front wall) → repeat
-    MUSHROOM("Mushroom", MovementPattern.MUSHROOM_FORWARD);
+    MUSHROOM("Mushroom", MovementPattern.MUSHROOM_FORWARD),
+
+    // Coco beans pattern: forward, right, backward, right, repeat
+    // Movement: Forward → Right → Backward → Right → repeat
+    COCO_BEANS("Coco Beans", MovementPattern.COCO_BEANS);
 
     private final String displayName;
     private final MovementPattern pattern;
@@ -52,13 +56,15 @@ public enum CropType {
             case RECTANGULAR -> new RectangularMovement();
             case DIAGONAL -> new DiagonalMovement();
             case MUSHROOM_FORWARD -> new MushroomMovement();
+            case COCO_BEANS -> new CocoBeansMovement();
         };
     }
 
     public enum MovementPattern {
         RECTANGULAR,
         DIAGONAL,
-        MUSHROOM_FORWARD
+        MUSHROOM_FORWARD,
+        COCO_BEANS
     }
 }
 

@@ -14,6 +14,10 @@ public class MovementState {
     public static final int RIGHT = 1 << 5;
     public int flags;
 
+    public MovementState() {
+        flags = 0;
+    }
+
     public MovementState(int flags) {
         this.flags = flags;
     }
@@ -40,10 +44,6 @@ public class MovementState {
 
     public boolean isAttacking() {
         return (flags & NOT_ATTACK) == 0;
-    }
-
-    public static MovementState noMovement() {
-        return new MovementState(0);
     }
 
     @Override
