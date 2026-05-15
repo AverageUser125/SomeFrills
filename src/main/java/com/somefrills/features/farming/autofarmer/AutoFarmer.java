@@ -9,6 +9,7 @@ import com.somefrills.features.core.AreaToggleFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.KeybindManager;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.util.math.BlockPos;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -25,6 +26,8 @@ public class AutoFarmer extends AreaToggleFeature {
     private MovementState currentState;
     @Nullable
     private MovementState savedState;
+    @Nullable
+    private BlockPos savedPosition;
     private KeybindManager.Subscription stateChangeSub = null;
 
     public AutoFarmer() {
@@ -33,7 +36,7 @@ public class AutoFarmer extends AreaToggleFeature {
     }
 
     private void initStrategy() {
-        strategy = config().getCropType().getStrategy();
+        strategy = config().cropType.get().getStrategy();
         currentState = strategy.getCurrentState();
     }
 
@@ -45,12 +48,31 @@ public class AutoFarmer extends AreaToggleFeature {
     @Override
     protected void onActivate() {
         initStrategy();
-        // Restore saved state if it exists (from screen close), otherwise use strategy's current state
-        if (savedState != null) {
-            currentState = savedState;
-            savedState = null;
+        registerKeyBindListener();
+
+        // Early return if restoration conditions not met
+        if (!config().restoreState || savedState == null || savedPosition == null || mc.player == null) {
+            return;
         }
 
+        // Check distance if enabled
+        if (config().enableDistanceCheck) {
+            double maxDistance = config().maxRestoreDistance;
+            double distanceSquared = maxDistance * maxDistance;
+            double actualDistance = mc.player.getBlockPos().getSquaredDistance(savedPosition);
+            if (actualDistance > distanceSquared) {
+                // Out of range, don't restore
+                return;
+            }
+        }
+
+        // Restore state
+        currentState = savedState;
+        savedState = null;
+        savedPosition = null;
+    }
+
+    private void registerKeyBindListener() {
         stateChangeSub = KeybindManager.register(config().stateChangeKeybind, () -> {
             strategy.nextState();
             currentState = strategy.getCurrentState();
@@ -59,13 +81,16 @@ public class AutoFarmer extends AreaToggleFeature {
 
     @Override
     protected void onDeactivate() {
+        if (stateChangeSub != null) {
+            stateChangeSub.unregister();
+        }
         stopFarming();
-        stateChangeSub.unregister();
     }
 
     @EventHandler
     public void onServerSwitch(ServerJoinEvent event) {
         savedState = null;
+        savedPosition = null;
     }
 
     @EventHandler
@@ -82,7 +107,6 @@ public class AutoFarmer extends AreaToggleFeature {
     @EventHandler
     public void onScreen(ScreenOpenEvent event) {
         toggleActive();
-        stopFarming();
     }
 
     private void stopFarming() {
@@ -93,5 +117,7 @@ public class AutoFarmer extends AreaToggleFeature {
         mc.options.leftKey.setPressed(false);
         mc.options.rightKey.setPressed(false);
         savedState = currentState;
+        if (mc.player == null) return;
+        savedPosition = mc.player.getBlockPos();
     }
 }
