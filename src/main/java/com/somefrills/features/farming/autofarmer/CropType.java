@@ -41,6 +41,17 @@ public enum CropType {
         return pattern;
     }
 
+    /**
+     * Create a new movement strategy for this crop type.
+     */
+    public MovementStrategy getStrategy() {
+        return switch (pattern) {
+            case RECTANGULAR -> new RectangularMovement();
+            case DIAGONAL -> new DiagonalMovement();
+            case MUSHROOM_FORWARD -> new MushroomMovement();
+        };
+    }
+
     public enum MovementPattern {
         RECTANGULAR,
         DIAGONAL,

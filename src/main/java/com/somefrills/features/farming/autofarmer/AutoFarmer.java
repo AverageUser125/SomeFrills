@@ -6,7 +6,9 @@ import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.AreaToggleFeature;
 import com.somefrills.misc.Area;
+import com.somefrills.misc.Input;
 import meteordevelopment.orbit.EventHandler;
+import org.lwjgl.glfw.GLFW;
 
 import static com.somefrills.Main.mc;
 
@@ -15,7 +17,9 @@ public class AutoFarmer extends AreaToggleFeature {
         return FrillsConfig.instance.farming.autoFarmer;
     }
 
-    private MovementStrategy strategy;
+    private MovementStrategy strategy = null;
+    private MovementState currentState = MovementState.noMovement();
+    private boolean lastKeybindState = false;
 
     public AutoFarmer() {
         super(config().enabled, config().keybind);
@@ -23,12 +27,8 @@ public class AutoFarmer extends AreaToggleFeature {
     }
 
     private void initStrategy() {
-        CropType cropType = config().getCropType();
-        strategy = switch (cropType.getPattern()) {
-            case RECTANGULAR -> new RectangularMovement();
-            case DIAGONAL -> new DiagonalMovement();
-            case MUSHROOM_FORWARD -> new MushroomMovement();
-        };
+        strategy = config().getCropType().getStrategy();
+        currentState = strategy.getCurrentState();
     }
 
     @Override
@@ -39,11 +39,6 @@ public class AutoFarmer extends AreaToggleFeature {
     @Override
     protected void onActivate() {
         initStrategy();
-        // Listen for crop type changes to re-initialize strategy
-        config().cropType.addObserver((o, n) -> initStrategy());
-        if (strategy != null) {
-            strategy.reset();
-        }
     }
 
     @Override
@@ -55,14 +50,22 @@ public class AutoFarmer extends AreaToggleFeature {
     public void onTick(TickEventPost event) {
         if (strategy == null) return;
 
-        MovementStrategy.MovementInput input = strategy.getMovement();
+        // Check if the state change keybind is pressed
+
+        boolean isKeyPressed = Input.isKeyPressed(config().stateChangeKeybind.get());
+        // Detect key press (transition from not pressed to pressed)
+        if (isKeyPressed && !lastKeybindState) {
+            strategy.nextState();
+            currentState = strategy.getCurrentState();
+        }
+        lastKeybindState = isKeyPressed;
 
         // Apply movement inputs
-        mc.options.attackKey.setPressed(input.attack);
-        mc.options.forwardKey.setPressed(input.forward);
-        mc.options.backKey.setPressed(input.backward);
-        mc.options.leftKey.setPressed(input.left);
-        mc.options.rightKey.setPressed(input.right);
+        mc.options.attackKey.setPressed(true); // Always attack
+        mc.options.forwardKey.setPressed(currentState.forward);
+        mc.options.backKey.setPressed(currentState.backward);
+        mc.options.leftKey.setPressed(currentState.left);
+        mc.options.rightKey.setPressed(currentState.right);
     }
 
     @EventHandler
@@ -76,8 +79,6 @@ public class AutoFarmer extends AreaToggleFeature {
         mc.options.backKey.setPressed(false);
         mc.options.leftKey.setPressed(false);
         mc.options.rightKey.setPressed(false);
-        if (strategy != null) {
-            strategy.reset();
-        }
+        currentState = MovementState.noMovement();
     }
 }

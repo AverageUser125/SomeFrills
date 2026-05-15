@@ -16,9 +16,14 @@ public class AutoFarmerConfig {
     public Property<Boolean> enabled = Property.of(false);
 
     @Expose
-    @ConfigOption(name = "Keybind", desc = "Keybind to farm (default: space)")
+    @ConfigOption(name = "Toggle keybind", desc = "Keybind to enable/disable farming (default: space)")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_SPACE)
     public Property<Integer> keybind = Property.of(GLFW.GLFW_KEY_SPACE);
+
+    @Expose
+    @ConfigOption(name = "State change keybind", desc = "Keybind to cycle to next movement state (default: G)")
+    @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_G)
+    public Property<Integer> stateChangeKeybind = Property.of(GLFW.GLFW_KEY_G);
 
     @Expose
     @ConfigOption(name = "Crop Type", desc = "Type of crop to farm")
