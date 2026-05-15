@@ -3,12 +3,14 @@ package com.somefrills.features.farming.autofarmer;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.farming.AutoFarmerConfig;
 import com.somefrills.events.ScreenOpenEvent;
+import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.AreaToggleFeature;
 import com.somefrills.misc.Area;
-import com.somefrills.misc.Input;
+import com.somefrills.misc.KeybindManager;
 import meteordevelopment.orbit.EventHandler;
-import org.lwjgl.glfw.GLFW;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import static com.somefrills.Main.mc;
 
@@ -17,10 +19,13 @@ public class AutoFarmer extends AreaToggleFeature {
         return FrillsConfig.instance.farming.autoFarmer;
     }
 
-    private MovementStrategy strategy = null;
-    private MovementState currentState = MovementState.noMovement();
-    private MovementState savedState = null;
-    private boolean lastKeybindState = false;
+    @NonNull
+    private MovementStrategy strategy;
+    @NonNull
+    private MovementState currentState;
+    @Nullable
+    private MovementState savedState;
+    private KeybindManager.Subscription stateChangeSub = null;
 
     public AutoFarmer() {
         super(config().enabled, config().keybind);
@@ -45,39 +50,37 @@ public class AutoFarmer extends AreaToggleFeature {
             currentState = savedState;
             savedState = null;
         }
+
+        stateChangeSub = KeybindManager.register(config().stateChangeKeybind, () -> {
+            strategy.nextState();
+            currentState = strategy.getCurrentState();
+        });
     }
 
     @Override
     protected void onDeactivate() {
         stopFarming();
+        stateChangeSub.unregister();
+    }
+
+    @EventHandler
+    public void onServerSwitch(ServerJoinEvent event) {
+        savedState = null;
     }
 
     @EventHandler
     public void onTick(TickEventPost event) {
-        if (strategy == null) return;
-
-        // Check if the state change keybind is pressed
-
-        boolean isKeyPressed = Input.isKeyPressed(config().stateChangeKeybind.get());
-        // Detect key press (transition from not pressed to pressed)
-        if (isKeyPressed && !lastKeybindState) {
-            strategy.nextState();
-            currentState = strategy.getCurrentState();
-        }
-        lastKeybindState = isKeyPressed;
-
         // Apply movement inputs
-        mc.options.sprintKey.setPressed(false);
-        mc.options.attackKey.setPressed(true); // Always attack
-        mc.options.forwardKey.setPressed(currentState.forward);
-        mc.options.backKey.setPressed(currentState.backward);
-        mc.options.leftKey.setPressed(currentState.left);
-        mc.options.rightKey.setPressed(currentState.right);
+        mc.options.sprintKey.setPressed(currentState.isSprinting());
+        mc.options.attackKey.setPressed(currentState.isAttacking());
+        mc.options.forwardKey.setPressed(currentState.isForward());
+        mc.options.backKey.setPressed(currentState.isBackward());
+        mc.options.leftKey.setPressed(currentState.isLeft());
+        mc.options.rightKey.setPressed(currentState.isRight());
     }
 
     @EventHandler
     public void onScreen(ScreenOpenEvent event) {
-        savedState = currentState;
         toggleActive();
         stopFarming();
     }
@@ -89,6 +92,6 @@ public class AutoFarmer extends AreaToggleFeature {
         mc.options.backKey.setPressed(false);
         mc.options.leftKey.setPressed(false);
         mc.options.rightKey.setPressed(false);
-        currentState = MovementState.noMovement();
+        savedState = currentState;
     }
 }

@@ -1,61 +1,59 @@
 package com.somefrills.features.farming.autofarmer;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Mushroom pattern farming - always moving forward with lateral adjustments.
  * Cycles: Forward+Right → Forward only → Forward+Left → repeat
  */
 public class MushroomMovement implements MovementStrategy {
-    private State currentState = State.FORWARD_RIGHT;
+    private FarmingState currentState = FarmingState.FORWARD_RIGHT;
 
     public MushroomMovement() {
     }
 
-    public MovementState getCurrentState() {
+    public @NonNull MovementState getCurrentState() {
         return currentState.toMovementState();
     }
 
     public void nextState() {
-        currentState = currentState.next();
+        currentState = (FarmingState) currentState.next();
     }
 
-    private enum State {
+    private enum FarmingState implements MovementStrategy.State {
         FORWARD_RIGHT {
             @Override
-            public State next() {
+            public FarmingState next() {
                 return FORWARD_ONLY;
             }
 
             @Override
             public MovementState toMovementState() {
-                return new MovementState(true, false, false, true);
+                return new MovementState(MovementState.FORWARD | MovementState.RIGHT);
             }
         },
         FORWARD_ONLY {
             @Override
-            public State next() {
+            public FarmingState next() {
                 return FORWARD_LEFT;
             }
 
             @Override
             public MovementState toMovementState() {
-                return new MovementState(true, false, false, false);
+                return new MovementState(MovementState.FORWARD);
             }
         },
         FORWARD_LEFT {
             @Override
-            public State next() {
+            public FarmingState next() {
                 return FORWARD_RIGHT;
             }
 
             @Override
             public MovementState toMovementState() {
-                return new MovementState(true, false, true, false);
+                return new MovementState(MovementState.FORWARD | MovementState.LEFT);
             }
-        };
-
-        protected abstract State next();
-
-        protected abstract MovementState toMovementState();
+        }
     }
 }
 

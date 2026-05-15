@@ -1,5 +1,7 @@
 package com.somefrills.features.farming.autofarmer;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Enum of crop types and their movement patterns.
  */
@@ -44,6 +46,7 @@ public enum CropType {
     /**
      * Create a new movement strategy for this crop type.
      */
+    @NonNull
     public MovementStrategy getStrategy() {
         return switch (pattern) {
             case RECTANGULAR -> new RectangularMovement();

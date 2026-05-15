@@ -1,50 +1,48 @@
 package com.somefrills.features.farming.autofarmer;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Diagonal pattern farming (sugar cane, sunflower, moonflower, rose).
- * Cycles through: Backward → Forward → Backward
+ * Cycles through: Backward+Left → Forward → Backward+Left
  */
 public class DiagonalMovement implements MovementStrategy {
-    private State currentState = State.BACKWARD;
+    private FarmingState currentState = FarmingState.BACKWARD;
 
     public DiagonalMovement() {
     }
 
-    public MovementState getCurrentState() {
+    public @NonNull MovementState getCurrentState() {
         return currentState.toMovementState();
     }
 
     public void nextState() {
-        currentState = currentState.next();
+        currentState = (FarmingState) currentState.next();
     }
 
-    private enum State {
+    private enum FarmingState implements MovementStrategy.State {
         BACKWARD {
             @Override
-            public State next() {
+            public FarmingState next() {
                 return LEFT;
             }
 
             @Override
             public MovementState toMovementState() {
-                return new MovementState(false, true, false, false);
+                return new MovementState(MovementState.BACKWARD | MovementState.LEFT);
             }
         },
         LEFT {
             @Override
-            public State next() {
+            public FarmingState next() {
                 return BACKWARD;
             }
 
             @Override
             public MovementState toMovementState() {
-                return new MovementState(false, false, true, false);
+                return new MovementState(MovementState.FORWARD);
             }
-        };
-
-        protected abstract State next();
-
-        protected abstract MovementState toMovementState();
+        }
     }
 }
 
