@@ -2,10 +2,10 @@ package com.somefrills.features.farming.autofarmer;
 
 /**
  * Diagonal pattern farming (sugar cane, sunflower, moonflower, rose).
- * Cycles through: Forward+Left → Backward → Forward+Left
+ * Cycles through: Backward → Forward → Backward
  */
 public class DiagonalMovement implements MovementStrategy {
-    private State currentState = State.FORWARD_LEFT;
+    private State currentState = State.BACKWARD;
 
     public DiagonalMovement() {
     }
@@ -19,7 +19,18 @@ public class DiagonalMovement implements MovementStrategy {
     }
 
     private enum State {
-        FORWARD_LEFT {
+        BACKWARD {
+            @Override
+            public State next() {
+                return LEFT;
+            }
+
+            @Override
+            public MovementState toMovementState() {
+                return new MovementState(false, true, false, false);
+            }
+        },
+        LEFT {
             @Override
             public State next() {
                 return BACKWARD;
@@ -27,18 +38,7 @@ public class DiagonalMovement implements MovementStrategy {
 
             @Override
             public MovementState toMovementState() {
-                return new MovementState(true, false, true, false);
-            }
-        },
-        BACKWARD {
-            @Override
-            public State next() {
-                return FORWARD_LEFT;
-            }
-
-            @Override
-            public MovementState toMovementState() {
-                return new MovementState(false, true, false, false);
+                return new MovementState(false, false, true, false);
             }
         };
 

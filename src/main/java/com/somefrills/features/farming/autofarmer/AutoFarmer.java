@@ -19,6 +19,7 @@ public class AutoFarmer extends AreaToggleFeature {
 
     private MovementStrategy strategy = null;
     private MovementState currentState = MovementState.noMovement();
+    private MovementState savedState = null;
     private boolean lastKeybindState = false;
 
     public AutoFarmer() {
@@ -39,6 +40,11 @@ public class AutoFarmer extends AreaToggleFeature {
     @Override
     protected void onActivate() {
         initStrategy();
+        // Restore saved state if it exists (from screen close), otherwise use strategy's current state
+        if (savedState != null) {
+            currentState = savedState;
+            savedState = null;
+        }
     }
 
     @Override
@@ -61,6 +67,7 @@ public class AutoFarmer extends AreaToggleFeature {
         lastKeybindState = isKeyPressed;
 
         // Apply movement inputs
+        mc.options.sprintKey.setPressed(false);
         mc.options.attackKey.setPressed(true); // Always attack
         mc.options.forwardKey.setPressed(currentState.forward);
         mc.options.backKey.setPressed(currentState.backward);
@@ -70,15 +77,18 @@ public class AutoFarmer extends AreaToggleFeature {
 
     @EventHandler
     public void onScreen(ScreenOpenEvent event) {
+        savedState = currentState;
         stopFarming();
     }
 
     private void stopFarming() {
+        mc.options.sprintKey.setPressed(false);
         mc.options.attackKey.setPressed(false);
         mc.options.forwardKey.setPressed(false);
         mc.options.backKey.setPressed(false);
         mc.options.leftKey.setPressed(false);
         mc.options.rightKey.setPressed(false);
         currentState = MovementState.noMovement();
+        toggleActive();
     }
 }
