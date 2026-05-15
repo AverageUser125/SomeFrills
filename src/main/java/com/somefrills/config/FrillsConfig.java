@@ -3,6 +3,7 @@ package com.somefrills.config;
 import com.google.gson.annotations.Expose;
 import com.somefrills.config.about.AboutCategory;
 import com.somefrills.config.farming.FarmingCategory;
+import com.somefrills.config.fishing.FishingCategory;
 import com.somefrills.config.mining.MiningCategory;
 import com.somefrills.config.misc.MiscCategory;
 import com.somefrills.config.solvers.SolverCategory;
@@ -52,6 +53,9 @@ public class FrillsConfig extends Config {
     @Expose
     @Category(name = "Mining", desc = "Settings for mining helpers")
     public MiningCategory mining = new MiningCategory();
+    @Expose
+    @Category(name = "Fishing", desc = "Settings for fishing helpers")
+    public FishingCategory fishing = new FishingCategory();
     @Expose
     @Category(name = "Misc", desc = "Settings for miscellaneous features")
     public MiscCategory misc = new MiscCategory();

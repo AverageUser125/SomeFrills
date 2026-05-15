@@ -1361,6 +1361,10 @@ public class Utils {
         return StringUtils.capitalize(str);
     }
 
+    public static boolean isHoldingFishingRod() {
+        return getSkyblockId(getHeldItem()).contains("ROD");
+    }
+
     public static class Symbols {
         public static String zone = "⏣";
         public static String zoneRift = "ф";
