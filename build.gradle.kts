@@ -1,3 +1,6 @@
+import com.somefrills.FeaturesGenerateTask
+import com.somefrills.FeaturesScanTask
+
 plugins {
     id("fabric-loom") version "1.15.5"
     id("maven-publish")
@@ -127,20 +130,19 @@ publishing {
     }
 }
 
-/* Feature scanning tasks disabled for now
 tasks.register<FeaturesScanTask>("scanFeatures") {
-    sourceDir.set(layout.projectDirectory.dir("src/main/kotlin/com/somefrills/features"))
+    sourceDir.set(layout.projectDirectory.dir("src/main/java/com/somefrills/features"))
     outputFile.set(layout.buildDirectory.file("tmp/features-list.txt"))
 }
 
 tasks.register<FeaturesGenerateTask>("generateFeatures") {
     inputFile.set(layout.buildDirectory.file("tmp/features-list.txt"))
-    outputDir.set(layout.projectDirectory.dir("src/main/kotlin/com/somefrills/features/core"))
+    outputDir.set(layout.projectDirectory.dir("src/main/java/com/somefrills/features/core"))
 
     dependsOn("scanFeatures")
 }
 
-tasks.named("compileKotlin") {
+tasks.named("compileJava") {
     dependsOn("generateFeatures")
 }
 
@@ -151,5 +153,4 @@ tasks.named("sourcesJar") {
 tasks.named("jar") {
     dependsOn("generateFeatures")
 }
-*/
 
