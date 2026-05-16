@@ -20,7 +20,7 @@ public class GlowPlayer extends Feature {
     private final ConcurrentHashMap<String, RenderColor> forcedGlows = new ConcurrentHashMap<>();
 
     public GlowPlayer() {
-        super(FrillsConfig.instance.misc.glowPlayer.enabled);
+        super(FrillsConfig.misc.glowPlayer.enabled);
     }
 
     private void applyHighlight(Entity entity) {

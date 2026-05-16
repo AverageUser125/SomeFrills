@@ -21,8 +21,8 @@ public class ChocolateFactory extends Feature {
     private long lastClaimTime = 0;
 
     public ChocolateFactory() {
-        super(FrillsConfig.instance.solvers.chocolateFactorySolver.enabled);
-        config = FrillsConfig.instance.solvers.chocolateFactorySolver;
+        super(FrillsConfig.solvers.chocolateFactorySolver.enabled);
+        config = FrillsConfig.solvers.chocolateFactorySolver;
     }
 
     @EventHandler

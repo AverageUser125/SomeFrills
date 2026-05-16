@@ -13,7 +13,7 @@ import static com.somefrills.Main.mc;
 public class BreakResetFix extends Feature {
 
     public BreakResetFix() {
-        super(FrillsConfig.instance.tweaks.breakResetFixEnabled);
+        super(FrillsConfig.tweaks.breakResetFixEnabled);
     }
     @EventHandler
     public void onBreakReset(InventoryUpdateEvent event) {

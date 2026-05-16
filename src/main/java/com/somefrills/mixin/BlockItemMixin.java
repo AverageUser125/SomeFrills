@@ -47,7 +47,7 @@ public abstract class BlockItemMixin {
             )
     )
     private BlockState modifyState(BlockState state, ItemPlacementContext context) {
-        var noGhostBlocksConfig = FrillsConfig.instance.tweaks.noGhostBlocks;
+        var noGhostBlocksConfig = FrillsConfig.tweaks.noGhostBlocks;
         if (noGhostBlocksConfig.enabled.get() && noGhostBlocksConfig.placing) {
             return getPlacementState(context);
         }

@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.somefrills.config.FrillsConfig;
+import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.NpcLocator;
 import com.somefrills.misc.Utils;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
@@ -58,7 +59,7 @@ public class NpcLocatorCommand {
     }
 
     private static boolean isNpcLocatorEnabled() {
-        return FrillsConfig.instance.misc.npcLocator.enabled.get();
+        return Features.isActive(NpcLocator.class);
     }
 
     /**

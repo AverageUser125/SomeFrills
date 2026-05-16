@@ -65,7 +65,7 @@ public class EntityMixin implements EntityRendering {
     private boolean makeCreeperVisible(boolean original) {
         // Make invisible creepers fully visible (client-side) if config enabled
         if ((Object) this instanceof CreeperEntity) {
-            var cfg = FrillsConfig.instance.mining.ghostVision;
+            var cfg = FrillsConfig.mining.ghostVision;
 
             // Make all creepers visible if config enabled
             if (cfg.makeAllCreepersVisible) {
@@ -83,7 +83,7 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "isCustomNameVisible", at = @At("HEAD"), cancellable = true)
     private void makeCreeperNameVisible(CallbackInfoReturnable<Boolean> cir) {
-        var cfg = FrillsConfig.instance.mining.ghostVision;
+        var cfg = FrillsConfig.mining.ghostVision;
         if (!cfg.enabled.get() && !cfg.creeperShowHP) {
             return;
         }
@@ -94,7 +94,7 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "hasCustomName", at = @At("HEAD"), cancellable = true)
     private void makeCreeperHaveName(CallbackInfoReturnable<Boolean> cir) {
-        var cfg = FrillsConfig.instance.mining.ghostVision;
+        var cfg = FrillsConfig.mining.ghostVision;
         if (!cfg.enabled.get() && !cfg.creeperShowHP) {
             return;
         }
@@ -105,7 +105,7 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "getCustomName", at = @At("HEAD"), cancellable = true)
     private void giveCreeperName(CallbackInfoReturnable<Text> cir) {
-        var cfg = FrillsConfig.instance.mining.ghostVision;
+        var cfg = FrillsConfig.mining.ghostVision;
         if (!cfg.enabled.get() || !cfg.creeperShowHP) {
             return;
         }

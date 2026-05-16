@@ -16,8 +16,8 @@ public class NoGhostBlocks extends Feature {
     private final NoGhostBlocksConfig config;
 
     public NoGhostBlocks() {
-        super(FrillsConfig.instance.tweaks.noGhostBlocks.enabled);
-        config = FrillsConfig.instance.tweaks.noGhostBlocks;
+        super(FrillsConfig.tweaks.noGhostBlocks.enabled);
+        config = FrillsConfig.tweaks.noGhostBlocks;
     }
 
     @EventHandler

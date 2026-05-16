@@ -18,7 +18,7 @@ import static com.somefrills.Main.mc;
 public class DoubleUseFix extends Feature {
 
     public DoubleUseFix() {
-        super(FrillsConfig.instance.tweaks.doubleUseFixEnabled);
+        super(FrillsConfig.tweaks.doubleUseFixEnabled);
     }
 
     private static Type getDisableType() {

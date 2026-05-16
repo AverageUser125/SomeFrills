@@ -41,8 +41,8 @@ public class Freecam extends ToggleFeature {
     private boolean forward = false, backward = false, right = false, left = false, up = false, down = false;
 
     public Freecam() {
-        super(FrillsConfig.instance.misc.freecam.enabled, FrillsConfig.instance.misc.freecam.keybind);
-        config = FrillsConfig.instance.misc.freecam;
+        super(FrillsConfig.misc.freecam.enabled, FrillsConfig.misc.freecam.keybind);
+        config = FrillsConfig.misc.freecam;
     }
 
     @Override

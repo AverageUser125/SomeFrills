@@ -37,8 +37,8 @@ public class ExperimentSolver extends Feature {
     private int clicks = 0;
 
     public ExperimentSolver() {
-        super(FrillsConfig.instance.solvers.experimentSolver.enabled);
-        config = FrillsConfig.instance.solvers.experimentSolver;
+        super(FrillsConfig.solvers.experimentSolver.enabled);
+        config = FrillsConfig.solvers.experimentSolver;
     }
 
     public static ExperimentType getExperimentType() {

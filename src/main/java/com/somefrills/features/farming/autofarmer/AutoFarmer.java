@@ -19,7 +19,7 @@ import static com.somefrills.Main.mc;
 @FrillsFeature
 public class AutoFarmer extends AreaToggleFeature {
     private static AutoFarmerConfig config() {
-        return FrillsConfig.instance.farming.autoFarmer;
+        return FrillsConfig.farming.autoFarmer;
     }
 
     @NonNull

@@ -24,8 +24,8 @@ public class CorpseHighlight extends AreaFeature {
     private final CorpseHighlightConfig config;
 
     public CorpseHighlight() {
-        super(FrillsConfig.instance.mining.corpseHighlight.enabled);
-        config = FrillsConfig.instance.mining.corpseHighlight;
+        super(FrillsConfig.mining.corpseHighlight.enabled);
+        config = FrillsConfig.mining.corpseHighlight;
     }
 
     private static CorpseType getCorpseType(ArmorStandEntity ent) {

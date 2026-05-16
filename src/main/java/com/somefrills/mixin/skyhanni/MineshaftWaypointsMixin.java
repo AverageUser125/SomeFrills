@@ -26,7 +26,7 @@ public abstract class MineshaftWaypointsMixin {
 
     @Inject(method = "onKeyPress", at = @At("HEAD"), cancellable = true)
     private void onKeyPress(KeyPressEvent event, CallbackInfo ci) {
-        if (!FrillsConfig.instance.mining.corpseHighlight.forceSkyhanni) {
+        if (!FrillsConfig.mining.corpseHighlight.forceSkyhanni) {
             return;
         }
         if (mc.currentScreen != null) return;

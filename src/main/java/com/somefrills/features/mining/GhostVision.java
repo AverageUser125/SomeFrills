@@ -22,8 +22,8 @@ public class GhostVision extends AreaFeature {
     private final GhostVisionConfig config;
 
     public GhostVision() {
-        super(FrillsConfig.instance.mining.ghostVision.enabled);
-        config = FrillsConfig.instance.mining.ghostVision;
+        super(FrillsConfig.mining.ghostVision.enabled);
+        config = FrillsConfig.mining.ghostVision;
     }
 
     @EventHandler

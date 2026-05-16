@@ -24,8 +24,8 @@ public class GlowMob extends Feature {
     private List<LivingEntity> entityList = List.of();
 
     public GlowMob() {
-        super(FrillsConfig.instance.misc.glowMob.enabled);
-        config = FrillsConfig.instance.misc.glowMob;
+        super(FrillsConfig.misc.glowMob.enabled);
+        config = FrillsConfig.misc.glowMob;
         rules = config.rules;
     }
 

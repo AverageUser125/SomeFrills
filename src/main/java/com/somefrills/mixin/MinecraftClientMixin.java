@@ -42,7 +42,7 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "doAttack", at = @At("HEAD"))
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
-        if (!FrillsConfig.instance.mining.noMiningTrace.enabled.get()) return;
+        if (!FrillsConfig.mining.noMiningTrace.enabled.get()) return;
         if (!(crosshairTarget instanceof EntityHitResult)) return;
         if (mc.player == null || mc.world == null) return;
 

@@ -12,7 +12,7 @@ import net.minecraft.block.BlockState
 import net.minecraft.block.HorizontalConnectingBlock.*
 
 @FrillsFeature
-object GemstoneDesyncFix : AreaFeature(FrillsConfig.instance.mining.gemstoneDesyncFixEnabled) {
+object GemstoneDesyncFix : AreaFeature(FrillsConfig.mining.gemstoneDesyncFixEnabled) {
     @EventHandler
     private fun onBlock(event: BlockUpdateEvent) {
         if (event.newState.isAir && Utils.isStainedGlass(event.oldState)) {

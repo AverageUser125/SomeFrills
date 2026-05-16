@@ -44,8 +44,8 @@ public class Aliases extends Feature {
     }
 
     public Aliases() {
-        super(FrillsConfig.instance.misc.commandAliases.enabled);
-        config = FrillsConfig.instance.misc.commandAliases;
+        super(FrillsConfig.misc.commandAliases.enabled);
+        config = FrillsConfig.misc.commandAliases;
     }
 
     public String convertCommand(String message) {

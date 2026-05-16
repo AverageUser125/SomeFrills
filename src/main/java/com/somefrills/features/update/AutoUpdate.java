@@ -14,8 +14,8 @@ public class AutoUpdate extends Feature {
     private final AboutCategory config;
 
     public AutoUpdate() {
-        super(FrillsConfig.instance.about.checkForUpdates);
-        config = FrillsConfig.instance.about;
+        super(FrillsConfig.about.checkForUpdates);
+        config = FrillsConfig.about;
     }
 
     @EventHandler

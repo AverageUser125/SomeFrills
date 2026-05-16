@@ -15,7 +15,7 @@ public class FilterMessages extends Feature {
             Pattern.compile("Your Implosion hit (\\d+) enem(?:y|ies) for ([\\d,.]+) damage\\.");
 
     public FilterMessages() {
-        super(FrillsConfig.instance.misc.chatFilter.enabled);
+        super(FrillsConfig.misc.chatFilter.enabled);
     }
 
     private static boolean shouldFilter(String msg) {

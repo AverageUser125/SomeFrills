@@ -14,6 +14,6 @@ public class TextRendererMixin {
         if (!Features.isInitialized()) {
             return original;
         }
-        return !FrillsConfig.instance.tweaks.noRender.noObfuscation && original;
+        return !FrillsConfig.tweaks.noRender.noObfuscation && original;
     }
 }

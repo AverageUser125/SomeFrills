@@ -16,7 +16,7 @@ public class AutoWarpHome extends AreaFeature {
     private static PestStatus lastStatus = PestStatus.UNKNOWN; // -1 = unknown
 
     public AutoWarpHome() {
-        super(FrillsConfig.instance.farming.autoWarpHomeEnabled);
+        super(FrillsConfig.farming.autoWarpHomeEnabled);
     }
 
     private static PestStatus checkAliveState(List<String> tabListLines) {

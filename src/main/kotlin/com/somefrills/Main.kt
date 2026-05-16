@@ -41,13 +41,12 @@ object Main : ClientModInitializer {
     @JvmField
     val eventBus: IEventBus = EventBus()
 
-    @JvmField
-    var config: ManagedConfig<FrillsConfig>? = null
+    lateinit var config: ManagedConfig<FrillsConfig>
 
     @EventHandler(priority = EventPriority.LOWEST)
     @JvmStatic
     fun onGameStop(event: GameStopEvent) {
-        config?.saveToFile()
+        config.saveToFile()
     }
 
     override fun onInitializeClient() {
@@ -141,8 +140,7 @@ object Main : ClientModInitializer {
         }
 
         config = ManagedConfig(builder)
-
-        FrillsConfig.instance = config!!.instance
+        FrillsConfig.bind(config.instance)
 
         eventBus.registerLambdaFactory("com.somefrills") { lookupInMethod, klass ->
             lookupInMethod.invoke(

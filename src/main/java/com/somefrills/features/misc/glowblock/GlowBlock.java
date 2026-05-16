@@ -23,7 +23,7 @@ public class GlowBlock extends Feature {
     private final List<Block> targetBlocks = new ArrayList<>();
 
     public GlowBlock() {
-        super(FrillsConfig.instance.misc.glowBlock.enabled);
+        super(FrillsConfig.misc.glowBlock.enabled);
     }
 
     @Override

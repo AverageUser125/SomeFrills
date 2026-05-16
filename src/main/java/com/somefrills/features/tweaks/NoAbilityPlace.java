@@ -28,7 +28,7 @@ public class NoAbilityPlace extends Feature {
     );
 
     public NoAbilityPlace() {
-        super(FrillsConfig.instance.tweaks.noAbilityPlaceEnabled);
+        super(FrillsConfig.tweaks.noAbilityPlaceEnabled);
     }
 
     @EventHandler

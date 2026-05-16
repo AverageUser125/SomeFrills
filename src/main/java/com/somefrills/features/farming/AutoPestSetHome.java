@@ -24,7 +24,7 @@ public class AutoPestSetHome extends AreaFeature {
     private static long lastServerJoinTime = 0L;
 
     public AutoPestSetHome() {
-        super(FrillsConfig.instance.farming.autoPestSetHomeEnabled);
+        super(FrillsConfig.farming.autoPestSetHomeEnabled);
     }
 
     @EventHandler

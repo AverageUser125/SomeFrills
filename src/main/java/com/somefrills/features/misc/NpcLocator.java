@@ -36,8 +36,8 @@ public class NpcLocator extends Feature {
     private final NpcLocatorConfig config;
 
     public NpcLocator() {
-        super(FrillsConfig.instance.misc.npcLocator.enabled);
-        config = FrillsConfig.instance.misc.npcLocator;
+        super(FrillsConfig.misc.npcLocator.enabled);
+        config = FrillsConfig.misc.npcLocator;
         config.color.addObserver((oldVal, newVal) -> onColorConfigChanged(newVal));
         onColorConfigChanged(config.color.get());
     }

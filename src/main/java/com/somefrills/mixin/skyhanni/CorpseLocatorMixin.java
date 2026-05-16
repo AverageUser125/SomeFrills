@@ -20,7 +20,7 @@ public class CorpseLocatorMixin {
             at = @At("STORE"),
             name = "canSee")
     private boolean forceCanSeeTrue(boolean canSee) {
-        if (FrillsConfig.instance.mining.corpseHighlight.forceSkyhanni) {
+        if (FrillsConfig.mining.corpseHighlight.forceSkyhanni) {
             return true; // Force canSee to be true
         }
         return canSee;
@@ -30,7 +30,7 @@ public class CorpseLocatorMixin {
             at = @At("HEAD"),
             cancellable = true)
     private void onShareCorpse(CallbackInfo ci) {
-        if (!FrillsConfig.instance.mining.corpseHighlight.forceSkyhanni) {
+        if (!FrillsConfig.mining.corpseHighlight.forceSkyhanni) {
             return;
         }
         var messages = CorpseHighlight.shareAllWaypoints();

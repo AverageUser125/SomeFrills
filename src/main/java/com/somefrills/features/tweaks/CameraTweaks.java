@@ -11,7 +11,7 @@ public class CameraTweaks extends PassiveFeature {
 
     public CameraTweaks() {
         super();
-        config = FrillsConfig.instance.tweaks.cameraTweaks;
+        config = FrillsConfig.tweaks.cameraTweaks;
     }
 
     public boolean clip() {

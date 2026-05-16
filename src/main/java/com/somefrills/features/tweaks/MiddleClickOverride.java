@@ -66,7 +66,7 @@ public class MiddleClickOverride extends Feature {
     );
 
     public MiddleClickOverride() {
-        super(FrillsConfig.instance.tweaks.middleClickOverrideEnabled);
+        super(FrillsConfig.tweaks.middleClickOverrideEnabled);
     }
 
     private static boolean isLeftClick(int button, SlotActionType actionType) {
@@ -86,7 +86,7 @@ public class MiddleClickOverride extends Feature {
     }
 
     public static boolean shouldOverride(Slot slot, int button, SlotActionType actionType) {
-        if (!FrillsConfig.instance.tweaks.middleClickOverrideEnabled.get()) return false;
+        if (!FrillsConfig.tweaks.middleClickOverrideEnabled.get()) return false;
         if (!(mc.currentScreen instanceof GenericContainerScreen container)) return false;
         if (slot == null) return false;
         if (!isLeftClick(button, actionType)) return false;
