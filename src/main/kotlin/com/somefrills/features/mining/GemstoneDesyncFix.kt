@@ -22,7 +22,7 @@ object GemstoneDesyncFix : AreaFeature(FrillsConfig.mining.gemstoneDesyncFixEnab
 
     @JvmStatic
     fun onGetUpdateState(original: BlockState): BlockState {
-        if (isEnabled && isDefaultPane(original)) {
+        if (isEnabled() && isDefaultPane(original)) {
             return asFullPane(original)
         }
         return original

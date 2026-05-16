@@ -29,7 +29,7 @@ object KeybindManager {
     }
 
     @JvmStatic
-    fun register(property: Property<Int?>, action: Runnable): Subscription {
+    fun register(property: Property<Int>, action: Runnable): Subscription {
         val initial = Keybind(property.get()!!, action)
         // Why use array? because we need to mutate the current subscription inside the observer, and Java's lambda requires captured variables to be effectively final.
         val current: Array<Subscription> = arrayOf(register(initial))
