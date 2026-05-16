@@ -27,6 +27,7 @@
     "WorldMixin",
     "WorldRendererMixin",
     "YggdrasilServicesKeyInfoMixin",
+    "skyblock_enhancements.PriceDataFetcherMixin",
     "skyhanni.CorpseLocatorMixin",
     "skyhanni.FishingHookDisplayMixin",
     "skyhanni.MineshaftWaypointsMixin",
