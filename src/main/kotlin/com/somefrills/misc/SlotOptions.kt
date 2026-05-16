@@ -154,7 +154,7 @@ object SlotOptions {
     }
 
     @EventHandler
-    private fun onScreen(event: ScreenOpenEvent?) {
+    private fun onScreen(event: ScreenOpenEvent) {
         slotFlags.clear()
     }
 

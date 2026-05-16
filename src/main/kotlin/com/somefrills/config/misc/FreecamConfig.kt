@@ -19,7 +19,7 @@ class FreecamConfig {
     @Expose
     @ConfigOption(name = "Keybind", desc = "Keybind to toggle freecam mode")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_UNKNOWN)
-    var keybind: Property<Int?> = Property.of<Int?>(GLFW.GLFW_KEY_UNKNOWN)
+    var keybind: Property<Int> = Property.of(GLFW.GLFW_KEY_UNKNOWN)
 
     @JvmField
     @Expose

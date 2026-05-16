@@ -144,7 +144,7 @@ object SkyblockData {
     }
 
     @EventHandler
-    private fun onJoinServer(event: ServerJoinEvent?) {
+    private fun onJoinServer(event: ServerJoinEvent) {
         isInstanceOver = false
         isInSkyblock = false
         location = ""

@@ -74,7 +74,7 @@ class EntityCache {
         }
 
         @EventHandler(priority = EventPriority.LOW)
-        private fun onJoin(event: ServerJoinEvent?) {
+        private fun onJoin(event: ServerJoinEvent) {
             for (instance in instances) {
                 instance.clear()
             }

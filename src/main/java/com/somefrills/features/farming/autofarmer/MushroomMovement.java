@@ -6,7 +6,7 @@ import org.jspecify.annotations.NonNull;
  * Mushroom pattern farming - always moving forward with lateral adjustments.
  * Cycles: Forward+Right → Forward only → Forward+Left → repeat
  */
-public class MushroomMovement implements MovementStrategy {
+public class MushroomMovement extends MovementStrategy {
     private FarmingState currentState = FarmingState.FORWARD_RIGHT;
 
     public MushroomMovement() {

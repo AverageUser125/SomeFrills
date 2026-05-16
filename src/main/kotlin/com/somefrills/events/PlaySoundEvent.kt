@@ -13,7 +13,7 @@ class PlaySoundEvent(var packet: PlaySoundS2CPacket) : Cancellable() {
         return packet.sound.value().id() == sound.id()
     }
 
-    fun isSound(sound: RegistryEntry.Reference<SoundEvent?>): Boolean {
+    fun isSound(sound: RegistryEntry.Reference<SoundEvent>): Boolean {
         return this.isSound(sound.value()!!)
     }
 }

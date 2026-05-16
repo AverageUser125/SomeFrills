@@ -1,22 +1,19 @@
-package com.somefrills.features.farming.autofarmer;
-
-import org.jspecify.annotations.NonNull;
+package com.somefrills.features.farming.autofarmer
 
 /**
  * Interface for movement strategies in auto farming.
  * Each strategy manages its own internal state and cycles through movement patterns.
  */
-public interface MovementStrategy {
+abstract class MovementStrategy {
     /**
      * Get the current movement state.
      */
-    @NonNull
-    MovementState getCurrentState();
+    open lateinit var currentState: MovementState
 
     /**
      * Advance to the next state in the movement pattern.
      */
-    void nextState();
+    abstract fun nextState()
 
     /**
      * Common interface for internal state enums in strategies.
@@ -26,12 +23,12 @@ public interface MovementStrategy {
         /**
          * Get the next state in the cycle.
          */
-        State next();
+        fun next(): State
 
         /**
          * Convert this state to a movement state.
          */
-        MovementState toMovementState();
+        fun toMovementState(): MovementState
     }
 }
 

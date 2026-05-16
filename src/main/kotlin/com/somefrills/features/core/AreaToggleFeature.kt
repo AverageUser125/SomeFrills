@@ -19,7 +19,7 @@ abstract class AreaToggleFeature(enabledProperty: Property<Boolean>, private val
     /**
      * Check if the current area is the correct one for this feature.
      */
-    protected abstract fun checkArea(area: Area?): Boolean
+    protected abstract fun checkArea(area: Area): Boolean
 
     /**
      * Both area check AND keybind toggle must be true for the feature to be active.
@@ -34,7 +34,7 @@ abstract class AreaToggleFeature(enabledProperty: Property<Boolean>, private val
             keybindSub = null
         }
         keybindSub = register(keybindProperty) { this.toggleActive() }
-        EventSubscriptions.register<AreaChangeEvent>(this, AreaChangeEvent::class.java)
+        EventSubscriptions.register(this, AreaChangeEvent::class.java)
     }
 
     override fun onDisable() {

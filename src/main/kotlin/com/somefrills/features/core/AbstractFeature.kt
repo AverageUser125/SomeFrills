@@ -75,7 +75,7 @@ abstract class AbstractFeature protected constructor(private val enabledProperty
     protected open fun onDeactivate() {
     }
 
-    protected open fun isEnabled(): Boolean {
+    protected fun isEnabled(): Boolean {
         return enabled
     }
 }

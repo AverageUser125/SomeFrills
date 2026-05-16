@@ -17,19 +17,19 @@ class AutoFarmerConfig {
     @Expose
     @ConfigOption(name = "Toggle keybind", desc = "Keybind to enable/disable farming (default: space)")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_SPACE)
-    var keybind: Property<Int?> = Property.of<Int?>(GLFW.GLFW_KEY_SPACE)
+    var keybind: Property<Int> = Property.of(GLFW.GLFW_KEY_SPACE)
 
     @JvmField
     @Expose
     @ConfigOption(name = "State change keybind", desc = "Keybind to cycle to next movement state (default: G)")
     @ConfigEditorKeybind(defaultKey = GLFW.GLFW_KEY_G)
-    var stateChangeKeybind: Property<Int?> = Property.of<Int?>(GLFW.GLFW_KEY_G)
+    var stateChangeKeybind: Property<Int> = Property.of(GLFW.GLFW_KEY_G)
 
     @JvmField
     @Expose
     @ConfigOption(name = "Crop Type", desc = "Type of crop to farm")
     @ConfigEditorDropdown
-    var cropType: Property<CropType?> = Property.of<CropType?>(CropType.MELON)
+    var cropType: Property<CropType> = Property.of(CropType.MELON)
 
     @JvmField
     @Expose

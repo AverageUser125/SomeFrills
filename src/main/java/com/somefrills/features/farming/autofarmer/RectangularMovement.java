@@ -1,12 +1,13 @@
 package com.somefrills.features.farming.autofarmer;
 
+import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 /**
  * Rectangular pattern farming (melon, pumpkin, wheat, carrot, potato, nether wart).
  * Cycles through: Forward+Right → Forward+Left → repeat
  */
-public class RectangularMovement implements MovementStrategy {
+public class RectangularMovement extends MovementStrategy {
     private FarmingState currentState = FarmingState.RIGHT;
 
     public RectangularMovement() {

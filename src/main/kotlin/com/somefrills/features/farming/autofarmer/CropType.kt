@@ -1,11 +1,9 @@
-package com.somefrills.features.farming.autofarmer;
-
-import org.jspecify.annotations.NonNull;
+package com.somefrills.features.farming.autofarmer
 
 /**
  * Enum of crop types and their movement patterns.
  */
-public enum CropType {
+enum class CropType(private val displayName: String, val pattern: MovementPattern) {
     // Rectangular pattern: melon, pumpkin, wheat, carrot, potato, nether wart
     // Movement: Move forward, if hit wall on right, move left, if hit wall on left, move right
     MELON("Melon", MovementPattern.RECTANGULAR),
@@ -30,37 +28,22 @@ public enum CropType {
     // Movement: Forward → Right → Backward → Right → repeat
     COCO_BEANS("Coco Beans", MovementPattern.COCO_BEANS);
 
-    private final String displayName;
-    private final MovementPattern pattern;
-
-    CropType(String displayName, MovementPattern pattern) {
-        this.displayName = displayName;
-        this.pattern = pattern;
+    override fun toString(): String {
+        return displayName
     }
 
-    @Override
-    public String toString() {
-        return displayName;
-    }
+    val strategy: MovementStrategy
+        /**
+         * Create a new movement strategy for this crop type.
+         */
+        get() = when (pattern) {
+            MovementPattern.RECTANGULAR -> RectangularMovement()
+            MovementPattern.DIAGONAL -> DiagonalMovement()
+            MovementPattern.MUSHROOM_FORWARD -> MushroomMovement()
+            MovementPattern.COCO_BEANS -> CocoBeansMovement()
+        }
 
-    public MovementPattern getPattern() {
-        return pattern;
-    }
-
-    /**
-     * Create a new movement strategy for this crop type.
-     */
-    @NonNull
-    public MovementStrategy getStrategy() {
-        return switch (pattern) {
-            case RECTANGULAR -> new RectangularMovement();
-            case DIAGONAL -> new DiagonalMovement();
-            case MUSHROOM_FORWARD -> new MushroomMovement();
-            case COCO_BEANS -> new CocoBeansMovement();
-        };
-    }
-
-    public enum MovementPattern {
+    enum class MovementPattern {
         RECTANGULAR,
         DIAGONAL,
         MUSHROOM_FORWARD,

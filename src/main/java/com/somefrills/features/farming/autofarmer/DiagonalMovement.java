@@ -6,7 +6,7 @@ import org.jspecify.annotations.NonNull;
  * Diagonal pattern farming (sugar cane, sunflower, moonflower, rose).
  * Cycles through: Backward+Left → Forward → Backward+Left
  */
-public class DiagonalMovement implements MovementStrategy {
+public class DiagonalMovement extends MovementStrategy {
     private FarmingState currentState = FarmingState.BACKWARD;
 
     public DiagonalMovement() {

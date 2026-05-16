@@ -6,7 +6,7 @@ import org.jspecify.annotations.NonNull;
  * Coco beans pattern farming.
  * Cycles: Forward → Right → Backward → Right → Forward (loop)
  */
-public class CocoBeansMovement implements MovementStrategy {
+public class CocoBeansMovement extends MovementStrategy {
     private FarmingState currentState = FarmingState.FORWARD;
 
     public CocoBeansMovement() {

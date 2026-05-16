@@ -85,7 +85,7 @@ class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(opti
         return 55
     }
 
-    override fun mouseInput(x: Int, y: Int, width: Int, mouseX: Int, mouseY: Int, event: MouseEvent?): Boolean {
+    override fun mouseInput(x: Int, y: Int, width: Int, mouseX: Int, mouseY: Int, event: MouseEvent): Boolean {
         try {
             // Only respond to left-click events
             if (event !is MouseEvent.Click) {
@@ -132,7 +132,7 @@ class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(opti
         return inX >= 0 && inX <= btn.width && inY >= 0 && inY <= GuiElementButton.HEIGHT
     }
 
-    override fun keyboardInput(event: KeyboardEvent?): Boolean {
+    override fun keyboardInput(event: KeyboardEvent): Boolean {
         return false
     }
 
