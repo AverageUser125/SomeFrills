@@ -4,12 +4,14 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.TabListUpdateEvent;
 import com.somefrills.features.core.AreaFeature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.List;
 
+@FrillsFeature
 public class AutoWarpHome extends AreaFeature {
     private static PestStatus lastStatus = PestStatus.UNKNOWN; // -1 = unknown
 

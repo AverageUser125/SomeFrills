@@ -4,7 +4,9 @@ import com.google.gson.JsonObject;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.MiscCategory.CommandAliasesConfig;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 
+@FrillsFeature
 public class Aliases extends Feature {
     private final CommandAliasesConfig config;
     private static final JsonObject aliases;

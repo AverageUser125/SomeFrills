@@ -6,6 +6,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig;
 import com.somefrills.events.TickEventPre;
 import com.somefrills.features.core.AreaFeature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+@FrillsFeature
 public class CorpseHighlight extends AreaFeature {
     private final CorpseHighlightConfig config;
 

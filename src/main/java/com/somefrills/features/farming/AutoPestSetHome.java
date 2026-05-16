@@ -4,6 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.features.core.AreaFeature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;

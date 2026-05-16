@@ -5,6 +5,7 @@ import com.somefrills.config.mining.MiningCategory.GhostVisionConfig;
 import com.somefrills.events.EntityUpdatedEvent;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.features.core.AreaFeature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.EntityCache;
 import com.somefrills.misc.RenderColor;
@@ -14,6 +15,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.util.math.Box;
 
+@FrillsFeature
 public class GhostVision extends AreaFeature {
 
     private static final EntityCache cache = new EntityCache();

@@ -4,12 +4,14 @@ import com.somefrills.Main.mc
 import com.somefrills.config.FrillsConfig
 import com.somefrills.events.BlockUpdateEvent
 import com.somefrills.features.core.AreaFeature
+import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.Utils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.BlockState
 import net.minecraft.block.HorizontalConnectingBlock.*
 
+@FrillsFeature
 object GemstoneDesyncFix : AreaFeature(FrillsConfig.instance.mining.gemstoneDesyncFixEnabled) {
     @EventHandler
     private fun onBlock(event: BlockUpdateEvent) {
