@@ -1,90 +1,103 @@
-package com.somefrills.config.misc;
+package com.somefrills.config.misc
 
-import com.google.gson.annotations.Expose;
-import io.github.notenoughupdates.moulconfig.annotations.Accordion;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean;
-import io.github.notenoughupdates.moulconfig.annotations.ConfigOption;
-import io.github.notenoughupdates.moulconfig.observer.Property;
+import com.google.gson.annotations.Expose
+import io.github.notenoughupdates.moulconfig.annotations.Accordion
+import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
+import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
+import io.github.notenoughupdates.moulconfig.observer.Property
 
-public class MiscCategory {
+class MiscCategory {
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Glow Player", desc = "Make players glow through walls")
-    public GlowPlayerConfig glowPlayer = new GlowPlayerConfig();
+    var glowPlayer: GlowPlayerConfig = GlowPlayerConfig()
 
-    public static class GlowPlayerConfig {
+    class GlowPlayerConfig {
+        @JvmField
         @Expose
         @ConfigOption(name = "Enabled", desc = "Make players glow through walls")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(true);
+        var enabled: Property<Boolean> = Property.of(true)
     }
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Mob Glow", desc = "Highlight entities based on name, type, or both")
-    public GlowMobConfig glowMob = new GlowMobConfig();
+    var glowMob: GlowMobConfig = GlowMobConfig()
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "NPC Locator", desc = "Locate and track NPCs")
-    public NpcLocatorConfig npcLocator = new NpcLocatorConfig();
+    var npcLocator: NpcLocatorConfig = NpcLocatorConfig()
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Command Aliases", desc = "Add aliases for commonly used commands")
-    public CommandAliasesConfig commandAliases = new CommandAliasesConfig();
+    var commandAliases: CommandAliasesConfig = CommandAliasesConfig()
 
-    public static class CommandAliasesConfig {
+    class CommandAliasesConfig {
+        @JvmField
         @Expose
         @ConfigOption(name = "Enabled", desc = "Add aliases for commonly used commands")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(true);
+        var enabled: Property<Boolean> = Property.of(true)
     }
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Chat Filter", desc = "Filter out unwanted chat messages")
-    public ChatFilterConfig chatFilter = new ChatFilterConfig();
+    var chatFilter: ChatFilterConfig = ChatFilterConfig()
 
-    public static class ChatFilterConfig {
+    class ChatFilterConfig {
+        @JvmField
         @Expose
         @ConfigOption(name = "Enabled", desc = "Filter out unwanted chat messages")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(true);
+        var enabled: Property<Boolean> = Property.of(true)
     }
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Save Cursor Position", desc = "Save and restore cursor position in chests")
-    public SaveCursorPositionConfig saveCursorPosition = new SaveCursorPositionConfig();
+    var saveCursorPosition: SaveCursorPositionConfig = SaveCursorPositionConfig()
 
-    public static class SaveCursorPositionConfig {
+    class SaveCursorPositionConfig {
+        @JvmField
         @Expose
         @ConfigOption(name = "Enabled", desc = "Save and restore cursor position in chests")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(true);
+        var enabled: Property<Boolean> = Property.of(true)
 
+        @JvmField
         @Expose
         @ConfigOption(name = "Only ChestUI", desc = "Only save cursor position when in ChestUI")
         @ConfigEditorBoolean
-        public boolean onlyChestUI = true;
-
+        var onlyChestUI: Boolean = true
     }
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Glow Block", desc = "Highlight blocks based on name, type, or both")
-    public GlowBlockConfig glowBlock = new GlowBlockConfig();
+    var glowBlock: GlowBlockConfig = GlowBlockConfig()
 
-    public static class GlowBlockConfig {
+    class GlowBlockConfig {
+        @JvmField
         @Expose
         @ConfigOption(name = "Enabled", desc = "Highlight blocks based on name, type, or both")
         @ConfigEditorBoolean
-        public Property<Boolean> enabled = Property.of(false);
+        var enabled: Property<Boolean> = Property.of(false)
     }
 
+    @JvmField
     @Expose
     @Accordion
     @ConfigOption(name = "Freecam", desc = "Enable freecam mode to move your camera independently of your player")
-    public FreecamConfig freecam = new FreecamConfig();
+    var freecam: FreecamConfig = FreecamConfig()
 }
