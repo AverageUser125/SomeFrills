@@ -23,12 +23,12 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
 
     init {
         strategy = config().cropType.get().strategy
-        currentState = strategy.currentState
+        currentState = strategy.getState()
     }
 
     private fun initStrategy() {
         strategy = config().cropType.get().strategy
-        currentState = strategy.currentState
+        currentState = strategy.getState()
     }
 
     override fun checkArea(area: Area): Boolean {
@@ -64,7 +64,7 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
     private fun registerKeyBindListener() {
         stateChangeSub = KeybindManager.register(config().stateChangeKeybind, Runnable {
             strategy.nextState()
-            currentState = strategy.currentState
+            currentState = strategy.getState()
         })
     }
 

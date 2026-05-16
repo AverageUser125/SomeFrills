@@ -5,10 +5,7 @@ package com.somefrills.features.farming.autofarmer
  * Each strategy manages its own internal state and cycles through movement patterns.
  */
 abstract class MovementStrategy {
-    /**
-     * Get the current movement state.
-     */
-    open lateinit var currentState: MovementState
+    abstract fun getState(): MovementState
 
     /**
      * Advance to the next state in the movement pattern.

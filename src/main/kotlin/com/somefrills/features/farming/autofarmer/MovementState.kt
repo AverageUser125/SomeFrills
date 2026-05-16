@@ -45,7 +45,7 @@ class MovementState {
 
     companion object {
         // Direction flags using bitwise operations
-        const val NOT_ATTACK= 1
+        const val NOT_ATTACK = 1
         const val SPRINT = 1 shl 1
         const val FORWARD = 1 shl 2
         const val BACKWARD = 1 shl 3
