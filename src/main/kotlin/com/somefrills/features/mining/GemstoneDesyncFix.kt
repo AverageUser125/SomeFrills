@@ -16,7 +16,7 @@ object GemstoneDesyncFix : AreaFeature(FrillsConfig.instance.mining.gemstoneDesy
     @EventHandler
     private fun onBlock(event: BlockUpdateEvent) {
         if (event.newState.isAir && Utils.isStainedGlass(event.oldState)) {
-            event.newState.updateNeighbors(mc?.world, event.pos, NOTIFY_ALL)
+            event.newState.updateNeighbors(mc.world, event.pos, NOTIFY_ALL)
         }
     }
 

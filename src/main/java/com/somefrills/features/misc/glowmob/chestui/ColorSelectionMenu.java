@@ -19,8 +19,8 @@ public class ColorSelectionMenu extends ChestUI {
     @Override
     protected void build() {
         for (MyMapColor color : MyMapColor.values()) {
-            ItemStack stack = new ItemStack(color.getItem());
-            int colorHex = color.getColor();
+            ItemStack stack = new ItemStack(color.item);
+            int colorHex = color.getHex();
             String name = Utils.capitalizeType(color.name().toLowerCase());
             Utils.setCustomName(stack, Style.EMPTY.withColor(colorHex), name);
             var nbt = new NbtCompound();

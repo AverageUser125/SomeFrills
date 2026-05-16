@@ -1,9 +1,9 @@
-package com.somefrills.misc;
+package com.somefrills.misc
 
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.item.Item
+import net.minecraft.item.Items
 
-public enum MyMapColor {
+enum class MyMapColor(val hex: Int, @JvmField val item: Item) {
     WHITE(16777215, Items.WHITE_DYE),
     ORANGE(14188339, Items.ORANGE_DYE),
     MAGENTA(11685080, Items.MAGENTA_DYE),
@@ -33,42 +33,25 @@ public enum MyMapColor {
     DARK_AQUA(3837580, Items.PRISMARINE),
     LICHEN_GREEN(8365974, Items.GLOW_LICHEN);
 
-    private final int color;
-    private final Item item;
+    companion object {
+        @JvmStatic
+        fun getClosest(color: RenderColor): MyMapColor? {
+            var bestMatch: MyMapColor? = null
+            var bestDistance = Float.MAX_VALUE
 
-    MyMapColor(int color, Item item) {
-        this.color = color;
-        this.item = item;
-    }
+            for (dyeColor in entries) {
+                val fmtColor = dyeColor.hex
+                val formatColor: RenderColor = RenderColor.fromHex(fmtColor)
 
-    public static MyMapColor getClosest(RenderColor color) {
-        MyMapColor bestMatch = null;
-        float bestDistance = Float.MAX_VALUE;
+                val distance = color.distance(formatColor)
 
-        for (MyMapColor dyeColor : MyMapColor.values()) {
-            int fmtColor = dyeColor.getColor();
-            RenderColor formatColor = RenderColor.fromHex(fmtColor);
-
-            float distance = color.distance(formatColor);
-
-            if (distance < bestDistance) {
-                bestDistance = distance;
-                bestMatch = dyeColor;
+                if (distance < bestDistance) {
+                    bestDistance = distance
+                    bestMatch = dyeColor
+                }
             }
+
+            return bestMatch
         }
-
-        return bestMatch;
-    }
-
-    public int getColor() {
-        return color;
-    }
-
-    public int getHex() {
-        return color;
-    }
-
-    public Item getItem() {
-        return item;
     }
 }

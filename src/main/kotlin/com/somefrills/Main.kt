@@ -35,7 +35,8 @@ object Main : ClientModInitializer {
     @JvmField
     val LOGGER: Logger = LoggerFactory.getLogger(MOD_ID)
 
-    lateinit var mc: MinecraftClient
+    @JvmField
+    val mc: MinecraftClient = MinecraftClient.getInstance();
 
     @JvmField
     val eventBus: IEventBus = EventBus()
@@ -51,8 +52,6 @@ object Main : ClientModInitializer {
 
     override fun onInitializeClient() {
         val start = Util.getMeasuringTimeMs()
-
-        mc = MinecraftClient.getInstance()
 
         ClientCommandRegistrationCallback.EVENT.register(SomeFrillsCommand::init)
 

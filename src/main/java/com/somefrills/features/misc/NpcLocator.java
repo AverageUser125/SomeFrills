@@ -91,7 +91,7 @@ public class NpcLocator extends Feature {
     private static Map<String, Vec3d> loadIslandNpcs(Area area) {
         Map<String, Vec3d> npcs = new HashMap<>();
 
-        String locationFileName = area.getDisplayName().replace(" ", "_").toUpperCase() + ".json";
+        String locationFileName = area.displayName.replace(" ", "_").toUpperCase() + ".json";
         Path locationFile = FabricLoader.getInstance().getConfigDir()
                 .resolve("skyhanni/repo/constants/island_graphs/" + locationFileName);
 

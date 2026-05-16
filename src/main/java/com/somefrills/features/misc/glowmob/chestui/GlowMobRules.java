@@ -88,7 +88,7 @@ public class GlowMobRules extends ChestUI {
 
         if (matchInfo.area != null) {
             lines.add(Text.literal("Island: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(matchInfo.area.getDisplayName()).setStyle(colorStyle(matchInfo.area.getColorHex()))));
+                    .append(Text.literal(matchInfo.area.displayName).setStyle(colorStyle(matchInfo.area.getColorHex()))));
         }
 
         if (!matchInfo.gear.isEmpty()) {

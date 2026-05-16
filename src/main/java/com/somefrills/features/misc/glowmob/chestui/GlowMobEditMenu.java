@@ -38,7 +38,7 @@ public class GlowMobEditMenu extends ChestUI {
 
     @Override
     protected void build() {
-        addItem(createChoiceItem(MyMapColor.getClosest(rule.color()).getItem(), "Color",
+        addItem(createChoiceItem(MyMapColor.getClosest(rule.color()).item, "Color",
                 Utils.colorToString(rule.color()),
                 rule.color().hex,
                 "Sets the glow color",
@@ -57,7 +57,7 @@ public class GlowMobEditMenu extends ChestUI {
                 "Click to set name filter"));
 
         addItem(createChoiceItem(Items.CARVED_PUMPKIN, "Area",
-                info.area != null ? info.area.getDisplayName() : null,
+                info.area != null ? info.area.displayName : null,
                 info.area != null ? info.area.getColorHex() : null,
                 "Only glows mobs in specific areas",
                 "Leave empty for all locations",

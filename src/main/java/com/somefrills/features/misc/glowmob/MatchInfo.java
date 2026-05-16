@@ -132,7 +132,7 @@ public class MatchInfo {
         }
 
         if (area != null) {
-            obj.addProperty("area", area.getDisplayName());
+            obj.addProperty("area", area.displayName);
         }
 
         if (!gear.isEmpty()) {
