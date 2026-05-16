@@ -34,8 +34,9 @@ public class AutoPestSetHome extends AreaFeature {
 
     @EventHandler
     private void onChatMessage(ChatMsgEvent event) {
-        if (event.messagePlain == null || event.messagePlain.isEmpty()) return;
-        Matcher m = PEST_SPAWN_PATTERN.matcher(event.messagePlain);
+        String msg = event.getPlainMessage();
+        if (msg.isEmpty()) return;
+        Matcher m = PEST_SPAWN_PATTERN.matcher(msg);
         if (!m.find()) return;
 
         long now = System.currentTimeMillis();

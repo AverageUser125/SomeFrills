@@ -27,7 +27,7 @@ public class FilterMessages extends Feature {
 
     @EventHandler
     private void onChatMessage(ChatMsgEvent event) {
-        if (shouldFilter(event.messagePlain)) {
+        if (shouldFilter(event.getPlainMessage())) {
             event.cancel();
         }
     }

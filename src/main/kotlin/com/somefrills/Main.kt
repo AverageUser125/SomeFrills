@@ -23,6 +23,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.MinecraftClient
 import net.minecraft.util.Util
+import org.jspecify.annotations.NonNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.lang.invoke.MethodHandles
@@ -34,8 +35,7 @@ object Main : ClientModInitializer {
     @JvmField
     val LOGGER: Logger = LoggerFactory.getLogger(MOD_ID)
 
-    @JvmField
-    var mc: MinecraftClient? = null
+    lateinit var mc: MinecraftClient
 
     @JvmField
     val eventBus: IEventBus = EventBus()

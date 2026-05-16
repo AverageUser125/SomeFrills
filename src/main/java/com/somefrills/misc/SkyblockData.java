@@ -88,7 +88,7 @@ public class SkyblockData {
                 Area newArea = Area.fromString(areaStr);
                 if (newArea != area) {
                     area = newArea;
-                    eventBus.post(new AreaChangeEvent(area));
+                    new AreaChangeEvent(area).post();
                 }
             }
             lines.add(name);
@@ -154,7 +154,7 @@ public class SkyblockData {
     @EventHandler
     private static void onChat(ChatMsgEvent event) {
         if (Utils.isInDungeons()) {
-            if (!instanceOver && scoreRegex.matcher(event.messagePlain.trim()).matches()) {
+            if (!instanceOver && scoreRegex.matcher(event.getPlainMessage().trim()).matches()) {
                 instanceOver = true;
             }
         }
