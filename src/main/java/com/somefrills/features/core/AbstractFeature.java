@@ -1,6 +1,7 @@
 package com.somefrills.features.core;
 
 import io.github.notenoughupdates.moulconfig.observer.Property;
+import org.jspecify.annotations.NonNull;
 
 import static com.somefrills.Main.eventBus;
 
@@ -10,7 +11,7 @@ public abstract class AbstractFeature {
     private final Property<Boolean> enabledProperty;
     private boolean active;
 
-    protected AbstractFeature(Property<Boolean> enabledProperty) {
+    protected AbstractFeature(@NonNull Property<@NonNull Boolean> enabledProperty) {
         this.enabledProperty = enabledProperty;
         this.active = false;
     }

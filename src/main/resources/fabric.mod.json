@@ -19,7 +19,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "com.somefrills.Main"
+      {
+        "adapter": "kotlin",
+        "value": "com.somefrills.Main"
+      }
     ],
     "modmenu": [
       "com.somefrills.config.ModMenuIntegration"

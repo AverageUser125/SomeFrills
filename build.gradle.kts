@@ -1,5 +1,6 @@
 import com.somefrills.FeaturesGenerateTask
 import com.somefrills.FeaturesScanTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("fabric-loom") version "1.15.5"
@@ -110,10 +111,10 @@ tasks.jar {
     }
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+tasks.withType<KotlinCompile>().configureEach {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
-        freeCompilerArgs.add("-Xjvm-default=all")
+        freeCompilerArgs.add("-jvm-default=enable")
     }
 }
 
