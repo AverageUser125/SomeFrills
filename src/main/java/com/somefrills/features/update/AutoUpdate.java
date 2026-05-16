@@ -4,10 +4,12 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.about.AboutCategory;
 import com.somefrills.events.GameStartEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import meteordevelopment.orbit.EventHandler;
 
 import static com.somefrills.Main.LOGGER;
 
+@FrillsFeature
 public class AutoUpdate extends Feature {
     private final AboutCategory config;
 

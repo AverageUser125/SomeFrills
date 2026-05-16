@@ -6,6 +6,7 @@ import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.AreaToggleFeature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.KeybindManager;
 import meteordevelopment.orbit.EventHandler;
@@ -15,6 +16,7 @@ import org.jspecify.annotations.Nullable;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public class AutoFarmer extends AreaToggleFeature {
     private static AutoFarmerConfig config() {
         return FrillsConfig.instance.farming.autoFarmer;

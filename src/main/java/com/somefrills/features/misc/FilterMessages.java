@@ -3,10 +3,12 @@ package com.somefrills.features.misc;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ChatMsgEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.regex.Pattern;
 
+@FrillsFeature
 public class FilterMessages extends Feature {
 
     private static final Pattern IMPLOSION_PATTERN =

@@ -5,11 +5,13 @@ import com.somefrills.config.tweaks.TweaksCategory.NoGhostBlocksConfig;
 import com.somefrills.events.BreakBlockEvent;
 import com.somefrills.events.PlaceBlockEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public class NoGhostBlocks extends Feature {
     private final NoGhostBlocksConfig config;
 

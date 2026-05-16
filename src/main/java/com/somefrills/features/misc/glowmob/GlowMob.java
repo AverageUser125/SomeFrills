@@ -6,6 +6,7 @@ import com.somefrills.config.misc.GlowMobConfig.GlowMobRule;
 import com.somefrills.events.GameStopEvent;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+@FrillsFeature
 public class GlowMob extends Feature {
     private final GlowMobConfig config;
     private final List<GlowMobRule> rules;

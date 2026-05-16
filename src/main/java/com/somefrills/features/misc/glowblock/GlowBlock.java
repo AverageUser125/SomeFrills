@@ -4,6 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.RenderColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public class GlowBlock extends Feature {
     private BlockScanner blockScanner = null;
     private final List<Block> targetBlocks = new ArrayList<>();

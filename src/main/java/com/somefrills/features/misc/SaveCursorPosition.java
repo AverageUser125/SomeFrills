@@ -5,6 +5,7 @@ import com.somefrills.config.misc.MiscCategory.SaveCursorPositionConfig;
 import com.somefrills.events.ScreenCloseEvent;
 import com.somefrills.events.ScreenOpenEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.features.misc.glowmob.chestui.ChestUI;
 import kotlin.Pair;
 import meteordevelopment.orbit.EventHandler;
@@ -13,6 +14,7 @@ import net.minecraft.client.util.InputUtil;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public final class SaveCursorPosition extends Feature {
     private final SaveCursorPositionConfig config;
     private Pair<Double, Double> savedPositionedP1 = null;

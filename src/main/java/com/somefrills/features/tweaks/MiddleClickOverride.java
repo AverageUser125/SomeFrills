@@ -3,6 +3,7 @@ package com.somefrills.features.tweaks;
 import com.google.common.collect.Sets;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.item.ItemStack;
@@ -14,6 +15,7 @@ import java.util.HashSet;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public class MiddleClickOverride extends Feature {
     private static final HashSet<String> matchBlacklist = Sets.newHashSet(
             "Attribute Fusion",

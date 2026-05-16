@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public class AutoPestSetHome extends AreaFeature {
     private static final long IGNORE_WINDOW_MS = 10_000L;
     private static final Pattern PEST_SPAWN_PATTERN = Pattern.compile(

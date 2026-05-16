@@ -4,6 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ChocolateFactoryConfig;
 import com.somefrills.events.ScreenRenderEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
@@ -13,12 +14,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 
-// descriptions moved into constructors
-
-/**
- * Fabric 1.21.10 port of the Kotlin ChocolateFactory module.
- * Automatically claims stray rabbits in the Chocolate Factory menu.
- */
+@FrillsFeature
 public class ChocolateFactory extends Feature {
     private static final String CHOCOLATE_FACTORY_TITLE = "Chocolate Factory";
     private final ChocolateFactoryConfig config;

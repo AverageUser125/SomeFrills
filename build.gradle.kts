@@ -77,6 +77,10 @@ dependencies {
     ksp(project(":processor"))
 }
 
+ksp {
+    arg("frills.cache.dir", layout.buildDirectory.dir("ksp-frills-cache").get().asFile.absolutePath)
+}
+
 tasks.processResources {
     inputs.property("version", project.version)
 

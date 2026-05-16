@@ -4,6 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.EntityUpdatedEvent;
 import com.somefrills.events.ServerJoinEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
@@ -14,6 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+@FrillsFeature
 public class GlowPlayer extends Feature {
     private final ConcurrentHashMap<String, RenderColor> forcedGlows = new ConcurrentHashMap<>();
 

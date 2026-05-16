@@ -8,6 +8,7 @@ import com.somefrills.config.misc.NpcLocatorConfig;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.events.WorldRenderEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
@@ -26,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static com.somefrills.Main.mc;
 
+@FrillsFeature
 public class NpcLocator extends Feature {
     private static final ConcurrentHashMap<String, NpcLocation> npcLocations = new ConcurrentHashMap<>();
     private static RenderColor color = new RenderColor(255, 100, 100, 255);

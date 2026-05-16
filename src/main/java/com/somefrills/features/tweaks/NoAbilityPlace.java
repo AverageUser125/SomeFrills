@@ -5,6 +5,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.PlaceBlockEvent;
 import com.somefrills.features.core.Feature;
 import com.somefrills.features.core.Features;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
@@ -13,6 +14,7 @@ import net.minecraft.item.ItemStack;
 
 import java.util.HashSet;
 
+@FrillsFeature
 public class NoAbilityPlace extends Feature {
     private static final HashSet<String> abilityWhitelist = Sets.newHashSet(
             "ABINGOPHONE",

@@ -4,6 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.InteractBlockEvent;
 import com.somefrills.events.InteractItemEvent;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.ItemStack;
@@ -13,8 +14,7 @@ import net.minecraft.util.hit.HitResult;
 
 import static com.somefrills.Main.mc;
 
-// description moved into constructors
-
+@FrillsFeature
 public class DoubleUseFix extends Feature {
 
     public DoubleUseFix() {

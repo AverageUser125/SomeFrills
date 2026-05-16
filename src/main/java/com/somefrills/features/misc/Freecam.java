@@ -3,6 +3,7 @@ package com.somefrills.features.misc;
 import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.misc.FreecamConfig;
 import com.somefrills.events.*;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.features.core.ToggleFeature;
 import com.somefrills.misc.Input;
 import com.somefrills.misc.KeyAction;
@@ -22,6 +23,7 @@ import org.lwjgl.glfw.GLFW;
 import static com.somefrills.Main.mc;
 import static com.somefrills.misc.Utils.info;
 
+@FrillsFeature
 public class Freecam extends ToggleFeature {
     private final FreecamConfig config;
 

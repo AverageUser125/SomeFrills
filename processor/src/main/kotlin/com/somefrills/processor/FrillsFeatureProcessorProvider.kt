@@ -6,7 +6,8 @@ class FrillsFeatureProcessorProvider : SymbolProcessorProvider {
     override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
         return FrillsFeatureProcessor(
             environment.codeGenerator,
-            environment.logger
+            environment.logger,
+            environment.options
         )
     }
 }

@@ -4,6 +4,7 @@ import com.somefrills.config.FrillsConfig;
 import com.somefrills.config.solvers.SolverCategory.ExperimentSolverConfig;
 import com.somefrills.events.TickEventPost;
 import com.somefrills.features.core.Feature;
+import com.somefrills.features.core.FrillsFeature;
 import com.somefrills.misc.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
@@ -24,11 +25,7 @@ import java.util.Map;
 
 import static com.somefrills.Main.mc;
 
-/**
- * Fabric 1.21.10 port of the Kotlin AutoExperiments module.
- * Mirrors the exact behavior: tracks state transitions and only clicks when new items appear.
- * Uses AllConfig for dynamic settings.
- */
+@FrillsFeature
 public class ExperimentSolver extends Feature {
     private final ExperimentSolverConfig config;
 
