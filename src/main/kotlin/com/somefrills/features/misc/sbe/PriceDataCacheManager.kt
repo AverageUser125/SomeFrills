@@ -25,49 +25,22 @@ object PriceDataCacheManager {
         }
     }
 
-    /**
-     * Loads cached JSON response for lowestbin prices.
-     *
-     * @return JSON string, or null if cache doesn't exist
-     */
-    @JvmStatic
     fun loadLowestBin(): String? {
         return loadCache(LOWESTBIN_CACHE_FILE, "lowestbin")
     }
 
-    /**
-     * Loads cached JSON response for bazaar prices.
-     *
-     * @return JSON string, or null if cache doesn't exist
-     */
-    @JvmStatic
     fun loadBazaar(): String? {
         return loadCache(BAZAAR_CACHE_FILE, "bazaar")
     }
 
-    /**
-     * Saves raw JSON response for lowestbin prices.
-     *
-     * @param jsonResponse Raw JSON string from HTTP response
-     */
-    @JvmStatic
     fun saveLowestBin(jsonResponse: String) {
         saveCache(LOWESTBIN_CACHE_FILE, jsonResponse, "lowestbin")
     }
 
-    /**
-     * Saves raw JSON response for bazaar prices.
-     *
-     * @param jsonResponse Raw JSON string from HTTP response
-     */
-    @JvmStatic
     fun saveBazaar(jsonResponse: String) {
         saveCache(BAZAAR_CACHE_FILE, jsonResponse, "bazaar")
     }
 
-    /**
-     * Internal helper: Loads cache from a specific file.
-     */
     private fun loadCache(cacheFile: Path, cacheType: String): String? {
         try {
             if (!Files.exists(cacheFile)) {
@@ -80,9 +53,6 @@ object PriceDataCacheManager {
         }
     }
 
-    /**
-     * Internal helper: Saves cache to a specific file.
-     */
     private fun saveCache(cacheFile: Path, jsonResponse: String, cacheType: String?) {
         try {
             Files.createDirectories(CACHE_DIR)

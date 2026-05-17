@@ -1,7 +1,7 @@
 package com.somefrills.mixin.skyblock_enhancements;
 
 import com.github.kd_gaming1.skyblockenhancements.feature.pricing.PriceDataFetcher;
-import com.somefrills.features.misc.PriceDataCacheManager;
+import com.somefrills.features.misc.sbe.PriceDataManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,15 +15,13 @@ public class PriceDataFetcherMixin {
     @Unique
     private static AtomicBoolean hasFetchedOnce = new AtomicBoolean(false);
 
-    @Inject(
-            method = "httpGet",
-            at = @At("HEAD"),
-            cancellable = true
-    )
+
+    @Inject(method = "httpGet", at = @At("HEAD"), cancellable = true)
     private static void httpGetStop(String url, CallbackInfoReturnable<String> cir) {
-        var cached = somefrills$getCachedForUrl(url);
-        if (cached != null) {
-            cir.setReturnValue(cached);
+        if (url.contains("lowestbin")) {
+            cir.setReturnValue(PriceDataManager.INSTANCE.getLowestBin());
+        } else if (url.contains("bazaar")) {
+            cir.setReturnValue(PriceDataManager.INSTANCE.getBazaar());
         }
     }
 
@@ -46,26 +44,6 @@ public class PriceDataFetcherMixin {
     private void refreshAsyncStop(org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
         if (hasFetchedOnce.get()) {
             ci.cancel();
-        }
-    }
-
-    @Unique
-    private static String somefrills$getCachedForUrl(String url) {
-        hasFetchedOnce.set(true);
-        if (url.contains("lowestbin")) {
-            return PriceDataCacheManager.loadLowestBin();
-        } else if (url.contains("bazaar")) {
-            return PriceDataCacheManager.loadBazaar();
-        }
-        return null;
-    }
-
-    @Unique
-    private static void somefrills$saveCacheForUrl(String url, String jsonResponse) {
-        if (url.contains("lowestbin")) {
-            PriceDataCacheManager.saveLowestBin(jsonResponse);
-        } else if (url.contains("bazaar")) {
-            PriceDataCacheManager.saveBazaar(jsonResponse);
         }
     }
 }
