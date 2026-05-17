@@ -90,6 +90,7 @@ But still has some frills, of course.
   your Minecraft version, and add it to your "mods" folder.
 - Additional dependencies needed to launch the mod:
     - [Fabric API](https://modrinth.com/mod/fabric-api)
+    - [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin)
     - [Mod Menu](https://modrinth.com/mod/modmenu) (Optional, settings can be accessed with `/somefrills`, or `/sf`)
 - To finish off, open the mod's settings screen, and configure it to your liking.
 
