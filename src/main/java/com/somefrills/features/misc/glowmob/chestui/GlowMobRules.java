@@ -26,7 +26,7 @@ public class GlowMobRules extends ChestUI {
 
     public GlowMobRules() {
         super("GlowMob Rules");
-        allRules = Features.get(GlowMob.class).getRules();
+        allRules = Features.get(GlowMob.class).rules;
         addAddon(new PagingAddon());
         rebuild();
     }

@@ -24,7 +24,7 @@ class GlowMobConfig {
 
     @JvmField
     @Expose
-    var rules: MutableList<GlowMobRule?> = ArrayList<GlowMobRule?>()
+    var rules: MutableList<GlowMobRule> = ArrayList<GlowMobRule>()
 
     class GlowMobRule {
         @Expose
@@ -37,8 +37,7 @@ class GlowMobConfig {
         private var enabled: Boolean
 
         @Transient
-        private var predicate: Predicate<LivingEntity?>?
-
+        private var predicate: Predicate<LivingEntity>?
         // Must have no-args constructor for Gson deserialization
         constructor() {
             this.info = MatchInfo()
@@ -82,15 +81,11 @@ class GlowMobConfig {
             this.enabled = !this.enabled
         }
 
-        fun predicate(): Predicate<LivingEntity?> {
+        fun matches(entity: LivingEntity): Boolean {
             if (this.predicate == null) {
                 this.predicate = info.compile()
             }
-            return predicate!!
-        }
-
-        fun matches(entity: LivingEntity?): Boolean {
-            return predicate().test(entity)
+            return predicate!!.test(entity)
         }
 
         override fun equals(other: Any?): Boolean {

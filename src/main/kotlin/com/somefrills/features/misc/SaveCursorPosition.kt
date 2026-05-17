@@ -2,7 +2,6 @@ package com.somefrills.features.misc
 
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.misc.MiscCategory.SaveCursorPositionConfig
 import com.somefrills.events.ScreenCloseEvent
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.features.core.Feature

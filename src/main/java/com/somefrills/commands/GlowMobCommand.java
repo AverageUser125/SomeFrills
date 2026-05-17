@@ -72,7 +72,7 @@ public class GlowMobCommand {
 
     private static int listGlowingMobs(CommandContext<FabricClientCommandSource> ctx, int ruleId) {
         var manager = get();
-        var rules = manager.getRules();
+        var rules = manager.rules;
 
         if (rules.isEmpty()) {
             ctx.getSource().sendFeedback(Text.literal("No glow rules found."));
@@ -157,7 +157,7 @@ public class GlowMobCommand {
         StringBuilder sb = new StringBuilder();
         sb.append("=== Entity Highlight Rules ===\n");
 
-        var rules = get().getRules();
+        var rules = get().rules;
         if (rules.isEmpty()) {
             sb.append("  (none)\n");
         } else {
