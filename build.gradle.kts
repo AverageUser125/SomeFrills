@@ -2,7 +2,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("fabric-loom") version "1.16.2"
-    id("maven-publish")
     id("org.jetbrains.kotlin.jvm") version "2.3.0"
     id("com.google.devtools.ksp") version "2.3.8"
     java
@@ -62,14 +61,13 @@ dependencies {
     include("meteordevelopment:orbit:${project.extra["orbit_version"]}")
     modImplementation("org.notenoughupdates.moulconfig:modern-1.21.11:${project.extra["moulconfig_version"]}")
     include("org.notenoughupdates.moulconfig:modern-1.21.11:${project.extra["moulconfig_version"]}")
-    modImplementation("moe.nea:libautoupdate:1.3.1")
-    include("moe.nea:libautoupdate:1.3.1")
+    modImplementation("moe.nea:libautoupdate:${project.extra["libautoupdate_version"]}")
+    include("moe.nea:libautoupdate:${project.extra["libautoupdate_version"]}")
 
 
     // External mods we optionally modify
     compileOnly(files("vendor/SkyHanni-7.19.0-mc1.21.11.jar"))
     modCompileOnly(files("vendor/SkyHanni-7.19.0-mc1.21.11.jar"))
-
     compileOnly(files("vendor/skyblock_enhancements-1.0.1+1.21.11.jar"))
     modCompileOnly(files("vendor/skyblock_enhancements-1.0.1+1.21.11.jar"))
 
@@ -77,7 +75,7 @@ dependencies {
     // External dependencies
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"]}")
     modImplementation("com.terraformersmc:modmenu:${project.extra["modmenu_version"]}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.11+kotlin.2.3.21")
+    modImplementation("net.fabricmc:fabric-language-kotlin:${project.extra["fabric_kotlin_version"]}")
 
     ksp(project(":processor"))
 }
@@ -129,23 +127,6 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
-// configure the maven publication
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            artifactId = project.extra["archives_base_name"].toString()
-            from(components["java"])
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
-    }
-}
 
 tasks.named("compileKotlin") {
     dependsOn("kspKotlin")
