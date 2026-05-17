@@ -14,8 +14,8 @@ import java.nio.file.Path
 object PriceDataCacheManager {
     private val LOGGER = Main.LOGGER
     private val CACHE_DIR: Path = FabricLoader.getInstance().configDir.resolve("skyblock_enhancements")
-    private val LOWESTBIN_CACHE_FILE: Path = CACHE_DIR.resolve("lowestbin-prices.json")
-    private val BAZAAR_CACHE_FILE: Path = CACHE_DIR.resolve("bazaar-prices.json")
+    private val LOWESTBIN_CACHE_FILE: Path = CACHE_DIR.resolve("lowestbin.json")
+    private val BAZAAR_CACHE_FILE: Path = CACHE_DIR.resolve("bazaar.json")
 
     init {
         try {
@@ -68,7 +68,7 @@ object PriceDataCacheManager {
     /**
      * Internal helper: Loads cache from a specific file.
      */
-    private fun loadCache(cacheFile: Path, cacheType: String?): String? {
+    private fun loadCache(cacheFile: Path, cacheType: String): String? {
         try {
             if (!Files.exists(cacheFile)) {
                 return null
