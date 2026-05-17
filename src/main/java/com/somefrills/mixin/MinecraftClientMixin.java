@@ -3,8 +3,8 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.Main;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.*;
+import com.somefrills.features.mining.NoMiningTrace;
 import com.somefrills.misc.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -42,7 +42,7 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "doAttack", at = @At("HEAD"))
     private void onAttack(CallbackInfoReturnable<Boolean> cir) {
-        if (!FrillsConfig.mining.noMiningTrace.enabled.get()) return;
+        if (!NoMiningTrace.INSTANCE.isActive()) return;
         if (!(crosshairTarget instanceof EntityHitResult)) return;
         if (mc.player == null || mc.world == null) return;
 

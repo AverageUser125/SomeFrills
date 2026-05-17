@@ -1,12 +1,13 @@
 package com.somefrills.features.tweaks
 
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.PassiveFeature
 
 @FrillsFeature
 class CameraTweaks : PassiveFeature() {
-    private val config get() = FrillsConfig.tweaks.cameraTweaks
+    private val config get() = FrillsMod.config.tweaks.cameraTweaks
 
     fun clip(): Boolean {
         return config.clip

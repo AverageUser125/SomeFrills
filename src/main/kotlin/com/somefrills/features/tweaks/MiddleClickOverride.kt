@@ -2,7 +2,8 @@ package com.somefrills.features.tweaks
 
 import com.google.common.collect.Sets
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Utils
@@ -12,7 +13,7 @@ import net.minecraft.screen.slot.SlotActionType
 import org.lwjgl.glfw.GLFW
 
 @FrillsFeature
-object MiddleClickOverride : Feature(FrillsConfig.tweaks.middleClickOverrideEnabled) {
+object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverrideEnabled) {
     private val matchBlacklist = Sets.newHashSet<String?>(
         "Attribute Fusion",
         "Beacon",
@@ -82,7 +83,7 @@ object MiddleClickOverride : Feature(FrillsConfig.tweaks.middleClickOverrideEnab
 
     @JvmStatic
     fun shouldOverride(slot: Slot?, button: Int, actionType: SlotActionType): Boolean {
-        if (!FrillsConfig.tweaks.middleClickOverrideEnabled.get()) return false
+        if (!FrillsMod.config.tweaks.middleClickOverrideEnabled.get()) return false
         val currentScreen = mc.currentScreen ?: return false
         if (slot == null) return false
         if (!isLeftClick(button, actionType)) return false

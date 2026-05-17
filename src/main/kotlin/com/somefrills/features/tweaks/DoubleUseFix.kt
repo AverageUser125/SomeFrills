@@ -1,7 +1,8 @@
 package com.somefrills.features.tweaks
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.InteractBlockEvent
 import com.somefrills.events.InteractItemEvent
 import com.somefrills.features.core.Feature
@@ -13,7 +14,7 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.HitResult
 
 @FrillsFeature
-class DoubleUseFix : Feature(FrillsConfig.tweaks.doubleUseFixEnabled) {
+class DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
     @EventHandler
     private fun onUseItem(event: InteractItemEvent) {
         if (mc.crosshairTarget != null && mc.crosshairTarget?.type == HitResult.Type.BLOCK && disableType == Type.Dagger) {

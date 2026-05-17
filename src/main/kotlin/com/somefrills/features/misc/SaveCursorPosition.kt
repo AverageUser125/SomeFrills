@@ -1,7 +1,8 @@
 package com.somefrills.features.misc
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.ScreenCloseEvent
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.features.core.Feature
@@ -13,8 +14,8 @@ import net.minecraft.client.util.InputUtil
 import kotlin.math.abs
 
 @FrillsFeature
-class SaveCursorPosition : Feature(FrillsConfig.misc.saveCursorPosition.enabled) {
-    private val config get() = FrillsConfig.misc.saveCursorPosition
+class SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.enabled) {
+    private val config get() = FrillsMod.config.misc.saveCursorPosition
     private var savedPositionedP1: Pair<Double, Double>? = null
     private var savedPosition: SavedPosition? = null
 

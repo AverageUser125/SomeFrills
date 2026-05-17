@@ -1,7 +1,8 @@
 package com.somefrills.features.tweaks
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.config.tweaks.TweaksCategory.NoGhostBlocksConfig
 import com.somefrills.events.BreakBlockEvent
 import com.somefrills.events.PlaceBlockEvent
@@ -11,12 +12,10 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.BlockState
 
 @FrillsFeature
-class NoGhostBlocks : Feature(FrillsConfig.tweaks.noGhostBlocks.enabled) {
-    private val config: NoGhostBlocksConfig
-
-    init {
-        config = FrillsConfig.tweaks.noGhostBlocks
-    }
+object NoGhostBlocks : Feature(FrillsMod.config.tweaks.noGhostBlocks.enabled) {
+    @JvmStatic
+    val config: NoGhostBlocksConfig
+        get() = FrillsMod.config.tweaks.noGhostBlocks
 
     @EventHandler
     private fun onBreakBlock(event: BreakBlockEvent) {

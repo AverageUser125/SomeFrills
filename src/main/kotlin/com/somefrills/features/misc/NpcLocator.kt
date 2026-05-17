@@ -2,7 +2,8 @@ package com.somefrills.features.misc
 
 import com.google.gson.JsonParser
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.TickEventPost
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.Feature
@@ -22,8 +23,8 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @FrillsFeature
-class NpcLocator : Feature(FrillsConfig.misc.npcLocator.enabled) {
-    private val config get() = FrillsConfig.misc.npcLocator
+class NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
+    private val config get() = FrillsMod.config.misc.npcLocator
 
     init {
         config.color.addObserver { oldVal: ChromaColour, newVal: ChromaColour -> onColorConfigChanged(newVal) }

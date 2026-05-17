@@ -1,6 +1,7 @@
 package com.somefrills.features.misc
 
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.ChatMsgEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
@@ -8,7 +9,7 @@ import meteordevelopment.orbit.EventHandler
 import java.util.regex.Pattern
 
 @FrillsFeature
-class FilterMessages : Feature(FrillsConfig.misc.chatFilter.enabled) {
+class FilterMessages : Feature(FrillsMod.config.misc.chatFilter.enabled) {
     @EventHandler
     private fun onChatMessage(event: ChatMsgEvent) {
         if (shouldFilter(event.plainMessage)) {

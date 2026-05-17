@@ -2,7 +2,8 @@ package com.somefrills.features.mining
 
 import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoint
 import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoints.waypoints
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig
 import com.somefrills.events.TickEventPre
 import com.somefrills.features.core.AreaFeature
@@ -17,9 +18,10 @@ import net.minecraft.item.ItemStack
 import java.util.function.Predicate
 
 @FrillsFeature
-class CorpseHighlight : AreaFeature(FrillsConfig.mining.corpseHighlight.enabled) {
-    private val config: CorpseHighlightConfig
-        get() = FrillsConfig.mining.corpseHighlight
+object CorpseHighlight : AreaFeature(FrillsMod.config.mining.corpseHighlight.enabled) {
+    @JvmStatic
+    val config: CorpseHighlightConfig
+        get() = FrillsMod.config.mining.corpseHighlight
 
     private fun getCorpseColor(type: CorpseType): ChromaColour? {
         return when (type) {
@@ -60,47 +62,45 @@ class CorpseHighlight : AreaFeature(FrillsConfig.mining.corpseHighlight.enabled)
         None
     }
 
+    private fun getCorpseType(ent: ArmorStandEntity): CorpseType {
+        val armor = Utils.getEntityArmor(ent)
+        if (armor.isEmpty()) return CorpseType.None
 
-    companion object {
-        private fun getCorpseType(ent: ArmorStandEntity): CorpseType {
-            val armor = Utils.getEntityArmor(ent)
-            if (armor.isEmpty()) return CorpseType.None
-
-            val helmet: ItemStack = armor[0]
-            if (helmet.isEmpty) return CorpseType.None
-            return when (Utils.toPlain(helmet.name)) {
-                "Lapis Armor Helmet" -> CorpseType.Lapis
-                "Mineral Helmet" -> CorpseType.Tungsten
-                "Yog Helmet" -> CorpseType.Umber
-                "Vanguard Helmet" -> CorpseType.Vanguard
-                else -> CorpseType.None
-            }
-        }
-
-
-        private fun shareAllWaypoints(filter: Predicate<MineshaftWaypoint>): MutableList<String> {
-            val sb = ArrayList<String>()
-            val waypoints = waypoints
-            for (waypoint in waypoints) {
-                if (!filter.test(waypoint)) continue
-                val location = waypoint.location.toChatFormat()
-                val type = waypoint.waypointType.displayText
-
-                val message = String.format("%s | (%s)", location, type)
-                sb.add(message)
-                waypoint.shared = true
-            }
-            return sb
-        }
-
-        @JvmStatic
-        fun shareAllWaypointsForce(): MutableList<String> {
-            return shareAllWaypoints { waypoint: MineshaftWaypoint -> waypoint.isCorpse }
-        }
-
-        @JvmStatic
-        fun shareAllWaypoints(): MutableList<String> {
-            return shareAllWaypoints { waypoint: MineshaftWaypoint -> !waypoint.shared && waypoint.isCorpse }
+        val helmet: ItemStack = armor[0]
+        if (helmet.isEmpty) return CorpseType.None
+        return when (Utils.toPlain(helmet.name)) {
+            "Lapis Armor Helmet" -> CorpseType.Lapis
+            "Mineral Helmet" -> CorpseType.Tungsten
+            "Yog Helmet" -> CorpseType.Umber
+            "Vanguard Helmet" -> CorpseType.Vanguard
+            else -> CorpseType.None
         }
     }
+
+
+    private fun shareAllWaypoints(filter: Predicate<MineshaftWaypoint>): MutableList<String> {
+        val sb = ArrayList<String>()
+        val waypoints = waypoints
+        for (waypoint in waypoints) {
+            if (!filter.test(waypoint)) continue
+            val location = waypoint.location.toChatFormat()
+            val type = waypoint.waypointType.displayText
+
+            val message = String.format("%s | (%s)", location, type)
+            sb.add(message)
+            waypoint.shared = true
+        }
+        return sb
+    }
+
+    @JvmStatic
+    fun shareAllWaypointsForce(): MutableList<String> {
+        return shareAllWaypoints { waypoint: MineshaftWaypoint -> waypoint.isCorpse }
+    }
+
+    @JvmStatic
+    fun shareAllWaypoints(): MutableList<String> {
+        return shareAllWaypoints { waypoint: MineshaftWaypoint -> !waypoint.shared && waypoint.isCorpse }
+    }
+
 }

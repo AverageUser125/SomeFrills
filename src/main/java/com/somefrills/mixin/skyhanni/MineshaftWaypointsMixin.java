@@ -5,7 +5,6 @@ import at.hannibal2.skyhanni.data.PartyApi;
 import at.hannibal2.skyhanni.events.minecraft.KeyPressEvent;
 import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoints;
 import at.hannibal2.skyhanni.utils.HypixelCommands;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.mining.CorpseHighlight;
 import com.somefrills.misc.Area;
 import com.somefrills.misc.Utils;
@@ -26,7 +25,7 @@ public abstract class MineshaftWaypointsMixin {
 
     @Inject(method = "onKeyPress", at = @At("HEAD"), cancellable = true)
     private void onKeyPress(KeyPressEvent event, CallbackInfo ci) {
-        if (!FrillsConfig.mining.corpseHighlight.forceSkyhanni) {
+        if (!CorpseHighlight.getConfig().forceSkyhanni) {
             return;
         }
         if (mc.currentScreen != null) return;

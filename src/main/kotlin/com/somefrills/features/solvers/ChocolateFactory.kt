@@ -1,6 +1,7 @@
 package com.somefrills.features.solvers
 
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.ScreenRenderEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
@@ -10,8 +11,8 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayerEntity
 
 @FrillsFeature
-class ChocolateFactory : Feature(FrillsConfig.solvers.chocolateFactorySolver.enabled) {
-    private val config get() = FrillsConfig.solvers.chocolateFactorySolver
+class ChocolateFactory : Feature(FrillsMod.config.solvers.chocolateFactorySolver.enabled) {
+    private val config get() = FrillsMod.config.solvers.chocolateFactorySolver
     private var lastClaimTime: Long = 0
 
     @EventHandler

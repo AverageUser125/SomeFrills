@@ -2,7 +2,6 @@ package com.somefrills.mixin.skyhanni;
 
 import at.hannibal2.skyhanni.features.mining.glacitemineshaft.CorpseLocator;
 import at.hannibal2.skyhanni.utils.HypixelCommands;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.mining.CorpseHighlight;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
@@ -20,7 +19,7 @@ public class CorpseLocatorMixin {
             at = @At("STORE"),
             name = "canSee")
     private boolean forceCanSeeTrue(boolean canSee) {
-        if (FrillsConfig.mining.corpseHighlight.forceSkyhanni) {
+        if (CorpseHighlight.getConfig().forceSkyhanni) {
             return true; // Force canSee to be true
         }
         return canSee;
@@ -30,7 +29,7 @@ public class CorpseLocatorMixin {
             at = @At("HEAD"),
             cancellable = true)
     private void onShareCorpse(CallbackInfo ci) {
-        if (!FrillsConfig.mining.corpseHighlight.forceSkyhanni) {
+        if (!CorpseHighlight.getConfig().forceSkyhanni) {
             return;
         }
         var messages = CorpseHighlight.shareAllWaypoints();

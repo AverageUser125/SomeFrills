@@ -1,7 +1,8 @@
 package com.somefrills.features.mining
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.BlockUpdateEvent
 import com.somefrills.features.core.AreaFeature
 import com.somefrills.features.core.FrillsFeature
@@ -12,7 +13,7 @@ import net.minecraft.block.BlockState
 import net.minecraft.block.HorizontalConnectingBlock.*
 
 @FrillsFeature
-object GemstoneDesyncFix : AreaFeature(FrillsConfig.mining.gemstoneDesyncFixEnabled) {
+object GemstoneDesyncFix : AreaFeature(FrillsMod.config.mining.gemstoneDesyncFixEnabled) {
     @EventHandler
     private fun onBlock(event: BlockUpdateEvent) {
         if (event.newState.isAir && Utils.isStainedGlass(event.oldState)) {

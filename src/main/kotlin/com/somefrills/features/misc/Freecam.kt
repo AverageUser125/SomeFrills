@@ -1,7 +1,8 @@
 package com.somefrills.features.misc
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.*
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.ToggleFeature
@@ -21,8 +22,8 @@ import org.lwjgl.glfw.GLFW
 import kotlin.math.sqrt
 
 @FrillsFeature
-object Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.misc.freecam.keybind) {
-    private val config get() = FrillsConfig.misc.freecam
+object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.config.misc.freecam.keybind) {
+    private val config get() = FrillsMod.config.misc.freecam
 
     @JvmField
     val pos: Vector3d = Vector3d()

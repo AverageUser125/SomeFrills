@@ -1,8 +1,8 @@
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.core.Features;
+import com.somefrills.features.mining.GhostVision;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
@@ -65,7 +65,7 @@ public class EntityMixin implements EntityRendering {
     private boolean makeCreeperVisible(boolean original) {
         // Make invisible creepers fully visible (client-side) if config enabled
         if ((Object) this instanceof CreeperEntity) {
-            var cfg = FrillsConfig.mining.ghostVision;
+            var cfg = GhostVision.getConfig();
 
             // Make all creepers visible if config enabled
             if (cfg.makeAllCreepersVisible) {
@@ -83,7 +83,7 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "isCustomNameVisible", at = @At("HEAD"), cancellable = true)
     private void makeCreeperNameVisible(CallbackInfoReturnable<Boolean> cir) {
-        var cfg = FrillsConfig.mining.ghostVision;
+        var cfg = GhostVision.getConfig();
         if (!cfg.enabled.get() && !cfg.creeperShowHP) {
             return;
         }
@@ -94,7 +94,7 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "hasCustomName", at = @At("HEAD"), cancellable = true)
     private void makeCreeperHaveName(CallbackInfoReturnable<Boolean> cir) {
-        var cfg = FrillsConfig.mining.ghostVision;
+        var cfg = GhostVision.getConfig();
         if (!cfg.enabled.get() && !cfg.creeperShowHP) {
             return;
         }
@@ -105,7 +105,7 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "getCustomName", at = @At("HEAD"), cancellable = true)
     private void giveCreeperName(CallbackInfoReturnable<Text> cir) {
-        var cfg = FrillsConfig.mining.ghostVision;
+        var cfg = GhostVision.getConfig();
         if (!cfg.enabled.get() || !cfg.creeperShowHP) {
             return;
         }

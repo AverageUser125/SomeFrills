@@ -1,8 +1,8 @@
 package com.somefrills.mixin;
 
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.events.PlaceBlockEvent;
 import com.somefrills.features.tweaks.NoAbilityPlace;
+import com.somefrills.features.tweaks.NoGhostBlocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
@@ -47,7 +47,7 @@ public abstract class BlockItemMixin {
             )
     )
     private BlockState modifyState(BlockState state, ItemPlacementContext context) {
-        var noGhostBlocksConfig = FrillsConfig.tweaks.noGhostBlocks;
+        var noGhostBlocksConfig = NoGhostBlocks.getConfig();
         if (noGhostBlocksConfig.enabled.get() && noGhostBlocksConfig.placing) {
             return getPlacementState(context);
         }

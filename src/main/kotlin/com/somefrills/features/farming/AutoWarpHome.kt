@@ -1,6 +1,7 @@
 package com.somefrills.features.farming
 
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.events.TabListUpdateEvent
 import com.somefrills.features.core.AreaFeature
@@ -10,7 +11,7 @@ import com.somefrills.misc.Utils
 import meteordevelopment.orbit.EventHandler
 
 @FrillsFeature
-class AutoWarpHome : AreaFeature(FrillsConfig.farming.autoWarpHomeEnabled) {
+class AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) {
     @EventHandler
     private fun onWorldTick(event: TabListUpdateEvent) {
         val status: PestStatus = checkAliveState(event.lines)

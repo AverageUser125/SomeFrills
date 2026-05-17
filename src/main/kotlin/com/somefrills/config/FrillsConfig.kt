@@ -14,7 +14,7 @@ import io.github.notenoughupdates.moulconfig.annotations.Category
 import io.github.notenoughupdates.moulconfig.common.MyResourceLocation
 import io.github.notenoughupdates.moulconfig.common.text.StructuredText
 
-object FrillsConfig : Config() {
+class FrillsConfig : Config() {
 
     private val socials: MutableList<Social> = mutableListOf(
         Social.forLink(

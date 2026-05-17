@@ -1,7 +1,7 @@
 package com.somefrills.features.farming
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
 import com.somefrills.events.ChatMsgEvent
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.features.core.AreaFeature
@@ -13,7 +13,7 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @FrillsFeature
-class AutoPestSetHome : AreaFeature(FrillsConfig.farming.autoPestSetHomeEnabled) {
+class AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEnabled) {
     @EventHandler
     private fun onServerJoin(event: ServerJoinEvent) {
         lastServerJoinTime = System.currentTimeMillis()

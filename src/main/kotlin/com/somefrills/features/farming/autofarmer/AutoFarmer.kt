@@ -1,7 +1,8 @@
 package com.somefrills.features.farming.autofarmer
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.config.farming.AutoFarmerConfig
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.events.ServerJoinEvent
@@ -110,7 +111,7 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
 
     companion object {
         private fun config(): AutoFarmerConfig {
-            return FrillsConfig.farming.autoFarmer
+            return FrillsMod.config.farming.autoFarmer
         }
     }
 }

@@ -1,7 +1,8 @@
 package com.somefrills.features.solvers
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.TickEventPost
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
@@ -17,8 +18,8 @@ import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 
 @FrillsFeature
-class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) {
-    private val config get() = FrillsConfig.solvers.experimentSolver
+class ExperimentSolver : Feature(FrillsMod.config.solvers.experimentSolver.enabled) {
+    private val config get() = FrillsMod.config.solvers.experimentSolver
 
     private val ultrasequencerOrder: MutableMap<Int, Int> = HashMap()
     private val chronomatronOrder: MutableList<Int> = ArrayList()

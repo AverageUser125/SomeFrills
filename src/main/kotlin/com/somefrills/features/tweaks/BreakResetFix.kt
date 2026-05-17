@@ -1,7 +1,8 @@
 package com.somefrills.features.tweaks
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.InventoryUpdateEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
@@ -9,7 +10,7 @@ import com.somefrills.mixin.ClientPlayerInteractionManagerAccessor
 import meteordevelopment.orbit.EventHandler
 
 @FrillsFeature
-class BreakResetFix : Feature(FrillsConfig.tweaks.breakResetFixEnabled) {
+class BreakResetFix : Feature(FrillsMod.config.tweaks.breakResetFixEnabled) {
     @EventHandler
     fun onBreakReset(event: InventoryUpdateEvent) {
         if (mc.player == null || mc.interactionManager == null) return

@@ -1,6 +1,7 @@
 package com.somefrills.features.mining
 
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.EntityUpdatedEvent
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.AreaFeature
@@ -13,8 +14,10 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.mob.CreeperEntity
 
 @FrillsFeature
-class GhostVision : AreaFeature(FrillsConfig.mining.ghostVision.enabled) {
-    private val config get() = FrillsConfig.mining.ghostVision
+object GhostVision : AreaFeature(FrillsMod.config.mining.ghostVision.enabled) {
+    @JvmStatic
+    val config get() = FrillsMod.config.mining.ghostVision
+    private val cache = EntityCache()
 
     @EventHandler
     private fun onEntity(event: EntityUpdatedEvent) {
@@ -40,9 +43,5 @@ class GhostVision : AreaFeature(FrillsConfig.mining.ghostVision.enabled) {
 
     override fun checkArea(area: Area): Boolean {
         return area == Area.DWARVEN_MINES
-    }
-
-    companion object {
-        private val cache = EntityCache()
     }
 }

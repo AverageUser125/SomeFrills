@@ -1,6 +1,7 @@
 package com.somefrills.features.misc.glowmob
 
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.config.misc.GlowMobConfig.GlowMobRule
 import com.somefrills.events.GameStopEvent
 import com.somefrills.events.TickEventPost
@@ -15,8 +16,8 @@ import net.minecraft.entity.LivingEntity
 import java.util.function.Consumer
 
 @FrillsFeature
-object GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
-    private val config get() = FrillsConfig.misc.glowMob
+object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
+    private val config get() = FrillsMod.config.misc.glowMob
 
     /* ---------------- QUERY API ---------------- */
     @JvmField

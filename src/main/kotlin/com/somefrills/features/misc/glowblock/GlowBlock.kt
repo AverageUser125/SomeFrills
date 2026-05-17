@@ -1,7 +1,8 @@
 package com.somefrills.features.misc.glowblock
 
 import com.somefrills.Main.mc
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.Feature
@@ -12,7 +13,7 @@ import net.minecraft.block.Block
 import net.minecraft.util.math.Box
 
 @FrillsFeature
-class GlowBlock : Feature(FrillsConfig.misc.glowBlock.enabled) {
+class GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
     private var blockScanner: BlockScanner? = null
 
     @JvmField

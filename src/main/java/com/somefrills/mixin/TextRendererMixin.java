@@ -1,8 +1,8 @@
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.core.Features;
+import com.somefrills.features.tweaks.NoRender;
 import net.minecraft.client.font.TextRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,6 +14,6 @@ public class TextRendererMixin {
         if (!Features.isInitialized()) {
             return original;
         }
-        return !FrillsConfig.tweaks.noRender.noObfuscation && original;
+        return !NoRender.getConfig().noObfuscation && original;
     }
 }

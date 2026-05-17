@@ -29,7 +29,7 @@ abstract class AbstractFeature protected constructor(private val enabledProperty
             enabledProperty.set(enabled)
         }
 
-    fun isActive(): Boolean {
+    open fun isActive(): Boolean {
         return active
     }
 

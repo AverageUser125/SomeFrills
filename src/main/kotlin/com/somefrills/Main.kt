@@ -2,6 +2,7 @@ package com.somefrills
 
 import com.somefrills.commands.SomeFrillsCommand
 import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
 import com.somefrills.config.about.ConfigVersionDisplay
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck
 import com.somefrills.events.*
@@ -139,7 +140,7 @@ object Main : ClientModInitializer {
         }
 
         config = ManagedConfig(builder)
-        FrillsConfig.bind(config.instance)
+        FrillsMod.bind(config.instance)
 
         eventBus.registerLambdaFactory("com.somefrills") { lookupInMethod, klass ->
             lookupInMethod.invoke(

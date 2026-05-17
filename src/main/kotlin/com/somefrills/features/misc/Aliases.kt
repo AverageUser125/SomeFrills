@@ -1,13 +1,14 @@
 package com.somefrills.features.misc
 
 import com.google.gson.JsonObject
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 
 @FrillsFeature
-class Aliases : Feature(FrillsConfig.misc.commandAliases.enabled) {
-    private val config get() = FrillsConfig.misc.commandAliases
+class Aliases : Feature(FrillsMod.config.misc.commandAliases.enabled) {
+    private val config get() = FrillsMod.config.misc.commandAliases
 
     fun convertCommand(message: String): String {
         if (!config.enabled.get()) return message

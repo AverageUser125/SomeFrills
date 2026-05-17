@@ -60,12 +60,12 @@ object SlotOptions {
     }
 
     @JvmStatic
-    fun isSpoofed(slot: Slot): Boolean {
+    fun isSpoofed(slot: Slot?): Boolean {
         return slotFlags.containsKey(slot) && slotFlags[slot]!!.spoofed
     }
 
     @JvmStatic
-    fun getSpoofed(slot: Slot): ItemStack? {
+    fun getSpoofed(slot: Slot?): ItemStack {
         if (isSpoofed(slot)) {
             return slotFlags[slot]!!.replacement
         }

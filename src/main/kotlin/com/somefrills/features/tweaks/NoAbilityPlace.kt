@@ -1,7 +1,8 @@
 package com.somefrills.features.tweaks
 
 import com.google.common.collect.Sets
-import com.somefrills.config.FrillsConfig
+import com.somefrills.config.FrillsMod
+
 import com.somefrills.events.PlaceBlockEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
@@ -11,7 +12,7 @@ import net.minecraft.item.BlockItem
 import net.minecraft.item.ItemPlacementContext
 
 @FrillsFeature
-object NoAbilityPlace : Feature(FrillsConfig.tweaks.noAbilityPlaceEnabled) {
+object NoAbilityPlace : Feature(FrillsMod.config.tweaks.noAbilityPlaceEnabled) {
     private val abilityWhitelist = Sets.newHashSet<String?>(
         "ABINGOPHONE",
         "SUPERBOOM_TNT",
