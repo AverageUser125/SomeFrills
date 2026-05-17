@@ -125,7 +125,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @ModifyExpressionValue(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isInCreativeMode()Z"))
     private boolean onMiddleClick(boolean original) {
-        if (FrillsConfig.instance.tweaks.middleClickFixEnabled) {
+        if (FrillsConfig.tweaks.middleClickFixEnabled) {
             return true;
         }
         return original;

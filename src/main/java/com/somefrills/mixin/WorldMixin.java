@@ -9,12 +9,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.somefrills.Main.eventBus;
-
 @Mixin(World.class)
 public abstract class WorldMixin {
     @Inject(method = "onBlockStateChanged", at = @At(value = "TAIL"))
     private void onBlockChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
-        eventBus.post(new BlockUpdateEvent(pos, oldBlock, newBlock));
+        new BlockUpdateEvent(pos, oldBlock, newBlock).post();
     }
 }

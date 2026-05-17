@@ -2,8 +2,6 @@ package com.somefrills.misc;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
@@ -669,116 +667,6 @@ public class Utils {
         return getSkyblockId(getCustomData(stack));
     }
 
-    /**
-     * Tries to parse the Bazaar/Auction ID tied to the name of the item.
-     */
-    public static String getMarketId(Text text) {
-        String name = toPlain(text);
-        if (hasItemQuantity(name)) {
-            name = name.substring(0, name.lastIndexOf(" ")).trim();
-        }
-        if (name.startsWith("Enchanted Book (") && name.endsWith(")")) {
-            String enchant = name.substring(name.indexOf("(") + 1, name.indexOf(")"));
-            String enchantName = toID(enchant.substring(0, enchant.lastIndexOf(" ")));
-            int enchantLevel = parseRoman(enchant.substring(enchant.lastIndexOf(" ") + 1));
-            Optional<Style> style = getStyle(text, enchant::equals);
-            if (style.isPresent() && hasColor(style.get(), Formatting.LIGHT_PURPLE) && !enchantName.startsWith("ULTIMATE_")) {
-                return format("ENCHANTMENT_ULTIMATE_{}_{}", enchantName, enchantLevel);
-            }
-            return format("ENCHANTMENT_{}_{}", enchantName, enchantLevel);
-        }
-        if (name.endsWith(" Essence")) {
-            return format("ESSENCE_{}", toID(name.substring(0, name.lastIndexOf(" "))));
-        }
-        if (name.endsWith(" Dye")) {
-            return format("DYE_{}", toID(name.substring(0, name.lastIndexOf(" "))));
-        }
-        if (name.startsWith("Master Skull - Tier ")) {
-            return toID(name.replace(" - ", " "));
-        }
-        if (name.startsWith("[Lvl 1] ")) {
-            String petName = name.substring(name.indexOf("]") + 2);
-            Optional<Style> styleOptional = getStyle(text, petName::equals);
-            String rarity = "COMMON";
-            if (styleOptional.isPresent()) {
-                Style style = styleOptional.get();
-                if (hasColor(style, Formatting.GOLD)) rarity = "LEGENDARY";
-                if (hasColor(style, Formatting.DARK_PURPLE)) rarity = "EPIC";
-                if (hasColor(style, Formatting.BLUE)) rarity = "RARE";
-                if (hasColor(style, Formatting.GREEN)) rarity = "UNCOMMON";
-            }
-            return format("{}_PET_{}", toID(petName), rarity);
-        }
-        if (name.endsWith(" Shard")) {
-            return ShardData.getId(name);
-        }
-        return switch (name) {
-            case "Shadow Warp" -> "SHADOW_WARP_SCROLL";
-            case "Wither Shield" -> "WITHER_SHIELD_SCROLL";
-            case "Implosion" -> "IMPLOSION_SCROLL";
-            case "Giant's Sword" -> "GIANTS_SWORD";
-            case "Warped Stone" -> "AOTE_STONE";
-            case "Spirit Boots" -> "THORNS_BOOTS";
-            case "Spirit Shortbow" -> "ITEM_SPIRIT_BOW";
-            case "Spirit Stone" -> "SPIRIT_DECOY";
-            case "Adaptive Blade" -> "STONE_BLADE";
-            default -> toID(name);
-        };
-    }
-
-    /**
-     * Returns the Bazaar/Auction ID tied to the item.
-     */
-    public static String getMarketId(ItemStack stack) {
-        NbtCompound data = getCustomData(stack);
-        String id = getSkyblockId(data);
-        String shardId = ShardData.getId(stack);
-        if (!shardId.isEmpty()) {
-            return shardId;
-        }
-        switch (id) {
-            case "PET" -> {
-                String petInfo = data.getString("petInfo").orElse("");
-                if (!petInfo.isEmpty()) {
-                    JsonObject petData = JsonParser.parseString(petInfo).getAsJsonObject();
-                    return format("{}_PET_{}", petData.get("type").getAsString(), petData.get("tier").getAsString());
-                }
-                return "UNKNOWN_PET";
-            }
-            case "RUNE", "UNIQUE_RUNE" -> {
-                NbtCompound runeData = data.getCompound("runes").orElse(null);
-                if (runeData != null) {
-                    String runeId = (String) runeData.getKeys().toArray()[0];
-                    return format("{}_{}_RUNE", runeId, runeData.getInt(runeId).orElse(0));
-                }
-                return "EMPTY_RUNE";
-            }
-            case "ENCHANTED_BOOK" -> {
-                NbtCompound enchantData = data.getCompound("enchantments").orElse(null);
-                if (enchantData != null) {
-                    Set<String> enchants = enchantData.getKeys();
-                    if (enchants.size() == 1) {
-                        String enchantId = (String) enchantData.getKeys().toArray()[0];
-                        int enchantLevel = enchantData.getInt(enchantId).orElse(0);
-                        return format("ENCHANTMENT_{}_{}", toUpper(enchantId), enchantLevel);
-                    }
-                }
-                return "ENCHANTMENT_UNKNOWN";
-            }
-            case "POTION" -> {
-                String potion = data.getString("potion").orElse("");
-                if (!potion.isEmpty()) {
-                    return format("{}_{}_POTION",
-                            toUpper(potion),
-                            data.getInt("potion_level").orElse(0)
-                    );
-                }
-                return "UNKNOWN_POTION";
-            }
-        }
-        return id;
-    }
-
     public static boolean hasItemQuantity(String name) {
         return Pattern.matches(".* x[0-9]*", name);
     }
@@ -1229,7 +1117,7 @@ public class Utils {
             }
         }
         for (MyMapColor mapColor : MyMapColor.values()) {
-            if (mapColor.getColor() == hex) {
+            if (mapColor.getHex() == hex) {
                 return capitalizeType(mapColor.name().toLowerCase());
             }
         }
