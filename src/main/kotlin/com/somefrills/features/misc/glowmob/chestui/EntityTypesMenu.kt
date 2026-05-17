@@ -36,7 +36,7 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
             }
 
             val eggStack = ItemStack(spawnEggItem)
-            if (!eggStack.isEmpty()) {
+            if (!eggStack.isEmpty) {
                 entries.add(createEntityItem(entityType, eggStack))
             }
         }
@@ -46,12 +46,12 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
         entries.add(createEntityItemFromId("player", ItemStack(Items.PLAYER_HEAD)))
         // Sort by the plain custom name (case-insensitive). Fallback to empty string if missing.
         entries.sortWith(Comparator { a: ItemStack?, b: ItemStack? ->
-                    var na = Utils.getPlainCustomName(a)
-                    var nb = Utils.getPlainCustomName(b)
-                    if (na == null) na = ""
-                    if (nb == null) nb = ""
-                    na.compareTo(nb, ignoreCase = true)
-                })
+            var na = Utils.getPlainCustomName(a)
+            var nb = Utils.getPlainCustomName(b)
+            if (na == null) na = ""
+            if (nb == null) nb = ""
+            na.compareTo(nb, ignoreCase = true)
+        })
 
         addItem(createEntityItemFromId("none", ItemStack(Items.STRUCTURE_VOID)))
         for (entry in entries) {
@@ -62,7 +62,7 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
     private fun createEntityItem(entityType: EntityType<*>?, eggStack: ItemStack): ItemStack {
         // Delegate to the ID-based helper to avoid duplication
         val entityTypeId = Registries.ENTITY_TYPE.getId(entityType)
-        return createEntityItemFromId(entityTypeId.getPath(), eggStack)
+        return createEntityItemFromId(entityTypeId.path, eggStack)
     }
 
     /**
@@ -93,7 +93,7 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
     }
 
     override fun onItemClick(stack: ItemStack?, button: Int) {
-        if (stack == null || stack.isEmpty()) return
+        if (stack == null || stack.isEmpty) return
 
         // Retrieve entity type from custom data
         val nbt = Utils.getCustomData(stack)

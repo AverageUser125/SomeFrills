@@ -30,31 +30,38 @@ object FrillsConfig : Config() {
 
     override fun getTitle() = StructuredText.of("Some Frills Config")
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "About", desc = "Information and update settings")
     var about = AboutCategory()
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "Solvers", desc = "Settings for puzzle solvers")
     var solvers = SolverCategory()
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "Tweaks/Fixes", desc = "Settings for various tweaks and fixes")
     var tweaks = TweaksCategory()
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "Farming", desc = "Settings for farming helpers")
     var farming = FarmingCategory()
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "Mining", desc = "Settings for mining helpers")
     var mining = MiningCategory()
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "Fishing", desc = "Settings for fishing helpers")
     var fishing = FishingCategory()
 
-    @JvmField @Expose
+    @JvmField
+    @Expose
     @Category(name = "Misc", desc = "Settings for miscellaneous features")
     var misc = MiscCategory()
 

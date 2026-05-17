@@ -7,7 +7,7 @@
   "authors": [
     "NaorVaninu"
   ],
-  "contributors" : [
+  "contributors": [
     "ItsRealHim"
   ],
   "contact": {
@@ -31,11 +31,13 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.github_releases" : "https://github.com/AverageUser125/SomeFrills/releases"
+        "modmenu.github_releases": "https://github.com/AverageUser125/SomeFrills/releases"
       }
     },
     "mc-publish": {
-      "loaders": ["fabric"]
+      "loaders": [
+        "fabric"
+      ]
     }
   },
   "mixins": [

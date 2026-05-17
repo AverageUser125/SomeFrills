@@ -13,7 +13,7 @@ import java.nio.file.Path
  */
 object PriceDataCacheManager {
     private val LOGGER = Main.LOGGER
-    private val CACHE_DIR: Path = FabricLoader.getInstance().getConfigDir().resolve("skyblock_enhancements")
+    private val CACHE_DIR: Path = FabricLoader.getInstance().configDir.resolve("skyblock_enhancements")
     private val LOWESTBIN_CACHE_FILE: Path = CACHE_DIR.resolve("lowestbin-prices.json")
     private val BAZAAR_CACHE_FILE: Path = CACHE_DIR.resolve("bazaar-prices.json")
 

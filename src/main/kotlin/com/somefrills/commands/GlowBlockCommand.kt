@@ -11,7 +11,6 @@ import com.somefrills.features.misc.glowblock.GlowBlock
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.block.Block
 import net.minecraft.command.argument.BlockArgumentParser
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKeys

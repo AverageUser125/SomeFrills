@@ -11,9 +11,9 @@ enum class KeyAction {
         @JvmStatic
         fun get(action: Int): KeyAction {
             return when (action) {
-                GLFW.GLFW_PRESS -> KeyAction.Press
-                GLFW.GLFW_RELEASE -> KeyAction.Release
-                else -> KeyAction.Repeat
+                GLFW.GLFW_PRESS -> Press
+                GLFW.GLFW_RELEASE -> Release
+                else -> Repeat
             }
         }
     }

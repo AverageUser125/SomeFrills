@@ -38,6 +38,7 @@ class GlowMobConfig {
 
         @Transient
         private var predicate: Predicate<LivingEntity>?
+
         // Must have no-args constructor for Gson deserialization
         constructor() {
             this.info = MatchInfo()

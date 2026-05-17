@@ -46,6 +46,7 @@ enum class Area {
      * Get the color hex value for this area
      */
     val colorHex: Int
+
     @JvmField
     val item: Item
 

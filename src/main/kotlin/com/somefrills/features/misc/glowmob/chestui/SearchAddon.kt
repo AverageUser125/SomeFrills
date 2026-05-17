@@ -88,7 +88,7 @@ class SearchAddon : UIAddon {
     }
 
     private fun colorStyle(color: Formatting): Style {
-        val colorValue = color.getColorValue()
+        val colorValue = color.colorValue
         return if (colorValue == null) Style.EMPTY else Style.EMPTY.withColor(TextColor.fromRgb(colorValue))
     }
 }

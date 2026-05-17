@@ -1,7 +1,6 @@
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.somefrills.config.FrillsConfig;
 import com.somefrills.features.mining.GemstoneDesyncFix;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.PaneBlock;

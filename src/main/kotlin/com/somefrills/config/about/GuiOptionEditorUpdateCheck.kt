@@ -105,6 +105,7 @@ class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(opti
                     UpdateManager.UpdateState.AVAILABLE -> UpdateManager.queueUpdate()
                     UpdateManager.UpdateState.QUEUED, UpdateManager.UpdateState.DOWNLOADED -> {
                     }
+
                     UpdateManager.UpdateState.NONE -> UpdateManager.checkUpdate()
                 }
                 return true

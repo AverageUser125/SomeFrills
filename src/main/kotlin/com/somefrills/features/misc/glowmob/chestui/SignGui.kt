@@ -50,7 +50,7 @@ class SignGui private constructor(
             blockEntity.cachedState.block is SignBlock
 
         model = SignBlockEntityRenderer.createSignModel(
-            client.getLoadedEntityModels(),
+            client.loadedEntityModels,
             signType,
             standing
         )

@@ -1,7 +1,6 @@
 package com.somefrills.features.mining
 
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.mining.MiningCategory.GhostVisionConfig
 import com.somefrills.events.EntityUpdatedEvent
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.AreaFeature
@@ -15,7 +14,7 @@ import net.minecraft.entity.mob.CreeperEntity
 
 @FrillsFeature
 class GhostVision : AreaFeature(FrillsConfig.mining.ghostVision.enabled) {
-    private val config get() =  FrillsConfig.mining.ghostVision
+    private val config get() = FrillsConfig.mining.ghostVision
 
     @EventHandler
     private fun onEntity(event: EntityUpdatedEvent) {

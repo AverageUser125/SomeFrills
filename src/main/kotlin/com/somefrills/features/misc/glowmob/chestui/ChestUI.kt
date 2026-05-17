@@ -3,7 +3,6 @@ package com.somefrills.features.misc.glowmob.chestui
 import com.somefrills.Main.mc
 import com.somefrills.misc.Utils
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
-import net.minecraft.client.network.ClientPlayerEntity
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
@@ -11,13 +10,15 @@ import net.minecraft.screen.GenericContainerScreenHandler
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 import net.minecraft.text.Text
-import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.MutableList
 
 abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val previousScreen: ChestUI? = null) :
     GenericContainerScreen(
         getHandler(INV_SIZE), mc.player!!.getInventory(), Text.of(title)
     ) {
     protected val addons: MutableList<UIAddon> = ArrayList<UIAddon>()
+
     @JvmField
     protected val allItems: MutableList<ItemStack?> = ArrayList<ItemStack?>()
     protected var lastClickTimestamp: Long = 0L
@@ -35,7 +36,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
     }
 
     protected val inventory: Inventory
-        get() = handler.getInventory()
+        get() = handler.inventory
 
     fun rebuild() {
         val inv = this.inventory
@@ -96,7 +97,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
         if (now - this.lastClickTimestamp < CLICK_COOLDOWN_MS) return
         this.lastClickTimestamp = now
 
-        val stack = slot.getStack()
+        val stack = slot.stack
         val name = Utils.getPlainCustomName(stack)
         if (name == null) return
 

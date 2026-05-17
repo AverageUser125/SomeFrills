@@ -1,6 +1,5 @@
 package com.somefrills.mixin;
 
-import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.mixininterface.IVec3d;
 import net.minecraft.client.MinecraftClient;

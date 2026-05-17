@@ -2,8 +2,6 @@ package com.somefrills.misc;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTextures;
 import com.mojang.authlib.minecraft.MinecraftSessionService;

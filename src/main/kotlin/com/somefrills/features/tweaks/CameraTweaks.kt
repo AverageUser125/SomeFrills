@@ -1,7 +1,6 @@
 package com.somefrills.features.tweaks
 
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.tweaks.TweaksCategory.CameraTweaksConfig
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.PassiveFeature
 

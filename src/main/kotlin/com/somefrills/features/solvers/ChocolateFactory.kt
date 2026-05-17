@@ -1,7 +1,6 @@
 package com.somefrills.features.solvers
 
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.solvers.SolverCategory.ChocolateFactoryConfig
 import com.somefrills.events.ScreenRenderEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
@@ -29,7 +28,7 @@ class ChocolateFactory : Feature(FrillsConfig.solvers.chocolateFactorySolver.ena
         var title = ""
         if (client.currentScreen != null) {
             val txt = client.currentScreen!!.getTitle()
-            if (txt != null) title = txt.getString()
+            if (txt != null) title = txt.string
         }
 
         // Check if we're in the Chocolate Factory menu
@@ -38,16 +37,16 @@ class ChocolateFactory : Feature(FrillsConfig.solvers.chocolateFactorySolver.ena
 
         // Scan for claimable items
         for (slot in handler.slots) {
-            val stack = slot.getStack()
-            if (stack == null || stack.isEmpty()) continue
+            val stack = slot.stack
+            if (stack == null || stack.isEmpty) continue
 
-            val displayName = stack.getName().getString()
+            val displayName = stack.name.string
 
             // Check if this is a claimable item (CLICK ME! or Golden Rabbit)
             if (displayName.contains("CLICK ME!")) {
                 // Check click delay
                 if (System.currentTimeMillis() - lastClaimTime < config.claimDelay) return
-                Utils.clickSlot(slot.getIndex())
+                Utils.clickSlot(slot.index)
                 lastClaimTime = System.currentTimeMillis()
                 return  // Only click one per tick
             }
@@ -56,7 +55,7 @@ class ChocolateFactory : Feature(FrillsConfig.solvers.chocolateFactorySolver.ena
             if (displayName.contains("Golden Rabbit")) {
                 // Check click delay
                 if (System.currentTimeMillis() - lastClaimTime < config.claimDelay * 100L) return
-                Utils.clickSlot(slot.getIndex())
+                Utils.clickSlot(slot.index)
                 lastClaimTime = System.currentTimeMillis()
                 return  // Only click one per tick
             }

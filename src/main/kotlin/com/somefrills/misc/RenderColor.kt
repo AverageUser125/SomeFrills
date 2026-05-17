@@ -12,14 +12,19 @@ import kotlin.math.sqrt
 class RenderColor {
     @JvmField
     var r: Float = 0f
+
     @JvmField
     var g: Float = 0f
+
     @JvmField
     var b: Float = 0f
+
     @JvmField
     var a: Float = 0f
+
     @JvmField
     var hex: Int = 0
+
     @JvmField
     var argb: Int = 0
 
@@ -94,7 +99,7 @@ class RenderColor {
     class RenderColorTypeAdapter : TypeAdapter<RenderColor?>() {
         @Throws(IOException::class)
         override fun write(out: JsonWriter?, value: RenderColor?) {
-            if(value == null) {
+            if (value == null) {
                 out!!.value(-1)
                 return
             }

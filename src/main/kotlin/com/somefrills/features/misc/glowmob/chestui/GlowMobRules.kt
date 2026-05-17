@@ -17,10 +17,6 @@ import net.minecraft.text.TextColor
 import net.minecraft.util.Formatting
 import org.lwjgl.glfw.GLFW
 import java.util.*
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Int
-import kotlin.NumberFormatException
 
 class GlowMobRules : ChestUI("GlowMob Rules") {
     private val allRules: MutableList<GlowMobRule> = GlowMob.rules
@@ -126,7 +122,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
     }
 
     private fun colorStyle(color: Formatting): Style? {
-        val colorValue = color.getColorValue()
+        val colorValue = color.colorValue
         if (colorValue == null) {
             return Style.EMPTY
         }

@@ -52,8 +52,8 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
         // Check if slot 49 is glowstone AND last added slot is not enchanted (click registered)
         val slot49 = invSlots.get(49)
         val lastAddedSlot = invSlots.get(lastAdded)
-        val slot49IsGlowstone = slot49.getStack() != null && isGlowstone(slot49)
-        val lastAddedNotEnchanted = lastAddedSlot.getStack() != null && !isEnchanted(lastAddedSlot.getStack())
+        val slot49IsGlowstone = slot49.stack != null && isGlowstone(slot49)
+        val lastAddedNotEnchanted = lastAddedSlot.stack != null && !isEnchanted(lastAddedSlot.stack)
 
         if (slot49IsGlowstone && lastAddedNotEnchanted) {
             if (config.chronomatron.shouldClose && chronomatronOrder.size > maxChronomatron) {
@@ -63,12 +63,12 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
         }
 
         // Detect new item entering: slot 49 is clock
-        if (!hasAdded && slot49.getStack() != null && isClock(slot49)) {
+        if (!hasAdded && slot49.stack != null && isClock(slot49)) {
             for (i in 11..56) { // Scan the colored glass/terracotta area (slots 11-56)
                 if (!isValidChronoSlot(i)) continue
                 val s = invSlots.get(i)
-                val stack = s.getStack()
-                if (stack == null || stack.isEmpty()) continue
+                val stack = s.stack
+                if (stack == null || stack.isEmpty) continue
                 if (!isEnchanted(stack)) continue
                 if (!isTerracotta(stack)) continue
                 chronomatronOrder.add(i)
@@ -82,7 +82,7 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
         }
 
         // Perform clicking: slot 49 is clock AND we have items to click
-        if (hasAdded && slot49.getStack() != null && isClock(slot49)
+        if (hasAdded && slot49.stack != null && isClock(slot49)
             && chronomatronOrder.size > clicks && System.currentTimeMillis() - lastClickTime > config.clickDelay
         ) {
             val slotToClick = chronomatronOrder.get(clicks)
@@ -98,18 +98,18 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
 
         // Reset when slot 49 becomes clock (new round)
         val slot49 = invSlots.get(49)
-        if (slot49.getStack() != null && isClock(slot49)) {
+        if (slot49.stack != null && isClock(slot49)) {
             hasAdded = false
         }
 
         // Detect and rebuild map when slot 49 becomes glowstone
-        if (!hasAdded && slot49.getStack() != null && isGlowstone(slot49)) {
+        if (!hasAdded && slot49.stack != null && isGlowstone(slot49)) {
             ultrasequencerOrder.clear()
 
             for (i in invSlots.indices) {
                 val s = invSlots.get(i)
-                if (s.getStack() != null && !s.getStack().isEmpty()) {
-                    val stackSize = s.getStack().getCount()
+                if (s.stack != null && !s.stack.isEmpty) {
+                    val stackSize = s.stack.count
                     if (isDye(s)) {
                         val idx = stackSize - 1
                         ultrasequencerOrder.put(idx, i)
@@ -129,7 +129,7 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
         }
 
         // Perform clicking: slot 49 is clock AND we have dyes to click
-        if (slot49.getStack() != null && isClock(slot49)
+        if (slot49.stack != null && isClock(slot49)
             && ultrasequencerOrder.containsKey(clicks) && System.currentTimeMillis() - lastClickTime > config.clickDelay
         ) {
             val slotToClick = ultrasequencerOrder.get(clicks)
@@ -157,7 +157,7 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
     }
 
     private fun isEnchanted(stack: ItemStack?): Boolean {
-        if (stack == null || stack.isEmpty()) return false
+        if (stack == null || stack.isEmpty) return false
         return stack.hasEnchantments() || stack.hasGlint()
     }
 
@@ -178,7 +178,7 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
             get() {
                 val screen = mc.currentScreen ?: return ExperimentType.None
                 if (Utils.isOnPrivateIsland() && screen is GenericContainerScreen) {
-                    val title: String = screen.getTitle().getString()
+                    val title: String = screen.getTitle().string
                     if (title.startsWith("Chronomatron (")) return ExperimentType.Chronomatron
                     if (title.startsWith("Ultrasequencer (")) return ExperimentType.Ultrasequencer
                     if (title.startsWith("Superpairs (")) return ExperimentType.Superpairs
@@ -191,23 +191,23 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
         }
 
         private fun isGlowstone(stack: ItemStack): Boolean {
-            return stack.getItem() == Items.GLOWSTONE
+            return stack.item == Items.GLOWSTONE
         }
 
         private fun isClock(stack: ItemStack): Boolean {
-            return stack.getItem() == Items.CLOCK
+            return stack.item == Items.CLOCK
         }
 
         private fun isGlowstone(s: Slot): Boolean {
-            return isGlowstone(s.getStack())
+            return isGlowstone(s.stack)
         }
 
         private fun isClock(s: Slot): Boolean {
-            return isClock(s.getStack())
+            return isClock(s.stack)
         }
 
         private fun isDye(stack: ItemStack): Boolean {
-            val item = stack.getItem()
+            val item = stack.item
             return item is DyeItem
                     || item == Items.INK_SAC
                     || item == Items.BONE_MEAL
@@ -216,15 +216,15 @@ class ExperimentSolver : Feature(FrillsConfig.solvers.experimentSolver.enabled) 
         }
 
         private fun isDye(s: Slot): Boolean {
-            return isDye(s.getStack())
+            return isDye(s.stack)
         }
 
         private fun isTerracotta(stack: ItemStack): Boolean {
-            return stack.getItem().toString().endsWith("terracotta")
+            return stack.item.toString().endsWith("terracotta")
         }
 
         private fun isTerracotta(s: Slot): Boolean {
-            return isTerracotta(s.getStack())
+            return isTerracotta(s.stack)
         }
     }
 }

@@ -17,12 +17,16 @@ import kotlin.math.hypot
 class MatchInfo {
     @JvmField
     var type: SortedList<String>
+
     @JvmField
     var name: String
+
     @JvmField
     var area: Area?
+
     @JvmField
     var gear: MutableSet<GearFlag>
+
     @JvmField
     var maxHp: Int
 
@@ -139,7 +143,7 @@ class MatchInfo {
         return obj
     }
 
-    fun serialize(): String? {
+    fun serialize(): String {
         return toJson().toString()
     }
 
@@ -232,13 +236,13 @@ class MatchInfo {
     class GearPredicate(private val requiredGear: MutableSet<GearFlag>) : Predicate<LivingEntity> {
         override fun test(entity: LivingEntity): Boolean {
             return requiredGear.contains(GearFlag.CHEST) && !entity.getEquippedStack(EquipmentSlot.CHEST)
-                .isEmpty() || requiredGear.contains(GearFlag.LEGS) && !entity.getEquippedStack(
+                .isEmpty || requiredGear.contains(GearFlag.LEGS) && !entity.getEquippedStack(
                 EquipmentSlot.LEGS
-            ).isEmpty() || requiredGear.contains(GearFlag.FEET) && !entity.getEquippedStack(
+            ).isEmpty || requiredGear.contains(GearFlag.FEET) && !entity.getEquippedStack(
                 EquipmentSlot.FEET
-            ).isEmpty() || requiredGear.contains(GearFlag.HEAD) && !entity.getEquippedStack(
+            ).isEmpty || requiredGear.contains(GearFlag.HEAD) && !entity.getEquippedStack(
                 EquipmentSlot.HEAD
-            ).isEmpty()
+            ).isEmpty
         }
     }
 
@@ -246,7 +250,7 @@ class MatchInfo {
         override fun test(entity: LivingEntity): Boolean {
             // FIXME: hurtTime is not good, as it means the mob may flicker, but it should still work
             // Without this checks, mobs that are dying or recently spawned will be considered naked, which is not ideal
-            if (entity.isDead() || entity.age <= 2 || entity.deathTime > 0 || entity.hurtTime > 0) {
+            if (entity.isDead || entity.age <= 2 || entity.deathTime > 0 || entity.hurtTime > 0) {
                 return false
             }
 
@@ -256,7 +260,7 @@ class MatchInfo {
 
     class MaxHpPredicate(private val maxHp: Int) : Predicate<LivingEntity> {
         override fun test(entity: LivingEntity): Boolean {
-            return entity.getMaxHealth() == maxHp.toFloat()
+            return entity.maxHealth == maxHp.toFloat()
         }
     }
 
@@ -269,8 +273,8 @@ class MatchInfo {
 
     class MultiTypePredicate(private val entityTypes: MutableList<String?>) : Predicate<LivingEntity> {
         override fun test(entity: LivingEntity): Boolean {
-            val entityTypeStr = entity.getType().toString().lowercase(Locale.getDefault())
-            return entityTypes.stream().anyMatch { s: String? -> Companion.specializedEquals(entityTypeStr, s!!) }
+            val entityTypeStr = entity.type.toString().lowercase(Locale.getDefault())
+            return entityTypes.stream().anyMatch { s: String? -> specializedEquals(entityTypeStr, s!!) }
         }
 
         companion object {
@@ -319,16 +323,16 @@ class MatchInfo {
             if (obj.has("type")) {
                 info.type = SortedList()
                 for (el in obj.getAsJsonArray("type")) {
-                    info.type.add(el.getAsString())
+                    info.type.add(el.asString)
                 }
             }
 
             if (obj.has("name")) {
-                info.name = obj.get("name").getAsString()
+                info.name = obj.get("name").asString
             }
 
             if (obj.has("area")) {
-                info.area = Area.fromString(obj.get("area").getAsString())
+                info.area = Area.fromString(obj.get("area").asString)
             }
 
             if (obj.has("gear")) {
@@ -336,16 +340,16 @@ class MatchInfo {
 
                 for (el in obj.getAsJsonArray("gear")) {
                     try {
-                        info.gear.add(GearFlag.valueOf(el.getAsString().uppercase(Locale.getDefault())))
+                        info.gear.add(GearFlag.valueOf(el.asString.uppercase(Locale.getDefault())))
                     } catch (e: IllegalArgumentException) {
-                        throw MatcherParseException("Unknown gear: " + el.getAsString())
+                        throw MatcherParseException("Unknown gear: " + el.asString)
                     }
                 }
             }
 
             if (obj.has("maxHp")) {
                 try {
-                    info.maxHp = obj.get("maxHp").getAsInt()
+                    info.maxHp = obj.get("maxHp").asInt
                 } catch (e: NumberFormatException) {
                     throw MatcherParseException("Invalid maxHp value")
                 }

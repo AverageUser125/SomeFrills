@@ -14,7 +14,7 @@ class UIInventory(private val size: Int) : Inventory {
 
     override fun isEmpty(): Boolean {
         for (stack in this.stacks) {
-            if (!stack.isEmpty()) {
+            if (!stack.isEmpty) {
                 return false
             }
         }
@@ -33,11 +33,11 @@ class UIInventory(private val size: Int) : Inventory {
             return ItemStack.EMPTY
         }
         val stack = this.stacks.get(slot)
-        if (stack.isEmpty()) {
+        if (stack.isEmpty) {
             return ItemStack.EMPTY
         }
         val result = stack.split(amount)
-        if (stack.isEmpty()) {
+        if (stack.isEmpty) {
             this.stacks.set(slot, ItemStack.EMPTY)
         }
         this.markDirty()
@@ -50,7 +50,7 @@ class UIInventory(private val size: Int) : Inventory {
         }
         val stack = this.stacks.get(slot)
         this.stacks.set(slot, ItemStack.EMPTY)
-        if (!stack.isEmpty()) {
+        if (!stack.isEmpty) {
             this.markDirty()
         }
         return stack

@@ -89,32 +89,33 @@ object UpdateManager {
         }
 
         LOGGER.info("Starting update check (autoQueue: {})", autoQueue)
-        activePromise = context.checkUpdate("full").thenAcceptAsync(Consumer thenAcceptAsync@{ update: PotentialUpdate? ->
-            LOGGER.info("Update check completed")
-            if (updateState != UpdateState.NONE) {
-                LOGGER.info("This appears to be the second update check. Ignoring this one")
-                return@thenAcceptAsync
-            }
-
-            potentialUpdate = update
-            if (update!!.isUpdateAvailable()) {
-                updateState = UpdateState.AVAILABLE
-                val versionName = update.update.getVersionName()
-                LOGGER.info("Update available: {}", versionName)
-                Utils.infoFormat("Update available: {}", versionName)
-
-                if (autoQueue) {
-                    LOGGER.info("Auto-queuing update")
-                    Utils.infoFormat("Auto-queuing update")
-                    queueUpdate()
+        activePromise =
+            context.checkUpdate("full").thenAcceptAsync(Consumer thenAcceptAsync@{ update: PotentialUpdate? ->
+                LOGGER.info("Update check completed")
+                if (updateState != UpdateState.NONE) {
+                    LOGGER.info("This appears to be the second update check. Ignoring this one")
+                    return@thenAcceptAsync
                 }
-            } else {
-                LOGGER.info("No update available")
-            }
-        }, mc).exceptionally(Function { e: Throwable? ->
-            LOGGER.error("[SomeFrills] Failed to check for updates", e)
-            null
-        })
+
+                potentialUpdate = update
+                if (update!!.isUpdateAvailable()) {
+                    updateState = UpdateState.AVAILABLE
+                    val versionName = update.update.getVersionName()
+                    LOGGER.info("Update available: {}", versionName)
+                    Utils.infoFormat("Update available: {}", versionName)
+
+                    if (autoQueue) {
+                        LOGGER.info("Auto-queuing update")
+                        Utils.infoFormat("Auto-queuing update")
+                        queueUpdate()
+                    }
+                } else {
+                    LOGGER.info("No update available")
+                }
+            }, mc).exceptionally(Function { e: Throwable? ->
+                LOGGER.error("[SomeFrills] Failed to check for updates", e)
+                null
+            })
     }
 
     fun queueUpdate() {

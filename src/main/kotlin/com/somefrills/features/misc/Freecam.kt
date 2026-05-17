@@ -26,6 +26,7 @@ object Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.m
 
     @JvmField
     val pos: Vector3d = Vector3d()
+
     @JvmField
     val prevPos: Vector3d = Vector3d()
 
@@ -33,10 +34,13 @@ object Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.m
 
     @JvmField
     var yaw: Float = 0f
+
     @JvmField
     var pitch: Float = 0f
+
     @JvmField
     var lastYaw: Float = 0f
+
     @JvmField
     var lastPitch: Float = 0f
 
@@ -205,26 +209,32 @@ object Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.m
                 forward = action != KeyAction.Release
                 mc.options.forwardKey.isPressed = false
             }
+
             Input.getKey(mc.options.backKey) -> {
                 backward = action != KeyAction.Release
                 mc.options.backKey.isPressed = false
             }
+
             Input.getKey(mc.options.rightKey) -> {
                 right = action != KeyAction.Release
                 mc.options.rightKey.isPressed = false
             }
+
             Input.getKey(mc.options.leftKey) -> {
                 left = action != KeyAction.Release
                 mc.options.leftKey.isPressed = false
             }
+
             Input.getKey(mc.options.jumpKey) -> {
                 up = action != KeyAction.Release
                 mc.options.jumpKey.isPressed = false
             }
+
             Input.getKey(mc.options.sneakKey) -> {
                 down = action != KeyAction.Release
                 mc.options.sneakKey.isPressed = false
             }
+
             else -> {
                 return false
             }

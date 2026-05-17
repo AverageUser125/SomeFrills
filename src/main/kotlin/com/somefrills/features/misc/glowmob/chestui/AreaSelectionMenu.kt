@@ -24,7 +24,7 @@ class AreaSelectionMenu(previousScreen: ChestUI?, private val info: MatchInfo) :
     }
 
     private fun createChoiceItem(baseItem: Item, displayName: String?, colorHex: Int): ItemStack {
-        val stack = baseItem.getDefaultStack()
+        val stack = baseItem.defaultStack
         Utils.setCustomName(stack, Style.EMPTY.withColor(TextColor.fromRgb(colorHex)), displayName)
         return stack
     }

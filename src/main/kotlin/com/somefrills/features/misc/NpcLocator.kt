@@ -3,7 +3,6 @@ package com.somefrills.features.misc
 import com.google.gson.JsonParser
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.misc.NpcLocatorConfig
 import com.somefrills.events.TickEventPost
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.Feature
@@ -13,16 +12,13 @@ import com.somefrills.misc.RenderColor
 import com.somefrills.misc.SkyblockData
 import com.somefrills.misc.Utils
 import io.github.notenoughupdates.moulconfig.ChromaColour
-import io.github.notenoughupdates.moulconfig.observer.Observer
 import meteordevelopment.orbit.EventHandler
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
 import java.io.IOException
 import java.nio.file.Files
-import java.util.Collections
-import java.util.HashMap
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @FrillsFeature
@@ -127,7 +123,7 @@ class NpcLocator : Feature(FrillsConfig.misc.npcLocator.enabled) {
             val npcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
 
             val locationFileName = area.displayName.replace(" ", "_").uppercase(Locale.getDefault()) + ".json"
-            val locationFile = FabricLoader.getInstance().getConfigDir()
+            val locationFile = FabricLoader.getInstance().configDir
                 .resolve("skyhanni/repo/constants/island_graphs/" + locationFileName)
 
             if (!Files.exists(locationFile)) {
@@ -140,17 +136,17 @@ class NpcLocator : Feature(FrillsConfig.misc.npcLocator.enabled) {
 
                 for (key in jsonObject.keySet()) {
                     val element = jsonObject.get(key)
-                    if (!element.isJsonObject()) continue
+                    if (!element.isJsonObject) continue
 
                     val node = element.getAsJsonObject()
 
                     // Check if this node has the "npc" tag
                     var isNpc = false
-                    if (node.has("Tags") && node.get("Tags").isJsonArray()) {
+                    if (node.has("Tags") && node.get("Tags").isJsonArray) {
                         val tagsArray = node.getAsJsonArray("Tags")
                         if (tagsArray != null) {
                             for (tag in tagsArray) {
-                                if (tag.isJsonPrimitive() && tag.getAsString() == "npc") {
+                                if (tag.isJsonPrimitive && tag.asString == "npc") {
                                     isNpc = true
                                     break
                                 }
@@ -163,8 +159,8 @@ class NpcLocator : Feature(FrillsConfig.misc.npcLocator.enabled) {
                     // Extract NPC name and position
                     if (!node.has("Name") || !node.has("Position")) continue
 
-                    val npcName = node.get("Name").getAsString()
-                    val positionStr = node.get("Position").getAsString()
+                    val npcName = node.get("Name").asString
+                    val positionStr = node.get("Position").asString
 
                     val position: Vec3d? = parsePosition(positionStr)
                     if (position != null) {

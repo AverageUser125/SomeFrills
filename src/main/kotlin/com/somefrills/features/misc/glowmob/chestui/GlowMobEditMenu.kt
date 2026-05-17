@@ -16,11 +16,6 @@ import net.minecraft.text.Text
 import net.minecraft.text.TextColor
 import net.minecraft.util.Formatting
 import java.util.function.Consumer
-import kotlin.Array
-import kotlin.Boolean
-import kotlin.Int
-import kotlin.NumberFormatException
-import kotlin.arrayOf
 
 class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, private val isNewRule: Boolean) :
     ChestUI("GlowMob Edit Menu", previousMenu) {
@@ -123,7 +118,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         // NONE
         if (gear.isEmpty()) {
             text = "(Unset)"
-            color = Formatting.RED.getColorValue()!!
+            color = Formatting.RED.colorValue!!
             return createChoiceItem(
                 Items.IRON_CHESTPLATE,
                 "Gear",
@@ -159,9 +154,9 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         text = parts.joinToString(", ")
 
         color = (if (parts.isEmpty())
-            Formatting.RED.getColorValue()
+            Formatting.RED.colorValue
         else
-            Formatting.GREEN.getColorValue())!!
+            Formatting.GREEN.colorValue)!!
 
         return createChoiceItem(
             Items.IRON_CHESTPLATE,
@@ -180,7 +175,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         chosen: String?,
         vararg descriptions: String
     ): ItemStack {
-        return createChoiceItem(item, label, chosen, Formatting.YELLOW.getColorValue()!!, *descriptions)
+        return createChoiceItem(item, label, chosen, Formatting.YELLOW.colorValue!!, *descriptions)
     }
 
     private fun createChoiceItem(
@@ -195,7 +190,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
 
         val lore: MutableList<Text> = ArrayList()
 
-        if(chosen.isNullOrEmpty()) {
+        if (chosen.isNullOrEmpty()) {
             lore.add(
                 Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
                     .append(Text.literal("(Unset)").setStyle(colorStyle(Formatting.DARK_GRAY)))
@@ -217,7 +212,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         // Add descriptions with proper formatting
         if (descriptions.isNotEmpty()) {
             for (i in descriptions.indices) {
-                val desc: kotlin.String = descriptions[i]
+                val desc: String = descriptions[i]
                 if (i == descriptions.size - 1) {
                     // Last line: action text in YELLOW
                     lore.add(Text.literal(desc).setStyle(colorStyle(Formatting.YELLOW)))
@@ -234,7 +229,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
     }
 
     private fun colorStyle(color: Formatting): Style? {
-        val colorValue = color.getColorValue() ?: return Style.EMPTY
+        val colorValue = color.colorValue ?: return Style.EMPTY
         return colorStyle(colorValue)
     }
 
@@ -243,7 +238,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
     }
 
     override fun onItemClick(stack: ItemStack?, button: Int) {
-        if (stack == null || stack.isEmpty()) return
+        if (stack == null || stack.isEmpty) return
 
         val itemName = Utils.getPlainCustomName(stack)
         when (itemName) {

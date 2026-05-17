@@ -26,15 +26,19 @@ object SkyblockData {
     @JvmStatic
     var area: Area = Area.UNKNOWN
         private set
+
     @JvmStatic
     var isInSkyblock: Boolean = false
         private set
+
     @JvmStatic
     var isInstanceOver: Boolean = false
         private set
+
     @JvmStatic
     var tabListLines: MutableList<String> = ArrayList()
         private set
+
     @JvmStatic
     var lines: MutableList<String> = ArrayList()
         private set
@@ -154,12 +158,12 @@ object SkyblockData {
 
     @EventHandler
     private fun onPing(event: ReceivePacketEvent) {
-        if(!showPing) return
+        if (!showPing) return
         event.packet.let {
-             if (it is PingResultS2CPacket) {
-                 Utils.infoFormat("§aPing: §f{}ms", it.startTime)
-                 showPing = false
-             }
+            if (it is PingResultS2CPacket) {
+                Utils.infoFormat("§aPing: §f{}ms", it.startTime)
+                showPing = false
+            }
         }
     }
 

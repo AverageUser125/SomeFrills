@@ -1,7 +1,6 @@
 package com.somefrills.features.misc.glowmob
 
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.misc.GlowMobConfig
 import com.somefrills.config.misc.GlowMobConfig.GlowMobRule
 import com.somefrills.events.GameStopEvent
 import com.somefrills.events.TickEventPost

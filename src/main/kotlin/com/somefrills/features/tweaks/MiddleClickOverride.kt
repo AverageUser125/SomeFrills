@@ -6,7 +6,6 @@ import com.somefrills.config.FrillsConfig
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Utils
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType

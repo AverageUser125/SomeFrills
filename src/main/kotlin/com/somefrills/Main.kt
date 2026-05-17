@@ -35,7 +35,7 @@ object Main : ClientModInitializer {
     val LOGGER: Logger = LoggerFactory.getLogger(MOD_ID)
 
     @JvmField
-    val mc: MinecraftClient = MinecraftClient.getInstance();
+    val mc: MinecraftClient = MinecraftClient.getInstance()
 
     @JvmField
     val eventBus: IEventBus = EventBus()

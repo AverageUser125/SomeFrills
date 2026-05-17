@@ -14,6 +14,7 @@ import net.minecraft.util.math.Box
 @FrillsFeature
 class GlowBlock : Feature(FrillsConfig.misc.glowBlock.enabled) {
     private var blockScanner: BlockScanner? = null
+
     @JvmField
     val targetBlocks: MutableList<Block> = ArrayList<Block>()
 

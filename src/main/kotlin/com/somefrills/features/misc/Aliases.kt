@@ -2,7 +2,6 @@ package com.somefrills.features.misc
 
 import com.google.gson.JsonObject
 import com.somefrills.config.FrillsConfig
-import com.somefrills.config.misc.MiscCategory.CommandAliasesConfig
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 
