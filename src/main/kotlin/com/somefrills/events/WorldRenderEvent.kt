@@ -20,11 +20,11 @@ import org.joml.Matrix4f
 import org.joml.Vector4f
 
 class WorldRenderEvent(
-    @JvmField var tickCounter: RenderTickCounter?,
-    @JvmField var camera: Camera,
-    var matrices: MatrixStack,
-    var gizmos: Gizmos,
-    var state: WorldRenderState
+    @JvmField val tickCounter: RenderTickCounter,
+    @JvmField val camera: Camera,
+    val matrices: MatrixStack,
+    val gizmos: Gizmos,
+    val state: WorldRenderState
 ) {
     private fun drawQuad(
         first: Vec3d,

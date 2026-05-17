@@ -4,8 +4,8 @@ import com.somefrills.misc.KeyAction
 import net.minecraft.client.gui.Click
 import net.minecraft.client.input.MouseInput
 
-class MouseClickEvent(var click: Click, @JvmField var action: KeyAction) : Cancellable() {
-    var input: MouseInput = click.buttonInfo()
+class MouseClickEvent(val click: Click, @JvmField val action: KeyAction) : Cancellable() {
+    val input: MouseInput get() = click.buttonInfo()
 
     fun button(): Int {
         return this.input.button()

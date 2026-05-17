@@ -4,7 +4,7 @@ import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket
 import net.minecraft.registry.entry.RegistryEntry
 import net.minecraft.sound.SoundEvent
 
-class PlaySoundEvent(var packet: PlaySoundS2CPacket) : Cancellable() {
+class PlaySoundEvent(val packet: PlaySoundS2CPacket) : Cancellable() {
 
     /**
      * Returns true if the SoundEvent from the packet matches the provided SoundEvent.

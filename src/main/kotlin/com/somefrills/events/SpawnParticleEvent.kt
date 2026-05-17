@@ -4,9 +4,9 @@ import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
 import net.minecraft.particle.ParticleType
 import net.minecraft.util.math.Vec3d
 
-class SpawnParticleEvent(var packet: ParticleS2CPacket) : Cancellable() {
-    var type: ParticleType<*> = packet.parameters.type
-    var pos: Vec3d? = Vec3d(packet.x, packet.y, packet.z)
+class SpawnParticleEvent(val packet: ParticleS2CPacket) : Cancellable() {
+    val type: ParticleType<*> get() = packet.parameters.type
+    val pos: Vec3d get() = Vec3d(packet.x, packet.y, packet.z)
 
     fun matchParameters(
         type: ParticleType<*>?,

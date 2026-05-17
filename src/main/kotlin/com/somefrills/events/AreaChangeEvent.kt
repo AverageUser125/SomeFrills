@@ -2,4 +2,4 @@ package com.somefrills.events
 
 import com.somefrills.misc.Area
 
-class AreaChangeEvent(var area: Area) : FrillsEvent()
+class AreaChangeEvent(val area: Area) : FrillsEvent()

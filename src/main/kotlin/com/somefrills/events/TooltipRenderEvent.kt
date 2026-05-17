@@ -6,9 +6,9 @@ import net.minecraft.text.Text
 
 class TooltipRenderEvent(
     var lines: MutableList<Text>,
-    var stack: ItemStack,
-    var customData: NbtCompound,
-    var title: String
+    val stack: ItemStack,
+    val customData: NbtCompound,
+    val title: String
 ) : FrillsEvent() {
     fun addLine(line: Text) {
         try {

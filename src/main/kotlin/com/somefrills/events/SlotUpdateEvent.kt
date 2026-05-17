@@ -8,16 +8,16 @@ import net.minecraft.screen.GenericContainerScreenHandler
 import net.minecraft.screen.slot.Slot
 
 class SlotUpdateEvent(
-    var packet: ScreenHandlerSlotUpdateS2CPacket,
-    var screen: GenericContainerScreen,
-    var handler: GenericContainerScreenHandler,
-    var slotId: Int
+    val packet: ScreenHandlerSlotUpdateS2CPacket,
+    val screen: GenericContainerScreen,
+    val handler: GenericContainerScreenHandler,
+    val slotId: Int
 ) {
-    var inventory: Inventory = handler.inventory
-    var slot: Slot? =
+    val inventory: Inventory get() = handler.inventory
+    val slot: Slot? =
         if ((this.slotId >= 0) and (this.slotId < this.handler.slots.size)) this.handler.getSlot(this.slotId) else null
-    var stack: ItemStack = this.inventory.getStack(this.slotId)
-    var title: String? = screen.getTitle().string
-    var isFinal: Boolean = packet.slot == handler.slots.last().id
-    var isInventory: Boolean = this.stack == ItemStack.EMPTY
+    val stack: ItemStack get() = this.inventory.getStack(this.slotId)
+    val title: String get() = screen.getTitle().string
+    val isFinal: Boolean get() = packet.slot == handler.slots.last().id
+    val isInventory: Boolean get() = this.stack == ItemStack.EMPTY
 }

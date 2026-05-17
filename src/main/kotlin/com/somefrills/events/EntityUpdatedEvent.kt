@@ -2,4 +2,4 @@ package com.somefrills.events
 
 import net.minecraft.entity.Entity
 
-class EntityUpdatedEvent(@JvmField var entity: Entity) : FrillsEvent()
+class EntityUpdatedEvent(@JvmField val entity: Entity) : FrillsEvent()
