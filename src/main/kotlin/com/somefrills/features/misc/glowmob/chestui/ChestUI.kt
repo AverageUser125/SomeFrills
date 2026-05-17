@@ -17,10 +17,10 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
     GenericContainerScreen(
         getHandler(INV_SIZE), mc.player!!.getInventory(), Text.of(title)
     ) {
-    protected val addons: MutableList<UIAddon> = ArrayList<UIAddon>()
+    protected val addons: MutableList<UIAddon> = ArrayList()
 
     @JvmField
-    protected val allItems: MutableList<ItemStack?> = ArrayList<ItemStack?>()
+    protected val allItems: MutableList<ItemStack> = ArrayList()
     protected var lastClickTimestamp: Long = 0L
 
     init {
@@ -48,7 +48,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
         build()
 
         // 2. Run addons to filter or paginate the list
-        val displayList: MutableList<ItemStack> = ArrayList<ItemStack>(allItems)
+        val displayList: MutableList<ItemStack> = ArrayList(allItems)
         for (addon in addons) {
             addon.processItems(this, displayList)
         }
@@ -98,8 +98,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
         this.lastClickTimestamp = now
 
         val stack = slot.stack
-        val name = Utils.getPlainCustomName(stack)
-        if (name == null) return
+        val name = Utils.getPlainCustomName(stack) ?: return
 
         // Addon Interception
         for (addon in addons) {
@@ -115,7 +114,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
         onItemClick(stack, button)
     }
 
-    protected fun addItem(stack: ItemStack?) {
+    protected fun addItem(stack: ItemStack) {
         allItems.add(stack)
     }
 
@@ -132,8 +131,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
     }
 
     companion object {
-        @JvmField
-        val INV_SIZE: Int = 9 * 6
+        const val INV_SIZE: Int = 9 * 6
         private const val CLICK_COOLDOWN_MS = 50L
 
         fun getHandler(invSize: Int): GenericContainerScreenHandler {

@@ -24,7 +24,7 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
 
     override fun build() {
         // Collect all entity entries (including special-case entries) then sort alphabetically by display name
-        val entries: MutableList<ItemStack?> = ArrayList<ItemStack?>()
+        val entries: MutableList<ItemStack> = ArrayList()
 
         for (entityType in Registries.ENTITY_TYPE) {
             val id = Registries.ENTITY_TYPE.getId(entityType)

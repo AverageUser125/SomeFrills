@@ -75,7 +75,7 @@ class MatchInfo {
     }
 
     override fun toString(): String {
-        return serialize()!!
+        return serialize()
     }
 
     fun clear() {
