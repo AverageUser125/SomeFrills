@@ -41,8 +41,14 @@ class FrillsFeatureProcessor(
 
         if (added.isNotEmpty() || removed.isNotEmpty()) {
             println("Frills diff:")
-            if (added.isNotEmpty()) println("added: $added")
-            if (removed.isNotEmpty()) println("removed: $removed")
+
+            if (added.isNotEmpty()) {
+                println("added: " + added.joinToString { simpleName(it) })
+            }
+
+            if (removed.isNotEmpty()) {
+                println("removed: " + removed.joinToString { simpleName(it) })
+            }
         }
 
         save(cacheFile, current)
@@ -104,4 +110,7 @@ class FrillsFeatureProcessor(
         file.parentFile.mkdirs()
         file.writeText(data.joinToString("\n"))
     }
+
+    private fun simpleName(qn: String): String =
+        qn.substringAfterLast('.')
 }
