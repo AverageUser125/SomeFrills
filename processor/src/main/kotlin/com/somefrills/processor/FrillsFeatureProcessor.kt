@@ -10,11 +10,6 @@ class FrillsFeatureProcessor(
     private val options: Map<String, String>
 ) : SymbolProcessor {
 
-    private data class FeatureEntry(
-        val qualifiedName: String,
-        val isObject: Boolean
-    )
-
     private var generated = false
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -28,10 +23,19 @@ class FrillsFeatureProcessor(
 
         val features = symbols.mapNotNull { s ->
             val qn = s.qualifiedName?.asString() ?: return@mapNotNull null
-            FeatureEntry(qn, s.classKind == ClassKind.OBJECT)
-        }.sortedBy { it.qualifiedName }
 
-        val current = features.map { it.qualifiedName }.toSet()
+            if (s.classKind != ClassKind.OBJECT) {
+                logger.error(
+                    "@FrillsFeature can only be applied to Kotlin objects (singleton). Found: $qn",
+                    s
+                )
+                return@mapNotNull null
+            }
+
+            qn
+        }.sorted()
+
+        val current = features.toSet()
 
         val cacheFile = File(getCacheDir(), "features-cache.txt")
         val previous = load(cacheFile)
@@ -40,14 +44,14 @@ class FrillsFeatureProcessor(
         val removed = previous - current
 
         if (added.isNotEmpty() || removed.isNotEmpty()) {
-            println("Frills diff:")
+            logger.info("Frills diff:")
 
             if (added.isNotEmpty()) {
-                println("added: " + added.joinToString { simpleName(it) })
+                logger.info("added: " + added.joinToString { simpleName(it) })
             }
 
             if (removed.isNotEmpty()) {
-                println("removed: " + removed.joinToString { simpleName(it) })
+                logger.info("removed: " + removed.joinToString { simpleName(it) })
             }
         }
 
@@ -66,19 +70,22 @@ class FrillsFeatureProcessor(
             out.appendLine("import com.somefrills.features.*")
             out.appendLine()
             out.appendLine("object FeaturesRegistry {")
-            out.appendLine("    val CREATORS: Array<() -> AbstractFeature> = arrayOf(")
+
+            out.appendLine(
+                "    val INSTANCES: Array<AbstractFeature> = arrayOf("
+            )
 
             for (f in features) {
-                val ref = if (f.isObject) f.qualifiedName else "${f.qualifiedName}()"
-                out.appendLine("        { $ref },")
+                // Kotlin objects are singletons → direct reference
+                out.appendLine("        $f,")
             }
 
             out.appendLine("    )")
             out.appendLine()
-            out.appendLine("    val INSTANCES: Array<AbstractFeature?> = arrayOfNulls(CREATORS.size)")
-            out.appendLine()
             out.appendLine("    fun init() {")
-            out.appendLine("        for (i in CREATORS.indices) INSTANCES[i] = CREATORS[i]()")
+            out.appendLine("        for (i in INSTANCES.indices) {")
+            out.appendLine("            INSTANCES[i].initialize()")
+            out.appendLine("        }")
             out.appendLine("    }")
             out.appendLine("}")
         }
@@ -94,7 +101,10 @@ class FrillsFeatureProcessor(
 
     private fun load(file: File): Set<String> {
         if (!file.exists()) return emptySet()
-        return file.readLines().map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+        return file.readLines()
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toSet()
     }
 
     private fun save(file: File, data: Set<String>) {
