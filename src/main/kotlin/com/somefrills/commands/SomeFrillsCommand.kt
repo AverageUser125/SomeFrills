@@ -15,43 +15,36 @@ object SomeFrillsCommand {
     val commands: Array<ModCommand> = arrayOf<ModCommand>(
         ModCommand(
             "settings",
-            "Opens the settings GUI.",
-            Supplier {
-                ClientCommandManager.literal("settings")
-                    .executes(Command { obj: CommandContext<FabricClientCommandSource> -> executeSettings(obj) })
-            }
-        ),
+            "Opens the settings GUI."
+        ) {
+            ClientCommandManager.literal("settings")
+                .executes { obj: CommandContext<FabricClientCommandSource> -> executeSettings(obj) }
+        },
         ModCommand(
             "glowplayer",
-            "Manage glowing players.",
-            Supplier { GlowPlayerCommand.getBuilder() }
-        ),
+            "Manage glowing players."
+        ) { GlowPlayerCommand.getBuilder() },
         ModCommand(
             "glowmob",
-            "Manage glowing mobs/entities.",
-            Supplier { GlowMobCommand.getBuilder() }
-        ),
+            "Manage glowing mobs/entities."
+        ) { GlowMobCommand.getBuilder() },
         ModCommand(
             "npclocator",
-            "Track NPC locations.",
-            Supplier { NpcLocatorCommand.getBuilder("npclocator") }
-        ),
+            "Track NPC locations."
+        ) { NpcLocatorCommand.getBuilder("npclocator") },
 
         ModCommand(
             "locatenpc",
-            "Alias for npclocator.",
-            Supplier { NpcLocatorCommand.getBuilder("locatenpc") }
-        ),
+            "Alias for npclocator."
+        ) { NpcLocatorCommand.getBuilder("locatenpc") },
         ModCommand(
             "freecam",
-            "Toggle freecam mode.",
-            Supplier { FreecamCommand.getBuilder() }
-        ),
+            "Toggle freecam mode."
+        ) { FreecamCommand.getBuilder() },
         ModCommand(
             "glowblock",
-            "Manage glowing blocks.",
-            Supplier { GlowBlockCommand.getBuilder() }
-        )
+            "Manage glowing blocks."
+        ) { GlowBlockCommand.getBuilder() }
     )
 
     /**
@@ -120,16 +113,16 @@ object SomeFrillsCommand {
     }
 
     class ModCommand(
-        var command: String?, var description: String?,
-        private val factory: Supplier<LiteralArgumentBuilder<FabricClientCommandSource?>?>
+        var command: String?, var description: String,
+        private val factory: Supplier<LiteralArgumentBuilder<FabricClientCommandSource>>
     ) {
-        private var cached: LiteralArgumentBuilder<FabricClientCommandSource?>? = null
+        private var cached: LiteralArgumentBuilder<FabricClientCommandSource>? = null
 
-        fun builder(): LiteralArgumentBuilder<FabricClientCommandSource?>? {
+        fun builder(): LiteralArgumentBuilder<FabricClientCommandSource> {
             if (cached == null) {
                 cached = factory.get()
             }
-            return cached
+            return cached!!
         }
     }
 }

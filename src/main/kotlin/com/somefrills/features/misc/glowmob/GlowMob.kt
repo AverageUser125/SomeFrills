@@ -179,12 +179,14 @@ object GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
 
     class MatchedEntityEntry(@JvmField var rule: GlowMobRule, @JvmField var entities: MutableList<LivingEntity>)
 
-    @JvmStatic
-    val glowingMobs: MutableList<MatchedEntityEntry>
-        get() = getGlowingMobs(rules)
 
     @JvmStatic
-    fun getGlowingMobs(rules: MutableList<GlowMobRule>): MutableList<MatchedEntityEntry> {
+    fun getGlowingMobs(): MutableList<MatchedEntityEntry> {
+        return getGlowingMobs(rules)
+    }
+
+    @JvmStatic
+    fun getGlowingMobs(rules: List<GlowMobRule>): MutableList<MatchedEntityEntry> {
         updateEntities()
 
         val result = ArrayList<MatchedEntityEntry>()

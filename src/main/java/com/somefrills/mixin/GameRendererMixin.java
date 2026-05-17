@@ -25,13 +25,11 @@ public abstract class GameRendererMixin {
     public abstract void updateCrosshairTarget(float tickDelta);
 
     @Unique
-    private boolean freecamSet = false;
+    private boolean freeCamSet = false;
 
     @Inject(method = "updateCrosshairTarget", at = @At("HEAD"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
-        var freecam = Features.get(Freecam.class);
-
-        if ((freecam.isActive()) && client.getCameraEntity() != null && !freecamSet) {
+        if ((Freecam.INSTANCE.isActive()) && client.getCameraEntity() != null && !freeCamSet) {
             info.cancel();
             Entity cameraE = client.getCameraEntity();
 
@@ -46,19 +44,19 @@ public abstract class GameRendererMixin {
             float lastYaw = cameraE.lastYaw;
             float lastPitch = cameraE.lastPitch;
 
-            ((IVec3d) cameraE.getEntityPos()).somefrills$set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
-            cameraE.lastX = freecam.prevPos.x;
-            cameraE.lastY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
-            cameraE.lastZ = freecam.prevPos.z;
-            cameraE.setYaw(freecam.yaw);
-            cameraE.setPitch(freecam.pitch);
-            cameraE.lastYaw = freecam.lastYaw;
-            cameraE.lastPitch = freecam.lastPitch;
+            ((IVec3d) cameraE.getEntityPos()).somefrills$set(Freecam.pos.x, Freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), Freecam.pos.z);
+            cameraE.lastX = Freecam.prevPos.x;
+            cameraE.lastY = Freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
+            cameraE.lastZ = Freecam.prevPos.z;
+            cameraE.setYaw(Freecam.yaw);
+            cameraE.setPitch(Freecam.pitch);
+            cameraE.lastYaw = Freecam.lastYaw;
+            cameraE.lastPitch = Freecam.lastPitch;
 
 
-            freecamSet = true;
+            freeCamSet = true;
             updateCrosshairTarget(tickDelta);
-            freecamSet = false;
+            freeCamSet = false;
 
             ((IVec3d) cameraE.getEntityPos()).somefrills$set(x, y, z);
             cameraE.lastX = lastX;
@@ -73,7 +71,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
     private void renderHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix, CallbackInfo ci) {
-        if (!Features.get(Freecam.class).shouldRenderHands()) {
+        if (!Freecam.shouldRenderHands()) {
             ci.cancel();
         }
     }

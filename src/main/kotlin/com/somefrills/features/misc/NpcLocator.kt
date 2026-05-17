@@ -100,15 +100,15 @@ class NpcLocator : Feature(FrillsConfig.misc.npcLocator.enabled) {
         }
 
         @JvmStatic
-        val allNpcLocations: MutableCollection<NpcLocation?>
-            get() = Collections.unmodifiableCollection<NpcLocation?>(npcLocations.values)
+        fun getAllNpcLocations(): Collection<NpcLocation> {
+            return Collections.unmodifiableCollection(npcLocations.values)
+        }
 
         @JvmStatic
-        val availableNpcsForCurrentIsland: MutableSet<String>
-            get() {
-                ensureCacheLoaded()
-                return cachedNpcs.keys
-            }
+        fun getAvailableNpcsForCurrentIsland(): Collection<String> {
+            ensureCacheLoaded()
+            return cachedNpcs.keys
+        }
 
         private fun ensureCacheLoaded() {
             val currentIsland = SkyblockData.area

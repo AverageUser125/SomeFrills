@@ -21,7 +21,7 @@ import org.lwjgl.glfw.GLFW
 import kotlin.math.sqrt
 
 @FrillsFeature
-class Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.misc.freecam.keybind) {
+object Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.misc.freecam.keybind) {
     private val config get() = FrillsConfig.misc.freecam
 
     @JvmField
@@ -315,6 +315,7 @@ class Freecam : ToggleFeature(FrillsConfig.misc.freecam.enabled, FrillsConfig.mi
         return MathHelper.lerp(tickDelta, lastPitch, pitch).toDouble()
     }
 
+    @JvmStatic
     fun shouldRenderHands(): Boolean {
         return config.renderHands
     }
