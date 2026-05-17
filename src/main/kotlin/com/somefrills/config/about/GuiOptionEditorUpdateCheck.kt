@@ -11,7 +11,7 @@ import io.github.notenoughupdates.moulconfig.processor.ProcessedOption
 
 class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(option) {
     private val button = GuiElementButton()
-    private val currentVersion: String = UpdateManager.getCurrentVersion()
+    private val currentVersion get() = UpdateManager.currentVersion
 
     override fun render(context: RenderContext, x: Int, y: Int, width: Int) {
         try {
@@ -20,17 +20,17 @@ class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(opti
             context.pushMatrix()
             context.translate((x + 10).toFloat(), y.toFloat())
             val adjustedWidth = width - 20
-            val nextVersion = UpdateManager.getLatestVersion()
+            val nextVersion = UpdateManager.latestVersion
 
             // Set button text based on state
-            button.text = getButtonText(UpdateManager.getUpdateState(), nextVersion)
+            button.text = getButtonText(UpdateManager.updateState, nextVersion)
             button.width = button.getWidth(context)
             button.render(context, getButtonPosition(adjustedWidth), 10)
 
             val widthRemaining = adjustedWidth - button.width - 10
 
             // Render downloaded message if applicable
-            if (UpdateManager.getUpdateState() == UpdateManager.UpdateState.DOWNLOADED) {
+            if (UpdateManager.updateState == UpdateManager.UpdateState.DOWNLOADED) {
                 context.drawStringCenteredScaledMaxWidth(
                     StructuredText.of("§aThe update will be installed after your next restart."),
                     fr,
@@ -45,10 +45,10 @@ class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(opti
             // Render version text with scaling
             context.scale(2f, 2f)
             val sameVersion = currentVersion.equals(nextVersion, ignoreCase = true)
-            val colorCode = if (UpdateManager.getUpdateState() == UpdateManager.UpdateState.NONE) "§a" else "§c"
+            val colorCode = if (UpdateManager.updateState == UpdateManager.UpdateState.NONE) "§a" else "§c"
             var versionText = colorCode + currentVersion
 
-            if (nextVersion != null && !sameVersion) {
+            if (!sameVersion) {
                 versionText += " ➜ §a$nextVersion"
             }
 
@@ -101,12 +101,10 @@ class GuiOptionEditorUpdateCheck(option: ProcessedOption) : GuiOptionEditor(opti
 
             // Check button click - using SkyHanni logic
             if (isInside(buttonPos, 10, button, x, y, mouseX, mouseY)) {
-                val state = UpdateManager.getUpdateState()
-                when (state) {
+                when (UpdateManager.updateState) {
                     UpdateManager.UpdateState.AVAILABLE -> UpdateManager.queueUpdate()
                     UpdateManager.UpdateState.QUEUED, UpdateManager.UpdateState.DOWNLOADED -> {
                     }
-
                     UpdateManager.UpdateState.NONE -> UpdateManager.checkUpdate()
                 }
                 return true
