@@ -28,7 +28,6 @@ class TweaksCategory {
     @ConfigEditorBoolean
     var noPearlCooldown: Boolean = true
 
-
     @JvmField
     @Expose
     @ConfigOption(
@@ -103,19 +102,5 @@ class TweaksCategory {
         @Expose
         @ConfigOption(name = "Clip", desc = "Prevent the camera from clipping into blocks")
         var clip: Boolean = false
-    }
-
-    @JvmField
-    @Expose
-    @ConfigOption(name = "No Render", desc = "Prevent certain things from rendering (experimental, may cause issues)")
-    @Accordion
-    var noRender: NoRenderConfig = NoRenderConfig()
-
-    class NoRenderConfig {
-        @JvmField
-        @ConfigEditorBoolean
-        @Expose
-        @ConfigOption(name = "No Obfuscation", desc = "Prevent obfuscation from rendering in text")
-        var noObfuscation: Boolean = false
     }
 }

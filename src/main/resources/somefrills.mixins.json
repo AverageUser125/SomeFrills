@@ -41,7 +41,6 @@
     "GameOptionsMixin",
     "GameRendererMixin",
     "LivingEntityRendererMixin",
-    "TextRendererMixin"
   ],
   "plugin": "com.somefrills.mixininterface.OptionalMixinPlugin"
 }
