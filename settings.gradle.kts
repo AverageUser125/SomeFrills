@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -11,6 +13,10 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://maven.fabricmc.net/")
     }
+}
+
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "SomeFrills"
