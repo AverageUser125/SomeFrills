@@ -80,7 +80,7 @@ public class NpcLocatorCommand {
             Utils.info("No NPCs are currently being tracked.");
         } else {
             Utils.info("Tracked NPCs:");
-            locations.forEach(location -> Utils.info(Utils.format("  - {}", location.npcName())));
+            locations.forEach(location -> Utils.info(Utils.format("  - {}", location.npcName)));
         }
         return 1;
     }
@@ -116,8 +116,8 @@ public class NpcLocatorCommand {
     private static CompletableFuture<Suggestions> suggestTrackedNpcs(CommandContext<FabricClientCommandSource> ctx, SuggestionsBuilder builder) {
         var trackedNpcs = NpcLocator.getAllNpcLocations();
         for (var location : trackedNpcs) {
-            if (location.npcName().toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
-                builder.suggest(location.npcName());
+            if (location.npcName.toLowerCase().startsWith(builder.getRemaining().toLowerCase())) {
+                builder.suggest(location.npcName);
             }
         }
         return builder.buildFuture();

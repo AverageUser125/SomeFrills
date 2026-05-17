@@ -39,7 +39,7 @@ class NpcLocatorConfig {
     @Expose
     @ConfigOption(name = "Color", desc = "Rendering color for NPC locator")
     @ConfigEditorColour
-    var color: Property<ChromaColour?> = Property.of<ChromaColour?>(fromStaticRGB(255, 100, 100, 255))
+    var color: Property<ChromaColour> = Property.of(fromStaticRGB(255, 100, 100, 255))
 
     @JvmField
     @Expose

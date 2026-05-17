@@ -87,12 +87,12 @@ public class GlowBlockCommand {
                         .executes(ctx -> {
                             GlowBlock glowBlock = get();
 
-                            if (glowBlock.getTargetBlocks().isEmpty()) {
+                            if (glowBlock.targetBlocks.isEmpty()) {
                                 ctx.getSource().sendFeedback(Text.literal("No tracked glow blocks."));
                                 return 1;
                             }
 
-                            String blocks = glowBlock.getTargetBlocks().stream()
+                            String blocks = glowBlock.targetBlocks.stream()
                                     .map(block -> Registries.BLOCK.getId(block).toString())
                                     .collect(Collectors.joining(", "));
 
@@ -109,7 +109,7 @@ public class GlowBlockCommand {
             com.mojang.brigadier.context.CommandContext<FabricClientCommandSource> ctx,
             SuggestionsBuilder builder
     ) {
-        for (Block block : get().getTargetBlocks()) {
+        for (Block block : get().targetBlocks) {
             builder.suggest(Registries.BLOCK.getId(block).toString());
         }
 
