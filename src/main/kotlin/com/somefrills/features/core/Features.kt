@@ -20,22 +20,4 @@ object Features {
 
         initialized = true
     }
-
-    @JvmStatic
-    @Suppress("UNCHECKED_CAST")
-    fun <T : AbstractFeature> get(clazz: Class<T>): T {
-        val f = registry.CLASS_TO_INSTANCE.get(clazz)
-            ?: error("No feature for $clazz")
-        return f as T
-    }
-
-    @JvmStatic
-    fun <T : AbstractFeature> isActive(clazz: Class<T>): Boolean {
-        return get(clazz).isActive()
-    }
-
-    @JvmStatic
-    fun all(): List<AbstractFeature> {
-        return registry.INSTANCES.filterNotNull()
-    }
 }

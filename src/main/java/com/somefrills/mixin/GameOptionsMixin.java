@@ -15,6 +15,6 @@ public abstract class GameOptionsMixin {
     @Inject(method = "setPerspective", at = @At("HEAD"), cancellable = true)
     private void setPerspective(Perspective perspective, CallbackInfo info) {
         if (!Features.isInitialized()) return;
-        if (Features.isActive(Freecam.class)) info.cancel();
+        if (Freecam.INSTANCE.isActive()) info.cancel();
     }
 }

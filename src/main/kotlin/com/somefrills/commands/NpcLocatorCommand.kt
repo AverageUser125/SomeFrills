@@ -5,7 +5,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
-import com.somefrills.features.core.Features
 import com.somefrills.features.misc.NpcLocator
 import com.somefrills.misc.Utils
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
@@ -120,19 +119,13 @@ object NpcLocatorCommand {
             )
     }
 
-    private fun isNpcLocatorEnabled(): Boolean {
-        return Features.isActive(NpcLocator::class.java)
-    }
-
     /**
      * Returns:
      * - null if enabled
      * - 1 if disabled
      */
     private fun checkNpcLocatorEnabledOrWarn(): Int? {
-
-        if (!isNpcLocatorEnabled()) {
-
+        if (!NpcLocator.isActive()) {
             Utils.info(
                 "NPC Locator feature is disabled."
             )

@@ -160,7 +160,7 @@ object Main : ClientModInitializer {
         eventBus.post(GameStartEvent())
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(
-            Features.get(Aliases::class.java)::convertCommand
+            Aliases::convertCommand
         )
 
         LOGGER.info(

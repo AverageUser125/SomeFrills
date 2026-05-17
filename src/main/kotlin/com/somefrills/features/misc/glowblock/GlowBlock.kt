@@ -13,7 +13,7 @@ import net.minecraft.block.Block
 import net.minecraft.util.math.Box
 
 @FrillsFeature
-class GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
+object GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
     private var blockScanner: BlockScanner? = null
 
     @JvmField

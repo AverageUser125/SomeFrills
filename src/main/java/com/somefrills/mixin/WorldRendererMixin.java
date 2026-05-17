@@ -2,7 +2,6 @@ package com.somefrills.mixin;
 
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.somefrills.events.WorldRenderEvent;
-import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.Freecam;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
@@ -39,6 +38,6 @@ public abstract class WorldRendererMixin {
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;updateCamera(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;Z)V"), index = 2)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
-        return Features.isActive(Freecam.class) || spectator;
+        return Freecam.INSTANCE.isActive() || spectator;
     }
 }

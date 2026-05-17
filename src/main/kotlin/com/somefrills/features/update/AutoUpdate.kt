@@ -9,7 +9,7 @@ import com.somefrills.features.core.FrillsFeature
 import meteordevelopment.orbit.EventHandler
 
 @FrillsFeature
-class AutoUpdate : Feature(FrillsMod.config.about.checkForUpdates) {
+object AutoUpdate : Feature(FrillsMod.config.about.checkForUpdates) {
     private val config get() = FrillsMod.config.about
 
     @EventHandler

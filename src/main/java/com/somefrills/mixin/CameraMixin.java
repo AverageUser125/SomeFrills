@@ -1,7 +1,6 @@
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.features.tweaks.CameraTweaks;
 import net.minecraft.client.render.Camera;
@@ -24,27 +23,27 @@ public class CameraMixin {
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(float desiredCameraDistance, CallbackInfoReturnable<Float> info) {
-        if (Features.get(CameraTweaks.class).clip()) {
+        if (CameraTweaks.INSTANCE.clip()) {
             info.setReturnValue(desiredCameraDistance);
         }
     }
 
     @ModifyVariable(method = "clipToSpace", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float modifyClipToSpace(float d) {
-        if (Features.isActive(Freecam.class)) return 0;
+        if (Freecam.INSTANCE.isActive()) return 0;
         return d;
     }
 
     @Inject(method = "update", at = @At("TAIL"))
     private void onUpdateTail(World area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickProgress, CallbackInfo ci) {
-        if (Features.isActive(Freecam.class)) {
+        if (Freecam.INSTANCE.isActive()) {
             this.thirdPerson = true;
         }
     }
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))
     private void onUpdateSetPosArgs(Args args, @Local(argsOnly = true) float tickDelta) {
-        var freecam = Features.get(Freecam.class);
+        var freecam = Freecam.INSTANCE;
 
         if (freecam.isActive()) {
             args.set(0, freecam.getX(tickDelta));
@@ -55,7 +54,7 @@ public class CameraMixin {
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
     private void onUpdateSetRotationArgs(Args args, @Local(argsOnly = true) float tickDelta) {
-        var freecam = Features.get(Freecam.class);
+        var freecam = Freecam.INSTANCE;
 
         if (freecam.isActive()) {
             args.set(0, (float) freecam.getYaw(tickDelta));

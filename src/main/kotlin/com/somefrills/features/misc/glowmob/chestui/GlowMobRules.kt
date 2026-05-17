@@ -1,7 +1,6 @@
 package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.config.misc.GlowMobConfig.GlowMobRule
-import com.somefrills.features.core.Features.get
 import com.somefrills.features.misc.glowmob.GlowMob
 import com.somefrills.features.misc.glowmob.MatchInfo.GearFlag
 import com.somefrills.misc.MyMapColor
@@ -162,7 +161,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
         val rule = allRules[parsedId - 1]
 
         if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-            get<GlowMob>(GlowMob::class.java).toggleRule(parsedId)
+            GlowMob.toggleRule(parsedId)
             rebuild()
             return
         }
@@ -171,7 +170,6 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
     }
 
     override fun onReturn() {
-        val glowMob = get(GlowMob::class.java)
         val session = session ?: run {
             rebuild()
             return
@@ -191,13 +189,13 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
 
         if (session.isNew) {
             if (!session.workingCopy.info().isEmpty) {
-                glowMob.addRule(session.workingCopy)
+                GlowMob.addRule(session.workingCopy)
             }
         } else {
             if (session.workingCopy.info().isEmpty) {
-                glowMob.removeRule(session.original!!)
+                GlowMob.removeRule(session.original!!)
             } else {
-                glowMob.replaceRule(session.original!!, session.workingCopy)
+                GlowMob.replaceRule(session.original!!, session.workingCopy)
             }
         }
 

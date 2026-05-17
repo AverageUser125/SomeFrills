@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.Main.mc
-import com.somefrills.features.core.Features
 import com.somefrills.features.misc.glowblock.GlowBlock
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
@@ -23,7 +22,7 @@ object GlowBlockCommand {
         return literal("glowblock")
 
             .executes {
-                get().toggle()
+                GlowBlock.toggle()
                 1
             }
 
@@ -65,7 +64,7 @@ object GlowBlockCommand {
                                     false
                                 )
 
-                                get().addBlock(result.blockState().block)
+                                GlowBlock.addBlock(result.blockState().block)
 
                                 1
                             }
@@ -76,7 +75,7 @@ object GlowBlockCommand {
                 literal("clear")
                     .executes { ctx ->
 
-                        get().clear()
+                        GlowBlock.clear()
 
                         ctx.source.sendFeedback(
                             Text.literal("Cleared all glow blocks.")
@@ -110,7 +109,7 @@ object GlowBlockCommand {
                                     false
                                 )
 
-                                get().removeBlock(result.blockState().block)
+                                GlowBlock.removeBlock(result.blockState().block)
 
                                 ctx.source.sendFeedback(
                                     Text.literal("Removed glow block.")
@@ -124,9 +123,7 @@ object GlowBlockCommand {
             .then(
                 literal("list")
                     .executes { ctx ->
-                        val glowBlock = get()
-
-                        if (glowBlock.targetBlocks.isEmpty()) {
+                        if (GlowBlock.targetBlocks.isEmpty()) {
                             ctx.source.sendFeedback(
                                 Text.literal("No tracked glow blocks.")
                             )
@@ -134,7 +131,7 @@ object GlowBlockCommand {
                             return@executes 1
                         }
 
-                        val blocks = glowBlock.targetBlocks
+                        val blocks = GlowBlock.targetBlocks
                             .joinToString(", ") {
                                 Registries.BLOCK.getId(it).toString()
                             }
@@ -153,16 +150,12 @@ object GlowBlockCommand {
         builder: SuggestionsBuilder
     ): CompletableFuture<Suggestions> {
 
-        for (block in get().targetBlocks) {
+        for (block in GlowBlock.targetBlocks) {
             builder.suggest(
                 Registries.BLOCK.getId(block).toString()
             )
         }
 
         return builder.buildFuture()
-    }
-
-    private fun get(): GlowBlock {
-        return Features.get(GlowBlock::class.java)
     }
 }

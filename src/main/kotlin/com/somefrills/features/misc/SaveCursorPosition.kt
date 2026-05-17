@@ -14,7 +14,7 @@ import net.minecraft.client.util.InputUtil
 import kotlin.math.abs
 
 @FrillsFeature
-class SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.enabled) {
+object SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.enabled) {
     private val config get() = FrillsMod.config.misc.saveCursorPosition
     private var savedPositionedP1: Pair<Double, Double>? = null
     private var savedPosition: SavedPosition? = null
@@ -26,11 +26,13 @@ class SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.enab
         return true
     }
 
+    @JvmStatic
     fun saveCursorOriginal(x: Double, y: Double) {
         if (!active()) return
         savedPositionedP1 = Pair(x, y)
     }
 
+    @JvmStatic
     fun saveCursorMiddle(middleX: Double, middleY: Double) {
         if (!active()) return
 
@@ -51,6 +53,7 @@ class SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.enab
         savedPosition = null
     }
 
+    @JvmStatic
     fun loadCursor(middleX: Double, middleY: Double): Pair<Double, Double>? {
         if (!active()) return null
         val pos = savedPosition ?: return null

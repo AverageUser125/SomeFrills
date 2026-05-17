@@ -2,8 +2,6 @@ package com.somefrills.features.farming.autofarmer
 
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
-
-import com.somefrills.config.farming.AutoFarmerConfig
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.events.TickEventPost
@@ -15,7 +13,10 @@ import meteordevelopment.orbit.EventHandler
 import net.minecraft.util.math.BlockPos
 
 @FrillsFeature
-class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
+object AutoFarmer :
+    AreaToggleFeature(FrillsMod.config.farming.autoFarmer.enabled, FrillsMod.config.farming.autoFarmer.keybind) {
+    val config get() = FrillsMod.config.farming.autoFarmer
+
     private var strategy: MovementStrategy
     private var currentState: MovementState
     private var savedState: MovementState? = null
@@ -23,12 +24,12 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
     private var stateChangeSub: KeybindManager.Subscription? = null
 
     init {
-        strategy = config().cropType.get().strategy
+        strategy = config.cropType.get().strategy
         currentState = strategy.getState()
     }
 
     private fun initStrategy() {
-        strategy = config().cropType.get().strategy
+        strategy = config.cropType.get().strategy
         currentState = strategy.getState()
     }
 
@@ -41,13 +42,13 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
         registerKeyBindListener()
 
         // Early return if restoration conditions not met
-        if (!config().restoreState || savedState == null || savedPosition == null || mc.player == null) {
+        if (!config.restoreState || savedState == null || savedPosition == null || mc.player == null) {
             return
         }
 
         // Check distance if enabled
-        if (config().enableDistanceCheck) {
-            val maxDistance = config().maxRestoreDistance.toDouble()
+        if (config.enableDistanceCheck) {
+            val maxDistance = config.maxRestoreDistance.toDouble()
             val distanceSquared = maxDistance * maxDistance
             val actualDistance: Double = mc.player?.blockPos?.getSquaredDistance(savedPosition) ?: Double.MAX_VALUE
             if (actualDistance > distanceSquared) {
@@ -63,7 +64,7 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
     }
 
     private fun registerKeyBindListener() {
-        stateChangeSub = KeybindManager.register(config().stateChangeKeybind, Runnable {
+        stateChangeSub = KeybindManager.register(config.stateChangeKeybind, Runnable {
             strategy.nextState()
             currentState = strategy.getState()
         })
@@ -109,9 +110,4 @@ class AutoFarmer : AreaToggleFeature(config().enabled, config().keybind) {
         savedPosition = mc.player?.blockPos
     }
 
-    companion object {
-        private fun config(): AutoFarmerConfig {
-            return FrillsMod.config.farming.autoFarmer
-        }
-    }
 }

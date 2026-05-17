@@ -18,7 +18,7 @@ import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 
 @FrillsFeature
-class ExperimentSolver : Feature(FrillsMod.config.solvers.experimentSolver.enabled) {
+object ExperimentSolver : Feature(FrillsMod.config.solvers.experimentSolver.enabled) {
     private val config get() = FrillsMod.config.solvers.experimentSolver
 
     private val ultrasequencerOrder: MutableMap<Int, Int> = HashMap()
@@ -27,6 +27,18 @@ class ExperimentSolver : Feature(FrillsMod.config.solvers.experimentSolver.enabl
     private var hasAdded = false
     private var lastAdded = 0
     private var clicks = 0
+
+    val experimentType: ExperimentType
+        get() {
+            val screen = mc.currentScreen ?: return ExperimentType.None
+            if (Utils.isOnPrivateIsland() && screen is GenericContainerScreen) {
+                val title: String = screen.getTitle().string
+                if (title.startsWith("Chronomatron (")) return ExperimentType.Chronomatron
+                if (title.startsWith("Ultrasequencer (")) return ExperimentType.Ultrasequencer
+                if (title.startsWith("Superpairs (")) return ExperimentType.Superpairs
+            }
+            return ExperimentType.None
+        }
 
     @EventHandler
     private fun onTick(event: TickEventPost) {
@@ -174,58 +186,45 @@ class ExperimentSolver : Feature(FrillsMod.config.solvers.experimentSolver.enabl
         Chronomatron, Ultrasequencer, Superpairs, None
     }
 
-    companion object {
-        val experimentType: ExperimentType
-            get() {
-                val screen = mc.currentScreen ?: return ExperimentType.None
-                if (Utils.isOnPrivateIsland() && screen is GenericContainerScreen) {
-                    val title: String = screen.getTitle().string
-                    if (title.startsWith("Chronomatron (")) return ExperimentType.Chronomatron
-                    if (title.startsWith("Ultrasequencer (")) return ExperimentType.Ultrasequencer
-                    if (title.startsWith("Superpairs (")) return ExperimentType.Superpairs
-                }
-                return ExperimentType.None
-            }
-
-        private fun isValidChronoSlot(idx: Int): Boolean {
-            return (11 <= idx && idx <= 19) || (30 <= idx && idx <= 38)
-        }
-
-        private fun isGlowstone(stack: ItemStack): Boolean {
-            return stack.item == Items.GLOWSTONE
-        }
-
-        private fun isClock(stack: ItemStack): Boolean {
-            return stack.item == Items.CLOCK
-        }
-
-        private fun isGlowstone(s: Slot): Boolean {
-            return isGlowstone(s.stack)
-        }
-
-        private fun isClock(s: Slot): Boolean {
-            return isClock(s.stack)
-        }
-
-        private fun isDye(stack: ItemStack): Boolean {
-            val item = stack.item
-            return item is DyeItem
-                    || item == Items.INK_SAC
-                    || item == Items.BONE_MEAL
-                    || item == Items.LAPIS_LAZULI
-                    || item == Items.COCOA_BEANS
-        }
-
-        private fun isDye(s: Slot): Boolean {
-            return isDye(s.stack)
-        }
-
-        private fun isTerracotta(stack: ItemStack): Boolean {
-            return stack.item.toString().endsWith("terracotta")
-        }
-
-        private fun isTerracotta(s: Slot): Boolean {
-            return isTerracotta(s.stack)
-        }
+    private fun isValidChronoSlot(idx: Int): Boolean {
+        return (11 <= idx && idx <= 19) || (30 <= idx && idx <= 38)
     }
+
+    private fun isGlowstone(stack: ItemStack): Boolean {
+        return stack.item == Items.GLOWSTONE
+    }
+
+    private fun isClock(stack: ItemStack): Boolean {
+        return stack.item == Items.CLOCK
+    }
+
+    private fun isGlowstone(s: Slot): Boolean {
+        return isGlowstone(s.stack)
+    }
+
+    private fun isClock(s: Slot): Boolean {
+        return isClock(s.stack)
+    }
+
+    private fun isDye(stack: ItemStack): Boolean {
+        val item = stack.item
+        return item is DyeItem
+                || item == Items.INK_SAC
+                || item == Items.BONE_MEAL
+                || item == Items.LAPIS_LAZULI
+                || item == Items.COCOA_BEANS
+    }
+
+    private fun isDye(s: Slot): Boolean {
+        return isDye(s.stack)
+    }
+
+    private fun isTerracotta(stack: ItemStack): Boolean {
+        return stack.item.toString().endsWith("terracotta")
+    }
+
+    private fun isTerracotta(s: Slot): Boolean {
+        return isTerracotta(s.stack)
+    }
+
 }

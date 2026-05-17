@@ -10,7 +10,7 @@ import com.somefrills.mixin.ClientPlayerInteractionManagerAccessor
 import meteordevelopment.orbit.EventHandler
 
 @FrillsFeature
-class BreakResetFix : Feature(FrillsMod.config.tweaks.breakResetFixEnabled) {
+object BreakResetFix : Feature(FrillsMod.config.tweaks.breakResetFixEnabled) {
     @EventHandler
     fun onBreakReset(event: InventoryUpdateEvent) {
         if (mc.player == null || mc.interactionManager == null) return

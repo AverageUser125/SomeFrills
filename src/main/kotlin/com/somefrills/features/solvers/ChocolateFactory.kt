@@ -11,7 +11,9 @@ import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayerEntity
 
 @FrillsFeature
-class ChocolateFactory : Feature(FrillsMod.config.solvers.chocolateFactorySolver.enabled) {
+object ChocolateFactory : Feature(FrillsMod.config.solvers.chocolateFactorySolver.enabled) {
+    private const val CHOCOLATE_FACTORY_TITLE = "Chocolate Factory"
+
     private val config get() = FrillsMod.config.solvers.chocolateFactorySolver
     private var lastClaimTime: Long = 0
 
@@ -61,9 +63,5 @@ class ChocolateFactory : Feature(FrillsMod.config.solvers.chocolateFactorySolver
                 return  // Only click one per tick
             }
         }
-    }
-
-    companion object {
-        private const val CHOCOLATE_FACTORY_TITLE = "Chocolate Factory"
     }
 }

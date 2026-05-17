@@ -23,8 +23,16 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @FrillsFeature
-class NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
+object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
     private val config get() = FrillsMod.config.misc.npcLocator
+
+    private val npcLocations = ConcurrentHashMap<String, NpcLocation>()
+    private var color = RenderColor(255, 100, 100, 255)
+    private var cachedIsland: Area? = null
+    private var cachedNpcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
+    private fun onColorConfigChanged(newColor: ChromaColour) {
+        color = RenderColor.fromChroma(newColor)
+    }
 
     init {
         config.color.addObserver { oldVal: ChromaColour, newVal: ChromaColour -> onColorConfigChanged(newVal) }
@@ -62,134 +70,125 @@ class NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         }
     }
 
-    @JvmRecord
-    data class NpcLocation(@JvmField val npcName: String, val position: Vec3d)
-    companion object {
-        private val npcLocations = ConcurrentHashMap<String, NpcLocation>()
-        private var color = RenderColor(255, 100, 100, 255)
-        private var cachedIsland: Area? = null
-        private var cachedNpcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
-        private fun onColorConfigChanged(newColor: ChromaColour) {
-            color = RenderColor.fromChroma(newColor)
+    @JvmStatic
+    fun addNpcLocation(npcName: String) {
+        val location: Vec3d? = getNpcCoordinates(npcName)
+        if (location != null) {
+            npcLocations[npcName] = NpcLocation(npcName, location)
+            Utils.info(Utils.format("Added {} to NPC Locator.", npcName))
+        } else {
+            Utils.info(Utils.format("Could not find NPC: {}", npcName))
         }
+    }
 
-        @JvmStatic
-        fun addNpcLocation(npcName: String) {
-            val location: Vec3d? = getNpcCoordinates(npcName)
-            if (location != null) {
-                npcLocations[npcName] = NpcLocation(npcName, location)
-                Utils.info(Utils.format("Added {} to NPC Locator.", npcName))
-            } else {
-                Utils.info(Utils.format("Could not find NPC: {}", npcName))
-            }
+    @JvmStatic
+    fun removeNpcLocation(npcName: String) {
+        npcLocations.remove(npcName)
+        Utils.info(Utils.format("Removed {} from NPC Locator.", npcName))
+    }
+
+    @JvmStatic
+    fun clearAllNpcLocations() {
+        npcLocations.clear()
+        Utils.info("Cleared all NPC locations.")
+    }
+
+    @JvmStatic
+    fun getAllNpcLocations(): Collection<NpcLocation> {
+        return Collections.unmodifiableCollection(npcLocations.values)
+    }
+
+    @JvmStatic
+    fun getAvailableNpcsForCurrentIsland(): Collection<String> {
+        ensureCacheLoaded()
+        return cachedNpcs.keys
+    }
+
+    private fun ensureCacheLoaded() {
+        val currentIsland = SkyblockData.area
+        if (cachedIsland != currentIsland) {
+            cachedIsland = currentIsland
+            cachedNpcs = loadIslandNpcs(currentIsland)
         }
+    }
 
-        @JvmStatic
-        fun removeNpcLocation(npcName: String) {
-            npcLocations.remove(npcName)
-            Utils.info(Utils.format("Removed {} from NPC Locator.", npcName))
-        }
+    private fun getNpcCoordinates(npcName: String?): Vec3d? {
+        ensureCacheLoaded()
+        return cachedNpcs.get(npcName)
+    }
 
-        @JvmStatic
-        fun clearAllNpcLocations() {
-            npcLocations.clear()
-            Utils.info("Cleared all NPC locations.")
-        }
+    private fun loadIslandNpcs(area: Area): MutableMap<String, Vec3d> {
+        val npcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
 
-        @JvmStatic
-        fun getAllNpcLocations(): Collection<NpcLocation> {
-            return Collections.unmodifiableCollection(npcLocations.values)
-        }
+        val locationFileName = area.displayName.replace(" ", "_").uppercase(Locale.getDefault()) + ".json"
+        val locationFile = FabricLoader.getInstance().configDir
+            .resolve("skyhanni/repo/constants/island_graphs/" + locationFileName)
 
-        @JvmStatic
-        fun getAvailableNpcsForCurrentIsland(): Collection<String> {
-            ensureCacheLoaded()
-            return cachedNpcs.keys
-        }
-
-        private fun ensureCacheLoaded() {
-            val currentIsland = SkyblockData.area
-            if (cachedIsland != currentIsland) {
-                cachedIsland = currentIsland
-                cachedNpcs = loadIslandNpcs(currentIsland)
-            }
-        }
-
-        private fun getNpcCoordinates(npcName: String?): Vec3d? {
-            ensureCacheLoaded()
-            return cachedNpcs.get(npcName)
-        }
-
-        private fun loadIslandNpcs(area: Area): MutableMap<String, Vec3d> {
-            val npcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
-
-            val locationFileName = area.displayName.replace(" ", "_").uppercase(Locale.getDefault()) + ".json"
-            val locationFile = FabricLoader.getInstance().configDir
-                .resolve("skyhanni/repo/constants/island_graphs/" + locationFileName)
-
-            if (!Files.exists(locationFile)) {
-                return npcs
-            }
-
-            try {
-                val jsonContent = Files.readString(locationFile)
-                val jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject()
-
-                for (key in jsonObject.keySet()) {
-                    val element = jsonObject.get(key)
-                    if (!element.isJsonObject) continue
-
-                    val node = element.getAsJsonObject()
-
-                    // Check if this node has the "npc" tag
-                    var isNpc = false
-                    if (node.has("Tags") && node.get("Tags").isJsonArray) {
-                        val tagsArray = node.getAsJsonArray("Tags")
-                        if (tagsArray != null) {
-                            for (tag in tagsArray) {
-                                if (tag.isJsonPrimitive && tag.asString == "npc") {
-                                    isNpc = true
-                                    break
-                                }
-                            }
-                        }
-                    }
-
-                    if (!isNpc) continue
-
-                    // Extract NPC name and position
-                    if (!node.has("Name") || !node.has("Position")) continue
-
-                    val npcName = node.get("Name").asString
-                    val positionStr = node.get("Position").asString
-
-                    val position: Vec3d? = parsePosition(positionStr)
-                    if (position != null) {
-                        npcs.put(npcName, position)
-                    }
-                }
-            } catch (e: IOException) {
-                // Log error if needed
-            } catch (e: RuntimeException) {
-            }
-
+        if (!Files.exists(locationFile)) {
             return npcs
         }
 
-        private fun parsePosition(positionStr: String): Vec3d? {
-            try {
-                val parts: Array<String> =
-                    positionStr.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                if (parts.size != 3) return null
+        try {
+            val jsonContent = Files.readString(locationFile)
+            val jsonObject = JsonParser.parseString(jsonContent).getAsJsonObject()
 
-                val x = parts[0].toDouble()
-                val y = parts[1].toDouble()
-                val z = parts[2].toDouble()
+            for (key in jsonObject.keySet()) {
+                val element = jsonObject.get(key)
+                if (!element.isJsonObject) continue
 
-                return Vec3d(x, y, z)
-            } catch (e: NumberFormatException) {
-                return null
+                val node = element.getAsJsonObject()
+
+                // Check if this node has the "npc" tag
+                var isNpc = false
+                if (node.has("Tags") && node.get("Tags").isJsonArray) {
+                    val tagsArray = node.getAsJsonArray("Tags")
+                    if (tagsArray != null) {
+                        for (tag in tagsArray) {
+                            if (tag.isJsonPrimitive && tag.asString == "npc") {
+                                isNpc = true
+                                break
+                            }
+                        }
+                    }
+                }
+
+                if (!isNpc) continue
+
+                // Extract NPC name and position
+                if (!node.has("Name") || !node.has("Position")) continue
+
+                val npcName = node.get("Name").asString
+                val positionStr = node.get("Position").asString
+
+                val position: Vec3d? = parsePosition(positionStr)
+                if (position != null) {
+                    npcs.put(npcName, position)
+                }
             }
+        } catch (e: IOException) {
+            // Log error if needed
+        } catch (e: RuntimeException) {
+        }
+
+        return npcs
+    }
+
+    private fun parsePosition(positionStr: String): Vec3d? {
+        try {
+            val parts: Array<String> =
+                positionStr.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            if (parts.size != 3) return null
+
+            val x = parts[0].toDouble()
+            val y = parts[1].toDouble()
+            val z = parts[2].toDouble()
+
+            return Vec3d(x, y, z)
+        } catch (e: NumberFormatException) {
+            return null
         }
     }
+
+    @JvmRecord
+    data class NpcLocation(@JvmField val npcName: String, val position: Vec3d)
 }

@@ -6,7 +6,6 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.Main
-import com.somefrills.features.core.Features
 import com.somefrills.features.misc.GlowPlayer
 import com.somefrills.misc.RenderColor
 import com.somefrills.misc.Utils
@@ -113,7 +112,7 @@ object GlowPlayerCommand {
                             return@executes 1
                         }
 
-                        get().clear()
+                        GlowPlayer.clear()
                         Utils.info("Cleared all forced glows.")
                         1
                     }
@@ -138,7 +137,7 @@ object GlowPlayerCommand {
     }
 
     private fun isGlowPlayerEnabled(): Boolean {
-        if (!Features.isActive(GlowPlayer::class.java)) {
+        if (!GlowPlayer.isActive()) {
             Utils.info("GlowPlayer feature is disabled.")
             return false
         }
@@ -156,7 +155,7 @@ object GlowPlayerCommand {
 
         val renderColor = RenderColor.fromFormatting(color)
 
-        val added = get().addPlayer(name, renderColor)
+        val added = GlowPlayer.addPlayer(name, renderColor)
 
         Utils.info(
             if (added) {
@@ -177,7 +176,7 @@ object GlowPlayerCommand {
     ): Int {
         val name = StringArgumentType.getString(ctx, "player")
 
-        val added = get().addPlayer(name, color)
+        val added = GlowPlayer.addPlayer(name, color)
 
         val colorStr = String.format("#%06X", color.hex)
 
@@ -202,7 +201,7 @@ object GlowPlayerCommand {
 
         val renderColor = RenderColor.fromFormatting(color)
 
-        get().addPlayer(name, renderColor)
+        GlowPlayer.addPlayer(name, renderColor)
 
         Utils.info("$name glow color set to ${color.name}.")
 
@@ -217,7 +216,7 @@ object GlowPlayerCommand {
     ): Int {
         val name = StringArgumentType.getString(ctx, "player")
 
-        get().addPlayer(name, color)
+        GlowPlayer.addPlayer(name, color)
 
         val colorStr = String.format("#%06X", color.hex)
 
@@ -233,7 +232,7 @@ object GlowPlayerCommand {
     ): Int {
         val name = StringArgumentType.getString(ctx, "player")
 
-        val removed = get().removePlayer(name)
+        val removed = GlowPlayer.removePlayer(name)
 
         Utils.info(
             if (removed) {
@@ -249,7 +248,7 @@ object GlowPlayerCommand {
     /* ---------------- Listing ---------------- */
 
     private fun listGlows() {
-        val names = get().forcedNames
+        val names = GlowPlayer.forcedNames
 
         if (names.isEmpty()) {
             Utils.info("No forced glows.")
@@ -259,7 +258,7 @@ object GlowPlayerCommand {
         val sb = StringBuilder("Forced glows:\n")
 
         for (name in names) {
-            val color = get().getColor(name)
+            val color = GlowPlayer.getColor(name)
 
             val colorStr = color?.let {
                 String.format("#%06X", it.hex)
@@ -307,7 +306,7 @@ object GlowPlayerCommand {
 
         val remaining = builder.remaining.lowercase()
 
-        for (name in get().forcedNames) {
+        for (name in GlowPlayer.forcedNames) {
             if (name.lowercase().startsWith(remaining)) {
                 builder.suggest(name)
             }
@@ -328,10 +327,10 @@ object GlowPlayerCommand {
 
             if (playerPureName != pureName) continue
 
-            val glowColor = get().getColor(pureName)
+            val glowColor = GlowPlayer.getColor(pureName)
 
             if (glowColor != null) {
-                get().setGlowImmediately(player, glowColor)
+                GlowPlayer.setGlowImmediately(player, glowColor)
             }
         }
     }
@@ -351,7 +350,7 @@ object GlowPlayerCommand {
 
         val sb = StringBuilder("Currently glowing players:\n")
 
-        val forcedNames = get().forcedNames
+        val forcedNames = GlowPlayer.forcedNames
 
         for (player in world.players) {
             if (!Utils.isRealPlayer(player)) continue
@@ -370,7 +369,7 @@ object GlowPlayerCommand {
             sb.append("  - ")
                 .append(playerPureName)
                 .append("(")
-                .append(Utils.colorToString(get().getColor(playerPureName)))
+                .append(Utils.colorToString(GlowPlayer.getColor(playerPureName)))
                 .append(")")
                 .append(", Pos: [")
                 .append(String.format("%.1f", player.x))
@@ -384,9 +383,5 @@ object GlowPlayerCommand {
         ctx.source.sendFeedback(Text.literal(sb.toString()))
 
         return 1
-    }
-
-    fun get(): GlowPlayer {
-        return Features.get(GlowPlayer::class.java)
     }
 }

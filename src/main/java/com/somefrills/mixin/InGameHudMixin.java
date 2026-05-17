@@ -3,7 +3,6 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.somefrills.events.HudRenderEvent;
 import com.somefrills.events.HudTickEvent;
-import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.mixininterface.TitleRendering;
@@ -80,7 +79,7 @@ public abstract class InGameHudMixin implements TitleRendering {
 
     @ModifyExpressionValue(method = "renderCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/Perspective;isFirstPerson()Z"))
     private boolean alwaysRenderCrosshairInFreecam(boolean firstPerson) {
-        return Features.get(Freecam.class).isActive() || firstPerson;
+        return Freecam.INSTANCE.isActive() || firstPerson;
     }
 
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/DebugHud;<init>(Lnet/minecraft/client/MinecraftClient;)V"))

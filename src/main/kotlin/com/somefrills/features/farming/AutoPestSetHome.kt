@@ -13,7 +13,14 @@ import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 @FrillsFeature
-class AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEnabled) {
+object AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEnabled) {
+    private const val IGNORE_WINDOW_MS = 10000L
+    private val PEST_SPAWN_PATTERN: Pattern = Pattern.compile(
+        "\\bPest[s]?\\b.*?spawn(?:ed)?\\b.*?Plot\\s*-?\\s*\\d+",
+        Pattern.CASE_INSENSITIVE
+    )
+    private var lastServerJoinTime = 0L
+
     @EventHandler
     private fun onServerJoin(event: ServerJoinEvent) {
         lastServerJoinTime = System.currentTimeMillis()
@@ -40,14 +47,5 @@ class AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEnab
 
     override fun checkArea(area: Area): Boolean {
         return area == Area.GARDEN && Utils.isOnGardenPlot()
-    }
-
-    companion object {
-        private const val IGNORE_WINDOW_MS = 10000L
-        private val PEST_SPAWN_PATTERN: Pattern = Pattern.compile(
-            "\\bPest[s]?\\b.*?spawn(?:ed)?\\b.*?Plot\\s*-?\\s*\\d+",
-            Pattern.CASE_INSENSITIVE
-        )
-        private var lastServerJoinTime = 0L
     }
 }

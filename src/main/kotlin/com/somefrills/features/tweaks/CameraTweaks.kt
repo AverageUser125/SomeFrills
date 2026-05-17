@@ -6,7 +6,7 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.PassiveFeature
 
 @FrillsFeature
-class CameraTweaks : PassiveFeature() {
+object CameraTweaks : PassiveFeature() {
     private val config get() = FrillsMod.config.tweaks.cameraTweaks
 
     fun clip(): Boolean {

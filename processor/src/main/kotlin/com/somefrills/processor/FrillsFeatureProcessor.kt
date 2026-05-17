@@ -77,15 +77,6 @@ class FrillsFeatureProcessor(
             out.appendLine()
             out.appendLine("    val INSTANCES: Array<AbstractFeature?> = arrayOfNulls(CREATORS.size)")
             out.appendLine()
-            out.appendLine("    val CLASS_TO_INSTANCE: ClassValue<AbstractFeature> = object : ClassValue<AbstractFeature>() {")
-            out.appendLine("        override fun computeValue(type: Class<*>): AbstractFeature {")
-            features.forEachIndexed { i, f ->
-                out.appendLine("            if (type == ${f.qualifiedName}::class.java) return INSTANCES[$i]!!")
-            }
-            out.appendLine($$"            throw IllegalStateException(\"Unknown feature: $type\")")
-            out.appendLine("        }")
-            out.appendLine("    }")
-            out.appendLine()
             out.appendLine("    fun init() {")
             out.appendLine("        for (i in CREATORS.indices) INSTANCES[i] = CREATORS[i]()")
             out.appendLine("    }")

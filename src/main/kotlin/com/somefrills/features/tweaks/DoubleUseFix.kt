@@ -14,7 +14,7 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.HitResult
 
 @FrillsFeature
-class DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
+object DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
     @EventHandler
     private fun onUseItem(event: InteractItemEvent) {
         if (mc.crosshairTarget != null && mc.crosshairTarget?.type == HitResult.Type.BLOCK && disableType == Type.Dagger) {
@@ -37,17 +37,15 @@ class DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
         None
     }
 
-    companion object {
-        private val disableType: Type
-            get() {
-                val held = Utils.getHeldItem()
-                if (held.item == Items.FISHING_ROD) {
-                    return Type.Rod
-                }
-                if (Utils.getRightClickAbility(held).contains("Attunement")) {
-                    return Type.Dagger
-                }
-                return Type.None
+    private val disableType: Type
+        get() {
+            val held = Utils.getHeldItem()
+            if (held.item == Items.FISHING_ROD) {
+                return Type.Rod
             }
-    }
+            if (Utils.getRightClickAbility(held).contains("Attunement")) {
+                return Type.Dagger
+            }
+            return Type.None
+        }
 }

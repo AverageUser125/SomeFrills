@@ -11,7 +11,18 @@ import com.somefrills.misc.Utils
 import meteordevelopment.orbit.EventHandler
 
 @FrillsFeature
-class AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) {
+object AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) {
+    private var lastStatus: PestStatus? = PestStatus.UNKNOWN // -1 = unknown
+
+    private fun checkAliveState(tabListLines: MutableList<String>): PestStatus {
+        for (line in tabListLines) {
+            if (line.contains("Alive")) {
+                return if (line.contains("0")) PestStatus.CLEARED else PestStatus.PRESENT
+            }
+        }
+        return PestStatus.UNKNOWN
+    }
+
     @EventHandler
     private fun onWorldTick(event: TabListUpdateEvent) {
         val status: PestStatus = checkAliveState(event.lines)
@@ -43,18 +54,5 @@ class AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) {
 
     enum class PestStatus {
         UNKNOWN, PRESENT, CLEARED
-    }
-
-    companion object {
-        private var lastStatus: PestStatus? = PestStatus.UNKNOWN // -1 = unknown
-
-        private fun checkAliveState(tabListLines: MutableList<String>): PestStatus {
-            for (line in tabListLines) {
-                if (line.contains("Alive")) {
-                    return if (line.contains("0")) PestStatus.CLEARED else PestStatus.PRESENT
-                }
-            }
-            return PestStatus.UNKNOWN
-        }
     }
 }

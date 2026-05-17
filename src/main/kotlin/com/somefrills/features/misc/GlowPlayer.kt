@@ -16,7 +16,7 @@ import net.minecraft.entity.player.PlayerEntity
 import java.util.concurrent.ConcurrentHashMap
 
 @FrillsFeature
-class GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
+object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     private val forcedGlows = ConcurrentHashMap<String, RenderColor>()
 
     private fun applyHighlight(entity: Entity) {

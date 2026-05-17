@@ -1,7 +1,6 @@
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.somefrills.features.core.Features;
 import com.somefrills.features.mining.GhostVision;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
@@ -138,10 +137,10 @@ public class EntityMixin implements EntityRendering {
 
     @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
     private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+        //noinspection ConstantValue
         if ((Object) this != mc.player) return;
 
-        var freecam = Features.get(Freecam.class);
-
+        var freecam = Freecam.INSTANCE;
         if (freecam.isActive()) {
             freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
             ci.cancel();

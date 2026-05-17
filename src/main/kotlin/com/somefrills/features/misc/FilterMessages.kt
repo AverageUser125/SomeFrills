@@ -9,23 +9,21 @@ import meteordevelopment.orbit.EventHandler
 import java.util.regex.Pattern
 
 @FrillsFeature
-class FilterMessages : Feature(FrillsMod.config.misc.chatFilter.enabled) {
+object FilterMessages : Feature(FrillsMod.config.misc.chatFilter.enabled) {
+    private val IMPLOSION_PATTERN: Pattern =
+        Pattern.compile("Your Implosion hit (\\d+) enem(?:y|ies) for ([\\d,.]+) damage\\.")
+
+    private fun shouldFilter(msg: String): Boolean {
+        if (msg.contains("There are blocks in the way!")) {
+            return true
+        }
+        return IMPLOSION_PATTERN.matcher(msg).matches()
+    }
+
     @EventHandler
     private fun onChatMessage(event: ChatMsgEvent) {
         if (shouldFilter(event.plainMessage)) {
             event.cancel()
-        }
-    }
-
-    companion object {
-        private val IMPLOSION_PATTERN: Pattern =
-            Pattern.compile("Your Implosion hit (\\d+) enem(?:y|ies) for ([\\d,.]+) damage\\.")
-
-        private fun shouldFilter(msg: String): Boolean {
-            if (msg.contains("There are blocks in the way!")) {
-                return true
-            }
-            return IMPLOSION_PATTERN.matcher(msg).matches()
         }
     }
 }
