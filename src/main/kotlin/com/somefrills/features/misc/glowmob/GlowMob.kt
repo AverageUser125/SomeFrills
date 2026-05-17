@@ -16,7 +16,7 @@ import net.minecraft.entity.LivingEntity
 import java.util.function.Consumer
 
 @FrillsFeature
-class GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
+object GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
     private val config get() = FrillsConfig.misc.glowMob
 
     /* ---------------- QUERY API ---------------- */
@@ -120,7 +120,7 @@ class GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
         val removed = rules.removeAt(id - 1)
 
         updateEntities()
-        forEachMatching(removed, Consumer { living: LivingEntity -> this.clearGlow(living) })
+        forEachMatching(removed) { living: LivingEntity -> this.clearGlow(living) }
 
         return true
     }
@@ -155,7 +155,7 @@ class GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
         updateEntities()
 
         for (rule in rules) {
-            forEachMatching(rule, Consumer { living: LivingEntity -> this.clearGlow(living) })
+            forEachMatching(rule) { living: LivingEntity -> this.clearGlow(living) }
         }
 
         rules.clear()
@@ -169,9 +169,9 @@ class GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
         updateEntities()
 
         if (rule.enabled()) {
-            forEachMatching(rule, Consumer { living: LivingEntity -> this.clearGlow(living) })
+            forEachMatching(rule) { living: LivingEntity -> this.clearGlow(living) }
         } else {
-            forEachMatching(rule, Consumer { living: LivingEntity -> applyGlow(living, rule) })
+            forEachMatching(rule) { living: LivingEntity -> applyGlow(living, rule) }
         }
 
         rule.toggle()
@@ -179,9 +179,11 @@ class GlowMob : Feature(FrillsConfig.misc.glowMob.enabled) {
 
     class MatchedEntityEntry(@JvmField var rule: GlowMobRule, @JvmField var entities: MutableList<LivingEntity>)
 
+    @JvmStatic
     val glowingMobs: MutableList<MatchedEntityEntry>
         get() = getGlowingMobs(rules)
 
+    @JvmStatic
     fun getGlowingMobs(rules: MutableList<GlowMobRule>): MutableList<MatchedEntityEntry> {
         updateEntities()
 

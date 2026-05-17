@@ -3,7 +3,6 @@ package com.somefrills.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.somefrills.features.core.Features;
 import com.somefrills.features.misc.glowmob.GlowMob;
 import com.somefrills.features.misc.glowmob.MatchInfo;
 import com.somefrills.features.misc.glowmob.chestui.GlowMobRules;
@@ -24,7 +23,7 @@ public class GlowMobCommand {
         return literal("glowmob")
                 .executes(ctx -> {
                     //Utils.info("Usage: /glowmob <add|remove|list|clear>");
-                    if (!get().isActive()) {
+                    if (!GlowMob.INSTANCE.isActive()) {
                         ctx.getSource().sendError(Text.literal("GlowMob feature is not active."));
                         return 0;
                     }
@@ -44,7 +43,7 @@ public class GlowMobCommand {
                         )
                 )
                 .then(literal("clear").executes(ctx -> {
-                    get().clearRules();
+                    GlowMob.INSTANCE.clearRules();
                     ctx.getSource().sendFeedback(Text.literal("Cleared all entity highlight rules."));
                     return 1;
                 }))
@@ -71,8 +70,7 @@ public class GlowMobCommand {
     }
 
     private static int listGlowingMobs(CommandContext<FabricClientCommandSource> ctx, int ruleId) {
-        var manager = get();
-        var rules = manager.rules;
+        var rules = GlowMob.rules;
 
         if (rules.isEmpty()) {
             ctx.getSource().sendFeedback(Text.literal("No glow rules found."));
@@ -89,8 +87,8 @@ public class GlowMobCommand {
 
         // If specific rule requested, pass only that rule
         var entries = (ruleId == -1)
-                ? manager.getGlowingMobs()
-                : manager.getGlowingMobs(List.of(rules.get(ruleId - 1)));
+                ? GlowMob.getGlowingMobs()
+                : GlowMob.getGlowingMobs(List.of(rules.get(ruleId - 1)));
 
         for (var entry : entries) {
             var rule = entry.rule;
@@ -133,7 +131,7 @@ public class GlowMobCommand {
 
 
     private static int addRuleCommand(CommandContext<FabricClientCommandSource> ctx, RenderColor color, MatchInfo matcher) {
-        int addIndex = get().addRule(matcher, color);
+        int addIndex = GlowMob.INSTANCE.addRule(matcher, color);
         if (addIndex != -1) {
             ctx.getSource().sendFeedback(Text.literal("Added rule " + addIndex + " with color " + Utils.colorToString(color) + " and matcher: " + matcher.serialize()));
         } else {
@@ -144,7 +142,7 @@ public class GlowMobCommand {
 
     private static int removeRuleCommand(CommandContext<FabricClientCommandSource> ctx) {
         int id = IntegerArgumentType.getInteger(ctx, "id");
-        boolean removed = get().removeRule(id);
+        boolean removed = GlowMob.INSTANCE.removeRule(id);
         if (removed) {
             ctx.getSource().sendFeedback(Text.literal("Removed rule '" + id + "'."));
         } else {
@@ -157,7 +155,7 @@ public class GlowMobCommand {
         StringBuilder sb = new StringBuilder();
         sb.append("=== Entity Highlight Rules ===\n");
 
-        var rules = get().rules;
+        var rules = GlowMob.rules;
         if (rules.isEmpty()) {
             sb.append("  (none)\n");
         } else {
@@ -172,9 +170,5 @@ public class GlowMobCommand {
 
         ctx.getSource().sendFeedback(Text.literal(sb.toString()));
         return 1;
-    }
-
-    private static GlowMob get() {
-        return Features.get(GlowMob.class);
     }
 }
