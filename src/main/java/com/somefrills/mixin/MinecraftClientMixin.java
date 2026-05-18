@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.Main;
 import com.somefrills.events.*;
 import com.somefrills.features.mining.NoMiningTrace;
-import com.somefrills.misc.Utils;
+import com.somefrills.utils.EntityUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.world.ClientWorld;
@@ -68,7 +68,7 @@ public abstract class MinecraftClientMixin {
 
     @ModifyReturnValue(method = "hasOutline", at = @At("RETURN"))
     private boolean hasOutline(boolean original, Entity entity) {
-        if (Utils.isGlowing(entity)) {
+        if (EntityUtils.isGlowing(entity)) {
             return true;
         }
         return original;

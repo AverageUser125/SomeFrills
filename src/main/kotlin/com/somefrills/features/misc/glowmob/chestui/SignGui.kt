@@ -1,6 +1,6 @@
 package com.somefrills.features.misc.glowmob.chestui
 
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
 import net.minecraft.block.SignBlock
 import net.minecraft.block.entity.SignBlockEntity
 import net.minecraft.block.entity.SignText
@@ -134,7 +134,7 @@ class SignGui private constructor(
             val sign = FakeSign(textRows)
             val gui = SignGui(sign, true, false, onClose)
 
-            Utils.setScreen(gui)
+            GuiUtils.setScreen(gui)
         }
 
         @JvmStatic
@@ -145,7 +145,7 @@ class SignGui private constructor(
             val sign = FakeSign(rows)
             val gui = SignGui(sign, true, false, onClose)
 
-            Utils.setScreen(gui)
+            GuiUtils.setScreen(gui)
         }
     }
 }

@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.features.misc.NpcLocator
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
@@ -29,7 +29,7 @@ object NpcLocatorCommand {
                     return@executes checkResult
                 }
 
-                Utils.info(
+                ChatUtils.info(
                     "Usage: /npclocator <list|add|remove|clear>"
                 )
 
@@ -126,7 +126,7 @@ object NpcLocatorCommand {
      */
     private fun checkNpcLocatorEnabledOrWarn(): Int? {
         if (!NpcLocator.isActive()) {
-            Utils.info(
+            ChatUtils.info(
                 "NPC Locator feature is disabled."
             )
 
@@ -143,22 +143,21 @@ object NpcLocatorCommand {
 
         if (locations.isEmpty()) {
 
-            Utils.info(
+            ChatUtils.info(
                 "No NPCs are currently being tracked."
             )
 
         } else {
 
-            Utils.info("Tracked NPCs:")
+            ChatUtils.info("Tracked NPCs:")
 
             locations.forEach { location ->
 
-                Utils.info(
-                    Utils.format(
+                ChatUtils.infoFormat(
                         "  - {}",
                         location.npcName
                     )
-                )
+
             }
         }
 

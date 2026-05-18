@@ -8,7 +8,10 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.Main
 import com.somefrills.features.misc.GlowPlayer
 import com.somefrills.misc.RenderColor
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.TextUtils
+import com.somefrills.utils.isRealPlayer
+import com.somefrills.utils.playerName
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.text.Text
@@ -21,11 +24,11 @@ object GlowPlayerCommand {
         return ClientCommandManager.literal("glowplayer")
             .executes { ctx ->
                 if (!isGlowPlayerEnabled()) {
-                    Utils.info("GlowPlayer feature is disabled.")
+                    ChatUtils.info("GlowPlayer feature is disabled.")
                     return@executes 1
                 }
 
-                Utils.info("Usage: /glowplayer <list|add|color|remove>")
+                ChatUtils.info("Usage: /glowplayer <list|add|color|remove>")
                 1
             }
 
@@ -33,7 +36,7 @@ object GlowPlayerCommand {
                 ClientCommandManager.literal("list")
                     .executes { _ ->
                         if (!isGlowPlayerEnabled()) {
-                            Utils.info("GlowPlayer feature is disabled.")
+                            ChatUtils.info("GlowPlayer feature is disabled.")
                             return@executes 1
                         }
 
@@ -50,7 +53,7 @@ object GlowPlayerCommand {
 
                             .executes { ctx ->
                                 if (!isGlowPlayerEnabled()) {
-                                    Utils.info("GlowPlayer feature is disabled.")
+                                    ChatUtils.info("GlowPlayer feature is disabled.")
                                     return@executes 1
                                 }
 
@@ -60,7 +63,7 @@ object GlowPlayerCommand {
                             .then(
                                 CommandColorUtils.buildColorArguments { ctx, color ->
                                     if (!isGlowPlayerEnabled()) {
-                                        Utils.info("GlowPlayer feature is disabled.")
+                                        ChatUtils.info("GlowPlayer feature is disabled.")
                                         return@buildColorArguments 1
                                     }
 
@@ -94,7 +97,7 @@ object GlowPlayerCommand {
                             .then(
                                 CommandColorUtils.buildColorArguments { ctx, color ->
                                     if (!isGlowPlayerEnabled()) {
-                                        Utils.info("GlowPlayer feature is disabled.")
+                                        ChatUtils.info("GlowPlayer feature is disabled.")
                                         return@buildColorArguments 1
                                     }
 
@@ -108,12 +111,12 @@ object GlowPlayerCommand {
                 ClientCommandManager.literal("clear")
                     .executes {
                         if (!isGlowPlayerEnabled()) {
-                            Utils.info("GlowPlayer feature is disabled.")
+                           ChatUtils.info("GlowPlayer feature is disabled.")
                             return@executes 1
                         }
 
                         GlowPlayer.clear()
-                        Utils.info("Cleared all forced glows.")
+                       ChatUtils.info("Cleared all forced glows.")
                         1
                     }
             )
@@ -126,7 +129,7 @@ object GlowPlayerCommand {
 
                             .executes { ctx ->
                                 if (!isGlowPlayerEnabled()) {
-                                    Utils.info("GlowPlayer feature is disabled.")
+                                   ChatUtils.info("GlowPlayer feature is disabled.")
                                     return@executes 1
                                 }
 
@@ -138,7 +141,7 @@ object GlowPlayerCommand {
 
     private fun isGlowPlayerEnabled(): Boolean {
         if (!GlowPlayer.isActive()) {
-            Utils.info("GlowPlayer feature is disabled.")
+           ChatUtils.info("GlowPlayer feature is disabled.")
             return false
         }
 
@@ -157,7 +160,7 @@ object GlowPlayerCommand {
 
         val added = GlowPlayer.addPlayer(name, renderColor)
 
-        Utils.info(
+       ChatUtils.info(
             if (added) {
                 "$name will now glow (${color.name})."
             } else {
@@ -180,7 +183,7 @@ object GlowPlayerCommand {
 
         val colorStr = String.format("#%06X", color.hex)
 
-        Utils.info(
+       ChatUtils.info(
             if (added) {
                 "$name will now glow ($colorStr)."
             } else {
@@ -203,7 +206,7 @@ object GlowPlayerCommand {
 
         GlowPlayer.addPlayer(name, renderColor)
 
-        Utils.info("$name glow color set to ${color.name}.")
+       ChatUtils.info("$name glow color set to ${color.name}.")
 
         applyGlowToOnlinePlayer(name)
 
@@ -220,7 +223,7 @@ object GlowPlayerCommand {
 
         val colorStr = String.format("#%06X", color.hex)
 
-        Utils.info("$name glow color set to $colorStr.")
+       ChatUtils.info("$name glow color set to $colorStr.")
 
         applyGlowToOnlinePlayer(name)
 
@@ -234,7 +237,7 @@ object GlowPlayerCommand {
 
         val removed = GlowPlayer.removePlayer(name)
 
-        Utils.info(
+        ChatUtils.info(
             if (removed) {
                 "$name will no longer glow."
             } else {
@@ -251,7 +254,7 @@ object GlowPlayerCommand {
         val names = GlowPlayer.forcedNames
 
         if (names.isEmpty()) {
-            Utils.info("No forced glows.")
+            ChatUtils.info("No forced glows.")
             return
         }
 
@@ -270,7 +273,7 @@ object GlowPlayerCommand {
                 .append(")\n")
         }
 
-        Utils.info(sb.toString())
+       ChatUtils.info(sb.toString())
     }
 
     /* ---------------- Suggestions ---------------- */
@@ -285,9 +288,8 @@ object GlowPlayerCommand {
         val remaining = builder.remaining.lowercase()
 
         for (player in world.players) {
-            if (!Utils.isRealPlayer(player)) continue
-
-            val name = player.name.string
+            if (!player.isRealPlayer()) continue
+            val name = player.playerName
 
             if (name.lowercase().startsWith(remaining)) {
                 builder.suggest(name)
@@ -321,9 +323,9 @@ object GlowPlayerCommand {
         val world = Main.mc.world ?: return
 
         for (player in world.players) {
-            if (!Utils.isRealPlayer(player)) continue
+            if (!player.isRealPlayer()) continue
 
-            val playerPureName = Utils.getPlayerName(player)
+            val playerPureName = player.playerName
 
             if (playerPureName != pureName) continue
 
@@ -353,10 +355,8 @@ object GlowPlayerCommand {
         val forcedNames = GlowPlayer.forcedNames
 
         for (player in world.players) {
-            if (!Utils.isRealPlayer(player)) continue
-
-            val playerPureName = Utils.getPlayerName(player) ?: continue
-
+            if (!player.isRealPlayer()) continue
+            val playerPureName = player.playerName
             if (
                 name.isNotEmpty() &&
                 !playerPureName.lowercase().contains(name.lowercase())
@@ -369,7 +369,7 @@ object GlowPlayerCommand {
             sb.append("  - ")
                 .append(playerPureName)
                 .append("(")
-                .append(Utils.colorToString(GlowPlayer.getColor(playerPureName)))
+                .append(TextUtils.colorToString(GlowPlayer.getColor(playerPureName) ?: RenderColor.white))
                 .append(")")
                 .append(", Pos: [")
                 .append(String.format("%.1f", player.x))

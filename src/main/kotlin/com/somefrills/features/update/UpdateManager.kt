@@ -4,7 +4,7 @@ import com.google.gson.JsonElement
 import com.somefrills.Main
 import com.somefrills.Main.LOGGER
 import com.somefrills.Main.mc
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
 import moe.nea.libautoupdate.CurrentVersion
 import moe.nea.libautoupdate.PotentialUpdate
 import moe.nea.libautoupdate.UpdateContext
@@ -102,11 +102,11 @@ object UpdateManager {
                     updateState = UpdateState.AVAILABLE
                     val versionName = update.update.getVersionName()
                     LOGGER.info("Update available: {}", versionName)
-                    Utils.infoFormat("Update available: {}", versionName)
+                    ChatUtils.infoFormat("Update available: {}", versionName)
 
                     if (autoQueue) {
                         LOGGER.info("Auto-queuing update")
-                        Utils.infoFormat("Auto-queuing update")
+                        ChatUtils.infoFormat("Auto-queuing update")
                         queueUpdate()
                     }
                 } else {
@@ -131,15 +131,15 @@ object UpdateManager {
 
         updateState = UpdateState.QUEUED
         LOGGER.info("Queuing update download")
-        Utils.infoFormat("Queuing update download")
+        ChatUtils.infoFormat("Queuing update download")
         activePromise = CompletableFuture.supplyAsync<Any?> {
             LOGGER.info("Update download started")
-            Utils.infoFormat("Update download started")
+            ChatUtils.infoFormat("Update download started")
             try {
                 potentialUpdate!!.prepareUpdate()
             } catch (e: IOException) {
                 LOGGER.error("Failed to download update", e)
-                Utils.infoFormat("Failed to download update: {}", e.message)
+                ChatUtils.infoFormat("Failed to download update: {}", e.message)
                 updateState = UpdateState.AVAILABLE
             } catch (e: NullPointerException) {
                 LOGGER.error("Update was cleared while downloading", e)
@@ -152,7 +152,7 @@ object UpdateManager {
                 return@thenAcceptAsync
             }
             LOGGER.info("Update download completed")
-            Utils.infoFormat("Update download completed. Will be installed on next restart.")
+            ChatUtils.infoFormat("Update download completed. Will be installed on next restart.")
             updateState = UpdateState.DOWNLOADED
             potentialUpdate!!.executePreparedUpdate()
         }, mc)

@@ -8,7 +8,10 @@ import com.somefrills.events.TickEventPost
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.RenderColor
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.EntityUtils
+import com.somefrills.utils.isMob
+import com.somefrills.utils.setGlowing
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import net.minecraft.entity.Entity
@@ -30,10 +33,9 @@ object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
         }
 
     private fun updateEntities() {
-        entityList = Utils.getEntities().stream()
-            .filter { entity: Entity -> Utils.isMob(entity) }
-            .map { obj: Entity -> LivingEntity::class.java.cast(obj) }
-            .toList()
+        entityList = EntityUtils.getStreamEntities(LivingEntity::class.java)
+            .filter { entity: Entity -> entity.isMob() }
+            .toMutableList()
     }
 
     /* ---------------- CORE MATCHING ---------------- */
@@ -48,7 +50,7 @@ object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
     private fun applyHighlight(living: LivingEntity) {
         val color = findGlowMatch(living)
         if (color != null) {
-            Utils.setGlowing(living, true, color)
+            living.setGlowing(true, color)
         }
     }
 
@@ -61,11 +63,11 @@ object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
     }
 
     private fun clearGlow(living: LivingEntity) {
-        Utils.setGlowing(living, false, RenderColor.white)
+        living.setGlowing(false, RenderColor.white)
     }
 
     private fun applyGlow(living: LivingEntity, rule: GlowMobRule) {
-        Utils.setGlowing(living, true, rule.color())
+        living.setGlowing(true, rule.color())
     }
 
     /* ---------------- LIFECYCLE ---------------- */
@@ -101,7 +103,7 @@ object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
             rules.add(rule)
             return rules.size
         } catch (e: Exception) {
-            Utils.infoFormat("Failed to add glow rule: {}", e.message)
+            ChatUtils.infoFormat("Failed to add glow rule: {}", e.message)
             return -1
         }
     }
@@ -130,7 +132,7 @@ object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
 
         val idx = rules.indexOf(original)
         if (idx == -1) {
-            Utils.info("Original rule not found, cannot replace")
+            ChatUtils.info("Original rule not found, cannot replace")
             return
         }
 

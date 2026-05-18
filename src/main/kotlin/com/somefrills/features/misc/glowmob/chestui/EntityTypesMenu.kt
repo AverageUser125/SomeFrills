@@ -1,7 +1,12 @@
 package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.features.misc.glowmob.MatchInfo
-import com.somefrills.misc.Utils
+import com.somefrills.utils.TextUtils
+import com.somefrills.utils.getCustomData
+import com.somefrills.utils.plainCustomName
+import com.somefrills.utils.setCustomData
+import com.somefrills.utils.setCustomName
+import com.somefrills.utils.stripPrefix
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.LoreComponent
 import net.minecraft.entity.EntityType
@@ -46,10 +51,8 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
         entries.add(createEntityItemFromId("player", ItemStack(Items.PLAYER_HEAD)))
         // Sort by the plain custom name (case-insensitive). Fallback to empty string if missing.
         entries.sortWith(Comparator { a: ItemStack?, b: ItemStack? ->
-            var na = Utils.getPlainCustomName(a)
-            var nb = Utils.getPlainCustomName(b)
-            if (na == null) na = ""
-            if (nb == null) nb = ""
+            val na = a?.plainCustomName ?: ""
+            val nb = b?.plainCustomName ?: ""
             na.compareTo(nb, ignoreCase = true)
         })
 
@@ -73,10 +76,10 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
 
         val nbt = NbtCompound()
         nbt.putString("EntityType", entityTypeId)
-        Utils.setCustomData(stack, nbt)
+        stack.setCustomData(nbt)
 
-        val displayName = Utils.capitalizeType(entityTypeId)
-        Utils.setCustomName(stack, Style.EMPTY.withColor(Formatting.GREEN).withItalic(false), displayName)
+        val displayName = TextUtils.capitalizeType(entityTypeId)
+        stack.setCustomName(Style.EMPTY.withColor(Formatting.GREEN).withItalic(false), displayName)
         setLore(stack, entityTypeId)
         return stack
     }
@@ -85,27 +88,26 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
         val lore: MutableList<Text?> = ArrayList<Text?>()
         if (info.type.contains(typeId)) {
             lore.add(Text.literal("✓ Currently selected").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)))
-            stack.set<Boolean?>(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
+            stack.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
         } else {
             lore.add(Text.literal("Click to select").setStyle(Style.EMPTY.withColor(Formatting.GRAY)))
         }
-        stack.set<LoreComponent?>(DataComponentTypes.LORE, LoreComponent(lore, lore))
+        stack.set(DataComponentTypes.LORE, LoreComponent(lore, lore))
     }
 
     override fun onItemClick(stack: ItemStack?, button: Int) {
         if (stack == null || stack.isEmpty) return
 
         // Retrieve entity type from custom data
-        val nbt = Utils.getCustomData(stack)
+        val nbt = stack.getCustomData()
         if (nbt == null || !nbt.contains("EntityType")) return
 
-        var entityTypeId = nbt.getString("EntityType").orElse(null)
-        if (entityTypeId == null) return
+        var entityTypeId = nbt.getString("EntityType").orElse(null) ?: return
 
         if (entityTypeId == "none") {
             info.type.clear()
         } else {
-            entityTypeId = Utils.stripPrefix(entityTypeId, "minecraft:")
+            entityTypeId = entityTypeId.stripPrefix("minecraft:")
             if (info.type.contains(entityTypeId)) {
                 info.type.remove(entityTypeId)
             } else {

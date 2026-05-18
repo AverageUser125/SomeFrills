@@ -3,7 +3,7 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.events.*;
 import com.somefrills.misc.SkyblockData;
-import com.somefrills.misc.Utils;
+import com.somefrills.utils.TextUtils;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
@@ -92,7 +92,7 @@ public class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "onGameMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/message/MessageHandler;onGameMessage(Lnet/minecraft/text/Text;Z)V"), cancellable = true)
     private void onGameMessage(GameMessageS2CPacket packet, CallbackInfo ci) {
-        String msg = Utils.toPlain(packet.content());
+        String msg = TextUtils.toPlain(packet.content());
         if (!packet.overlay()) {
             if (eventBus.post(new ChatMsgEvent(packet.content(), msg)).isCancelled()) {
                 ci.cancel();

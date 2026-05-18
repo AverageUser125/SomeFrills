@@ -5,7 +5,7 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.ScreenRenderEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ContainerUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.network.ClientPlayerEntity
@@ -49,7 +49,7 @@ object ChocolateFactory : Feature(FrillsMod.config.solvers.chocolateFactorySolve
             if (displayName.contains("CLICK ME!")) {
                 // Check click delay
                 if (System.currentTimeMillis() - lastClaimTime < config.claimDelay) return
-                Utils.clickSlot(slot.index)
+                ContainerUtils.clickSlot(slot.index)
                 lastClaimTime = System.currentTimeMillis()
                 return  // Only click one per tick
             }
@@ -58,7 +58,7 @@ object ChocolateFactory : Feature(FrillsMod.config.solvers.chocolateFactorySolve
             if (displayName.contains("Golden Rabbit")) {
                 // Check click delay
                 if (System.currentTimeMillis() - lastClaimTime < config.claimDelay * 100L) return
-                Utils.clickSlot(slot.index)
+                ContainerUtils.clickSlot(slot.index)
                 lastClaimTime = System.currentTimeMillis()
                 return  // Only click one per tick
             }

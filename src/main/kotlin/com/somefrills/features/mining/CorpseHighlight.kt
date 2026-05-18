@@ -3,14 +3,16 @@ package com.somefrills.features.mining
 import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoint
 import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoints.waypoints
 import com.somefrills.config.FrillsMod
-
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig
 import com.somefrills.events.TickEventPre
 import com.somefrills.features.core.AreaFeature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.RenderColor.Companion.fromChroma
-import com.somefrills.misc.Utils
+import com.somefrills.utils.EntityUtils
+import com.somefrills.utils.getEquippedArmor
+import com.somefrills.utils.setGlowing
+import com.somefrills.utils.toPlain
 import io.github.notenoughupdates.moulconfig.ChromaColour
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.decoration.ArmorStandEntity
@@ -36,7 +38,7 @@ object CorpseHighlight : AreaFeature(FrillsMod.config.mining.corpseHighlight.ena
 
     @EventHandler
     private fun onTick(event: TickEventPre?) {
-        val stands = Utils.getStreamEntities(ArmorStandEntity::class.java)
+        val stands = EntityUtils.getStreamEntities(ArmorStandEntity::class.java)
             .filter { stand: ArmorStandEntity ->
                 if (stand.isInvisible) return@filter false
                 if (!stand.shouldShowArms()) return@filter false
@@ -46,7 +48,7 @@ object CorpseHighlight : AreaFeature(FrillsMod.config.mining.corpseHighlight.ena
         for (stand in stands) {
             val colour = getCorpseColor(getCorpseType(stand)) ?: continue
             val color = fromChroma(colour)
-            Utils.setGlowing(stand, true, color)
+            stand.setGlowing(true, color)
         }
     }
 
@@ -63,12 +65,12 @@ object CorpseHighlight : AreaFeature(FrillsMod.config.mining.corpseHighlight.ena
     }
 
     private fun getCorpseType(ent: ArmorStandEntity): CorpseType {
-        val armor = Utils.getEntityArmor(ent)
+        val armor = ent.getEquippedArmor()
         if (armor.isEmpty()) return CorpseType.None
 
         val helmet: ItemStack = armor[0]
         if (helmet.isEmpty) return CorpseType.None
-        return when (Utils.toPlain(helmet.name)) {
+        return when (helmet.name.toPlain()) {
             "Lapis Armor Helmet" -> CorpseType.Lapis
             "Mineral Helmet" -> CorpseType.Tungsten
             "Yog Helmet" -> CorpseType.Umber

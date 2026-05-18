@@ -10,7 +10,7 @@ import com.somefrills.events.TooltipRenderEvent;
 import com.somefrills.features.tweaks.MiddleClickFix;
 import com.somefrills.features.tweaks.MiddleClickOverride;
 import com.somefrills.misc.SlotOptions;
-import com.somefrills.misc.Utils;
+import com.somefrills.utils.ItemStackUtils;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -76,7 +76,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @ModifyExpressionValue(method = "drawMouseoverTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/HandledScreen;getTooltipFromItem(Lnet/minecraft/item/ItemStack;)Ljava/util/List;"))
     private List<Text> onGetTooltipFromItem(List<Text> original, @Local ItemStack itemStack) {
         if (!itemStack.isEmpty()) {
-            eventBus.post(new TooltipRenderEvent(original, itemStack, Utils.getCustomData(itemStack), this.getTitle().getString()));
+            eventBus.post(new TooltipRenderEvent(original, itemStack, ItemStackUtils.getCustomData(itemStack), this.getTitle().getString()));
         }
         return original;
     }

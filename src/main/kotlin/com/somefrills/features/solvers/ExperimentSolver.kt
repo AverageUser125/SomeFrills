@@ -6,7 +6,7 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.TickEventPost
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
-import com.somefrills.misc.Utils
+import com.somefrills.utils.SkyblockUtils
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
@@ -31,7 +31,7 @@ object ExperimentSolver : Feature(FrillsMod.config.solvers.experimentSolver.enab
     val experimentType: ExperimentType
         get() {
             val screen = mc.currentScreen ?: return ExperimentType.None
-            if (Utils.isOnPrivateIsland() && screen is GenericContainerScreen) {
+            if (SkyblockUtils.isOnPrivateIsland() && screen is GenericContainerScreen) {
                 val title: String = screen.getTitle().string
                 if (title.startsWith("Chronomatron (")) return ExperimentType.Chronomatron
                 if (title.startsWith("Ultrasequencer (")) return ExperimentType.Ultrasequencer

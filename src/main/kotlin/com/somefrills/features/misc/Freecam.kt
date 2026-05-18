@@ -8,7 +8,8 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.ToggleFeature
 import com.somefrills.misc.Input
 import com.somefrills.misc.KeyAction
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.set
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.option.Perspective
@@ -76,8 +77,8 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         // FIXME: why is this here?
         //config.speed = config.speed
 
-        Utils.set(pos, mc.gameRenderer.camera.cameraPos)
-        Utils.set(prevPos, mc.gameRenderer.camera.cameraPos)
+        pos.set(mc.gameRenderer.camera.cameraPos)
+        prevPos.set(mc.gameRenderer.camera.cameraPos)
 
         if (mc.options.perspective == Perspective.THIRD_PERSON_FRONT) {
             yaw += 180f
@@ -272,17 +273,17 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
             val entity = mc.world?.getEntityById(packet.playerId()) ?: return
             if (entity === mc.player && config.toggleOnDeath) {
                 toggle()
-                Utils.info("Toggled off because you died.")
+                ChatUtils.info("Toggled off because you died.")
             }
         } else if (packet is HealthUpdateS2CPacket) {
             val player = mc.player ?: return
             if (player.health - packet.health > 0 && config.toggleOnDamage) {
                 toggle()
-                Utils.info("Toggled off because you took damage.")
+                ChatUtils.info("Toggled off because you took damage.")
             }
         } else if (packet is PlayerRespawnS2CPacket) {
             toggle()
-            Utils.info("Toggled off because you changed dimensions.")
+            ChatUtils.info("Toggled off because you changed dimensions.")
         }
     }
 

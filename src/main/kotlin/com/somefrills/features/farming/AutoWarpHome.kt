@@ -7,7 +7,9 @@ import com.somefrills.events.TabListUpdateEvent
 import com.somefrills.features.core.AreaFeature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.PlayerUtils
+import com.somefrills.utils.SkyblockUtils
 import meteordevelopment.orbit.EventHandler
 
 @FrillsFeature
@@ -36,8 +38,8 @@ object AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) 
 
         // Trigger only on transition >0 → 0
         if (status == PestStatus.CLEARED && lastStatus == PestStatus.PRESENT) {
-            Utils.info("AutoWarpHome: >0 → 0 detected, running /home")
-            Utils.runCommand("home")
+            ChatUtils.info("AutoWarpHome: >0 → 0 detected, running /home")
+            PlayerUtils.runCommand("home")
         }
 
         lastStatus = status
@@ -49,7 +51,7 @@ object AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) 
     }
 
     override fun checkArea(area: Area): Boolean {
-        return area == Area.GARDEN && Utils.isOnGardenPlot()
+        return area == Area.GARDEN && SkyblockUtils.isOnGardenPlot()
     }
 
     enum class PestStatus {

@@ -2,7 +2,9 @@ package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.features.misc.glowmob.MatchInfo
 import com.somefrills.features.misc.glowmob.MatchInfo.GearFlag
-import com.somefrills.misc.Utils
+import com.somefrills.utils.getCustomData
+import com.somefrills.utils.setCustomData
+import com.somefrills.utils.setCustomName
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.AttributeModifiersComponent
 import net.minecraft.component.type.DyedColorComponent
@@ -13,11 +15,10 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.text.Style
 import net.minecraft.text.TextColor
 
-class ArmorSelectionMenu(previousScreen: ChestUI?, info: MatchInfo) : ChestUI("Select Armor Type", previousScreen) {
-    private val gear: MutableSet<GearFlag>
+class ArmorSelectionMenu(previousScreen: ChestUI, info: MatchInfo) : ChestUI("Select Armor Type", previousScreen) {
+    private val gear: MutableSet<GearFlag> = info.gear
 
     init {
-        this.gear = info.gear
         rebuild()
     }
 
@@ -97,20 +98,19 @@ class ArmorSelectionMenu(previousScreen: ChestUI?, info: MatchInfo) : ChestUI("S
 
         val status = if (enabled) " [ON]" else " [OFF]"
 
-        Utils.setCustomName(
-            item,
+        item.setCustomName(
             Style.EMPTY.withColor(TextColor.fromRgb(color)),
             name + status
         )
 
         val colorComponent = DyedColorComponent(color)
-        item.set<DyedColorComponent?>(DataComponentTypes.DYED_COLOR, colorComponent)
-        item.remove<AttributeModifiersComponent?>(DataComponentTypes.ATTRIBUTE_MODIFIERS)
+        item.set(DataComponentTypes.DYED_COLOR, colorComponent)
+        item.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS)
 
         if (flag != null) {
             val data = NbtCompound()
             data.putString("Flag", flag.name)
-            Utils.setCustomData(item, data)
+            item.setCustomData(data)
         }
         addItem(item)
     }
@@ -119,8 +119,7 @@ class ArmorSelectionMenu(previousScreen: ChestUI?, info: MatchInfo) : ChestUI("S
     // Click handling
     // ========================
     override fun onItemClick(stack: ItemStack?, button: Int) {
-        val customData = Utils.getCustomData(stack)
-        if (customData == null) {
+        val customData = stack?.getCustomData() ?: run {
             gear.clear()
             rebuild()
             return

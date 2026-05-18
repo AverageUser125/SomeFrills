@@ -2,6 +2,11 @@ package com.somefrills.misc
 
 import com.somefrills.Main.mc
 import com.somefrills.events.*
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.NetworkUtils
+import com.somefrills.utils.SkyblockUtils
+import com.somefrills.utils.Symbols
+import com.somefrills.utils.toPlain
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.gui.hud.PlayerListHud
@@ -46,12 +51,9 @@ object SkyblockData {
     private var tabListDirty = true
     private var scoreboardDirty = true
 
-    val isInInstance: Boolean
-        get() = Utils.isInDungeons() || Utils.isInKuudra()
-
     fun showPing() {
         showPing = true
-        Utils.sendPingPacket()
+        NetworkUtils.sendPingPacket()
     }
 
     @JvmStatic
@@ -65,9 +67,8 @@ object SkyblockData {
         val playerListHud: PlayerListHud = mc.inGameHud.playerListHud ?: return
 
         for (entry in playerListHud.collectPlayerEntries()) {
-            if (entry == null || entry.displayName == null) continue
-
-            val name = Utils.toPlain(entry.displayName).trim { it <= ' ' }
+            val displayName = entry.displayName?.toPlain() ?: continue
+            val name = displayName.trim { it <= ' ' }
             if (name.isEmpty()) continue
 
             if (name.startsWith("Area: ") || name.startsWith("Dungeon: ")) {
@@ -97,7 +98,7 @@ object SkyblockData {
         val scoreboard = mc.player?.networkHandler?.scoreboard ?: return
         val objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.FROM_ID.apply(1))
         if (objective != null) {
-            isInSkyblock = Utils.toPlain(objective.displayName).contains("SKYBLOCK")
+            isInSkyblock = objective.displayName.toPlain().contains("SKYBLOCK")
         }
     }
 
@@ -118,10 +119,10 @@ object SkyblockData {
                     val line = Formatting.strip(team.prefix.string + team.suffix.string)!!
                         .trim { it <= ' ' }
                     if (!line.isEmpty()) {
-                        if (line.startsWith(Utils.Symbols.zone) || line.startsWith(Utils.Symbols.zoneRift)) {
+                        if (line.startsWith(Symbols.zone) || line.startsWith(Symbols.zoneRift)) {
                             location = line
                         }
-                        if (Utils.isInKuudra() && !isInstanceOver) {
+                        if (SkyblockUtils.isInKuudra() && !isInstanceOver) {
                             isInstanceOver = line.startsWith("Instance Shutdown")
                         }
                         currentLines.add(line)
@@ -141,7 +142,7 @@ object SkyblockData {
 
     @EventHandler
     private fun onChat(event: ChatMsgEvent) {
-        if (!Utils.isInDungeons()) return
+        if (!SkyblockUtils.isInDungeons()) return
         if (!isInstanceOver && scoreRegex.matcher(event.plainMessage.trim { it <= ' ' }).matches()) {
             isInstanceOver = true
         }
@@ -161,7 +162,7 @@ object SkyblockData {
         if (!showPing) return
         event.packet.let {
             if (it is PingResultS2CPacket) {
-                Utils.infoFormat("§aPing: §f{}ms", it.startTime)
+                ChatUtils.infoFormat("§aPing: §f{}ms", it.startTime)
                 showPing = false
             }
         }

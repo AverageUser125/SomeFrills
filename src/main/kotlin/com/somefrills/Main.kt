@@ -10,6 +10,7 @@ import com.somefrills.features.core.Features
 import com.somefrills.features.misc.Aliases
 import com.somefrills.features.misc.glowmob.MatchInfo
 import com.somefrills.misc.*
+import com.somefrills.utils.toPlain
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfigBuilder
 import meteordevelopment.orbit.EventBus
@@ -55,7 +56,7 @@ object Main : ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register(SomeFrillsCommand::init)
 
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
-            val msg = Utils.toPlain(message)
+            val msg = message.toPlain()
 
             if (overlay) {
                 return@register !eventBus.post(

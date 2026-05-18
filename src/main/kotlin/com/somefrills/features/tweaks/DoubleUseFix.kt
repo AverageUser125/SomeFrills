@@ -7,7 +7,9 @@ import com.somefrills.events.InteractBlockEvent
 import com.somefrills.events.InteractItemEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
-import com.somefrills.misc.Utils
+import com.somefrills.utils.EntityUtils
+import com.somefrills.utils.PlayerUtils
+import com.somefrills.utils.getRightClickAbility
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.item.Items
 import net.minecraft.util.Hand
@@ -39,11 +41,11 @@ object DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
 
     private val disableType: Type
         get() {
-            val held = Utils.getHeldItem()
+            val held = PlayerUtils.getHeldItem()
             if (held.item == Items.FISHING_ROD) {
                 return Type.Rod
             }
-            if (Utils.getRightClickAbility(held).contains("Attunement")) {
+            if (held.getRightClickAbility().contains("Attunement")) {
                 return Type.Dagger
             }
             return Type.None

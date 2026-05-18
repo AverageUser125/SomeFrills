@@ -9,7 +9,8 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.EntityCache
 import com.somefrills.misc.RenderColor.Companion.fromChroma
-import com.somefrills.misc.Utils
+import com.somefrills.utils.EntityUtils
+import com.somefrills.utils.getLerpedBox
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.entity.mob.CreeperEntity
 
@@ -33,7 +34,7 @@ object GhostVision : AreaFeature(FrillsMod.config.mining.ghostVision.enabled) {
     private fun onRender(event: WorldRenderEvent) {
         for (ent in cache.get()) {
             if (!ent.isAlive) continue
-            val box = Utils.getLerpedBox(ent, event)
+            val box = ent.getLerpedBox(event)
             event.drawStyled(
                 box, config.style, false,
                 fromChroma(config.outline), fromChroma(config.fill)

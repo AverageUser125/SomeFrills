@@ -7,7 +7,7 @@ import at.hannibal2.skyhanni.features.mining.glacitemineshaft.MineshaftWaypoints
 import at.hannibal2.skyhanni.utils.HypixelCommands;
 import com.somefrills.features.mining.CorpseHighlight;
 import com.somefrills.misc.Area;
-import com.somefrills.misc.Utils;
+import com.somefrills.utils.SkyblockUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.Shadow;
@@ -29,7 +29,7 @@ public abstract class MineshaftWaypointsMixin {
             return;
         }
         if (mc.currentScreen != null) return;
-        if (!Utils.isInArea(Area.MINESHAFT)) return;
+        if (!SkyblockUtils.isInArea(Area.MINESHAFT)) return;
         if (event.getKeyCode() != getConfig().getShareWaypointLocation()) return;
 
         var messages = CorpseHighlight.shareAllWaypointsForce();

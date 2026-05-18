@@ -4,7 +4,13 @@ import com.somefrills.config.misc.GlowMobConfig.GlowMobRule
 import com.somefrills.features.misc.glowmob.MatchInfo
 import com.somefrills.features.misc.glowmob.MatchInfo.GearFlag
 import com.somefrills.misc.MyMapColor.Companion.getClosest
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
+import com.somefrills.utils.NumberUtils
+import com.somefrills.utils.TextUtils
+import com.somefrills.utils.formatCompact
+import com.somefrills.utils.plainCustomName
+import com.somefrills.utils.setCustomName
+import com.somefrills.utils.wrapByDelimiter
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.AttributeModifiersComponent
 import net.minecraft.component.type.LoreComponent
@@ -31,7 +37,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         addItem(
             createChoiceItem(
                 getClosest(rule.color())!!.item, "Color",
-                Utils.colorToString(rule.color()),
+                TextUtils.colorToString(rule.color()),
                 rule.color().hex,
                 "Sets the glow color",
                 "Click to change color"
@@ -41,7 +47,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         addItem(
             createChoiceItem(
                 Items.CREEPER_SPAWN_EGG, "Entity",
-                Utils.wrapByDelimiter(info.type.toString(), 20, ","),
+                info.type.toString().wrapByDelimiter(20, ","),
                 "Filters by mob type (zombie, creeper, etc.)",
                 "Leave empty to match all types",
                 "Click to choose entities"
@@ -74,7 +80,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         addItem(
             createChoiceItem(
                 Items.ENCHANTED_BOOK, "Max HP",
-                if (info.maxHp > 0) Utils.formatCompact(info.maxHp) else null,
+                if (info.maxHp > 0) info.maxHp.formatCompact() else null,
                 "Only glows mobs with this exact max health",
                 "Leave empty for any health",
                 "Click to set max HP filter"
@@ -84,8 +90,8 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         // Add revert/cancel button
         if (!isNewRule) {
             val revert = ItemStack(Items.REDSTONE)
-            Utils.setCustomName(revert, colorStyle(Formatting.GOLD), "Revert Changes")
-            val revertLore: MutableList<Text?> = ArrayList<Text?>()
+            revert.setCustomName(colorStyle(Formatting.GOLD), "Revert Changes")
+            val revertLore: MutableList<Text?> = ArrayList()
             revertLore.add(Text.literal("Restore to original").setStyle(colorStyle(Formatting.GRAY)))
             revertLore.add(Text.literal("").setStyle(colorStyle(Formatting.GRAY)))
             revertLore.add(Text.literal("Click to revert").setStyle(colorStyle(Formatting.YELLOW)))
@@ -94,7 +100,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
             inventory.setStack(INV_SIZE - 9 + 3, revert)
         } else {
             val cancel = ItemStack(Items.BARRIER)
-            Utils.setCustomName(cancel, colorStyle(Formatting.RED), "Cancel")
+            cancel.setCustomName(colorStyle(Formatting.RED), "Cancel")
             val cancelLore: MutableList<Text?> = ArrayList<Text?>()
             cancelLore.add(Text.literal("Discard changes").setStyle(colorStyle(Formatting.GRAY)))
             cancelLore.add(Text.literal("").setStyle(colorStyle(Formatting.GRAY)))
@@ -105,7 +111,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         }
 
         val delete = ItemStack(Items.CAULDRON)
-        Utils.setCustomName(delete, colorStyle(Formatting.RED), "Delete")
+        delete.setCustomName(colorStyle(Formatting.RED), "Delete")
         inventory.setStack(INV_SIZE - 9 + 5, delete)
     }
 
@@ -186,7 +192,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         vararg descriptions: String
     ): ItemStack {
         val stack = ItemStack(item)
-        Utils.setCustomName(stack, colorStyle(Formatting.GREEN)!!.withItalic(false), label)
+        stack.setCustomName(colorStyle(Formatting.GREEN).withItalic(false), label)
 
         val lore: MutableList<Text> = ArrayList()
 
@@ -228,24 +234,24 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         return stack
     }
 
-    private fun colorStyle(color: Formatting): Style? {
+    private fun colorStyle(color: Formatting): Style {
         val colorValue = color.colorValue ?: return Style.EMPTY
         return colorStyle(colorValue)
     }
 
-    private fun colorStyle(colorHex: Int): Style? {
+    private fun colorStyle(colorHex: Int): Style {
         return Style.EMPTY.withColor(TextColor.fromRgb(colorHex))
     }
 
     override fun onItemClick(stack: ItemStack?, button: Int) {
         if (stack == null || stack.isEmpty) return
 
-        val itemName = Utils.getPlainCustomName(stack)
+        val itemName = stack.plainCustomName
         when (itemName) {
-            "Entity" -> Utils.setScreen(EntityTypesMenu(this, info))
-            "Area" -> Utils.setScreen(AreaSelectionMenu(this, info))
-            "Gear" -> Utils.setScreen(ArmorSelectionMenu(this, info))
-            "Color" -> Utils.setScreen(ColorSelectionMenu(this, rule.color()))
+            "Entity" -> GuiUtils.setScreen(EntityTypesMenu(this, info))
+            "Area" -> GuiUtils.setScreen(AreaSelectionMenu(this, info))
+            "Gear" -> GuiUtils.setScreen(ArmorSelectionMenu(this, info))
+            "Color" -> GuiUtils.setScreen(ColorSelectionMenu(this, rule.color()))
             "Name" -> SignGui.open(
                 arrayOf("Set Name Filter", info.name)
             ) { lines: Array<String> ->
@@ -258,13 +264,13 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
                 }
                 info.name = nameBuilder.toString().trim { it <= ' ' }
                 rebuild()
-                Utils.setScreen(this)
+                GuiUtils.setScreen(this)
             }
 
             "Max HP" -> SignGui.open(
                 arrayOf(
                     "Enter Max Hp",
-                    if (info.maxHp > 0) Utils.formatCompact(info.maxHp) else ""
+                    if (info.maxHp > 0) info.maxHp.formatCompact() else ""
                 ), Consumer open@{ lines: Array<String> ->
                     if (lines.size < 2) return@open
                     val input = lines[1].trim { it <= ' ' }
@@ -274,15 +280,15 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
                         info.maxHp = 0
                     } else {
                         try {
-                            info.maxHp = Utils.parseCompact(input)
+                            info.maxHp = NumberUtils.parseCompact(input)
                         } catch (e: NumberFormatException) {
                             // Invalid input - don't update
-                            Utils.setScreen(this)
+                            GuiUtils.setScreen(this)
                             return@open
                         }
                     }
                     rebuild()
-                    Utils.setScreen(this)
+                    GuiUtils.setScreen(this)
                 })
 
             "Revert Changes", "Cancel" -> {

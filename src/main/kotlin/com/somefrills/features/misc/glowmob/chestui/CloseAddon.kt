@@ -1,6 +1,6 @@
 package com.somefrills.features.misc.glowmob.chestui
 
-import com.somefrills.misc.Utils
+import com.somefrills.utils.setCustomName
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
@@ -20,7 +20,7 @@ class CloseAddon : UIAddon {
 
         val closeButton = ItemStack(Items.BARRIER)
         val barrierStyle = Style.EMPTY.withColor(Formatting.GRAY).withItalic(false)
-        Utils.setCustomName(closeButton, barrierStyle, "Close")
+        closeButton.setCustomName(barrierStyle, "Close")
 
         inventory.setStack(closeSlot, closeButton)
     }

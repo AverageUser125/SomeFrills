@@ -1,7 +1,8 @@
 package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.Main.mc
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
+import com.somefrills.utils.plainCustomName
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
@@ -13,7 +14,7 @@ import net.minecraft.text.Text
 import kotlin.collections.ArrayList
 import kotlin.collections.MutableList
 
-abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val previousScreen: ChestUI? = null) :
+abstract class ChestUI @JvmOverloads constructor(title: String, @JvmField val previousScreen: ChestUI? = null) :
     GenericContainerScreen(
         getHandler(INV_SIZE), mc.player!!.getInventory(), Text.of(title)
     ) {
@@ -98,8 +99,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
         this.lastClickTimestamp = now
 
         val stack = slot.stack
-        val name = Utils.getPlainCustomName(stack) ?: return
-
+        val name = stack.plainCustomName
         // Addon Interception
         for (addon in addons) {
             if (addon.onClick(this, stack, name, button)) return
@@ -126,7 +126,7 @@ abstract class ChestUI @JvmOverloads constructor(title: String?, @JvmField val p
         if (this.client.player != null) this.client.player!!.closeHandledScreen()
         if (this.previousScreen != null) {
             this.previousScreen.onReturn()
-            Utils.setScreen(this.previousScreen)
+            GuiUtils.setScreen(this.previousScreen)
         }
     }
 

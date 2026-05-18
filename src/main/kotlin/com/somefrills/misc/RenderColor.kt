@@ -156,7 +156,7 @@ class RenderColor {
         }
 
         @JvmStatic
-        fun fromFormatting(formatting: Formatting?): RenderColor {
+        fun fromFormatting(formatting: Formatting): RenderColor {
             if (formatting == null) {
                 return white
             }

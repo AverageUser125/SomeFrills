@@ -5,7 +5,8 @@ import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.tree.CommandNode
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.GuiUtils
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.command.CommandRegistryAccess
@@ -62,7 +63,7 @@ object SomeFrillsCommand {
      * Executes the settings command.
      */
     private fun executeSettings(context: CommandContext<FabricClientCommandSource>): Int {
-        Utils.showGui()
+        GuiUtils.showGui()
         return Command.SINGLE_SUCCESS
     }
 
@@ -70,9 +71,9 @@ object SomeFrillsCommand {
         val helpArg =
             ClientCommandManager.literal("help")
                 .executes(Command { context: CommandContext<FabricClientCommandSource> ->
-                    Utils.info("§7Printing command list...")
+                    ChatUtils.info("§7Printing command list...")
                     for (command in commands) {
-                        Utils.info("§l" + command.command + "§r§7: " + command.description)
+                        ChatUtils.infoFormat("§l{}§r§7: {}", command.command, command.description)
                     }
                     Command.SINGLE_SUCCESS
                 })
@@ -80,14 +81,14 @@ object SomeFrillsCommand {
         val commandMain =
             ClientCommandManager.literal("somefrills")
                 .executes(Command { context: CommandContext<FabricClientCommandSource?>? ->
-                    Utils.showGui()
+                    GuiUtils.showGui()
                     Command.SINGLE_SUCCESS
                 })
 
         val commandShort =
             ClientCommandManager.literal("sf")
                 .executes(Command { context: CommandContext<FabricClientCommandSource?>? ->
-                    Utils.showGui()
+                    GuiUtils.showGui()
                     Command.SINGLE_SUCCESS
                 })
 

@@ -1,7 +1,7 @@
 package com.somefrills.features.update
 
 import com.google.gson.JsonPrimitive
-import com.somefrills.misc.Utils
+import com.somefrills.utils.stripPrefix
 import moe.nea.libautoupdate.GithubReleaseUpdateData
 import moe.nea.libautoupdate.GithubReleaseUpdateSource
 import moe.nea.libautoupdate.UpdateData
@@ -40,7 +40,7 @@ class CustomGithubReleaseUpdateSource(owner: String, repository: String) :
     }
 
     private fun createReleaseData(asset: GithubRelease.Download, release: GithubRelease): GithubReleaseUpdateData {
-        val tagName = Utils.stripPrefix(release.getTagName(), "v")
+        val tagName = release.getTagName().stripPrefix("v")
         return GithubReleaseUpdateData(
             if (release.getName() != null) release.getName() else release.getTagName(),
             JsonPrimitive(tagName),

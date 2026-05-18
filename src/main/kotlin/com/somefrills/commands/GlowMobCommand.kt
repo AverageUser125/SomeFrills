@@ -7,7 +7,9 @@ import com.somefrills.features.misc.glowmob.GlowMob
 import com.somefrills.features.misc.glowmob.MatchInfo
 import com.somefrills.features.misc.glowmob.chestui.GlowMobRules
 import com.somefrills.misc.RenderColor
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
+import com.somefrills.utils.TextUtils
+import com.somefrills.utils.toPlain
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
@@ -29,7 +31,7 @@ object GlowMobCommand {
                     return@executes 0
                 }
 
-                Utils.setScreen(GlowMobRules())
+                GuiUtils.setScreen(GlowMobRules())
 
                 1
             }
@@ -168,7 +170,7 @@ object GlowMobCommand {
             sb.append("Rule ")
                 .append(currentRuleId)
                 .append(" (")
-                .append(Utils.colorToString(rule.color()))
+                .append(TextUtils.colorToString(rule.color()))
                 .append("):\n")
 
             if (entities.isEmpty()) {
@@ -179,7 +181,7 @@ object GlowMobCommand {
             for (entity in entities) {
 
                 sb.append("  - ")
-                    .append(Utils.toPlain(entity.name))
+                    .append(entity.name.toPlain())
                     .append(" (")
                     .append(entity.type.name.string)
                     .append(")")
@@ -215,7 +217,7 @@ object GlowMobCommand {
             ctx.source.sendFeedback(
                 Text.literal(
                     "Added rule $addIndex with color ${
-                        Utils.colorToString(color)
+                        TextUtils.colorToString(color)
                     } and matcher: ${matcher.serialize()}"
                 )
             )
@@ -270,7 +272,7 @@ object GlowMobCommand {
             for ((idx, rule) in rules.withIndex()) {
 
                 val color =
-                    Utils.colorToString(rule.color())
+                    TextUtils.colorToString(rule.color())
 
                 sb.append("  • id=")
                     .append(idx + 1)

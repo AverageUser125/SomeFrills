@@ -5,7 +5,11 @@ import com.somefrills.features.misc.glowmob.GlowMob
 import com.somefrills.features.misc.glowmob.MatchInfo.GearFlag
 import com.somefrills.misc.MyMapColor
 import com.somefrills.misc.RenderColor.Companion.fromHex
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
+import com.somefrills.utils.TextUtils
+import com.somefrills.utils.plainCustomName
+import com.somefrills.utils.setCustomName
+import com.somefrills.utils.wrapByDelimiter
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.LoreComponent
 import net.minecraft.item.ItemStack
@@ -32,17 +36,16 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
             val stack = ItemStack(if (rule.enabled()) Items.GREEN_TERRACOTTA else Items.RED_TERRACOTTA)
             // Display the rule index (1-based) in the menu
             val displayId = "Rule " + (i + 1)
-            Utils.setCustomName(
-                stack,
+            stack.setCustomName(
                 colorStyle(if (rule.enabled()) Formatting.GREEN else Formatting.RED)!!.withItalic(false),
                 displayId
             )
-            stack.set<LoreComponent?>(DataComponentTypes.LORE, getRuleLore(rule))
+            stack.set(DataComponentTypes.LORE, getRuleLore(rule))
             addItem(stack)
         }
 
         val createButton = ItemStack(Items.YELLOW_TERRACOTTA)
-        Utils.setCustomName(createButton, colorStyle(Formatting.GREEN)!!.withItalic(false), "Create Rule")
+        createButton.setCustomName(colorStyle(Formatting.GREEN)!!.withItalic(false), "Create Rule")
 
         val lore: MutableList<Text> = ArrayList<Text>()
         lore.add(
@@ -52,7 +55,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
         )
         lore.add(Text.literal(""))
         lore.add(Text.literal("Click to create!").setStyle(colorStyle(Formatting.YELLOW)))
-        createButton.set<LoreComponent?>(DataComponentTypes.LORE, LoreComponent(lore, lore))
+        createButton.set(DataComponentTypes.LORE, LoreComponent(lore, lore))
 
         addItem(createButton)
     }
@@ -66,7 +69,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
 
         if (!matchInfo.type.isEmpty()) {
             val typeLines: Array<String> =
-                Utils.wrapByDelimiter(matchInfo.type.toString(), 20, ",").split("\n".toRegex())
+                matchInfo.type.toString().wrapByDelimiter(20, ",").split("\n".toRegex())
                     .dropLastWhile { it.isEmpty() }.toTypedArray()
             lines.add(
                 Text.literal("Type: ").setStyle(colorStyle(Formatting.GRAY))
@@ -102,7 +105,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
         lines.add(Text.literal(""))
         lines.add(Text.literal("Color: ").setStyle(colorStyle(Formatting.YELLOW)))
 
-        val colorDisplay = Utils.colorToString(rule.color())
+        val colorDisplay = TextUtils.colorToString(rule.color())
         lines.add(Text.literal(capitalize(colorDisplay)).setStyle(colorStyle(rule.color().hex)))
 
         lines.add(Text.literal(""))
@@ -135,7 +138,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
     override fun onItemClick(stack: ItemStack?, button: Int) {
         if (stack == null || stack.isEmpty) return
 
-        val itemName = Utils.getPlainCustomName(stack)
+        val itemName = stack.plainCustomName
         if (itemName.isEmpty()) return
 
         if (itemName == "Create Rule") {
@@ -206,7 +209,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
     private fun openRuleEditor(rule: GlowMobRule?) {
         session = RuleEditSession(rule)
         session!!.menu = GlowMobEditMenu(this, session!!.workingCopy, false)
-        Utils.setScreen(session!!.menu)
+        GuiUtils.setScreen(session!!.menu)
     }
 
     private fun createNewRule() {
@@ -214,7 +217,7 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
         session!!.workingCopy = GlowMobRule(session!!.workingCopy.info(), fromHex(MyMapColor.WHITE.hex))
         session!!.workingCopy.toggle() // new rules start as enabled by default
         session!!.menu = GlowMobEditMenu(this, session!!.workingCopy, true)
-        Utils.setScreen(session!!.menu)
+        GuiUtils.setScreen(session!!.menu)
     }
 
     private class RuleEditSession(// null if creating new

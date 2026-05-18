@@ -1,6 +1,6 @@
 package com.somefrills.features.misc.glowmob.chestui
 
-import com.somefrills.misc.Utils
+import com.somefrills.utils.setCustomName
 import net.minecraft.inventory.Inventory
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
@@ -43,7 +43,7 @@ class PagingAddon : UIAddon {
         // 1. Only show "Previous" if we aren't on the first page
         if (currentPage > 0) {
             val back = ItemStack(Items.ARROW)
-            Utils.setCustomName(back, Style.EMPTY, "Previous Page")
+            back.setCustomName(Style.EMPTY, "Previous Page")
             inventory.setStack(prevSlot, back)
         }
 
@@ -51,7 +51,7 @@ class PagingAddon : UIAddon {
         // This implicitly handles the "Single Page" case: 0 < 1 - 1 is false.
         if (currentPage < totalPages - 1) {
             val forward = ItemStack(Items.ARROW)
-            Utils.setCustomName(forward, Style.EMPTY, "Next Page")
+            forward.setCustomName(Style.EMPTY, "Next Page")
             inventory.setStack(nextSlot, forward)
         }
     }

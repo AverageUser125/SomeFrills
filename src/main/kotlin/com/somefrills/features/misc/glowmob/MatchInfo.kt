@@ -5,7 +5,9 @@ import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import com.somefrills.misc.Area
 import com.somefrills.misc.SortedList
-import com.somefrills.misc.Utils
+import com.somefrills.utils.SkyblockUtils
+import com.somefrills.utils.isNaked
+import com.somefrills.utils.toPlain
 import net.minecraft.entity.EquipmentSlot
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.decoration.ArmorStandEntity
@@ -88,7 +90,7 @@ class MatchInfo {
     fun compile(): Predicate<LivingEntity> {
         var predicate = Predicate { e: LivingEntity -> true }
         if (area != null) {
-            predicate = predicate.and(AreaPredicate(area))
+            predicate = predicate.and(AreaPredicate(area!!))
         }
         if (!type.isEmpty()) {
             predicate = predicate.and(MultiTypePredicate(type))
@@ -172,9 +174,9 @@ class MatchInfo {
         }
     }
 
-    class AreaPredicate(private val area: Area?) : Predicate<LivingEntity?> {
-        override fun test(entity: LivingEntity?): Boolean {
-            return Utils.isInArea(area)
+    class AreaPredicate(private val area: Area) : Predicate<LivingEntity> {
+        override fun test(entity: LivingEntity): Boolean {
+            return SkyblockUtils.isInArea(area)
         }
     }
 
@@ -203,7 +205,7 @@ class MatchInfo {
                 val horizontalDist = hypot(dx, dz)
 
                 if (horizontalDist <= HORIZONTAL_RADIUS) {
-                    val asName = Utils.toPlain(nearby.displayName).lowercase(Locale.getDefault())
+                    val asName = nearby.displayName?.toPlain()?.lowercase(Locale.getDefault()) ?: continue
                     if (asName.contains(this.name)) {
                         return true
                     }
@@ -254,7 +256,7 @@ class MatchInfo {
                 return false
             }
 
-            return Utils.isNaked(entity)
+            return entity.isNaked
         }
     }
 

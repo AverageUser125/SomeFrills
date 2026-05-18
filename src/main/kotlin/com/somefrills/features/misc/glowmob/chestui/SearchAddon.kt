@@ -1,6 +1,8 @@
 package com.somefrills.features.misc.glowmob.chestui
 
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
+import com.somefrills.utils.plainCustomName
+import com.somefrills.utils.setCustomName
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.component.type.LoreComponent
 import net.minecraft.inventory.Inventory
@@ -23,16 +25,15 @@ class SearchAddon : UIAddon {
         if (searchQuery == null || searchQuery!!.isEmpty()) return
 
         val query = searchQuery!!.lowercase(Locale.getDefault())
-        items.removeIf { stack: ItemStack? ->
-            val name = Utils.getPlainCustomName(stack)
-            name == null || !name.lowercase(Locale.getDefault()).contains(query)
+        items.removeIf { stack: ItemStack ->
+            !stack.plainCustomName.lowercase(Locale.getDefault()).contains(query)
         }
     }
 
     override fun drawDecoration(ui: ChestUI, inventory: Inventory) {
         // --- Search Compass ---
         val searchItem = ItemStack(Items.COMPASS)
-        Utils.setCustomName(searchItem, colorStyle(Formatting.AQUA).withItalic(false), "Search")
+        searchItem.setCustomName(colorStyle(Formatting.AQUA).withItalic(false), "Search")
 
         val lore: MutableList<Text?> = ArrayList<Text?>()
         lore.add(
@@ -52,7 +53,7 @@ class SearchAddon : UIAddon {
         // --- Clear Search (Oak Sign) ---
         if (searchQuery != null && !searchQuery!!.isEmpty()) {
             val clearItem = ItemStack(Items.OAK_SIGN)
-            Utils.setCustomName(clearItem, colorStyle(Formatting.RED).withItalic(false), "Clear Search")
+            clearItem.setCustomName(colorStyle(Formatting.RED).withItalic(false), "Clear Search")
 
             val clearLore: MutableList<Text?> = ArrayList<Text?>()
             clearLore.add(Text.literal("Reset the search filter").setStyle(colorStyle(Formatting.GRAY)))
@@ -74,7 +75,7 @@ class SearchAddon : UIAddon {
                 this.searchQuery = input.ifEmpty { null }
 
                 ui.rebuild()
-                Utils.setScreen(ui)
+                GuiUtils.setScreen(ui)
             })
             return true
         }

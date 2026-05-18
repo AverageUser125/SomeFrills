@@ -1,5 +1,6 @@
 package com.somefrills.features.mining
 
+import at.hannibal2.skyhanni.utils.BlockUtils
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 
@@ -7,7 +8,7 @@ import com.somefrills.events.BlockUpdateEvent
 import com.somefrills.features.core.AreaFeature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
-import com.somefrills.misc.Utils
+import com.somefrills.utils.isStainedGlass
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.block.BlockState
 import net.minecraft.block.HorizontalConnectingBlock.*
@@ -16,7 +17,7 @@ import net.minecraft.block.HorizontalConnectingBlock.*
 object GemstoneDesyncFix : AreaFeature(FrillsMod.config.mining.gemstoneDesyncFixEnabled) {
     @EventHandler
     private fun onBlock(event: BlockUpdateEvent) {
-        if (event.newState.isAir && Utils.isStainedGlass(event.oldState)) {
+        if (event.newState.isAir && event.oldState.isStainedGlass()) {
             event.newState.updateNeighbors(mc.world, event.pos, NOTIFY_ALL)
         }
     }
@@ -30,7 +31,7 @@ object GemstoneDesyncFix : AreaFeature(FrillsMod.config.mining.gemstoneDesyncFix
     }
 
     private fun isDefaultPane(state: BlockState): Boolean {
-        return Utils.isStainedGlass(state) && !isConnectedPane(state)
+        return state.isStainedGlass() && !isConnectedPane(state)
     }
 
     private fun isConnectedPane(state: BlockState): Boolean {

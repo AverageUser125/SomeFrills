@@ -1,6 +1,7 @@
 package com.somefrills.misc
 
 import com.somefrills.events.ScreenOpenEvent
+import com.somefrills.utils.Symbols
 import meteordevelopment.orbit.EventHandler
 import net.minecraft.component.DataComponentTypes
 import net.minecraft.item.ItemStack
@@ -12,10 +13,10 @@ import java.util.concurrent.ConcurrentHashMap
 object SlotOptions {
     val BACKGROUND: ItemStack = stackWithName(Items.BLACK_STAINED_GLASS_PANE.defaultStack, " ")
     val SOLID_BACKGROUND: ItemStack = stackWithName(Items.GRAY_CONCRETE.defaultStack, " ")
-    val FIRST: ItemStack = stackWithName(Items.LIME_CONCRETE.defaultStack, Utils.Symbols.format + "aClick here!")
+    val FIRST: ItemStack = stackWithName(Items.LIME_CONCRETE.defaultStack, Symbols.format + "aClick here!")
     val SECOND: ItemStack =
-        stackWithName(Items.ORANGE_CONCRETE.defaultStack, Utils.Symbols.format + "9Click next.")
-    val THIRD: ItemStack = stackWithName(Items.RED_CONCRETE.defaultStack, Utils.Symbols.format + "cClick after.")
+        stackWithName(Items.ORANGE_CONCRETE.defaultStack, Symbols.format + "9Click next.")
+    val THIRD: ItemStack = stackWithName(Items.RED_CONCRETE.defaultStack, Symbols.format + "cClick after.")
     val slotFlags: ConcurrentHashMap<Slot, Flags> = ConcurrentHashMap<Slot, Flags>()
 
     fun stackWithName(stack: ItemStack, name: String): ItemStack {

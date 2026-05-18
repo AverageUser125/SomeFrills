@@ -1,6 +1,6 @@
 package com.somefrills.config
 
-import com.somefrills.misc.Utils
+import com.somefrills.utils.GuiUtils
 import com.terraformersmc.modmenu.api.ConfigScreenFactory
 import com.terraformersmc.modmenu.api.ModMenuApi
 import net.minecraft.client.gui.screen.Screen
@@ -12,7 +12,7 @@ class ModMenuIntegration : ModMenuApi {
 
     companion object {
         private fun getConfigScreen(previous: Screen?): Screen {
-            return Utils.getGuiScreen(previous)
+            return GuiUtils.getGuiScreen(previous)
         }
     }
 }

@@ -5,8 +5,9 @@ import com.somefrills.features.mining.GhostVision;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
-import com.somefrills.misc.Utils;
 import com.somefrills.mixininterface.EntityRendering;
+import com.somefrills.utils.NumberUtils;
+import com.somefrills.utils.TextUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -113,8 +114,8 @@ public class EntityMixin implements EntityRendering {
             int currentHealth = (int) creeper.getHealth();
             int maxHealth = (int) creeper.getMaxHealth();
 
-            String currentHealthText = Utils.formatCompact(currentHealth);
-            String maxHealthText = Utils.formatCompact(maxHealth);
+            String currentHealthText = NumberUtils.formatCompact(currentHealth);
+            String maxHealthText = NumberUtils.formatCompact(maxHealth);
             // FIXME: this is a hack, since it should be 1m but hypixel says 1024 for some reason.
             // Skyhanni, EntityCompact has an if(entityHealth == 1024f), so maybe this is intentional?
             if (currentHealthText.equals("1.0k")) {

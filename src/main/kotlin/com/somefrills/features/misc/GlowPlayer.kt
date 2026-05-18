@@ -7,7 +7,9 @@ import com.somefrills.events.ServerJoinEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.RenderColor
-import com.somefrills.misc.Utils
+import com.somefrills.utils.EntityUtils
+import com.somefrills.utils.playerName
+import com.somefrills.utils.setGlowing
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.network.AbstractClientPlayerEntity
@@ -19,12 +21,11 @@ import java.util.concurrent.ConcurrentHashMap
 object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     private val forcedGlows = ConcurrentHashMap<String, RenderColor>()
 
-    private fun applyHighlight(entity: Entity) {
-        if (entity !is PlayerEntity) return
-        val pureName = Utils.getPlayerName(entity)
+    private fun applyHighlight(entity: PlayerEntity) {
+        val pureName = entity.playerName
         val color = getColor(pureName)
         if (color != null) {
-            Utils.setGlowing(entity, true, color)
+            entity.setGlowing(true, color)
         }
     }
 
@@ -36,11 +37,10 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
         if (forcedGlows.remove(pureName) == null) {
             return false
         }
-        for (entity in Utils.getEntities()) {
-            if (entity !is PlayerEntity) continue
-            val entityPureName = Utils.getPlayerName(entity)
+        for (entity in EntityUtils.getPlayers()) {
+            val entityPureName = entity.playerName
             if (pureName != entityPureName) continue
-            Utils.setGlowing(entity, false, RenderColor.white)
+            entity.setGlowing(false, RenderColor.white)
             break
         }
         return true
@@ -55,11 +55,10 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     }
 
     fun clear() {
-        for (entity in Utils.getEntities()) {
-            if (entity !is PlayerEntity) continue
-            val pureName = Utils.getPlayerName(entity)
-            if (pureName == null || !forcedGlows.containsKey(pureName)) continue
-            Utils.setGlowing(entity, false, RenderColor.white)
+        for (entity in EntityUtils.getPlayers()) {
+            val pureName = entity.playerName
+            if (!forcedGlows.containsKey(pureName)) continue
+            entity.setGlowing(false, RenderColor.white)
         }
         forcedGlows.clear()
     }
@@ -67,13 +66,13 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     val forcedNames: MutableSet<String>
         get() = forcedGlows.keys
 
-    fun setGlowImmediately(player: AbstractClientPlayerEntity, color: RenderColor) {
-        Utils.setGlowing(player, true, color)
+    fun setGlowImmediately(player: PlayerEntity, color: RenderColor) {
+        player.setGlowing(true, color)
     }
 
     @EventHandler
     private fun onServerJoin(event: ServerJoinEvent) {
-        for (entity in Utils.getEntities()) {
+        for (entity in EntityUtils.getPlayers()) {
             applyHighlight(entity)
         }
     }
@@ -81,6 +80,7 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     @EventHandler(priority = EventPriority.HIGH)
     fun onEntityUpdate(event: EntityUpdatedEvent) {
         val entity = event.entity
+        if (entity !is AbstractClientPlayerEntity) return
         applyHighlight(entity)
     }
 }

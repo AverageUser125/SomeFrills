@@ -6,7 +6,8 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.misc.RenderColor
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.TextUtils
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.util.Formatting
@@ -67,16 +68,11 @@ object CommandColorUtils {
             StringArgumentType.getString(ctx, "color")
 
         val color =
-            Utils.parseRenderColor(colorStr)
-
-        if (color.isEmpty) {
-
-            throw IllegalArgumentException(
+            TextUtils.parseRenderColor(colorStr) ?: throw IllegalArgumentException(
                 "Invalid color format: $colorStr"
             )
-        }
 
-        return color.get()
+        return color
     }
 
     /**
@@ -103,11 +99,11 @@ object CommandColorUtils {
                     StringArgumentType.getString(ctx, "color")
 
                 val color =
-                    Utils.parseRenderColor(colorStr)
+                    TextUtils.parseRenderColor(colorStr)
 
-                if (color.isEmpty) {
+                if (color == null) {
 
-                    Utils.info(
+                    ChatUtils.info(
                         "Invalid color format."
                     )
 
@@ -116,7 +112,7 @@ object CommandColorUtils {
 
                 handler(
                     ctx,
-                    color.get()
+                    color
                 )
             }
     }

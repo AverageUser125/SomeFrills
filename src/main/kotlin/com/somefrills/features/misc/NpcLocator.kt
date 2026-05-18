@@ -11,7 +11,7 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.RenderColor
 import com.somefrills.misc.SkyblockData
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
 import io.github.notenoughupdates.moulconfig.ChromaColour
 import meteordevelopment.orbit.EventHandler
 import net.fabricmc.loader.api.FabricLoader
@@ -75,22 +75,22 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         val location: Vec3d? = getNpcCoordinates(npcName)
         if (location != null) {
             npcLocations[npcName] = NpcLocation(npcName, location)
-            Utils.info(Utils.format("Added {} to NPC Locator.", npcName))
+            ChatUtils.infoFormat("Added {} to NPC Locator.", npcName)
         } else {
-            Utils.info(Utils.format("Could not find NPC: {}", npcName))
+            ChatUtils.infoFormat("Could not find NPC: {}", npcName)
         }
     }
 
     @JvmStatic
     fun removeNpcLocation(npcName: String) {
         npcLocations.remove(npcName)
-        Utils.info(Utils.format("Removed {} from NPC Locator.", npcName))
+        ChatUtils.infoFormat("Removed {} from NPC Locator.", npcName)
     }
 
     @JvmStatic
     fun clearAllNpcLocations() {
         npcLocations.clear()
-        Utils.info("Cleared all NPC locations.")
+        ChatUtils.info("Cleared all NPC locations.")
     }
 
     @JvmStatic
@@ -114,7 +114,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
 
     private fun getNpcCoordinates(npcName: String?): Vec3d? {
         ensureCacheLoaded()
-        return cachedNpcs.get(npcName)
+        return cachedNpcs[npcName]
     }
 
     private fun loadIslandNpcs(area: Area): MutableMap<String, Vec3d> {
@@ -122,7 +122,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
 
         val locationFileName = area.displayName.replace(" ", "_").uppercase(Locale.getDefault()) + ".json"
         val locationFile = FabricLoader.getInstance().configDir
-            .resolve("skyhanni/repo/constants/island_graphs/" + locationFileName)
+            .resolve("skyhanni/repo/constants/island_graphs/$locationFileName")
 
         if (!Files.exists(locationFile)) {
             return npcs
@@ -162,7 +162,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
 
                 val position: Vec3d? = parsePosition(positionStr)
                 if (position != null) {
-                    npcs.put(npcName, position)
+                    npcs[npcName] = position
                 }
             }
         } catch (e: IOException) {

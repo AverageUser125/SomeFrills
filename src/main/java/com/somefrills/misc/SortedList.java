@@ -1,5 +1,6 @@
 package com.somefrills.misc;
 
+import com.somefrills.utils.TextUtils;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -206,7 +207,7 @@ public class SortedList<T> implements List<T> {
 
     @Override
     public String toString() {
-        return stream().map(s -> Utils.capitalizeType(s.toString())).reduce((a, b) -> a + ", " + b).orElse("");
+        return stream().map(s -> TextUtils.capitalizeType(s.toString())).reduce((a, b) -> a + ", " + b).orElse("");
     }
 
     private T[] insertAt(T[] arr, T value, int index) {

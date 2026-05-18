@@ -6,7 +6,11 @@ import com.somefrills.config.FrillsMod
 
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
-import com.somefrills.misc.Utils
+import com.somefrills.utils.SkyblockUtils
+import com.somefrills.utils.Symbols
+import com.somefrills.utils.TextUtils
+import com.somefrills.utils.getLoreLines
+import com.somefrills.utils.skyblockId
 import net.minecraft.item.ItemStack
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
@@ -31,7 +35,7 @@ object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverride
         "Convert to Dungeon Item",
         "Upgrade Item",
         "Salvage Items",
-        Utils.format("A{}iphone", Utils.Symbols.bingo),
+        TextUtils.format("A{}iphone", Symbols.bingo),
         "Fishing Rod Parts",
         "Stats Tuning",
         "Pet Sitter",
@@ -76,8 +80,8 @@ object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverride
             .anyMatch { s: String? -> title.contains(s!!) }
     }
 
-    private fun isTransaction(stack: ItemStack?): Boolean {
-        return Utils.getLoreLines(stack).stream()
+    private fun isTransaction(stack: ItemStack): Boolean {
+        return stack.getLoreLines().stream()
             .anyMatch { line: String? -> line == "Cost" || line == "Sell Price" || line == "Bazaar Price" }
     }
 
@@ -93,8 +97,9 @@ object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverride
 
         if (stack.isEmpty) return false
         if (isBlacklisted(title)) return false
-        if (!Utils.isInSkyblock()) return false
+        if (!SkyblockUtils.isInSkyblock()) return false
+        if (stack.skyblockId?.isEmpty() == true) return false
 
-        return Utils.getSkyblockId(stack).isEmpty() || isWhitelisted(title) || isTransaction(stack)
+        return isWhitelisted(title) || isTransaction(stack)
     }
 }

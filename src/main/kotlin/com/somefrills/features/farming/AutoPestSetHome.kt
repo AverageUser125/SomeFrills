@@ -7,7 +7,9 @@ import com.somefrills.events.ServerJoinEvent
 import com.somefrills.features.core.AreaFeature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
-import com.somefrills.misc.Utils
+import com.somefrills.utils.ChatUtils
+import com.somefrills.utils.PlayerUtils
+import com.somefrills.utils.SkyblockUtils
 import meteordevelopment.orbit.EventHandler
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -39,13 +41,13 @@ object AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEna
         if (mc.player == null || mc.player?.networkHandler == null) return
 
         try {
-            Utils.info("Pests spawned detected in chat, running /sethome")
-            Utils.runCommand("sethome")
+            ChatUtils.info("Pests spawned detected in chat, running /sethome")
+            PlayerUtils.runCommand("sethome")
         } catch (_: Exception) {
         }
     }
 
     override fun checkArea(area: Area): Boolean {
-        return area == Area.GARDEN && Utils.isOnGardenPlot()
+        return area == Area.GARDEN && SkyblockUtils.isOnGardenPlot()
     }
 }
