@@ -7,7 +7,6 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.mixininterface.EntityRendering;
 import com.somefrills.utils.NumberUtils;
-import com.somefrills.utils.TextUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
