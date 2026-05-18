@@ -24,12 +24,9 @@ object EntityUtils {
     }
 
     fun getEntities(): List<Entity> {
-        return if (mc.world != null) {
-            val lookup = mc.world!!.entityManager.getLookup() as SimpleEntityLookup<Entity>
-            ArrayList(lookup.index.idToEntity.values)
-        } else {
-            ArrayList()
-        }
+        val world = mc.world ?: return ArrayList();
+        val lookup = world.entityManager.getLookup() as SimpleEntityLookup<Entity>
+        return ArrayList(lookup.index.idToEntity.values)
     }
 
     fun <T, R : T> filterAndCast(clazz: Class<R>): (T) -> Sequence<R> {

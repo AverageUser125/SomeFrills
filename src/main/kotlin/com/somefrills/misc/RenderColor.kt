@@ -157,9 +157,6 @@ class RenderColor {
 
         @JvmStatic
         fun fromFormatting(formatting: Formatting): RenderColor {
-            if (formatting == null) {
-                return white
-            }
             val colorValue = formatting.colorValue
             if (colorValue == null || colorValue == -1) {
                 return white

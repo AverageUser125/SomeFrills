@@ -49,7 +49,7 @@ class MatchInfo {
     }
 
     constructor() {
-        this.type = SortedList()
+        this.type = SortedList<String>()
         this.name = ""
         this.area = null
         this.gear = EnumSet.noneOf(GearFlag::class.java)
@@ -273,10 +273,10 @@ class MatchInfo {
         }
     }
 
-    class MultiTypePredicate(private val entityTypes: MutableList<String?>) : Predicate<LivingEntity> {
+    class MultiTypePredicate(private val entityTypes: MutableList<String>) : Predicate<LivingEntity> {
         override fun test(entity: LivingEntity): Boolean {
             val entityTypeStr = entity.type.toString().lowercase(Locale.getDefault())
-            return entityTypes.stream().anyMatch { s: String? -> specializedEquals(entityTypeStr, s!!) }
+            return entityTypes.stream().anyMatch { s: String -> specializedEquals(entityTypeStr, s) }
         }
 
         companion object {
@@ -286,9 +286,9 @@ class MatchInfo {
                 if (entityTypeStr.length - PREFIX_LENGTH != entityType.length) {
                     return false
                 }
-                for (i in 0..<entityType.length) {
-                    val c1 = entityTypeStr.get(i + PREFIX_LENGTH)
-                    val c2 = entityType.get(i)
+                for ((i, element) in entityType.withIndex()) {
+                    val c1 = entityTypeStr[i + PREFIX_LENGTH]
+                    val c2 = element
                     if (c1 != c2) {
                         return false
                     }
