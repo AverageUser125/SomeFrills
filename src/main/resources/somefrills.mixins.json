@@ -29,6 +29,7 @@
     "YggdrasilServicesKeyInfoMixin",
     "skyblock_enhancements.PriceDataFetcherMixin",
     "skyhanni.CorpseLocatorMixin",
+    "skyhanni.ExperimentsAddonsHelperMixin",
     "skyhanni.MineshaftWaypointsMixin",
     "skyhanni.ThunderSparkHighlightMixin"
   ],
@@ -40,7 +41,7 @@
     "CompassStateMixin",
     "GameOptionsMixin",
     "GameRendererMixin",
-    "LivingEntityRendererMixin",
+    "LivingEntityRendererMixin"
   ],
   "plugin": "com.somefrills.mixininterface.OptionalMixinPlugin"
 }

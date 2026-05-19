@@ -6,7 +6,7 @@ import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
 
 object ContainerUtils {
-    fun clickSlotInternal(slotIdx: Int) {
+    fun clickSlot(slotIdx: Int) {
         val player = mc.player ?: return
         val interactionManager = mc.interactionManager ?: return
 
@@ -27,10 +27,8 @@ object ContainerUtils {
         }
     }
 
-// ========== Global Slot Management ==========
-
-    fun clickSlot(slotIdx: Int) {
-        ContainerUtils.clickSlotInternal(slotIdx)
+    fun clickSlot(slot: Slot) {
+        clickSlot(slot.index)
     }
 
     fun clickSlotQuickMove(slotIdx: Int) {
