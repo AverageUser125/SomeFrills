@@ -40,11 +40,19 @@ public abstract class MouseMixin {
 
     @Inject(method = "onMouseButton", at = @At("HEAD"), cancellable = true)
     private void onMouseButton(long window, MouseInput mouseInput, int action, CallbackInfo ci) {
-        Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
-
-        Click click = new Click(getScaledX(client.getWindow()), getScaledY(client.getWindow()), mouseInput);
-        if (eventBus.post(new MouseClickEvent(click, KeyAction.get(action))).isCancelled()) {
+        if (mouseInput == null) {
             ci.cancel();
+            return;
+        }
+
+        try {
+            Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
+
+            Click click = new Click(getScaledX(client.getWindow()), getScaledY(client.getWindow()), mouseInput);
+            if (eventBus.post(new MouseClickEvent(click, KeyAction.get(action))).isCancelled()) {
+                ci.cancel();
+            }
+        } catch (Exception ignored) {
         }
     }
 

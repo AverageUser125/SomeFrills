@@ -34,13 +34,13 @@ object SlotOptions {
     }
 
     fun getOrInit(slot: Slot?): Flags? {
-        if (slot != null) {
-            if (!slotFlags.containsKey(slot)) {
-                slotFlags[slot] = Flags()
-            }
-            return this.slotFlags[slot]
+        if (slot == null) {
+            return Flags();
         }
-        return Flags()
+        if (!slotFlags.containsKey(slot)) {
+            slotFlags[slot] = Flags()
+        }
+        return this.slotFlags[slot]
     }
 
     fun isDisabled(slot: Slot?): Boolean {
@@ -62,6 +62,7 @@ object SlotOptions {
 
     @JvmStatic
     fun isSpoofed(slot: Slot?): Boolean {
+        if (slot == null) return false
         return slotFlags.containsKey(slot) && slotFlags[slot]!!.spoofed
     }
 
