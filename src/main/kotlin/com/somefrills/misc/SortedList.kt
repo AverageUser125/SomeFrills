@@ -16,6 +16,7 @@ class SortedList<T : Comparable<T>>(private var array: Array<T>) : MutableList<T
 
     constructor(list: SortedList<T>) : this(list.array.copyOf())
 
+    @Suppress("UNCHECKED_CAST")
     constructor() : this(arrayOfNulls<Comparable<T>>(0) as Array<T>)
 
     init {

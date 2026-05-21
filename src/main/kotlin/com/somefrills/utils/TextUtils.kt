@@ -1,16 +1,22 @@
 package com.somefrills.utils
-
+import at.hannibal2.skyhanni.utils.compat.value
 import com.google.common.base.Splitter
 import com.somefrills.misc.RenderColor
 import com.somefrills.misc.RenderColor.Companion.fromFormatting
 import com.somefrills.misc.RenderColor.Companion.fromHex
+import net.minecraft.text.PlainTextContent
 import net.minecraft.text.Style
 import net.minecraft.text.Text
+import net.minecraft.text.TextColor
+import net.minecraft.text.TranslatableTextContent
 import net.minecraft.util.Formatting
 import org.apache.commons.lang3.StringUtils
 import java.text.DecimalFormat
 import java.util.*
 import java.util.function.Predicate
+import kotlin.text.isNotEmpty
+import kotlin.text.startsWith
+import kotlin.text.substring
 
 
 object TextUtils {
@@ -92,6 +98,11 @@ object TextUtils {
     fun toPlain(content: Text): String {
         return content.toPlain()
     }
+
+    @JvmStatic
+    fun stripPrefix(s1: String, s2: String): String {
+        return if (s1.startsWith(s2)) s1.substring(s2.length) else s1
+    }
 }
 
 // ========== String Extension Functions ==========
@@ -147,8 +158,73 @@ fun String.parseColor(): Formatting? {
     }
 }
 
+private val textColorLUT = Formatting.entries
+    .mapNotNull { formatting -> formatting.colorValue?.let { it to formatting } }
+    .toMap()
+
+fun Text?.formattedTextCompatLessResets(): String = this.formattedTextCompat(noExtraResets = true)
+fun Text?.formattedTextCompatLeadingWhite(): String = this.formattedTextCompat(leadingWhite = true)
+fun Text?.formattedTextCompatLeadingWhiteLessResets(): String =
+    this.formattedTextCompat(noExtraResets = true, leadingWhite = true)
+
+@JvmOverloads
+@Suppress("unused")
+fun Text?.formattedTextCompat(noExtraResets: Boolean = false, leadingWhite: Boolean = false): String {
+    this ?: return ""
+    return computeFormattedTextCompat(noExtraResets, leadingWhite)
+}
+
+private fun Text?.computeFormattedTextCompat(noExtraResets: Boolean, leadingWhite: Boolean): String {
+    this ?: return ""
+    val sb = StringBuilder(50)
+    var wasFormatted = false
+    for (component in iterator()) {
+        val chatStyle = component.style.chatStyle()
+        if (chatStyle.isNotEmpty() && (leadingWhite || (wasFormatted && (sb.length != 2 || sb[0] != '§' || sb[1] != 'r')) || chatStyle != "§f")) {
+            sb.append(chatStyle)
+            wasFormatted = true
+        }
+        sb.append(component.unformattedTextForChatCompat())
+        if (!noExtraResets) {
+            sb.append("§r")
+            wasFormatted = true
+        } else if (component == Text.empty()) {
+            sb.append("§r")
+            wasFormatted = true
+        }
+    }
+    return sb.removeSuffix("§r").removePrefix("§r").toString()
+}
+
+fun Text.unformattedTextForChatCompat(): String {
+    return computeUnformattedTextCompat()
+}
+
+private fun Text.computeUnformattedTextCompat(): String {
+    if (this.content is TranslatableTextContent) {
+        return this.string
+    }
+    return (this.content as? PlainTextContent)?.string().orEmpty()
+}
+fun Text.iterator(): Sequence<Text> {
+    return sequenceOf(this) + siblings.asSequence().flatMap { it.iterator() } // TODO: in theory we want to properly inherit styles here
+}
+
+fun Style.chatStyle() = buildString {
+    color?.let { append(it.toChatFormatting()?.toString() ?: "<${it.hexCode}>") }
+    if (isBold) append("§l")
+    if (isItalic) append("§o")
+    if (isUnderlined) append("§n")
+    if (isStrikethrough) append("§m")
+    if (isObfuscated) append("§k")
+}
+
+fun TextColor.toChatFormatting(): Formatting? {
+    return textColorLUT[this.rgb]
+}
+
 fun String.stripPrefix(prefix: String): String =
-    if (startsWith(prefix)) substring(prefix.length) else this
+    TextUtils.stripPrefix(this, prefix)
 
 fun String.uppercaseFirst(replaceUnderscores: Boolean = false): String {
     val parts = if (replaceUnderscores) replace("_", " ").split(Regex("\\s"))

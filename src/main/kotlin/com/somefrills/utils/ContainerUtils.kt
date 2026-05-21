@@ -1,22 +1,19 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
+import net.minecraft.client.gui.screen.ingame.HandledScreen
+import net.minecraft.item.ItemStack
 import net.minecraft.screen.GenericContainerScreenHandler
 import net.minecraft.screen.slot.Slot
 import net.minecraft.screen.slot.SlotActionType
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 object ContainerUtils {
     fun clickSlot(slotIdx: Int) {
-        val player = mc.player ?: return
-        val interactionManager = mc.interactionManager ?: return
-
-        interactionManager.clickSlot(
-            player.currentScreenHandler.syncId,
-            slotIdx,
-            0,
-            SlotActionType.PICKUP,
-            player
-        )
+        val screen = mc.currentScreen as? HandledScreen<*> ?: return
+        screen.onMouseClick(null, slotIdx, 0, SlotActionType.PICKUP)
     }
 
     fun getContainerSlotsInternal(handler: GenericContainerScreenHandler, inverse: Boolean): List<Slot> {
@@ -62,6 +59,15 @@ object ContainerUtils {
             val screenHandler = mc.player?.currentScreenHandler
             return screenHandler as? GenericContainerScreenHandler
         }
+
+    fun getItemsInOpenChest(): List<Slot> {
+        return getItemsInOpenChestWithNull().filter { it.item.isNotEmpty() }
+    }
+
+    fun getItemsInOpenChestWithNull(): List<Slot> {
+        val guiChest = mc.currentScreen as? GenericContainerScreen ?: return emptyList()
+        return guiChest.screenHandler.slots
+    }
 }
 
 // ========== GenericContainerScreenHandler Extension Functions ==========
@@ -86,3 +92,14 @@ fun GenericContainerScreenHandler.getContainerSlotAt(row: Int, col: Int): Slot? 
     if (index >= rows * 9) return null
     return getSlot(index)
 }
+
+@OptIn(ExperimentalContracts::class)
+fun ItemStack?.isNotEmpty(): Boolean {
+    contract {
+        returns(true) implies (this@isNotEmpty != null)
+    }
+    this ?: return false
+    return !this.isEmpty
+}
+
+val Slot.item: ItemStack? get() = this.inventory.getStack(this.index)

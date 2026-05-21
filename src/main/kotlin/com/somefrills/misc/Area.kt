@@ -87,6 +87,10 @@ enum class Area {
             return UNKNOWN
         }
 
+        fun equals(other: Area, area: Area): Boolean {
+            return other == area
+        }
+
         val allDisplayNames: Array<String?>
             /**
              * Get all area display names

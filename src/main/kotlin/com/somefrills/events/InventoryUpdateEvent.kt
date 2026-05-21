@@ -7,4 +7,4 @@ class InventoryUpdateEvent(
     val packet: ScreenHandlerSlotUpdateS2CPacket,
     @JvmField val stack: ItemStack,
     @JvmField val slotId: Int
-)
+) : FrillsEvent()

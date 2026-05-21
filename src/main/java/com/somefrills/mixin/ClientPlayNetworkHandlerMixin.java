@@ -56,13 +56,6 @@ public class ClientPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onPlaySound", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V", shift = At.Shift.AFTER), cancellable = true)
-    private void onPlaySound(PlaySoundS2CPacket packet, CallbackInfo ci) {
-        if (eventBus.post(new PlaySoundEvent(packet)).isCancelled()) {
-            ci.cancel();
-        }
-    }
-
     @Inject(method = "onParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V", shift = At.Shift.AFTER), cancellable = true)
     private void onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
         if (eventBus.post(new SpawnParticleEvent(packet)).isCancelled()) {

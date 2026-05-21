@@ -8,6 +8,8 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.text.Style
 import net.minecraft.text.Text
 import com.somefrills.Main.mc
+import net.minecraft.item.Item
+import net.minecraft.registry.Registries
 
 object ItemStackUtils {
     fun getSkyblockId(customData: NbtCompound): String? {
@@ -113,6 +115,12 @@ val ItemStack.hasGlint: Boolean
 fun ItemStack.setCustomName(style: Style, name: String) {
     set(DataComponentTypes.CUSTOM_NAME, Text.literal(name).setStyle(style.withItalic(false)))
 }
+
+fun Item.getIdentifierString(): String {
+    return Registries.ITEM.getKey(this).toString()
+}
+
+val ItemStack.hoverName: Text get() = toHoverableText()
 
 val ItemStack.plainCustomName: String
     get() {
