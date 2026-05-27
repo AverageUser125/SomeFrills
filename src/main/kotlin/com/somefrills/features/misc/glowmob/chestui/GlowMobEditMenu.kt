@@ -64,11 +64,14 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
             )
         )
 
+        // Area may be unset; avoid forcing a null color with !! which causes NPEs
+        val areaDisplay = info.area?.displayName
+        val areaColor = info.area?.colorHex ?: Formatting.YELLOW.colorValue!!
         addItem(
             createChoiceItem(
                 Items.CARVED_PUMPKIN, "Area",
-                if (info.area != null) info.area!!.displayName else null,
-                (if (info.area != null) info.area!!.colorHex else null)!!,
+                areaDisplay,
+                areaColor,
                 "Only glows mobs in specific areas",
                 "Leave empty for all locations",
                 "Click to select area"

@@ -34,6 +34,7 @@ enum class Area {
     THE_MIST("The Mist", 0xAAAAAA, Items.WHITE_STAINED_GLASS),
     MINESHAFT("Mineshaft", 0xAAAAAA, Items.PACKED_ICE),
     LOST_PRECURSOR_CITY("Lost Precursor City", Formatting.DARK_PURPLE, Items.CHISELED_STONE_BRICKS),
+    LOTUS_ATOLL("Lotus Atoll", 0x55FF55, Items.LILY_OF_THE_VALLEY),
     UNKNOWN("Unknown", Formatting.WHITE, Items.WHITE_CONCRETE);
 
     /**
