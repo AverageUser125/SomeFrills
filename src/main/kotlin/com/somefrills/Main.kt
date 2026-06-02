@@ -153,7 +153,6 @@ object Main : ClientModInitializer {
 
         eventBus.subscribe(SkyblockData::class.java)
         eventBus.subscribe(EntityCache::class.java)
-        eventBus.subscribe(Input::class.java)
         eventBus.subscribe(Main::class.java)
 
         Features.init()

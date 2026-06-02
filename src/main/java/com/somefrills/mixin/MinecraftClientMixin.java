@@ -5,7 +5,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.Main;
 import com.somefrills.events.*;
 import com.somefrills.features.mining.NoMiningTrace;
-import com.somefrills.misc.Input;
 import com.somefrills.utils.EntityUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -126,7 +125,6 @@ public abstract class MinecraftClientMixin {
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         Profilers.get().push(Main.MOD_ID + "_post_update");
-        Input.update();
         eventBus.post(new TickEventPost());
         Profilers.get().pop();
     }

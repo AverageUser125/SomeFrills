@@ -3,7 +3,6 @@ package com.somefrills.mixin;
 import com.somefrills.events.MouseClickEvent;
 import com.somefrills.events.MouseScrollEvent;
 import com.somefrills.features.misc.SaveCursorPosition;
-import com.somefrills.misc.Input;
 import com.somefrills.misc.KeyAction;
 import kotlin.Pair;
 import net.minecraft.client.MinecraftClient;
@@ -46,7 +45,7 @@ public abstract class MouseMixin {
         }
 
         try {
-            Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
+            //Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
 
             Click click = new Click(getScaledX(client.getWindow()), getScaledY(client.getWindow()), mouseInput);
             if (eventBus.post(new MouseClickEvent(click, KeyAction.get(action))).isCancelled()) {

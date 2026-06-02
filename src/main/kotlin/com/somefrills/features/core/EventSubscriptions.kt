@@ -41,11 +41,11 @@ object EventSubscriptions {
      * Convenience overload for no event usage.
      */
     fun <T> register(owner: Any, eventClass: Class<T>, action: Runnable) {
-        register<T>(owner, eventClass, Consumer { e: T -> action.run() })
+        register(owner, eventClass) { e: T -> action.run() }
     }
 
     fun <T> register(feature: AbstractFeature, eventClass: Class<T>) {
-        register<T>(feature, eventClass, Consumer { e: T -> feature.sync() })
+        register(feature, eventClass) { e: T -> feature.sync() }
     }
 
     fun unregister(owner: Any) {

@@ -6,7 +6,6 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.*
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.ToggleFeature
-import com.somefrills.misc.Input
 import com.somefrills.misc.KeyAction
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.set
@@ -20,6 +19,7 @@ import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import org.joml.Vector3d
 import org.lwjgl.glfw.GLFW
+import java.awt.event.KeyEvent
 import kotlin.math.sqrt
 
 @FrillsFeature
@@ -88,13 +88,13 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         lastYaw = yaw
         lastPitch = pitch
 
-        //isSneaking = mc.options.sneakKey.isPressed();
-        forward = Input.isPressed(mc.options.forwardKey)
-        backward = Input.isPressed(mc.options.backKey)
-        right = Input.isPressed(mc.options.rightKey)
-        left = Input.isPressed(mc.options.leftKey)
-        up = Input.isPressed(mc.options.jumpKey)
-        down = Input.isPressed(mc.options.sneakKey)
+        // isSneaking = mc.options.sneakKey.isPressed;
+        forward = mc.options.forwardKey.isPressed
+        backward = mc.options.backKey.isPressed
+        right = mc.options.rightKey.isPressed
+        left = mc.options.leftKey.isPressed
+        up = mc.options.jumpKey.isPressed
+        down = mc.options.sneakKey.isPressed
 
         unpress()
         if (config.reloadChunks) mc.worldRenderer.reload()
@@ -150,7 +150,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         var velZ = 0.0
 
         var s = 0.5
-        if (Input.isPressed(mc.options.sprintKey)) s = 1.0
+        if (mc.options.sprintKey.isPressed) s = 1.0
 
         var a = false
         if (this.forward) {
@@ -194,10 +194,17 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    fun onKey(event: InputEvent) {
-        if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return
+    fun onKey(event: KeyDownEvent) {
+        if (event.keyCode == GLFW.GLFW_KEY_F3) return
 
-        if (onInput(event.key, event.action)) event.cancel()
+        if (onInput(event.keyCode, KeyAction.Press)) event.cancel()
+    }
+
+    @EventHandler
+    fun onKey(event: KeyUpEvent) {
+        if (event.keyCode == GLFW.GLFW_KEY_F3) return
+
+        if (onInput(event.keyCode, KeyAction.Release)) event.cancel()
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -207,32 +214,32 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     private fun onInput(key: Int, action: KeyAction): Boolean {
         when (key) {
-            Input.getKey(mc.options.forwardKey) -> {
+           mc.options.forwardKey.boundKey.code -> {
                 forward = action != KeyAction.Release
                 mc.options.forwardKey.isPressed = false
             }
 
-            Input.getKey(mc.options.backKey) -> {
+            mc.options.backKey.boundKey.code -> {
                 backward = action != KeyAction.Release
                 mc.options.backKey.isPressed = false
             }
 
-            Input.getKey(mc.options.rightKey) -> {
+            mc.options.rightKey.boundKey.code -> {
                 right = action != KeyAction.Release
                 mc.options.rightKey.isPressed = false
             }
 
-            Input.getKey(mc.options.leftKey) -> {
+            mc.options.leftKey.boundKey.code -> {
                 left = action != KeyAction.Release
                 mc.options.leftKey.isPressed = false
             }
 
-            Input.getKey(mc.options.jumpKey) -> {
+            mc.options.jumpKey.boundKey.code -> {
                 up = action != KeyAction.Release
                 mc.options.jumpKey.isPressed = false
             }
 
-            Input.getKey(mc.options.sneakKey) -> {
+            mc.options.sneakKey.boundKey.code -> {
                 down = action != KeyAction.Release
                 mc.options.sneakKey.isPressed = false
             }

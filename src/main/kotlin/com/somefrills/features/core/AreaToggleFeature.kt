@@ -48,6 +48,7 @@ abstract class AreaToggleFeature(enabledProperty: Property<Boolean>, private val
 
     protected fun toggleActive() {
         if (!isEnabled()) return
+        Main.LOGGER.info("Toggling ${this::class.simpleName} to ${!keybindActive}")
         keybindActive = !keybindActive
         sync()
     }

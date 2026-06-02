@@ -6,7 +6,7 @@ package com.somefrills.features.farming.autofarmer
  */
 class MushroomMovement : MovementStrategy() {
 
-    private var state: FarmingState = FarmingState.FORWARD_RIGHT
+    private var state: FarmingState = FarmingState.FORWARD_ONLY
 
     override fun getState(): MovementState {
         return state.toMovementState()
@@ -17,17 +17,6 @@ class MushroomMovement : MovementStrategy() {
     }
 
     private enum class FarmingState : State {
-
-        FORWARD_RIGHT {
-            override fun next() = FORWARD_ONLY
-
-            override fun toMovementState(): MovementState {
-                return MovementState(
-                    MovementState.FORWARD or MovementState.RIGHT
-                )
-            }
-        },
-
         FORWARD_ONLY {
             override fun next() = FORWARD_LEFT
 
@@ -37,11 +26,11 @@ class MushroomMovement : MovementStrategy() {
         },
 
         FORWARD_LEFT {
-            override fun next() = FORWARD_RIGHT
+            override fun next() = FORWARD_ONLY
 
             override fun toMovementState(): MovementState {
                 return MovementState(
-                    MovementState.FORWARD or MovementState.LEFT
+                    MovementState.FORWARD or MovementState.LEFT or MovementState.SPRINT
                 )
             }
         }

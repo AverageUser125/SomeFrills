@@ -305,6 +305,6 @@ object ExperimentSolver : AreaFeature(FrillsMod.config.solvers.experimentSolver.
     }
     // </editor-fold>
     override fun checkArea(area: Area): Boolean {
-        return Area.equals(area, Area.PRIVATE_ISLAND)
+        return area == Area.PRIVATE_ISLAND
     }
 }

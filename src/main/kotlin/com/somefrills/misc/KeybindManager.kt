@@ -1,5 +1,6 @@
 package com.somefrills.misc
 
+import com.somefrills.Main
 import com.somefrills.Main.mc
 import com.somefrills.mixin.BaseObservableAccessor
 import io.github.notenoughupdates.moulconfig.observer.Observer
@@ -8,6 +9,7 @@ import io.github.notenoughupdates.moulconfig.observer.Property
 object KeybindManager {
     private val keybinds: MutableList<Keybind> = ArrayList<Keybind>()
 
+    @JvmStatic
     fun onKeyPressed(key: Int) {
         if (mc.currentScreen != null) return
 

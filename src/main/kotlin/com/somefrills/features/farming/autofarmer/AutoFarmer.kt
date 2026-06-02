@@ -1,5 +1,6 @@
 package com.somefrills.features.farming.autofarmer
 
+import com.somefrills.Main
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 import com.somefrills.events.ScreenOpenEvent
@@ -38,6 +39,7 @@ object AutoFarmer :
     }
 
     override fun onActivate() {
+        Main.LOGGER.info("Activating AutoFarmer with strategy: ${config.cropType.get()}")
         initStrategy()
         registerKeyBindListener()
 

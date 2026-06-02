@@ -5,8 +5,6 @@ import net.minecraft.client.input.KeyInput
 import net.minecraft.client.input.MouseInput
 import net.minecraft.client.option.KeyBinding
 import net.minecraft.client.gui.Click
-import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket
-import net.minecraft.util.Util
 
 object InputUtils {
     fun matchesKeyInternal(binding: KeyBinding, keyInput: KeyInput?, mouseInput: MouseInput?): Boolean {
