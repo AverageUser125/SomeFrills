@@ -1,7 +1,5 @@
 package com.somefrills.misc
 
-import com.somefrills.events.TickEventPost
-import meteordevelopment.orbit.EventHandler
 import net.minecraft.client.option.KeyBinding
 import org.lwjgl.glfw.GLFW
 
@@ -20,8 +18,8 @@ object Input {
     private val buttonReleaseAt = LongArray(16)
     private val buttonReleasePending = BooleanArray(16)
 
-    @EventHandler
-    fun update(event: TickEventPost?) {
+    @JvmStatic
+    fun update() {
         val now = System.currentTimeMillis()
 
         for (i in keys.indices) {

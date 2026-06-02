@@ -1,9 +1,9 @@
 package com.somefrills.features.core
 
+import com.somefrills.Main
 import com.somefrills.events.AreaChangeEvent
 import com.somefrills.misc.Area
 import com.somefrills.misc.KeybindManager
-import com.somefrills.misc.KeybindManager.register
 import com.somefrills.misc.SkyblockData.area
 import io.github.notenoughupdates.moulconfig.observer.Property
 
@@ -33,7 +33,7 @@ abstract class AreaToggleFeature(enabledProperty: Property<Boolean>, private val
             keybindSub!!.unregister()
             keybindSub = null
         }
-        keybindSub = register(keybindProperty) { this.toggleActive() }
+        keybindSub = KeybindManager.register(keybindProperty) { toggleActive() }
         EventSubscriptions.register(this, AreaChangeEvent::class.java)
     }
 

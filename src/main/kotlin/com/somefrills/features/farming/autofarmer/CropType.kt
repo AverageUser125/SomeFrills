@@ -3,7 +3,7 @@ package com.somefrills.features.farming.autofarmer
 /**
  * Enum of crop types and their movement patterns.
  */
-enum class CropType(private val displayName: String, val pattern: MovementPattern) {
+enum class CropType(val displayName: String, val pattern: MovementPattern) {
     // Rectangular pattern: melon, pumpkin, wheat, carrot, potato, nether wart
     // Movement: Move forward, if hit wall on right, move left, if hit wall on left, move right
     MELON("Melon", MovementPattern.RECTANGULAR),
