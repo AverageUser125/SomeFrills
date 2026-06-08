@@ -1,5 +1,6 @@
 package com.somefrills.utils
 
+import java.text.NumberFormat
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.floor
@@ -42,8 +43,21 @@ object NumberUtils {
     }
 
     @JvmStatic
+    fun formatCompact(num: Long): String {
+        if (num < 1000) return num.toString()
+        var value = num.toDouble()
+        var suffixIndex = -1
+        while (value >= 1000 && suffixIndex < 3) {
+            value /= 1000.0
+            suffixIndex++
+        }
+        val format = if (value >= 10 || value == floor(value)) "%.0f%s" else "%.1f%s"
+        return String.format(format, value, arrayOf("k", "m", "b", "t")[suffixIndex])
+    }
+
+    @JvmStatic
     fun formatCompact(num: Int): String {
-        if (num < 1000) return toString()
+        if (num < 1000) return num.toString()
         var value = num.toDouble()
         var suffixIndex = -1
         while (value >= 1000 && suffixIndex < 3) {
@@ -67,6 +81,10 @@ object NumberUtils {
         }
         val format = if (value >= 10 || value == floor(value)) "%.0f%s" else "%.1f%s"
         return String.format(format, value, arrayOf("k", "m", "b", "t")[suffixIndex])
+    }
+
+    fun formatComma(num: Long): String {
+        return NumberFormat.getNumberInstance(Locale.US).format(num)
     }
 }
 

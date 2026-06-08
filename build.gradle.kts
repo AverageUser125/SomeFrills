@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("fabric-loom") version "1.16.2"
+    id("fabric-loom") version "1.17.3"
     id("org.jetbrains.kotlin.jvm") version "2.3.0"
     id("com.google.devtools.ksp") version "2.3.8"
     java
@@ -70,7 +70,8 @@ dependencies {
     modCompileOnly(files("vendor/SkyHanni-7.19.0-mc1.21.11.jar"))
     compileOnly(files("vendor/skyblock_enhancements-1.0.1+1.21.11.jar"))
     modCompileOnly(files("vendor/skyblock_enhancements-1.0.1+1.21.11.jar"))
-
+    compileOnly(files("vendor/SkyOcean-1.21.11-1.16.1.jar"))
+    modCompileOnly(files("vendor/SkyOcean-1.21.11-1.16.1.jar"))
 
     // External dependencies
     modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"]}")

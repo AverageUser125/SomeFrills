@@ -45,7 +45,11 @@ object SomeFrillsCommand {
         ModCommand(
             "glowblock",
             "Manage glowing blocks."
-        ) { GlowBlockCommand.getBuilder() }
+        ) { GlowBlockCommand.getBuilder() },
+        ModCommand(
+            "totalnetworth",
+            "Get the total networth of the current profile"
+        ) { TotalNetworthCommand.getBuilder()}
     )
 
     /**
