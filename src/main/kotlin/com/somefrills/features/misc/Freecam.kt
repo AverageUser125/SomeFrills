@@ -2,16 +2,17 @@ package com.somefrills.features.misc
 
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
-
 import com.somefrills.events.*
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.core.ToggleFeature
 import com.somefrills.misc.KeyAction
+import com.somefrills.mixin.KeyMappingAccessor
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.set
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
 import net.minecraft.client.CameraType
+import net.minecraft.client.KeyMapping
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket
 import net.minecraft.network.protocol.game.ClientboundSetHealthPacket
@@ -20,6 +21,7 @@ import net.minecraft.world.phys.Vec3
 import org.joml.Vector3d
 import org.lwjgl.glfw.GLFW
 import kotlin.math.sqrt
+
 
 @FrillsFeature
 object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.config.misc.freecam.keybind) {
@@ -57,7 +59,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     public override fun onActivate() {
         super.onActivate()
-        if ( mc.player == null || mc.options == null || mc.gameRenderer == null || mc.gameRenderer.mainCamera == null) {
+        if ( mc.player == null) {
             return
         }
 
@@ -210,34 +212,39 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         if (onInput(event.button(), event.action)) event.cancel()
     }
 
+
+    fun getKey(bind: KeyMapping): Int {
+        return (bind as KeyMappingAccessor).`somefrills$getKey`().value
+    }
+
     private fun onInput(key: Int, action: KeyAction): Boolean {
         when (key) {
-           mc.options.keyUp.key.numericKeyValue.asInt -> {
+            getKey(mc.options.keyUp) -> {
                 forward = action != KeyAction.Release
                 mc.options.keyUp.isDown = false
             }
 
-            mc.options.keyDown.key.numericKeyValue.asInt -> {
+            getKey(mc.options.keyDown) -> {
                 backward = action != KeyAction.Release
                 mc.options.keyDown.isDown = false
             }
 
-            mc.options.keyRight.key.numericKeyValue.asInt -> {
+            getKey(mc.options.keyRight) -> {
                 right = action != KeyAction.Release
                 mc.options.keyRight.isDown = false
             }
 
-            mc.options.keyLeft.key.numericKeyValue.asInt -> {
+            getKey(mc.options.keyLeft) -> {
                 left = action != KeyAction.Release
                 mc.options.keyLeft.isDown = false
             }
 
-            mc.options.keyJump.key.numericKeyValue.asInt -> {
+            getKey(mc.options.keyJump) -> {
                 up = action != KeyAction.Release
                 mc.options.keyJump.isDown = false
             }
 
-            mc.options.keyShift.key.numericKeyValue.asInt -> {
+            getKey(mc.options.keyShift) -> {
                 down = action != KeyAction.Release
                 mc.options.keyShift.isDown = false
             }
