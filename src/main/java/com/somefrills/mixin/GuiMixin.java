@@ -4,14 +4,11 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.somefrills.events.HudRenderEvent;
 import com.somefrills.events.HudTickEvent;
 import com.somefrills.features.misc.Freecam;
-import com.somefrills.misc.RenderColor;
 import com.somefrills.mixininterface.TitleRendering;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.DeltaTracker;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,27 +22,10 @@ import static com.somefrills.Main.mc;
 @Mixin(Gui.class)
 public abstract class GuiMixin implements TitleRendering {
     @Unique
-    private static String titleString = "";
-    @Unique
     private static int titleTicks = 0;
-    @Unique
-    private static int titleOffset = 0;
-    @Unique
-    private static float titleScale = 1;
-    @Unique
-    private static int titleColor = 0xFFFFFFFF;
 
     @Shadow
     public abstract Font getFont();
-
-    @Override
-    public void somefrills$setRenderTitle(String title, int stayTicks, int yOffset, float scale, RenderColor color) {
-        titleString = title;
-        titleTicks = stayTicks;
-        titleOffset = yOffset;
-        titleScale = scale;
-        titleColor = color.argb;
-    }
 
     @Override
     public boolean somefrills$isRenderingTitle() {
@@ -60,30 +40,15 @@ public abstract class GuiMixin implements TitleRendering {
         eventBus.post(new HudTickEvent());
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
-        if (mc.options.hudHidden) return;
-        eventBus.post(new HudRenderEvent(context, this.getFont(), tickCounter));
-        if (titleTicks > 0) {
-            context.getMatrices().pushMatrix();
-            context.getMatrices().translate((float) (context.getScaledWindowWidth() / 2), (float) (context.getScaledWindowHeight() / 2));
-            context.getMatrices().scale(titleScale, titleScale);
-            Font textRenderer = mc.inGameHud.getTextRenderer();
-            Component title = Component.of(titleString);
-            int width = textRenderer.getWidth(title);
-            context.drawTextWithBackground(textRenderer, title, -width / 2, titleOffset, width, titleColor);
-            context.getMatrices().popMatrix();
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    private void onRender(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
+        if (!mc.options.hideGui) {
+            eventBus.post(new HudRenderEvent(graphics, this.getFont(), deltaTracker));
         }
-
     }
 
-    @ModifyExpressionValue(method = "renderCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"))
+    @ModifyExpressionValue(method = "extractCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/CameraType;isFirstPerson()Z"))
     private boolean alwaysRenderCrosshairInFreecam(boolean firstPerson) {
         return Freecam.INSTANCE.isActive() || firstPerson;
-    }
-
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/DebugScreenOverlay;<init>(Lnet/minecraft/client/Minecraft;)V"))
-    private void onInit(Minecraft client, CallbackInfo ci) {
-        //HudManager.registerElements();
     }
 }

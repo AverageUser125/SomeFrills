@@ -17,14 +17,14 @@ public abstract class ArmorStandRendererMixin {
     )
     private void blockBodyRenderForInvisibleGlowingArmorStand(
             ArmorStandRenderState state,
-            boolean showBody,
-            boolean translucent,
-            boolean showOutline,
+            boolean isBodyVisible,
+            boolean forceTransparent,
+            boolean appearGlowing,
             CallbackInfoReturnable<RenderType> cir
     ) {
         // Block body render for invisible glowing armor stands
         // Features (armor, items, elytra, head) will still render
-        if (state.invisible && showOutline) {
+        if (state.isInvisible && appearGlowing) {
             cir.setReturnValue(null);
         }
     }

@@ -47,7 +47,8 @@ public abstract class MouseHandlerMixin {
         try {
             //Input.setButtonState(mouseInput.button(), action != GLFW_RELEASE);
 
-            MouseButtonEvent click = new Click(getScaledXPos(minecraft.getWindow()), getScaledYPos(minecraft.getWindow()), mouseInput);
+            MouseButtonEvent click = new MouseButtonEvent(getScaledXPos(minecraft.getWindow()), getScaledYPos(minecraft.getWindow()), mouseInput);
+
             if (eventBus.post(new MouseClickEvent(click, KeyAction.get(action))).isCancelled()) {
                 ci.cancel();
             }

@@ -5,7 +5,7 @@ import net.minecraft.core.Vec3i;
 import org.joml.Vector3d;
 
 @SuppressWarnings("UnusedReturnValue")
-public interface IVec3d {
+public interface IVec3 {
     Vec3 somefrills$set(double x, double y, double z);
 
     default Vec3 somefrills$set(Vec3i vec) {

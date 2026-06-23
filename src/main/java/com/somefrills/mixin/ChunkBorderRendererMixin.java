@@ -18,17 +18,15 @@ public abstract class ChunkBorderRendererMixin {
     @Final
     private Minecraft minecraft;
 
-    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/SectionPos;of(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/SectionPos;"))
-    private SectionPos render$getChunkPos(SectionPos original) {
+    @ModifyExpressionValue(method = "emitGizmos", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/SectionPos;of(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/SectionPos;"))    private SectionPos render$getChunkPos(SectionPos original) {
         var freecam = Freecam.INSTANCE;
         if (!freecam.isActive()) return original;
 
-        float delta = minecraft.getRenderTickCounter().getTickProgress(true);
-
-        return SectionPos.from(
-                SectionPos.getSectionCoord(Mth.floor(freecam.getX(delta))),
-                SectionPos.getSectionCoord(Mth.floor(freecam.getY(delta))),
-                SectionPos.getSectionCoord(Mth.floor(freecam.getZ(delta)))
+        float delta = minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true);
+        return SectionPos.of(
+                SectionPos.posToSectionCoord(Mth.floor(freecam.getX(delta))),
+                SectionPos.posToSectionCoord(Mth.floor(freecam.getY(delta))),
+                SectionPos.posToSectionCoord(Mth.floor(freecam.getZ(delta)))
         );
     }
 }

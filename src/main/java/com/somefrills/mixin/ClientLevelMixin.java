@@ -18,14 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static com.somefrills.Main.eventBus;
 
 @Mixin(ClientLevel.class)
-public abstract class ClientLevelMixin extends ClientLevel {
+public abstract class ClientLevelMixin extends Level {
 
-    protected ClientLevelMixin(WritableLevelData properties, ResourceKey<ClientLevel> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
+    protected ClientLevelMixin(WritableLevelData properties, ResourceKey<Level> registryRef, RegistryAccess registryManager, Holder<DimensionType> dimensionEntry, boolean isClient, boolean debugWorld, long seed, int maxChainedNeighborUpdates) {
         super(properties, registryRef, registryManager, dimensionEntry, isClient, debugWorld, seed, maxChainedNeighborUpdates);
     }
-
     @Inject(method = "removeEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;setRemoved(Lnet/minecraft/world/entity/Entity$RemovalReason;)V"))
-    private void onBeforeRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo ci, @Local Entity ent) {
-        eventBus.post(new EntityRemovedEvent(ent, removalReason));
+    private void onBeforeRemoveEntity(int id, Entity.RemovalReason reason, CallbackInfo ci, @Local(name = "entity") Entity entity) {
+        eventBus.post(new EntityRemovedEvent(entity, reason));
     }
 }

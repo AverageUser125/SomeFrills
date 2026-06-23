@@ -57,8 +57,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     public override fun onActivate() {
         super.onActivate()
-        val player = mc.player ?: return
-        if (mc.options == null || mc.gameRenderer == null || mc.gameRenderer.mainCamera == null) {
+        if ( mc.player == null || mc.options == null || mc.gameRenderer == null || mc.gameRenderer.mainCamera == null) {
             return
         }
 

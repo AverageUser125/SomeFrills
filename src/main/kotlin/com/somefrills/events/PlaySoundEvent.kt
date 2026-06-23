@@ -1,8 +1,5 @@
 package com.somefrills.events
 
-import net.minecraft.world.phys.Vec3
+import net.minecraft.client.resources.sounds.SoundInstance
 
-class PlaySoundEvent(val soundName: String,
-                     val location: Vec3,
-                     val pitch: Float,
-                     val volume: Float) : Cancellable()
+class PlaySoundEvent(val sound: SoundInstance) : Cancellable()

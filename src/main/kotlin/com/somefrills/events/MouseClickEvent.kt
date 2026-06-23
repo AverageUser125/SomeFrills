@@ -1,10 +1,10 @@
 package com.somefrills.events
 
 import com.somefrills.misc.KeyAction
-import io.github.notenoughupdates.moulconfig.gui.MouseEvent
+import net.minecraft.client.input.MouseButtonEvent
 
-class MouseClickEvent(val click: MouseEvent.Click, @JvmField val action: KeyAction) : Cancellable() {
+class MouseClickEvent(val click: MouseButtonEvent, @JvmField val action: KeyAction) : Cancellable() {
     fun button(): Int {
-        return click.mouseButton
+        return click.button()
     }
 }

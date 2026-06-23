@@ -125,10 +125,10 @@ public class EntityMixin implements EntityRendering {
             }
 
             Component healthDisplay = Component.literal(currentHealthText)
-                    .styled(style -> style.withColor(ChatFormatting.GREEN))
-                    .append(Component.literal("/").styled(style -> style.withColor(ChatFormatting.WHITE)))
-                    .append(Component.literal(maxHealthText).styled(style -> style.withColor(ChatFormatting.GREEN)))
-                    .append(Component.literal("❤").styled(style -> style.withColor(ChatFormatting.RED)));
+                    .withStyle(style -> style.withColor(ChatFormatting.GREEN))
+                    .append(Component.literal("/").withStyle(style -> style.withColor(ChatFormatting.WHITE)))
+                    .append(Component.literal(maxHealthText).withStyle(style -> style.withColor(ChatFormatting.GREEN)))
+                    .append(Component.literal("❤").withStyle(style -> style.withColor(ChatFormatting.RED)));
 
             cir.setReturnValue(healthDisplay);
         }

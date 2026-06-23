@@ -24,34 +24,34 @@ public abstract class BlockItemMixin {
     @Inject(method = "placeBlock(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z", at = @At("HEAD"),
             cancellable = true)
     private void onPlaceBlock(BlockPlaceContext context, BlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!context.getWorld().isClient()) return;
+        if (!context.getLevel().isClientSide()) return;
 
         if (eventBus.post(new PlaceBlockEvent(context, state.getBlock())).isCancelled()) {
             cir.setReturnValue(true);
         }
     }
 
-    @Inject(method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundGroup()Lnet/minecraft/world/level/block/SoundType;"), cancellable = true)
-    private void beforeGetSoundGroup(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
-        if (NoAbilityPlace.hasAbility(context)) {
+    @Inject(method = "place", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getSoundType()Lnet/minecraft/world/level/block/SoundType;"), cancellable = true)
+    private void beforeGetSoundGroup(BlockPlaceContext placeContext, CallbackInfoReturnable<InteractionResult> cir) {
+        if (NoAbilityPlace.hasAbility(placeContext)) {
             cir.setReturnValue(InteractionResult.SUCCESS);
         }
     }
 
+
     @ModifyVariable(
             method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
-            ordinal = 1,
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockState;isOf(Lnet/minecraft/world/level/block/Block;)Z"
-            )
-    )
-    private BlockState modifyState(BlockState state, BlockPlaceContext context) {
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;is(Ljava/lang/Object;)Z"
+            ),
+            name = "placedState")
+    private BlockState modifyState(BlockState placedState, BlockPlaceContext placeContext) {
         var noGhostBlocksConfig = NoGhostBlocks.getConfig();
         if (noGhostBlocksConfig.enabled.get() && noGhostBlocksConfig.placing) {
-            return getPlacementState(context);
+            return getPlacementState(placeContext);
         }
 
-        return state;
+        return placedState;
     }
 }

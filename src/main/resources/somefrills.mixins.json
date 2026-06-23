@@ -23,14 +23,10 @@
     "MouseHandlerMixin",
     "IronBarsBlockMixin",
     "PlayerTabOverlayAccessor",
-    "Vec3dMixin",
+    "Vec3Mixin",
     "LevelMixin",
     "LevelRendererMixin",
     "YggdrasilServicesKeyInfoMixin",
-    "skyblock_enhancements.PriceDataFetcherMixin",
-    "skyhanni.CorpseLocatorMixin",
-    "skyhanni.MineshaftWaypointsMixin",
-    "skyhanni.ThunderSparkHighlightMixin"
   ],
   "client": [
     "ArmorStandRendererMixin",

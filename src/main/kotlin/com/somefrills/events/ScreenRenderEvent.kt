@@ -29,9 +29,9 @@ open class ScreenRenderEvent(
 ) {
     private fun getSlot(slotId: Int): Optional<Slot> {
         if (slotId < 0 || slotId >= this.handler.slots.size) {
-            return Optional.empty<Slot?>()
+            return Optional.empty<Slot>()
         }
-        return Optional.of<Slot?>(this.handler.getSlot(slotId))
+        return Optional.of<Slot>(this.handler.getSlot(slotId))
     }
 
     fun drawLine(firstId: Int, secondId: Int, width: Double, color: RenderColor) {
