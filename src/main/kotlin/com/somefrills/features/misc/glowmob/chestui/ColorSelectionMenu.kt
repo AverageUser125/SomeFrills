@@ -7,9 +7,9 @@ import com.somefrills.utils.TextUtils
 import com.somefrills.utils.setCustomData
 import com.somefrills.utils.getCustomData
 import com.somefrills.utils.setCustomName
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.text.Style
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Style
+import net.minecraft.world.item.ItemStack
 import java.util.*
 
 class ColorSelectionMenu(previousScreen: ChestUI?, private val color: RenderColor) : ChestUI("Color", previousScreen) {
@@ -18,12 +18,12 @@ class ColorSelectionMenu(previousScreen: ChestUI?, private val color: RenderColo
     }
 
     override fun build() {
-        for (color in MyMapColor.values()) {
+        for (color in MyMapColor.entries) {
             val stack = ItemStack(color.item)
             val colorHex = color.hex
             val name = TextUtils.capitalizeType(color.name.lowercase())
             stack.setCustomName(Style.EMPTY.withColor(colorHex), name)
-            val nbt = NbtCompound()
+            val nbt = CompoundTag()
             nbt.putInt("color", colorHex)
             stack.setCustomData(nbt)
             addItem(stack)
@@ -34,6 +34,6 @@ class ColorSelectionMenu(previousScreen: ChestUI?, private val color: RenderColo
         if (stack?.isEmpty ?: return) return
         val colorHex = stack.getCustomData()?.getInt("color")?.orElse(0xFFFFFF) ?: 0xFFFFFF
         color.set(fromHex(colorHex))
-        close()
+        onClose()
     }
 }

@@ -1,23 +1,18 @@
 package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.utils.GuiUtils
-import net.minecraft.block.SignBlock
-import net.minecraft.block.entity.SignBlockEntity
-import net.minecraft.block.entity.SignText
-import net.minecraft.client.gui.screen.ingame.SignEditScreen
-import net.minecraft.client.gui.widget.ButtonWidget
-import net.minecraft.client.render.block.entity.SignBlockEntityRenderer
-import net.minecraft.client.util.SelectionManager
-import net.minecraft.registry.Registries
-import net.minecraft.screen.ScreenTexts
-import net.minecraft.text.Text
-import net.minecraft.util.DyeColor
-import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
-import java.util.*
+import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.screens.inventory.SignEditScreen
+import net.minecraft.core.BlockPos
+import net.minecraft.network.chat.CommonComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.DyeColor
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.entity.SignBlockEntity
+import net.minecraft.world.level.block.entity.SignText
 import java.util.function.Consumer
 
-class SignGui private constructor(
+class SignGui(
     sign: SignBlockEntity,
     private val front: Boolean,
     filtered: Boolean,
@@ -25,102 +20,65 @@ class SignGui private constructor(
 ) : SignEditScreen(sign, front, filtered) {
 
     override fun init() {
-        addDrawableChild(
-            ButtonWidget.builder(ScreenTexts.DONE) {
-                close()
-            }.dimensions(
+        super.init()
+
+        addRenderableWidget(
+            Button.builder(CommonComponents.GUI_DONE) {
+                onClose()
+            }.bounds(
                 width / 2 - 100,
                 height / 4 + 144,
                 200,
                 20
             ).build()
         )
-
-        selectionManager = SelectionManager(
-            { messages[currentRow] },
-            { message -> setCurrentRowMessage(message) },
-            SelectionManager.makeClipboardGetter(client),
-            SelectionManager.makeClipboardSetter(client),
-            { textLine ->
-                client.textRenderer.getWidth(textLine) <= blockEntity.maxTextWidth
-            }
-        )
-
-        val standing =
-            blockEntity.cachedState.block is SignBlock
-
-        model = SignBlockEntityRenderer.createSignModel(
-            client.loadedEntityModels,
-            signType,
-            standing
-        )
-
-        currentRow = 1
-        selectionManager?.putCursorAtEnd()
     }
 
-    override fun close() {
-        val finalText = blockEntity.getText(front)
-
-        val out = Array(4) { i ->
-            finalText.getMessage(i, false).string
+    override fun onClose() {
+        val text = sign.getText(front)
+        val output = Array<String>(4) { i ->
+            text.getMessage(i, false).string
         }
 
-        onClose.accept(out)
+        onClose.accept(output)
+        super.onClose()
     }
 
-    class FakeSign(lines: Array<Text>) : SignBlockEntity(
-        BlockPos.ORIGIN,
-        Registries.BLOCK.get(
-            Identifier.of("minecraft", "oak_sign")
-        ).defaultState
-    ) {
+
+    class FakeSign(lines: Array<Component>) :
+        SignBlockEntity(
+            BlockPos.ZERO,
+            Blocks.OAK_SIGN.defaultBlockState()
+        ) {
 
         init {
             val padded = Array(4) { i ->
-                lines.getOrElse(i) { Text.empty() }
+                lines.getOrElse(i) { Component.empty() }
             }
 
-            val text = SignText(
+            val signText = SignText(
                 padded,
                 padded,
                 DyeColor.WHITE,
                 false
             )
 
-            setText(text, true)
+            setText(signText, true)
         }
 
-        override fun setText(text: SignText, front: Boolean): Boolean {
-            return if (front) {
-                setFrontText(text)
+        override fun setText(
+            text: SignText,
+            front: Boolean
+        ): Boolean {
+            if (front) {
+                frontText = text
             } else {
-                setBackText(text)
+                backText = text
             }
-        }
-
-        override fun isPlayerTooFarToEdit(uuid: UUID): Boolean {
-            return false
-        }
-
-        private fun setBackText(backText: SignText): Boolean {
-            if (backText != this.backText) {
-                this.backText = backText
-                return true
-            }
-
-            return false
-        }
-
-        private fun setFrontText(frontText: SignText): Boolean {
-            if (frontText != this.frontText) {
-                this.frontText = frontText
-                return true
-            }
-
-            return false
+            return true
         }
     }
+
 
     companion object {
 
@@ -129,23 +87,28 @@ class SignGui private constructor(
             rows: Array<String>,
             onClose: Consumer<Array<String>>
         ) {
-            val textRows = rows.map(Text::of).toTypedArray()
-
-            val sign = FakeSign(textRows)
-            val gui = SignGui(sign, true, false, onClose)
-
-            GuiUtils.setScreen(gui)
+            open(
+                rows.map(Component::literal).toTypedArray(),
+                onClose
+            )
         }
+
 
         @JvmStatic
         fun open(
-            rows: Array<Text>,
+            rows: Array<Component>,
             onClose: Consumer<Array<String>>
         ) {
             val sign = FakeSign(rows)
-            val gui = SignGui(sign, true, false, onClose)
 
-            GuiUtils.setScreen(gui)
+            GuiUtils.setScreen(
+                SignGui(
+                    sign,
+                    front = true,
+                    filtered = false,
+                    onClose = onClose
+                )
+            )
         }
     }
 }

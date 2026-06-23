@@ -15,8 +15,8 @@ import com.somefrills.utils.ChatUtils
 import io.github.notenoughupdates.moulconfig.ChromaColour
 import meteordevelopment.orbit.EventHandler
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Vec3d
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.io.IOException
 import java.nio.file.Files
 import java.util.*
@@ -29,7 +29,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
     private val npcLocations = ConcurrentHashMap<String, NpcLocation>()
     private var color = RenderColor(255, 100, 100, 255)
     private var cachedIsland: Area? = null
-    private var cachedNpcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
+    private var cachedNpcs: MutableMap<String, Vec3> = HashMap<String, Vec3>()
     private fun onColorConfigChanged(newColor: ChromaColour) {
         color = RenderColor.fromChroma(newColor)
     }
@@ -45,7 +45,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         val player = mc.player ?: return
         if (npcLocations.isEmpty()) return
 
-        val playerPos: Vec3d = player.eyePos
+        val playerPos: Vec3 = player.eyePosition
         npcLocations.entries.removeIf { entry: MutableMap.MutableEntry<String, NpcLocation> ->
             val npcPos = entry.value.position
             val distance = playerPos.distanceTo(npcPos)
@@ -64,7 +64,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
                 event.drawTracer(center, color)
             }
             if (config.outlineBox) {
-                val box = Box(npc.position.subtract(0.0, 1.0, 0.0), npc.position.add(1.0, 1.0, 1.0))
+                val box = AABB(npc.position.subtract(0.0, 1.0, 0.0), npc.position.add(1.0, 1.0, 1.0))
                 event.drawOutline(box, true, color)
             }
         }
@@ -72,7 +72,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
 
     @JvmStatic
     fun addNpcLocation(npcName: String) {
-        val location: Vec3d? = getNpcCoordinates(npcName)
+        val location: Vec3? = getNpcCoordinates(npcName)
         if (location != null) {
             npcLocations[npcName] = NpcLocation(npcName, location)
             ChatUtils.infoFormat("Added {} to NPC Locator.", npcName)
@@ -112,13 +112,13 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         }
     }
 
-    private fun getNpcCoordinates(npcName: String?): Vec3d? {
+    private fun getNpcCoordinates(npcName: String?): Vec3? {
         ensureCacheLoaded()
         return cachedNpcs[npcName]
     }
 
-    private fun loadIslandNpcs(area: Area): MutableMap<String, Vec3d> {
-        val npcs: MutableMap<String, Vec3d> = HashMap<String, Vec3d>()
+    private fun loadIslandNpcs(area: Area): MutableMap<String, Vec3> {
+        val npcs: MutableMap<String, Vec3> = HashMap<String, Vec3>()
 
         val locationFileName = area.displayName.replace(" ", "_").uppercase(Locale.getDefault()) + ".json"
         val locationFile = FabricLoader.getInstance().configDir
@@ -160,7 +160,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
                 val npcName = node.get("Name").asString
                 val positionStr = node.get("Position").asString
 
-                val position: Vec3d? = parsePosition(positionStr)
+                val position: Vec3? = parsePosition(positionStr)
                 if (position != null) {
                     npcs[npcName] = position
                 }
@@ -173,7 +173,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         return npcs
     }
 
-    private fun parsePosition(positionStr: String): Vec3d? {
+    private fun parsePosition(positionStr: String): Vec3? {
         try {
             val parts: Array<String> =
                 positionStr.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -183,12 +183,12 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
             val y = parts[1].toDouble()
             val z = parts[2].toDouble()
 
-            return Vec3d(x, y, z)
+            return Vec3(x, y, z)
         } catch (e: NumberFormatException) {
             return null
         }
     }
 
     @JvmRecord
-    data class NpcLocation(@JvmField val npcName: String, val position: Vec3d)
+    data class NpcLocation(@JvmField val npcName: String, val position: Vec3)
 }

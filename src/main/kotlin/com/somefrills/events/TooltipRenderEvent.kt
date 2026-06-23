@@ -1,19 +1,31 @@
 package com.somefrills.events
 
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.text.Text
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.world.item.ItemStack
+
 
 class TooltipRenderEvent(
-    var lines: MutableList<Text>,
-    val stack: ItemStack,
-    val customData: NbtCompound?,
-    val title: String
-) : FrillsEvent() {
-    fun addLine(line: Text) {
+    var lines: MutableList<Component?>,
+    var stack: ItemStack?,
+    var customData: CompoundTag?,
+    var title: String?
+) {
+    fun addLine(line: Component?) {
         try {
             lines.add(line)
-        } catch (_: UnsupportedOperationException) {
+        } catch (ignored: UnsupportedOperationException) {
+        }
+    }
+
+    class Before(stack: ItemStack?, title: String?) : Cancellable() {
+        var stack: ItemStack?
+        var title: String?
+
+        init {
+            this.isCancelled = false
+            this.stack = stack
+            this.title = title
         }
     }
 }

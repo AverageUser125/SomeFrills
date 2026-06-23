@@ -2,9 +2,9 @@ package com.somefrills.mixin;
 
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.mixininterface.IVec3d;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.world.entity.Entity;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,19 +18,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GameRendererMixin {
     @Shadow
     @Final
-    private MinecraftClient client;
+    private Minecraft minecraft;
 
     @Shadow
-    public abstract void updateCrosshairTarget(float tickDelta);
+    public abstract void pick(float tickDelta);
 
     @Unique
     private boolean freeCamSet = false;
 
-    @Inject(method = "updateCrosshairTarget", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "pick", at = @At("HEAD"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
-        if ((Freecam.INSTANCE.isActive()) && client.getCameraEntity() != null && !freeCamSet) {
+        if ((Freecam.INSTANCE.isActive()) && minecraft.getCameraEntity() != null && !freeCamSet) {
             info.cancel();
-            Entity cameraE = client.getCameraEntity();
+            Entity cameraE = minecraft.getCameraEntity();
 
             double x = cameraE.getX();
             double y = cameraE.getY();
@@ -54,7 +54,7 @@ public abstract class GameRendererMixin {
 
 
             freeCamSet = true;
-            updateCrosshairTarget(tickDelta);
+            pick(tickDelta);
             freeCamSet = false;
 
             ((IVec3d) cameraE.getEntityPos()).somefrills$set(x, y, z);
@@ -68,7 +68,7 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderItemInHand", at = @At("HEAD"), cancellable = true)
     private void renderHand(float tickProgress, boolean sleeping, Matrix4f positionMatrix, CallbackInfo ci) {
         if (!Freecam.shouldRenderHands()) {
             ci.cancel();

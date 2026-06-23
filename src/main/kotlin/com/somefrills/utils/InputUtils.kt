@@ -1,60 +1,62 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
-import net.minecraft.client.input.KeyInput
-import net.minecraft.client.input.MouseInput
-import net.minecraft.client.option.KeyBinding
-import net.minecraft.client.gui.Click
+import net.minecraft.client.KeyMapping
+import net.minecraft.client.Minecraft
+import net.minecraft.client.input.KeyEvent
+import net.minecraft.client.input.MouseButtonEvent
 
 object InputUtils {
-    fun matchesKeyInternal(binding: KeyBinding, keyInput: KeyInput?, mouseInput: MouseInput?): Boolean {
-        return (keyInput != null && binding.matchesKey(keyInput)) ||
-               (mouseInput != null && binding.matchesMouse(Click(0.0, 0.0, mouseInput)))
+    fun matchesKeyInternal(
+        binding: KeyMapping,
+        keyInput: KeyEvent?,
+        mouseInput: MouseButtonEvent?
+    ): Boolean {
+        return (keyInput != null && binding.matches(keyInput)) ||
+                (mouseInput != null && binding.matchesMouse(mouseInput))
     }
 }
 
-// ========== KeyBinding Extension Functions ==========
+// ========== KeyMapping Extension Functions ==========
 
-fun KeyBinding.matches(keyInput: KeyInput?): Boolean {
+fun KeyMapping.matches(keyInput: KeyEvent?): Boolean {
     return InputUtils.matchesKeyInternal(this, keyInput, null)
 }
 
-fun KeyBinding.matches(mouseInput: MouseInput?): Boolean {
+fun KeyMapping.matches(mouseInput: MouseButtonEvent?): Boolean {
     return InputUtils.matchesKeyInternal(this, null, mouseInput)
 }
 
-fun KeyBinding.matches(keyInput: KeyInput?, mouseInput: MouseInput?): Boolean {
+fun KeyMapping.matches(keyInput: KeyEvent?, mouseInput: MouseButtonEvent?): Boolean {
     return InputUtils.matchesKeyInternal(this, keyInput, mouseInput)
 }
+
 
 // ========== Input State Extensions ==========
 
 val isLeftMouseDown: Boolean
-    get() = mc.options.attackKey.isPressed
+    get() = mc.options.keyAttack.isDown
 
 val isRightMouseDown: Boolean
-    get() = mc.options.useKey.isPressed
+    get() = mc.options.keyUse.isDown
 
 val isForwardPressed: Boolean
-    get() = mc.options.forwardKey.isPressed
+    get() = mc.options.keyUp.isDown
 
 val isBackwardPressed: Boolean
-    get() = mc.options.backKey.isPressed
+    get() = mc.options.keyDown.isDown
 
 val isLeftPressed: Boolean
-    get() = mc.options.leftKey.isPressed
+    get() = mc.options.keyLeft.isDown
 
 val isRightPressed: Boolean
-    get() = mc.options.rightKey.isPressed
+    get() = mc.options.keyRight.isDown
 
 val isJumpPressed: Boolean
-    get() = mc.options.jumpKey.isPressed
+    get() = mc.options.keyJump.isDown
 
 val isShiftPressed: Boolean
-    get() = mc.options.sneakKey.isPressed
+    get() = mc.options.keyShift.isDown
 
 val isCtrlPressed: Boolean
-    get() = mc.options.sprintKey.isPressed
-
-
-
+    get() = mc.options.keySprint.isDown

@@ -3,141 +3,188 @@ package com.somefrills.features.misc.glowmob.chestui
 import com.somefrills.Main.mc
 import com.somefrills.utils.GuiUtils
 import com.somefrills.utils.plainCustomName
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.screen.GenericContainerScreenHandler
-import net.minecraft.screen.slot.Slot
-import net.minecraft.screen.slot.SlotActionType
-import net.minecraft.text.Text
+import io.github.notenoughupdates.moulconfig.common.ClickType
+import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.player.Inventory
+import net.minecraft.world.inventory.ChestMenu
+import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import kotlin.collections.ArrayList
 import kotlin.collections.MutableList
 
-abstract class ChestUI @JvmOverloads constructor(title: String, @JvmField val previousScreen: ChestUI? = null) :
-    GenericContainerScreen(
-        getHandler(INV_SIZE), mc.player!!.getInventory(), Text.of(title)
-    ) {
+abstract class ChestUI @JvmOverloads constructor(
+    title: String,
+    @JvmField val previousScreen: ChestUI? = null
+) : ContainerScreen(
+    getHandler(INV_SIZE),
+    mc.player!!.inventory,
+    Component.literal(title)
+) {
+
     protected val addons: MutableList<UIAddon> = ArrayList()
 
     @JvmField
     protected val allItems: MutableList<ItemStack> = ArrayList()
+
     protected var lastClickTimestamp: Long = 0L
+
 
     init {
         addAddon(CloseAddon())
     }
 
+
     fun addAddon(addon: UIAddon?) {
-        this.addons.add(addon!!)
+        addons.add(addon!!)
     }
 
     fun clearAddons() {
-        this.addons.clear()
+        addons.clear()
     }
 
+
     protected val inventory: Inventory
-        get() = handler.inventory
+        get() = this.minecraft!!.player!!.inventory
+
 
     fun rebuild() {
-        val inv = this.inventory
-        inv.clear()
+        val inv = this.menu.container
+
+        inv.clearContent()
         fillBorder(inv)
 
-        // 1. Let the subclass define what items exist
         allItems.clear()
         build()
 
-        // 2. Run addons to filter or paginate the list
-        val displayList: MutableList<ItemStack> = ArrayList(allItems)
+        val displayList = ArrayList(allItems)
+
         for (addon in addons) {
             addon.processItems(this, displayList)
         }
 
-        // 3. Render the processed list into the UI
         renderList(inv, displayList)
 
-        // 4. Let addons draw their navigation buttons
         for (addon in addons) {
             addon.drawDecoration(this, inv)
         }
     }
 
+
     protected abstract fun build()
 
-    private fun renderList(inv: Inventory, items: MutableList<ItemStack>) {
+
+    private fun renderList(inv: net.minecraft.world.Container, items: MutableList<ItemStack>) {
         var slotPtr = 0
+
         for (stack in items) {
-            while (slotPtr < inv.size() && isBorderSlot(slotPtr)) {
+            while (slotPtr < inv.containerSize && isBorderSlot(slotPtr)) {
                 slotPtr++
             }
-            if (slotPtr >= inv.size()) break
-            inv.setStack(slotPtr++, stack)
+
+            if (slotPtr >= inv.containerSize) {
+                break
+            }
+
+            inv.setItem(slotPtr++, stack)
         }
     }
 
-    protected fun fillBorder(inventory: Inventory) {
-        for (i in 0..<inventory.size()) {
+
+    protected fun fillBorder(inventory: net.minecraft.world.Container) {
+        for (i in 0 until inventory.containerSize) {
             if (isBorderSlot(i)) {
-                inventory.setStack(i, ItemStack(Items.GRAY_STAINED_GLASS_PANE))
+                inventory.setItem(
+                    i,
+                    ItemStack(Items.GRAY_STAINED_GLASS_PANE)
+                )
             }
         }
     }
 
+
     protected fun isBorderSlot(slotIndex: Int): Boolean {
-        return slotIndex < 9 || slotIndex >= INV_SIZE - 9 || slotIndex % 9 == 0 || slotIndex % 9 == 8
+        return slotIndex < 9 ||
+                slotIndex >= INV_SIZE - 9 ||
+                slotIndex % 9 == 0 ||
+                slotIndex % 9 == 8
     }
+
 
     protected open fun onItemClick(stack: ItemStack?, button: Int) {
     }
 
-    override fun onMouseClick(slot: Slot?, slotId: Int, button: Int, actionType: SlotActionType?) {
-        if (slot == null || !slot.hasStack()) return
+    override fun slotClicked(
+        slot: Slot, slotId: Int, buttonNum: Int, containerInput: ContainerInput
+    ) {
+        if (!slot.hasItem()) return
 
         val now = System.currentTimeMillis()
-        if (now - this.lastClickTimestamp < CLICK_COOLDOWN_MS) return
-        this.lastClickTimestamp = now
 
-        val stack = slot.stack
-        val name = stack.plainCustomName
-        // Addon Interception
-        for (addon in addons) {
-            if (addon.onClick(this, stack, name, button)) return
-        }
-
-        // Hardcoded Close Logic
-        if (name == "Close") {
-            this.close()
+        if (now - lastClickTimestamp < CLICK_COOLDOWN_MS) {
             return
         }
 
-        onItemClick(stack, button)
+        lastClickTimestamp = now
+
+        val stack = slot.item
+        val name = stack.plainCustomName
+
+        for (addon in addons) {
+            if (addon.onClick(this, stack, name, buttonNum)) {
+                return
+            }
+        }
+
+        if (name == "Close") {
+            super.onClose()
+            return
+        }
+
+        onItemClick(stack, buttonNum)
     }
+
 
     protected fun addItem(stack: ItemStack) {
         allItems.add(stack)
     }
 
+
     protected open fun onReturn() {
         rebuild()
     }
 
-    override fun close() {
-        if (this.client.player != null) this.client.player!!.closeHandledScreen()
-        if (this.previousScreen != null) {
-            this.previousScreen.onReturn()
-            GuiUtils.setScreen(this.previousScreen)
+
+    override fun onClose() {
+        if (minecraft?.player != null) {
+            minecraft!!.player!!.closeContainer()
+        }
+
+        previousScreen?.let {
+            it.onReturn()
+            GuiUtils.setScreen(it)
         }
     }
 
+
     companion object {
-        const val INV_SIZE: Int = 9 * 6
+
+        const val INV_SIZE = 9 * 6
         private const val CLICK_COOLDOWN_MS = 50L
 
-        fun getHandler(invSize: Int): GenericContainerScreenHandler {
+
+        fun getHandler(invSize: Int): ChestMenu {
             val syncId = 0
-            val inventory: Inventory = UIInventory(invSize)
-            return GenericContainerScreenHandler.createGeneric9x6(syncId, mc.player!!.getInventory(), inventory)
+
+            val container = UIInventory(invSize)
+
+            return ChestMenu.sixRows(
+                syncId,
+                mc.player!!.inventory,
+                container
+            )
         }
     }
 }

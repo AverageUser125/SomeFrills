@@ -1,18 +1,18 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
-import net.minecraft.network.packet.c2s.query.QueryPingC2SPacket
+import net.minecraft.network.protocol.ping.ServerboundPingRequestPacket
 import net.minecraft.util.Util
 
 object NetworkUtils {
     fun sendPingPacket() {
-        val handler = mc.networkHandler ?: return
-        handler.sendPacket(QueryPingC2SPacket(Util.getMeasuringTimeMs()))
+        val handler = mc.connection ?: return
+        handler.send(ServerboundPingRequestPacket(System.currentTimeMillis()))
     }
 
     val isPingPending: Boolean
         get() {
-            val handler = mc.networkHandler
+            val handler = mc.connection
             return handler != null
         }
 }

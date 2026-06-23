@@ -1,9 +1,9 @@
 package com.somefrills.events
 
 import com.somefrills.utils.toPlain
-import net.minecraft.entity.Entity
-import net.minecraft.text.Text
+import net.minecraft.world.entity.Entity
+import net.minecraft.network.chat.Component
 
-class EntityNamedEvent(val entity: Entity, val name: Text) : FrillsEvent() {
+class EntityNamedEvent(val entity: Entity, val name: Component) : FrillsEvent() {
     val namePlain get() = name.toPlain()
 }

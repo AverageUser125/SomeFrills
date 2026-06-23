@@ -8,9 +8,9 @@ import com.somefrills.misc.SortedList
 import com.somefrills.utils.SkyblockUtils
 import com.somefrills.utils.isNaked
 import com.somefrills.utils.toPlain
-import net.minecraft.entity.EquipmentSlot
-import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.decoration.ArmorStandEntity
+import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.decoration.ArmorStand
 import java.io.Serial
 import java.util.*
 import java.util.function.Predicate
@@ -191,7 +191,7 @@ class MatchInfo {
             val eZ = entity.z
 
             for (nearby in getNearbyEntities(entity)) {
-                if (nearby !is ArmorStandEntity) {
+                if (nearby !is ArmorStand) {
                     continue
                 }
 
@@ -219,17 +219,17 @@ class MatchInfo {
 
         companion object {
             private fun getNearbyEntities(entity: LivingEntity): MutableList<LivingEntity> {
-                val world = entity.entityWorld ?: return mutableListOf<LivingEntity>()
+                val world = entity.level()
 
                 val box = entity.boundingBox
-                    .expand(HORIZONTAL_RADIUS * 2, VERTICAL_RANGE, HORIZONTAL_RADIUS * 2)
+                    .expandTowards(HORIZONTAL_RADIUS * 2, VERTICAL_RANGE, HORIZONTAL_RADIUS * 2)
 
-                return world.getEntitiesByClass(
-                    ArmorStandEntity::class.java,
+                return world.getEntitiesOfClass(
+                    ArmorStand::class.java,
                     box,
-                    Predicate { e: ArmorStandEntity -> true })
+                    Predicate { e: ArmorStand -> true })
                     .stream()
-                    .map { e: ArmorStandEntity -> e as LivingEntity }
+                    .map { e: ArmorStand -> e as LivingEntity }
                     .toList()
             }
         }
@@ -237,12 +237,12 @@ class MatchInfo {
 
     class GearPredicate(private val requiredGear: MutableSet<GearFlag>) : Predicate<LivingEntity> {
         override fun test(entity: LivingEntity): Boolean {
-            return requiredGear.contains(GearFlag.CHEST) && !entity.getEquippedStack(EquipmentSlot.CHEST)
-                .isEmpty || requiredGear.contains(GearFlag.LEGS) && !entity.getEquippedStack(
+            return requiredGear.contains(GearFlag.CHEST) && !entity.getItemBySlot(EquipmentSlot.CHEST)
+                .isEmpty || requiredGear.contains(GearFlag.LEGS) && !entity.getItemBySlot(
                 EquipmentSlot.LEGS
-            ).isEmpty || requiredGear.contains(GearFlag.FEET) && !entity.getEquippedStack(
+            ).isEmpty || requiredGear.contains(GearFlag.FEET) && !entity.getItemBySlot(
                 EquipmentSlot.FEET
-            ).isEmpty || requiredGear.contains(GearFlag.HEAD) && !entity.getEquippedStack(
+            ).isEmpty || requiredGear.contains(GearFlag.HEAD) && !entity.getItemBySlot(
                 EquipmentSlot.HEAD
             ).isEmpty
         }
@@ -252,7 +252,7 @@ class MatchInfo {
         override fun test(entity: LivingEntity): Boolean {
             // FIXME: hurtTime is not good, as it means the mob may flicker, but it should still work
             // Without this checks, mobs that are dying or recently spawned will be considered naked, which is not ideal
-            if (entity.isDead || entity.age <= 2 || entity.deathTime > 0 || entity.hurtTime > 0) {
+            if (entity.isDeadOrDying || entity.tickCount <= 2 || entity.deathTime > 0 || entity.hurtTime > 0) {
                 return false
             }
 

@@ -1,5 +1,6 @@
 package com.somefrills.features.misc
 
+import com.mojang.blaze3d.platform.InputConstants
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 
@@ -9,8 +10,7 @@ import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.features.misc.glowmob.chestui.ChestUI
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.client.MinecraftClient
-import net.minecraft.client.util.InputUtil
+import net.minecraft.client.Minecraft
 import kotlin.math.abs
 
 @FrillsFeature
@@ -21,7 +21,7 @@ object SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.ena
 
     fun active(): Boolean {
         if (config.onlyChestUI) {
-            return mc.currentScreen is ChestUI
+            return mc.screen is ChestUI
         }
         return true
     }
@@ -45,7 +45,7 @@ object SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.ena
 
     @EventHandler
     fun onScreen(event: ScreenOpenEvent) {
-        loadCursor(mc.mouse.x, mc.mouse.y)
+        loadCursor(mc.mouseHandler.xpos(), mc.mouseHandler.ypos())
     }
 
     @EventHandler
@@ -68,11 +68,11 @@ object SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.ena
         if (abs(pos.middle.first - middleX) < 1
             && abs(pos.middle.second - middleY) < 1
         ) {
-            val client = MinecraftClient.getInstance()
+            val client = Minecraft.getInstance()
 
-            InputUtil.setCursorParameters(
+            InputConstants.grabOrReleaseMouse(
                 client.window,
-                InputUtil.GLFW_CURSOR_NORMAL,
+                InputConstants.CURSOR_NORMAL,
                 pos.cursor.first,
                 pos.cursor.second
             )

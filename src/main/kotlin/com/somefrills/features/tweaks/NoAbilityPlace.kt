@@ -9,8 +9,8 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.utils.hasRightClickAbility
 import com.somefrills.utils.skyblockId
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.item.BlockItem
-import net.minecraft.item.ItemPlacementContext
+import net.minecraft.world.item.BlockItem
+import net.minecraft.world.item.context.BlockPlaceContext
 
 @FrillsFeature
 object NoAbilityPlace : Feature(FrillsMod.config.tweaks.noAbilityPlaceEnabled) {
@@ -31,10 +31,10 @@ object NoAbilityPlace : Feature(FrillsMod.config.tweaks.noAbilityPlaceEnabled) {
     }
 
     @JvmStatic
-    fun hasAbility(context: ItemPlacementContext?): Boolean {
+    fun hasAbility(context: BlockPlaceContext?): Boolean {
         if (!isActive()) return false
         if (context == null) return false
-        val stack = context.stack
+        val stack = context.itemInHand
         val id = stack.skyblockId ?: return false
         if (!id.isEmpty() && (abilityWhitelist.contains(id) || id.startsWith("ABIPHONE"))) {
             return true

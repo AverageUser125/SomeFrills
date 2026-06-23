@@ -14,8 +14,8 @@ import com.somefrills.utils.isMob
 import com.somefrills.utils.setGlowing
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import net.minecraft.entity.Entity
-import net.minecraft.entity.LivingEntity
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.LivingEntity
 import java.util.function.Consumer
 
 @FrillsFeature

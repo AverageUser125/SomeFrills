@@ -5,11 +5,11 @@ import com.somefrills.misc.Area
 import com.somefrills.misc.Area.Companion.fromString
 import com.somefrills.utils.plainCustomName
 import com.somefrills.utils.setCustomName
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Style
-import net.minecraft.text.TextColor
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 class AreaSelectionMenu(previousScreen: ChestUI?, private val info: MatchInfo) :
     ChestUI("Select Area", previousScreen) {
@@ -25,7 +25,7 @@ class AreaSelectionMenu(previousScreen: ChestUI?, private val info: MatchInfo) :
     }
 
     private fun createChoiceItem(baseItem: Item, displayName: String, colorHex: Int): ItemStack {
-        val stack = baseItem.defaultStack
+        val stack = baseItem.defaultInstance
         stack.setCustomName(Style.EMPTY.withColor(TextColor.fromRgb(colorHex)), displayName)
         return stack
     }
@@ -37,6 +37,6 @@ class AreaSelectionMenu(previousScreen: ChestUI?, private val info: MatchInfo) :
         } else {
             info.area = fromString(customName)
         }
-        close()
+        onClose()
     }
 }

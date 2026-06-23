@@ -11,7 +11,7 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.KeybindManager
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
 
 @FrillsFeature
 object AutoFarmer :
@@ -52,7 +52,8 @@ object AutoFarmer :
         if (config.enableDistanceCheck) {
             val maxDistance = config.maxRestoreDistance.toDouble()
             val distanceSquared = maxDistance * maxDistance
-            val actualDistance: Double = mc.player?.blockPos?.getSquaredDistance(savedPosition) ?: Double.MAX_VALUE
+            val saved = savedPosition ?: return
+            val actualDistance: Double = mc.player?.blockPosition()?.distSqr(saved) ?: Double.MAX_VALUE
             if (actualDistance > distanceSquared) {
                 // Out of range, don't restore
                 return
@@ -88,12 +89,12 @@ object AutoFarmer :
     @EventHandler
     fun onTick(event: TickEventPost?) {
         // Apply movement inputs
-        mc.options.sprintKey.isPressed = currentState.isSprinting
-        mc.options.attackKey.isPressed = currentState.isAttacking
-        mc.options.forwardKey.isPressed = currentState.isForward
-        mc.options.backKey.isPressed = currentState.isBackward
-        mc.options.leftKey.isPressed = currentState.isLeft
-        mc.options.rightKey.isPressed = currentState.isRight
+        mc.options.keySprint.isDown = currentState.isSprinting
+        mc.options.keyAttack.isDown = currentState.isAttacking
+        mc.options.keyUp.isDown = currentState.isForward
+        mc.options.keyDown.isDown = currentState.isBackward
+        mc.options.keyLeft.isDown = currentState.isLeft
+        mc.options.keyRight.isDown = currentState.isRight
     }
 
     @EventHandler
@@ -102,14 +103,14 @@ object AutoFarmer :
     }
 
     private fun stopFarming() {
-        mc.options.sprintKey.isPressed = false
-        mc.options.attackKey.isPressed = false
-        mc.options.forwardKey.isPressed = false
-        mc.options.backKey.isPressed = false
-        mc.options.leftKey.isPressed = false
-        mc.options.rightKey.isPressed = false
+        mc.options.keySprint.isDown = false
+        mc.options.keyAttack.isDown = false
+        mc.options.keyUp.isDown = false
+        mc.options.keyDown.isDown = false
+        mc.options.keyLeft.isDown = false
+        mc.options.keyRight.isDown = false
         savedState = currentState
-        savedPosition = mc.player?.blockPos
+        savedPosition = mc.player?.blockPosition()
     }
 
 }

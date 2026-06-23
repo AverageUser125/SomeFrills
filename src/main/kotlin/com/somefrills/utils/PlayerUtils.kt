@@ -1,25 +1,22 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
-import net.minecraft.client.network.ClientPlayNetworkHandler
-import net.minecraft.client.network.ClientPlayerEntity
-import net.minecraft.client.network.PlayerListEntry
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
-import net.minecraft.util.Formatting
-import net.minecraft.util.math.Box
+import net.minecraft.ChatFormatting
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.phys.AABB
 
 object PlayerUtils {
-    fun isRealPlayer(entity: PlayerEntity): Boolean {
-        val handler: ClientPlayNetworkHandler = mc.networkHandler ?: return entity == mc.player
+    fun isRealPlayer(entity: Player): Boolean {
+        val handler = mc.connection ?: return entity == mc.player
 
         val uuid = entity.uuid ?: return false
         if (uuid.version() != 4) return false
 
-        val listEntry: PlayerListEntry = handler.getPlayerListEntry(uuid) ?: return entity == mc.player
+        val listEntry = handler.getPlayerInfo(uuid) ?: return entity == mc.player
 
         val displayName: String = listEntry.profile.name ?: return false
-        val name = Formatting.strip(displayName) ?: return false
+        val name = ChatFormatting.stripFormatting(displayName) ?: return false
         return name.let { it.isNotEmpty() && !it.contains(" ") }
     }
 
@@ -29,10 +26,10 @@ object PlayerUtils {
         val inv = player.inventory
         val query = refillQuery.replace("_", " ")
         for (i in 0 until 36) {
-            val stack = inv.getStack(i)
+            val stack = inv.getItem(i)
             if (stack.isEmpty) continue
             val id = stack.skyblockId?.replace("_", " ") ?: continue
-            val name = stack.name.toPlain()
+            val name = stack.displayName.toPlain()
             if (query.equals(id, ignoreCase = true) || query.equals(name, ignoreCase = true)) {
                 total += stack.count
             }
@@ -47,14 +44,14 @@ object PlayerUtils {
         val player = mc.player ?: return
         if (message.isEmpty()) return
         if (message.startsWith("/")) {
-            player.networkHandler.sendChatCommand(message.substring(1))
+            player.connection.sendCommand(message.substring(1))
         } else {
-            player.networkHandler.sendChatMessage(message)
+            player.connection.sendChat(message)
         }
     }
 
     fun runCommand(command: String) {
-        mc.player?.networkHandler?.sendChatCommand(command)
+        mc.player?.connection?.sendCommand(command)
     }
 
     fun getHeldItem(): ItemStack = mc.player?.getHeldItem() ?: ItemStack.EMPTY
@@ -62,40 +59,40 @@ object PlayerUtils {
     fun isHoldingFishingRod(): Boolean = mc.player?.isHoldingFishingRod() == true
 }
 
-// ========== PlayerEntity Extension Functions ==========
+// ========== Player Extension Functions ==========
 
-fun PlayerEntity.isRealPlayer(): Boolean = PlayerUtils.isRealPlayer(this)
+fun Player.isRealPlayer(): Boolean = PlayerUtils.isRealPlayer(this)
 
-val PlayerEntity.playerName: String
-    get() = Formatting.strip(gameProfile.name) ?: ""
+val Player.playerName: String
+    get() = ChatFormatting.stripFormatting(gameProfile.name) ?: ""
 
-fun PlayerEntity.getHeldItem(): ItemStack = mainHandStack
+fun Player.getHeldItem(): ItemStack = mainHandItem
 
-fun PlayerEntity.isHoldingFishingRod(): Boolean = getHeldItem().skyblockId?.contains("ROD") == true
+fun Player.isHoldingFishingRod(): Boolean = getHeldItem().skyblockId?.contains("ROD") == true
 
-fun PlayerEntity.refillItem(refillQuery: String, amount: Int) = PlayerUtils.refillItemInternal(refillQuery, amount)
+fun Player.refillItem(refillQuery: String, amount: Int) = PlayerUtils.refillItemInternal(refillQuery, amount)
 
-fun PlayerEntity.isInZone(x1: Double, y1: Double, z1: Double, x2: Double, y2: Double, z2: Double): Boolean {
-    val area = Box(x1, y1, z1, x2, y2, z2)
-    return area.contains(entityPos)
+fun Player.isInZone(x1: Double, y1: Double, z1: Double, x2: Double, y2: Double, z2: Double): Boolean {
+    val area = AABB(x1, y1, z1, x2, y2, z2)
+    return area.contains(position())
 }
 
-val PlayerEntity.cordsFormatted: String
+val Player.cordsFormatted: String
     get() {
-        val pos = blockPos
+        val pos = blockPosition()
         return TextUtils.format("{},{},{}", pos.x, pos.y, pos.z)
     }
 
-fun PlayerEntity.cordsFormatted(format: String): String {
-    val pos = blockPos
+fun Player.cordsFormatted(format: String): String {
+    val pos = blockPosition()
     return TextUtils.format(format, pos.x, pos.y, pos.z)
 }
 
-fun PlayerEntity.isSelf(): Boolean = this === mc.player
+fun Player.isSelf(): Boolean = this === mc.player
 
 // ========== Static Player State Extensions ==========
 
-fun getHeldItem(): ItemStack = mc.player?.mainHandStack ?: ItemStack.EMPTY
+fun getHeldItem(): ItemStack = mc.player?.mainHandItem ?: ItemStack.EMPTY
 
 fun isInZone(x1: Double, y1: Double, z1: Double, x2: Double, y2: Double, z2: Double): Boolean {
     return mc.player?.isInZone(x1, y1, z1, x2, y2, z2) ?: false

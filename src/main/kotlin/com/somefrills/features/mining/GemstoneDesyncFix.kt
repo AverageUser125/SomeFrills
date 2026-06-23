@@ -1,6 +1,5 @@
 package com.somefrills.features.mining
 
-import at.hannibal2.skyhanni.utils.BlockUtils
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 
@@ -10,15 +9,17 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.utils.isStainedGlass
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.block.BlockState
-import net.minecraft.block.HorizontalConnectingBlock.*
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.block.CrossCollisionBlock.*
 
 @FrillsFeature
 object GemstoneDesyncFix : AreaFeature(FrillsMod.config.mining.gemstoneDesyncFixEnabled) {
     @EventHandler
     private fun onBlock(event: BlockUpdateEvent) {
+        val level = mc.level ?: return
         if (event.newState.isAir && event.oldState.isStainedGlass()) {
-            event.newState.updateNeighbors(mc.world, event.pos, NOTIFY_ALL)
+            event.newState.updateNeighbourShapes(level, event.pos, Block.UPDATE_ALL);
         }
     }
 
@@ -35,11 +36,11 @@ object GemstoneDesyncFix : AreaFeature(FrillsMod.config.mining.gemstoneDesyncFix
     }
 
     private fun isConnectedPane(state: BlockState): Boolean {
-        return state.get(NORTH) || state.get(EAST) || state.get(SOUTH) || state.get(WEST)
+        return state.getValue(NORTH) || state.getValue(EAST) || state.getValue(SOUTH) || state.getValue(WEST)
     }
 
     private fun asFullPane(state: BlockState): BlockState {
-        return state.with(NORTH, true).with(EAST, true).with(SOUTH, true).with(WEST, true)
+        return state.setValue(NORTH, true).setValue(EAST, true).setValue(SOUTH, true).setValue(WEST, true)
     }
 
     override fun checkArea(area: Area): Boolean {

@@ -1,32 +1,32 @@
 package com.somefrills.utils
 
-import com.somefrills.events.WorldRenderEvent
 import com.somefrills.Main.mc
+import com.somefrills.events.WorldRenderEvent
 import com.somefrills.misc.RenderColor
 import com.somefrills.mixininterface.EntityRendering
-import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityPose
-import net.minecraft.entity.EquipmentSlot
-import net.minecraft.entity.LivingEntity
-import net.minecraft.entity.decoration.ArmorStandEntity
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.item.ItemStack
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.MathHelper
-import net.minecraft.util.math.Vec3d
-import net.minecraft.world.entity.SimpleEntityLookup
+import net.minecraft.util.Mth
+import net.minecraft.world.entity.Entity
+import net.minecraft.world.entity.EquipmentSlot
+import net.minecraft.world.entity.LivingEntity
+import net.minecraft.world.entity.Pose
+import net.minecraft.world.entity.decoration.ArmorStand
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.entity.LevelEntityGetterAdapter
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
 import java.util.function.Predicate
-import kotlin.collections.ArrayList
+
 
 object EntityUtils {
-    fun getPlayers(): List<PlayerEntity> {
-        return getStreamEntities(PlayerEntity::class.java).toList()
+    fun getPlayers(): List<Player> {
+        return getStreamEntities(Player::class.java).toList()
     }
 
-    fun getEntities(): List<Entity> {
-        val world = mc.world ?: return ArrayList();
-        val lookup = world.entityManager.getLookup() as SimpleEntityLookup<Entity>
-        return ArrayList(lookup.index.idToEntity.values)
+    fun getEntities(): MutableList<Entity> {
+        val level = mc.level ?: return ArrayList<Entity>()
+        val lookup = level.entityStorage.getEntityGetter() as LevelEntityGetterAdapter<Entity>
+        return ArrayList(lookup.visibleEntities.byId.values)
     }
 
     fun <T, R : T> filterAndCast(clazz: Class<R>): (T) -> Sequence<R> {
@@ -37,19 +37,19 @@ object EntityUtils {
         return getEntities().asSequence().flatMap(filterAndCast(clazz))
     }
 
-    fun horizontalDistance(from: Vec3d, to: Vec3d): Float {
+    fun horizontalDistance(from: Vec3, to: Vec3): Float {
         val x = (from.x - to.x).toFloat()
         val z = (from.z - to.z).toFloat()
-        return MathHelper.sqrt(x * x + z * z)
+        return Mth.sqrt(x * x + z * z)
     }
 
     fun findNametagOwner(armorStandEntity: Entity, otherEntities: List<Entity>): Entity? {
         var entity: Entity? = null
         var lowestDist = 2.0f
-        val maxY = armorStandEntity.entityPos.y
+        val maxY = armorStandEntity.position().y
         for (ent in otherEntities) {
-            val dist = horizontalDistance(ent.entityPos, armorStandEntity.entityPos)
-            if (ent !is ArmorStandEntity && ent.entityPos.y < maxY && dist < lowestDist) {
+            val dist = horizontalDistance(ent.position(), armorStandEntity.position())
+            if (ent !is ArmorStand && ent.position().y < maxY && dist < lowestDist) {
                 entity = ent
                 lowestDist = dist
             }
@@ -65,20 +65,20 @@ object EntityUtils {
 
 // ========== Entity Extension Functions ==========
 
-fun Entity.getLerpedBox(event: WorldRenderEvent): Box {
-    return getLerpedBox(event.tickCounter.getTickProgress(true))
+fun Entity.getLerpedBox(event: WorldRenderEvent): AABB {
+    return getLerpedBox(event.tickCounter.gameTimeDeltaTicks)
 }
 
-fun Entity.getLerpedBox(tickProgress: Float): Box {
-    return getDimensions(EntityPose.STANDING).getBoxAt(getLerpedPos(tickProgress))
+fun Entity.getLerpedBox(tickProgress: Float): AABB {
+    return getDimensions(Pose.STANDING).makeBoundingBox(getPosition(tickProgress));
 }
 
 fun Entity.horizontalDistance(to: Entity): Float {
-    return EntityUtils.horizontalDistance(entityPos, to.entityPos)
+    return EntityUtils.horizontalDistance(position(), to.position())
 }
 
-fun Entity.horizontalDistance(to: Vec3d): Float {
-    return EntityUtils.horizontalDistance(entityPos, to)
+fun Entity.horizontalDistance(to: Vec3): Float {
+    return EntityUtils.horizontalDistance(position(), to)
 }
 
 fun Entity.setGlowing(shouldGlow: Boolean, color: RenderColor) {
@@ -99,32 +99,54 @@ fun Entity.findNametagOwners(otherEntities: List<Entity>): Entity? {
     return EntityUtils.findNametagOwner(this, otherEntities)
 }
 
-fun Entity.getOtherEntitiesAround(box: Box, filter: Predicate<Entity>): List<Entity> {
+fun Entity.getOtherEntitiesAround(
+    box: AABB,
+    filter: Predicate<Entity>
+): List<Entity> {
     val entities = ArrayList<Entity>()
+
     for (ent in EntityUtils.getEntities()) {
-        if (ent != this && filter.test(ent) && ent.boundingBox.intersects(box)) {
+        if (ent !== this &&
+            filter.test(ent) &&
+            ent.boundingBox.intersects(box)
+        ) {
             entities.add(ent)
         }
     }
+
     return entities
 }
 
-fun Entity.getOtherEntitiesAround(distX: Double, distY: Double, distZ: Double, filter: Predicate<Entity>): List<Entity> {
-    return getOtherEntitiesAround(Box.of(entityPos, distX, distY, distZ), filter)
+fun Entity.getOtherEntitiesAround(
+    distX: Double,
+    distY: Double,
+    distZ: Double,
+    filter: Predicate<Entity>
+): List<Entity> {
+    return getOtherEntitiesAround(
+        AABB.ofSize(position(), distX, distY, distZ),
+        filter
+    )
 }
 
-fun Entity.getOtherEntitiesAround(dist: Double, filter: Predicate<Entity>): List<Entity> {
-    return getOtherEntitiesAround(Box.of(entityPos, dist, dist, dist), filter)
+fun Entity.getOtherEntitiesAround(
+    dist: Double,
+    filter: Predicate<Entity>
+): List<Entity> {
+    return getOtherEntitiesAround(
+        AABB.ofSize(position(), dist, dist, dist),
+        filter
+    )
 }
 
 // ========== LivingEntity Extension Functions ==========
 
 fun LivingEntity.getEquippedArmor(): List<ItemStack> {
     return listOf(
-        getEquippedStack(EquipmentSlot.HEAD),
-        getEquippedStack(EquipmentSlot.CHEST),
-        getEquippedStack(EquipmentSlot.LEGS),
-        getEquippedStack(EquipmentSlot.FEET)
+        getItemBySlot(EquipmentSlot.HEAD),
+        getItemBySlot(EquipmentSlot.CHEST),
+        getItemBySlot(EquipmentSlot.LEGS),
+        getItemBySlot(EquipmentSlot.FEET)
     )
 }
 
@@ -140,7 +162,7 @@ fun LivingEntity.isBaseHealth(health: Float): Boolean {
 // ========== Generic Entity Checking ==========
 
 fun Entity.isMob(): Boolean {
-    return if (this is net.minecraft.entity.player.PlayerEntity) {
+    return if (this is Player) {
         !PlayerUtils.isRealPlayer(this)
     } else {
         this is LivingEntity

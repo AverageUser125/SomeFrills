@@ -1,14 +1,15 @@
 package com.somefrills.events
 
-import net.minecraft.screen.ScreenHandler
-import net.minecraft.screen.slot.Slot
-import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.world.inventory.AbstractContainerMenu
+import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
+
 
 class SlotClickEvent(
     val slot: Slot?,
     val slotId: Int,
     val button: Int,
-    val actionType: SlotActionType,
+    val actionType: ContainerInput,
     val title: String,
-    val handler: ScreenHandler
+    val handler: AbstractContainerMenu
 ) : Cancellable()

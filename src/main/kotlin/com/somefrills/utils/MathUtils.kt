@@ -1,6 +1,6 @@
 package com.somefrills.utils
 
-import net.minecraft.util.math.Vec3d
+import net.minecraft.world.phys.Vec3
 import org.joml.Vector3d
 import kotlin.math.abs
 
@@ -13,7 +13,7 @@ object MathUtils {
         return abs(a - b) < eps
     }
 
-    fun setVector(vec: Vector3d, v: Vec3d): Vector3d {
+    fun setVector(vec: Vector3d, v: Vec3): Vector3d {
         vec.x = v.x
         vec.y = v.y
         vec.z = v.z
@@ -35,7 +35,7 @@ fun Float.isNearlyEqual(other: Float, eps: Float = 1e-5f): Boolean {
 
 // ========== Vector3d Extension Functions ==========
 
-fun Vector3d.set(v: Vec3d): Vector3d {
+fun Vector3d.set(v: Vec3): Vector3d {
     return MathUtils.setVector(this, v)
 }
 
@@ -43,23 +43,23 @@ fun Vector3d.isNearlyEqual(other: Vector3d, eps: Double = 1e-9): Boolean {
     return x.isNearlyEqual(other.x, eps) && y.isNearlyEqual(other.y, eps) && z.isNearlyEqual(other.z, eps)
 }
 
-// ========== Vec3d Extension Functions ==========
+// ========== Vec3 Extension Functions ==========
 
-fun Vec3d.isNearlyEqual(other: Vec3d, eps: Double = 1e-9): Boolean {
+fun Vec3.isNearlyEqual(other: Vec3, eps: Double = 1e-9): Boolean {
     return x.isNearlyEqual(other.x, eps) && y.isNearlyEqual(other.y, eps) && z.isNearlyEqual(other.z, eps)
 }
 
-fun Vec3d.toVector3d(): Vector3d {
+fun Vec3.toVector3d(): Vector3d {
     return Vector3d(x, y, z)
 }
 
 // ========== Vector3d Operator Extensions ==========
 
-operator fun Vector3d.plus(other: Vec3d): Vector3d {
+operator fun Vector3d.plus(other: Vec3): Vector3d {
     return Vector3d(x + other.x, y + other.y, z + other.z)
 }
 
-operator fun Vector3d.minus(other: Vec3d): Vector3d {
+operator fun Vector3d.minus(other: Vec3): Vector3d {
     return Vector3d(x - other.x, y - other.y, z - other.z)
 }
 

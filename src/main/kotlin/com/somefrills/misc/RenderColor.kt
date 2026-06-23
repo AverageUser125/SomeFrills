@@ -4,8 +4,8 @@ import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
 import io.github.notenoughupdates.moulconfig.ChromaColour
-import net.minecraft.util.Formatting
-import net.minecraft.util.math.ColorHelper
+import net.minecraft.ChatFormatting
+import net.minecraft.util.ARGB
 import java.io.IOException
 import kotlin.math.sqrt
 
@@ -38,7 +38,7 @@ class RenderColor {
             0,
             255
         )
-        this.argb = ColorHelper.getArgb(
+        this.argb = ARGB.color(
             Math.clamp(a.toLong(), 0, 255),
             Math.clamp(r.toLong(), 0, 255),
             Math.clamp(g.toLong(), 0, 255),
@@ -57,7 +57,7 @@ class RenderColor {
         val bi = (this.b * 255f).toInt()
         val ai = (this.a * 255f).toInt()
         this.hex = (ri shl 16) or (gi shl 8) or bi // RGB hex
-        this.argb = ColorHelper.getArgb(ai, ri, gi, bi)
+        this.argb = ARGB.color(ai, ri, gi, bi)
     }
 
     constructor(color: RenderColor) {
@@ -156,8 +156,8 @@ class RenderColor {
         }
 
         @JvmStatic
-        fun fromFormatting(formatting: Formatting): RenderColor {
-            val colorValue = formatting.colorValue
+        fun fromFormatting(ChatFormatting: ChatFormatting): RenderColor {
+            val colorValue = ChatFormatting.color
             if (colorValue == null || colorValue == -1) {
                 return white
             }

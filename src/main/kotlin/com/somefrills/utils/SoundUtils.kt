@@ -1,47 +1,52 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
-import net.minecraft.registry.entry.RegistryEntry
-import net.minecraft.sound.SoundEvent
-import net.minecraft.util.Identifier
-import net.minecraft.client.sound.PositionedSoundInstance
+import net.minecraft.client.resources.sounds.DirectionalSoundInstance
+import net.minecraft.core.RegistryAccess
+import net.minecraft.resources.Identifier
+import net.minecraft.sounds.SoundEvent
+import net.minecraft.sounds.SoundSource
+import net.minecraft.util.RandomSource
 
 object SoundUtils {
-    fun playSoundInternal(event: SoundEvent, volume: Float, pitch: Float) {
-        mc.soundManager.play(PositionedSoundInstance.master(event, pitch, volume))
+
+    fun playSoundInternal(
+        event: SoundEvent,
+        xAngle: Float,
+        yAngle: Float,
+        volume: Float = 1f
+    ) {
+        val sound = DirectionalSoundInstance(
+            event,
+            SoundSource.MASTER,
+            RandomSource.create(),
+            mc.gameRenderer.mainCamera,
+            xAngle,
+            yAngle
+        )
+
+        sound.volume = volume
+        mc.soundManager.play(sound)
     }
 
-    fun playSoundInternal(event: RegistryEntry.Reference<SoundEvent>, volume: Float, pitch: Float) {
-        playSoundInternal(event.value(), volume, pitch)
-    }
-
-    fun playSoundInternal(event: String, volume: Float, pitch: Float) {
-        playSoundInternal(SoundEvent.of(Identifier.of(event)), volume, pitch)
+    fun playSoundInternal(id: String, volume: Float, pitch: Float, yaw: Float = 0f) {
+        val sound = SoundEvent.createVariableRangeEvent(Identifier.parse(id))
+        playSoundInternal(sound, volume, pitch, yaw)
     }
 }
 
-// ========== Sound Extension Functions ==========
 
 fun playSound(event: SoundEvent, volume: Float = 1.0f, pitch: Float = 1.0f) {
     SoundUtils.playSoundInternal(event, volume, pitch)
 }
 
-fun playSound(event: RegistryEntry.Reference<SoundEvent>, volume: Float = 1.0f, pitch: Float = 1.0f) {
-    SoundUtils.playSoundInternal(event, volume, pitch)
-}
-
-fun playSound(event: String, volume: Float = 1.0f, pitch: Float = 1.0f) {
-    SoundUtils.playSoundInternal(event, volume, pitch)
+fun playSound(id: String, volume: Float = 1.0f, pitch: Float = 1.0f) {
+    SoundUtils.playSoundInternal(id, volume, pitch)
 }
 
 val SoundEvent.play: Unit
     get() = playSound(this)
 
-fun SoundEvent.play(volume: Float, pitch: Float = 1.0f) {
+fun SoundEvent.play(volume: Float = 1.0f, pitch: Float = 1.0f) {
     playSound(this, volume, pitch)
 }
-
-fun RegistryEntry.Reference<SoundEvent>.play(volume: Float = 1.0f, pitch: Float = 1.0f) {
-    playSound(this, volume, pitch)
-}
-

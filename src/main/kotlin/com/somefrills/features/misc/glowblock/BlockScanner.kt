@@ -1,10 +1,9 @@
 package com.somefrills.features.misc.glowblock
 
 import com.somefrills.Main.mc
-import net.minecraft.block.Block
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.ChunkPos
-import net.minecraft.world.chunk.WorldChunk
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.block.Block
 
 class BlockScanner {
     private val scannedChunks: MutableSet<ChunkPos> = HashSet<ChunkPos>()
@@ -27,16 +26,16 @@ class BlockScanner {
     }
 
     fun removeBlockFromResults(block: Block?) {
-        val world = mc.world ?: return
-        glowingBlocks.removeIf { pos: BlockPos? -> world.getBlockState(pos).block === block }
+        val world = mc.level ?: return
+        glowingBlocks.removeIf { pos: BlockPos -> world.getBlockState(pos).block === block }
     }
 
     fun scanRenderedChunks(targetBlocks: MutableList<Block>): MutableSet<BlockPos> {
         val player = mc.player ?: return glowingBlocks
-        val world = mc.world ?: return glowingBlocks
+        val world = mc.level ?: return glowingBlocks
 
-        val center = ChunkPos(player.blockPos)
-        val radius: Int = mc.options.viewDistance.getValue()
+        val center = ChunkPos(player.blockX, player.blockZ)
+        val radius: Int = mc.options.renderDistance().get()
 
         // optional: reset scan memory when player moves chunk
         if (lastCenter == null || lastCenter != center) {
@@ -51,7 +50,7 @@ class BlockScanner {
                 val cp = ChunkPos(center.x + dx, center.z + dz)
 
                 if (scannedChunks.contains(cp)) continue
-                if (!world.isChunkLoaded(cp.x, cp.z)) continue
+                if (!world.isLoaded(BlockPos(cp.x, 100, cp.z))) continue
 
                 toScan = cp
                 break@outer
@@ -62,15 +61,16 @@ class BlockScanner {
 
         scannedChunks.add(toScan)
 
-        val chunk: WorldChunk = world.getChunk(toScan.x, toScan.z)
-        val basePos = chunk.getPos().startPos
+        val chunk = world.getChunk(toScan.x, toScan.z)
+        val basePosX = chunk.getPos().minBlockX
+        val basePosZ = chunk.getPos().minBlockZ
 
         for (x in 0..15) {
             for (z in 0..15) {
-                val worldX = basePos.x + x
-                val worldZ = basePos.z + z
+                val worldX = basePosX + x
+                val worldZ = basePosZ + z
 
-                for (y in chunk.bottomY..chunk.topYInclusive) {
+                for (y in chunk.minY..chunk.maxY) {
                     val pos = BlockPos(worldX, y, worldZ)
 
                     if (targetBlocks.contains(world.getBlockState(pos).block)) {

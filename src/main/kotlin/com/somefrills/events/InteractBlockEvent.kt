@@ -1,5 +1,5 @@
 package com.somefrills.events
 
-import net.minecraft.util.hit.BlockHitResult
+import net.minecraft.world.phys.BlockHitResult
 
 class InteractBlockEvent(val blockHitResult: BlockHitResult) : Cancellable()

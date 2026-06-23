@@ -1,7 +1,7 @@
 package com.somefrills.misc
 
-import net.minecraft.item.Item
-import net.minecraft.item.Items
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.Items
 
 enum class MyMapColor(val hex: Int, @JvmField val item: Item) {
     WHITE(16777215, Items.WHITE_DYE),

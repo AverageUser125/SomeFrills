@@ -1,10 +1,10 @@
 package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.utils.setCustomName
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Style
+import net.minecraft.network.chat.Style
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -39,12 +39,12 @@ class PagingAddon : UIAddon {
         }
     }
 
-    override fun drawDecoration(ui: ChestUI, inventory: Inventory) {
+    override fun drawDecoration(ui: ChestUI, inventory: Container) {
         // 1. Only show "Previous" if we aren't on the first page
         if (currentPage > 0) {
             val back = ItemStack(Items.ARROW)
             back.setCustomName(Style.EMPTY, "Previous Page")
-            inventory.setStack(prevSlot, back)
+            inventory.setItem(prevSlot, back)
         }
 
         // 2. Only show "Next" if there is at least one page ahead of us
@@ -52,7 +52,7 @@ class PagingAddon : UIAddon {
         if (currentPage < totalPages - 1) {
             val forward = ItemStack(Items.ARROW)
             forward.setCustomName(Style.EMPTY, "Next Page")
-            inventory.setStack(nextSlot, forward)
+            inventory.setItem(nextSlot, forward)
         }
     }
 

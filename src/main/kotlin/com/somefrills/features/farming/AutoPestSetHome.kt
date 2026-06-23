@@ -38,7 +38,7 @@ object AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEna
         val now = System.currentTimeMillis()
         if (now - lastServerJoinTime < IGNORE_WINDOW_MS) return
 
-        if (mc.player == null || mc.player?.networkHandler == null) return
+        if (mc.player == null || mc.player?.packetContext == null) return
 
         try {
             ChatUtils.info("Pests spawned detected in chat, running /sethome")

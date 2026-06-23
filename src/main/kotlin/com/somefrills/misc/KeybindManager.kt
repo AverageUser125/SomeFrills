@@ -11,7 +11,7 @@ object KeybindManager {
 
     @JvmStatic
     fun onKeyPressed(key: Int) {
-        if (mc.currentScreen != null) return
+        if (mc.screen != null) return
 
         for (keybind in ArrayList<Keybind>(keybinds)) {
             if (keybind.key == key) {

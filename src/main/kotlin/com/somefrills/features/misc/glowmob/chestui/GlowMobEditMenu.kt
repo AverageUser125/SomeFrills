@@ -11,16 +11,15 @@ import com.somefrills.utils.formatCompact
 import com.somefrills.utils.plainCustomName
 import com.somefrills.utils.setCustomName
 import com.somefrills.utils.wrapByDelimiter
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.AttributeModifiersComponent
-import net.minecraft.component.type.LoreComponent
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.text.TextColor
-import net.minecraft.util.Formatting
+import net.minecraft.network.chat.Component
+import net.minecraft.ChatFormatting
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.ItemLore
 import java.util.function.Consumer
 
 class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, private val isNewRule: Boolean) :
@@ -66,7 +65,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
 
         // Area may be unset; avoid forcing a null color with !! which causes NPEs
         val areaDisplay = info.area?.displayName
-        val areaColor = info.area?.colorHex ?: Formatting.YELLOW.colorValue!!
+        val areaColor = info.area?.colorHex ?: ChatFormatting.YELLOW.color!!
         addItem(
             createChoiceItem(
                 Items.CARVED_PUMPKIN, "Area",
@@ -93,29 +92,29 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         // Add revert/cancel button
         if (!isNewRule) {
             val revert = ItemStack(Items.REDSTONE)
-            revert.setCustomName(colorStyle(Formatting.GOLD), "Revert Changes")
-            val revertLore: MutableList<Text?> = ArrayList()
-            revertLore.add(Text.literal("Restore to original").setStyle(colorStyle(Formatting.GRAY)))
-            revertLore.add(Text.literal("").setStyle(colorStyle(Formatting.GRAY)))
-            revertLore.add(Text.literal("Click to revert").setStyle(colorStyle(Formatting.YELLOW)))
-            revert.set<LoreComponent?>(DataComponentTypes.LORE, LoreComponent(revertLore, revertLore))
-            revert.remove<AttributeModifiersComponent?>(DataComponentTypes.ATTRIBUTE_MODIFIERS)
-            inventory.setStack(INV_SIZE - 9 + 3, revert)
+            revert.setCustomName(colorStyle(ChatFormatting.GOLD), "Revert Changes")
+            val revertLore: MutableList<Component> = ArrayList()
+            revertLore.add(Component.literal("Restore to original").setStyle(colorStyle(ChatFormatting.GRAY)))
+            revertLore.add(Component.literal("").setStyle(colorStyle(ChatFormatting.GRAY)))
+            revertLore.add(Component.literal("Click to revert").setStyle(colorStyle(ChatFormatting.YELLOW)))
+            revert.set(DataComponents.LORE, ItemLore(revertLore, revertLore))
+            revert.remove(DataComponents.ATTRIBUTE_MODIFIERS)
+            inventory.setItem(INV_SIZE - 9 + 3, revert)
         } else {
             val cancel = ItemStack(Items.BARRIER)
-            cancel.setCustomName(colorStyle(Formatting.RED), "Cancel")
-            val cancelLore: MutableList<Text?> = ArrayList<Text?>()
-            cancelLore.add(Text.literal("Discard changes").setStyle(colorStyle(Formatting.GRAY)))
-            cancelLore.add(Text.literal("").setStyle(colorStyle(Formatting.GRAY)))
-            cancelLore.add(Text.literal("Click to cancel").setStyle(colorStyle(Formatting.YELLOW)))
-            cancel.set<LoreComponent?>(DataComponentTypes.LORE, LoreComponent(cancelLore, cancelLore))
-            cancel.remove<AttributeModifiersComponent?>(DataComponentTypes.ATTRIBUTE_MODIFIERS)
-            inventory.setStack(INV_SIZE - 9 + 3, cancel)
+            cancel.setCustomName(colorStyle(ChatFormatting.RED), "Cancel")
+            val cancelLore: MutableList<Component> = ArrayList()
+            cancelLore.add(Component.literal("Discard changes").setStyle(colorStyle(ChatFormatting.GRAY)))
+            cancelLore.add(Component.literal("").setStyle(colorStyle(ChatFormatting.GRAY)))
+            cancelLore.add(Component.literal("Click to cancel").setStyle(colorStyle(ChatFormatting.YELLOW)))
+            cancel.set(DataComponents.LORE, ItemLore(cancelLore, cancelLore))
+            cancel.remove(DataComponents.ATTRIBUTE_MODIFIERS)
+            inventory.setItem(INV_SIZE - 9 + 3, cancel)
         }
 
         val delete = ItemStack(Items.CAULDRON)
-        delete.setCustomName(colorStyle(Formatting.RED), "Delete")
-        inventory.setStack(INV_SIZE - 9 + 5, delete)
+        delete.setCustomName(colorStyle(ChatFormatting.RED), "Delete")
+        inventory.setItem(INV_SIZE - 9 + 5, delete)
     }
 
     private fun createGearChoiceItem(): ItemStack {
@@ -127,7 +126,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         // NONE
         if (gear.isEmpty()) {
             text = "(Unset)"
-            color = Formatting.RED.colorValue!!
+            color = ChatFormatting.RED.color!!
             return createChoiceItem(
                 Items.IRON_CHESTPLATE,
                 "Gear",
@@ -163,9 +162,9 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         text = parts.joinToString(", ")
 
         color = (if (parts.isEmpty())
-            Formatting.RED.colorValue
+            ChatFormatting.RED.color
         else
-            Formatting.GREEN.colorValue)!!
+            ChatFormatting.GREEN.color)!!
 
         return createChoiceItem(
             Items.IRON_CHESTPLATE,
@@ -184,7 +183,7 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         chosen: String?,
         vararg descriptions: String
     ): ItemStack {
-        return createChoiceItem(item, label, chosen, Formatting.YELLOW.colorValue!!, *descriptions)
+        return createChoiceItem(item, label, chosen, ChatFormatting.YELLOW.color!!, *descriptions)
     }
 
     private fun createChoiceItem(
@@ -195,50 +194,50 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
         vararg descriptions: String
     ): ItemStack {
         val stack = ItemStack(item)
-        stack.setCustomName(colorStyle(Formatting.GREEN).withItalic(false), label)
+        stack.setCustomName(colorStyle(ChatFormatting.GREEN).withItalic(false), label)
 
-        val lore: MutableList<Text> = ArrayList()
+        val lore: MutableList<Component> = ArrayList()
 
         if (chosen.isNullOrEmpty()) {
             lore.add(
-                Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal("(Unset)").setStyle(colorStyle(Formatting.DARK_GRAY)))
+                Component.literal("Chosen: ").setStyle(colorStyle(ChatFormatting.GRAY))
+                    .append(Component.literal("(Unset)").setStyle(colorStyle(ChatFormatting.DARK_GRAY)))
             )
         } else {
             val lines: Array<String> =
                 chosen.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             lore.add(
-                Text.literal("Chosen: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(lines[0]).setStyle(colorStyle(chosenColor)))
+                Component.literal("Chosen: ").setStyle(colorStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(lines[0]).setStyle(colorStyle(chosenColor)))
             )
             for (i in 1..<lines.size) {
-                lore.add(Text.literal(lines[i]).setStyle(colorStyle(chosenColor)))
+                lore.add(Component.literal(lines[i]).setStyle(colorStyle(chosenColor)))
             }
         }
 
-        lore.add(Text.literal(""))
+        lore.add(Component.literal(""))
 
-        // Add descriptions with proper formatting
+        // Add descriptions with proper ChatFormatting
         if (descriptions.isNotEmpty()) {
             for (i in descriptions.indices) {
                 val desc: String = descriptions[i]
                 if (i == descriptions.size - 1) {
                     // Last line: action text in YELLOW
-                    lore.add(Text.literal(desc).setStyle(colorStyle(Formatting.YELLOW)))
+                    lore.add(Component.literal(desc).setStyle(colorStyle(ChatFormatting.YELLOW)))
                 } else {
                     // Middle lines: help text in GRAY
-                    lore.add(Text.literal(desc).setStyle(colorStyle(Formatting.GRAY)))
+                    lore.add(Component.literal(desc).setStyle(colorStyle(ChatFormatting.GRAY)))
                 }
             }
         }
 
-        stack.set(DataComponentTypes.LORE, LoreComponent(lore, lore))
-        stack.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS)
+        stack.set(DataComponents.LORE, ItemLore(lore, lore))
+        stack.remove(DataComponents.ATTRIBUTE_MODIFIERS)
         return stack
     }
 
-    private fun colorStyle(color: Formatting): Style {
-        val colorValue = color.colorValue ?: return Style.EMPTY
+    private fun colorStyle(color: ChatFormatting): Style {
+        val colorValue = color.color ?: return Style.EMPTY
         return colorStyle(colorValue)
     }
 
@@ -296,12 +295,12 @@ class GlowMobEditMenu(previousMenu: ChestUI?, private val rule: GlowMobRule, pri
 
             "Revert Changes", "Cancel" -> {
                 this.isRevertRequested = true
-                close()
+                onClose()
             }
 
             "Delete" -> {
                 info.clear()
-                close()
+                onClose()
             }
         }
     }

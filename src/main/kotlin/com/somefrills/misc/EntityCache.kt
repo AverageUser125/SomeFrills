@@ -5,7 +5,7 @@ import com.somefrills.events.EntityUpdatedEvent
 import com.somefrills.events.ServerJoinEvent
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import net.minecraft.entity.Entity
+import net.minecraft.world.entity.Entity
 
 /**
  * An object for temporarily storing any relevant entity handles, such as armor stands with custom names.

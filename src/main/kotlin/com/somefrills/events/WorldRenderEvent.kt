@@ -1,126 +1,118 @@
 package com.somefrills.events
 
+import com.mojang.blaze3d.pipeline.DepthStencilState
 import com.mojang.blaze3d.pipeline.RenderPipeline
-import com.mojang.blaze3d.platform.DepthTestFunction
-import com.somefrills.Main.mc
+import com.mojang.blaze3d.platform.CompareOp
+import com.mojang.blaze3d.vertex.ByteBufferBuilder
+import com.mojang.blaze3d.vertex.PoseStack
+import com.mojang.blaze3d.vertex.VertexConsumer
 import com.somefrills.misc.RenderColor
 import com.somefrills.misc.RenderStyle
-import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gl.RenderPipelines
-import net.minecraft.client.render.*
-import net.minecraft.client.render.VertexConsumerProvider.Immediate
-import net.minecraft.client.render.WorldRenderer.Gizmos
-import net.minecraft.client.render.state.WorldRenderState
-import net.minecraft.client.util.BufferAllocator
-import net.minecraft.client.util.math.MatrixStack
-import net.minecraft.text.Text
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Vec3d
+import net.minecraft.client.DeltaTracker
+import net.minecraft.client.gui.Font
+import net.minecraft.client.renderer.MultiBufferSource
+import net.minecraft.client.renderer.RenderPipelines
+import net.minecraft.client.renderer.rendertype.*
+import net.minecraft.client.renderer.state.level.CameraRenderState
+import net.minecraft.client.renderer.state.level.LevelRenderState
+import net.minecraft.network.chat.Component
+import net.minecraft.util.LightCoordsUtil
+import net.minecraft.world.phys.AABB
+import net.minecraft.world.phys.Vec3
+import com.somefrills.Main.mc
 import org.joml.Matrix4f
 import org.joml.Vector4f
+import kotlin.math.max
 
-class WorldRenderEvent(
-    @JvmField val tickCounter: RenderTickCounter,
-    @JvmField val camera: Camera,
-    val matrices: MatrixStack,
-    val gizmos: Gizmos,
-    val state: WorldRenderState
-) {
-    private fun drawQuad(
-        first: Vec3d,
-        second: Vec3d,
-        third: Vec3d,
-        fourth: Vec3d,
-        consumer: VertexConsumer,
-        color: RenderColor
-    ) {
-        val entry = this.matrices.peek()
-        val camPos = this.camera.cameraPos
-        consumer.vertex(
+class WorldRenderEvent(val camera: CameraRenderState, val matrices: PoseStack, val state: LevelRenderState?) {
+    val tickCounter: DeltaTracker = mc.getDeltaTracker()
+
+    fun drawQuad(first: Vec3, second: Vec3, third: Vec3, fourth: Vec3, consumer: VertexConsumer, color: RenderColor) {
+        val entry = this.matrices.last()
+        val camPos = this.camera.pos
+        consumer.addVertex(
             entry,
-            (first.getX() - camPos.getX()).toFloat(),
-            (first.getY() - camPos.getY()).toFloat(),
-            (first.getZ() - camPos.getZ()).toFloat()
-        ).color(color.argb)
-        consumer.vertex(
+            (first.x() - camPos.x()).toFloat(),
+            (first.y() - camPos.y()).toFloat(),
+            (first.z() - camPos.z()).toFloat()
+        ).setColor(color.argb)
+        consumer.addVertex(
             entry,
-            (second.getX() - camPos.getX()).toFloat(),
-            (second.getY() - camPos.getY()).toFloat(),
-            (second.getZ() - camPos.getZ()).toFloat()
-        ).color(color.argb)
-        consumer.vertex(
+            (second.x() - camPos.x()).toFloat(),
+            (second.y() - camPos.y()).toFloat(),
+            (second.z() - camPos.z()).toFloat()
+        ).setColor(color.argb)
+        consumer.addVertex(
             entry,
-            (third.getX() - camPos.getX()).toFloat(),
-            (third.getY() - camPos.getY()).toFloat(),
-            (third.getZ() - camPos.getZ()).toFloat()
-        ).color(color.argb)
-        consumer.vertex(
+            (third.x() - camPos.x()).toFloat(),
+            (third.y() - camPos.y()).toFloat(),
+            (third.z() - camPos.z()).toFloat()
+        ).setColor(color.argb)
+        consumer.addVertex(
             entry,
-            (fourth.getX() - camPos.getX()).toFloat(),
-            (fourth.getY() - camPos.getY()).toFloat(),
-            (fourth.getZ() - camPos.getZ()).toFloat()
-        ).color(color.argb)
+            (fourth.x() - camPos.x()).toFloat(),
+            (fourth.y() - camPos.y()).toFloat(),
+            (fourth.z() - camPos.z()).toFloat()
+        ).setColor(color.argb)
     }
 
-    private fun drawLine(start: Vec3d, end: Vec3d, width: Float, consumer: VertexConsumer, color: RenderColor) {
-        val entry = this.matrices.peek()
-        val camPos = this.camera.cameraPos
-        val vector4f = Vector4f()
-        val vector4f2 = Vector4f()
-        vector4f.set(start.getX() - camPos.getX(), start.getY() - camPos.getY(), start.getZ() - camPos.getZ(), 1.0)
-        vector4f2.set(end.getX() - camPos.getX(), end.getY() - camPos.getY(), end.getZ() - camPos.getZ(), 1.0)
-        consumer.vertex(entry, vector4f.x, vector4f.y, vector4f.z)
-            .normal(entry, vector4f2.x - vector4f.x, vector4f2.y - vector4f.y, vector4f2.z - vector4f.z)
-            .color(color.argb)
-            .lineWidth(width)
-        consumer.vertex(entry, vector4f2.x, vector4f2.y, vector4f2.z)
-            .normal(entry, vector4f2.x - vector4f.x, vector4f2.y - vector4f.y, vector4f2.z - vector4f.z)
-            .color(color.argb)
-            .lineWidth(width)
+    fun drawLine(start: Vec3, end: Vec3, width: Float, consumer: VertexConsumer, color: RenderColor) {
+        val entry = this.matrices.last()
+        val camPos = this.camera.pos
+        val vector4f = Vector4f().set(start.x() - camPos.x(), start.y() - camPos.y(), start.z() - camPos.z(), 1.0)
+        val vector4f2 = Vector4f().set(end.x() - camPos.x(), end.y() - camPos.y(), end.z() - camPos.z(), 1.0)
+        consumer.addVertex(entry, vector4f.x, vector4f.y, vector4f.z)
+            .setNormal(entry, vector4f2.x - vector4f.x, vector4f2.y - vector4f.y, vector4f2.z - vector4f.z)
+            .setColor(color.argb)
+            .setLineWidth(width)
+        consumer.addVertex(entry, vector4f2.x, vector4f2.y, vector4f2.z)
+            .setNormal(entry, vector4f2.x - vector4f.x, vector4f2.y - vector4f.y, vector4f2.z - vector4f.z)
+            .setColor(color.argb)
+            .setLineWidth(width)
     }
 
-    fun drawFilled(box: Box, throughWalls: Boolean, color: RenderColor) {
-        val consumer: VertexConsumer =
-            if (throughWalls) immediate.getBuffer(DEBUG_FILLED_BOX_NO_CULL) else immediate.getBuffer(RenderLayers.debugFilledBox())
+    fun drawFilled(box: AABB, throughWalls: Boolean, color: RenderColor) {
+        val consumer =
+            if (throughWalls) immediate.getBuffer(DEBUG_FILLED_BOX_NO_CULL) else immediate.getBuffer(RenderTypes.debugFilledBox())
         val d = box.minX
         val e = box.minY
         val f = box.minZ
         val g = box.maxX
         val h = box.maxY
         val i = box.maxZ
-        this.drawQuad(Vec3d(g, e, f), Vec3d(g, h, f), Vec3d(g, h, i), Vec3d(g, e, i), consumer, color)
-        this.drawQuad(Vec3d(d, e, f), Vec3d(d, e, i), Vec3d(d, h, i), Vec3d(d, h, f), consumer, color)
-        this.drawQuad(Vec3d(d, e, f), Vec3d(d, h, f), Vec3d(g, h, f), Vec3d(g, e, f), consumer, color)
-        this.drawQuad(Vec3d(d, e, i), Vec3d(g, e, i), Vec3d(g, h, i), Vec3d(d, h, i), consumer, color)
-        this.drawQuad(Vec3d(d, h, f), Vec3d(d, h, i), Vec3d(g, h, i), Vec3d(g, h, f), consumer, color)
-        this.drawQuad(Vec3d(d, e, f), Vec3d(g, e, f), Vec3d(g, e, i), Vec3d(d, e, i), consumer, color)
+        this.drawQuad(Vec3(g, e, f), Vec3(g, h, f), Vec3(g, h, i), Vec3(g, e, i), consumer, color)
+        this.drawQuad(Vec3(d, e, f), Vec3(d, e, i), Vec3(d, h, i), Vec3(d, h, f), consumer, color)
+        this.drawQuad(Vec3(d, e, f), Vec3(d, h, f), Vec3(g, h, f), Vec3(g, e, f), consumer, color)
+        this.drawQuad(Vec3(d, e, i), Vec3(g, e, i), Vec3(g, h, i), Vec3(d, h, i), consumer, color)
+        this.drawQuad(Vec3(d, h, f), Vec3(d, h, i), Vec3(g, h, i), Vec3(g, h, f), consumer, color)
+        this.drawQuad(Vec3(d, e, f), Vec3(g, e, f), Vec3(g, e, i), Vec3(d, e, i), consumer, color)
     }
 
-    fun drawOutline(box: Box, throughWalls: Boolean, color: RenderColor) {
-        val consumer: VertexConsumer =
-            if (throughWalls) immediate.getBuffer(LINES_TRANSLUCENT_NO_CULL) else immediate.getBuffer(RenderLayers.lines())
+    fun drawOutline(box: AABB, throughWalls: Boolean, color: RenderColor) {
+        val consumer =
+            if (throughWalls) immediate.getBuffer(LINES_TRANSLUCENT_NO_CULL) else immediate.getBuffer(RenderTypes.lines())
         val d = box.minX
         val e = box.minY
         val f = box.minZ
         val g = box.maxX
         val h = box.maxY
         val i = box.maxZ
-        this.drawLine(Vec3d(d, e, f), Vec3d(g, e, f), 3.0f, consumer, color)
-        this.drawLine(Vec3d(d, e, f), Vec3d(d, h, f), 3.0f, consumer, color)
-        this.drawLine(Vec3d(d, e, f), Vec3d(d, e, i), 3.0f, consumer, color)
-        this.drawLine(Vec3d(g, e, f), Vec3d(g, h, f), 3.0f, consumer, color)
-        this.drawLine(Vec3d(g, h, f), Vec3d(d, h, f), 3.0f, consumer, color)
-        this.drawLine(Vec3d(d, h, f), Vec3d(d, h, i), 3.0f, consumer, color)
-        this.drawLine(Vec3d(d, h, i), Vec3d(d, e, i), 3.0f, consumer, color)
-        this.drawLine(Vec3d(d, e, i), Vec3d(g, e, i), 3.0f, consumer, color)
-        this.drawLine(Vec3d(g, e, i), Vec3d(g, e, f), 3.0f, consumer, color)
-        this.drawLine(Vec3d(d, h, i), Vec3d(g, h, i), 3.0f, consumer, color)
-        this.drawLine(Vec3d(g, e, i), Vec3d(g, h, i), 3.0f, consumer, color)
-        this.drawLine(Vec3d(g, h, f), Vec3d(g, h, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, e, f), Vec3(g, e, f), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, e, f), Vec3(d, h, f), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, e, f), Vec3(d, e, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(g, e, f), Vec3(g, h, f), 3.0f, consumer, color)
+        this.drawLine(Vec3(g, h, f), Vec3(d, h, f), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, h, f), Vec3(d, h, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, h, i), Vec3(d, e, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, e, i), Vec3(g, e, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(g, e, i), Vec3(g, e, f), 3.0f, consumer, color)
+        this.drawLine(Vec3(d, h, i), Vec3(g, h, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(g, e, i), Vec3(g, h, i), 3.0f, consumer, color)
+        this.drawLine(Vec3(g, h, f), Vec3(g, h, i), 3.0f, consumer, color)
     }
 
     fun drawStyled(
-        box: Box,
+        box: AABB,
         style: RenderStyle,
         throughWalls: Boolean,
         outlineColor: RenderColor,
@@ -134,80 +126,109 @@ class WorldRenderEvent(
         }
     }
 
-    fun drawText(pos: Vec3d, text: Text?, scale: Float, throughWalls: Boolean, color: RenderColor) {
-        if (mc.textRenderer == null) return
+    fun drawText(pos: Vec3, text: Component, scale: Float, throughWalls: Boolean, color: RenderColor) {
         val matrices = Matrix4f()
-        val camPos = this.camera.cameraPos
-        val textX = (pos.getX() - camPos.getX()).toFloat()
-        val textY = (pos.getY() - camPos.getY()).toFloat()
-        val textZ = (pos.getZ() - camPos.getZ()).toFloat()
+        val camPos = this.camera.pos
+        val textX = (pos.x() - camPos.x()).toFloat()
+        val textY = (pos.y() - camPos.y()).toFloat()
+        val textZ = (pos.z() - camPos.z()).toFloat()
         matrices.translate(textX, textY, textZ)
-        matrices.rotate(camera.rotation)
+        matrices.rotate(camera.orientation)
         matrices.scale(scale, -scale, scale)
-        mc.textRenderer.draw(
+        mc.font.drawInBatch(
             text,
-            -mc.textRenderer.getWidth(text) / 2f,
+            -mc.font.width(text) / 2f,
             1.0f,
             color.argb,
             true,
             matrices,
             immediate,
-            if (throughWalls) TextRenderer.TextLayerType.SEE_THROUGH else TextRenderer.TextLayerType.NORMAL,
+            if (throughWalls) Font.DisplayMode.SEE_THROUGH else Font.DisplayMode.NORMAL,
             0,
-            LightmapTextureManager.MAX_LIGHT_COORDINATE
+            LightCoordsUtil.FULL_BRIGHT
         )
     }
 
-    fun drawBeam(pos: Vec3d, height: Int, throughWalls: Boolean, color: RenderColor) {
-        this.drawFilled(Box.of(pos, 0.5, 0.0, 0.5).stretch(0.0, height.toDouble(), 0.0), throughWalls, color)
+    fun drawDistanceScaledText(
+        pos: Vec3,
+        text: Component,
+        baseScale: Float,
+        scaling: Float,
+        throughWalls: Boolean,
+        color: RenderColor
+    ) {
+        val dist = this.camera.pos.distanceTo(pos)
+        val distScale = (1 + dist * scaling).toFloat()
+        val scale = max(baseScale * distScale, baseScale)
+        this.drawText(pos.add(0.0, dist * baseScale, 0.0), text, scale, throughWalls, color)
     }
 
-    fun drawFilledWithBeam(box: Box, height: Int, throughWalls: Boolean, color: RenderColor) {
-        val center = box.center
+    fun drawDistanceScaledText(
+        pos: Vec3,
+        text: Component,
+        baseScale: Float,
+        throughWalls: Boolean,
+        color: RenderColor
+    ) {
+        this.drawDistanceScaledText(pos, text, baseScale, 0.1f, throughWalls, color)
+    }
+
+    fun drawBeam(pos: Vec3, height: Int, throughWalls: Boolean, color: RenderColor) {
+        this.drawFilled(AABB.ofSize(pos, 0.5, 0.0, 0.5).expandTowards(0.0, height.toDouble(), 0.0), throughWalls, color)
+    }
+
+    fun drawFilledWithBeam(box: AABB, height: Int, throughWalls: Boolean, color: RenderColor) {
+        val center = box.getCenter()
         this.drawFilled(box, throughWalls, color)
-        this.drawBeam(center.add(0.0, box.maxY - center.getY(), 0.0), height, throughWalls, color)
+        this.drawBeam(center.add(0.0, box.maxY - center.y(), 0.0), height, throughWalls, color)
     }
 
-    fun drawTracer(pos: Vec3d, width: Float, color: RenderColor) {
-        val consumer: VertexConsumer = immediate.getBuffer(LINES_TRANSLUCENT_NO_CULL)
-        val point = this.camera.cameraPos.add(Vec3d.fromPolar(this.camera.pitch, this.camera.yaw))
+    fun drawTracer(pos: Vec3, width: Float, color: RenderColor) {
+        val consumer = immediate.getBuffer(LINES_TRANSLUCENT_NO_CULL)
+        val point = this.camera.pos.add(Vec3.directionFromRotation(this.camera.xRot, this.camera.yRot))
         this.drawLine(point, pos, width, consumer, color)
     }
 
-    fun drawTracer(pos: Vec3d, color: RenderColor) {
+    fun drawTracer(pos: Vec3, color: RenderColor) {
         this.drawTracer(pos, 4.0f, color)
     }
 
-    companion object {
-        @JvmField
-        val immediate: Immediate = VertexConsumerProvider.immediate(BufferAllocator(2048))
+    fun delta(): Float {
+        return this.tickCounter.getGameTimeDeltaPartialTick(true)
+    }
 
-        private val DEBUG_FILLED_BOX_NO_CULL_PIPELINE: RenderPipeline = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-                .withLocation("pipeline/somefrills_debug_filled_box_no_cull")
-                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
+    fun draw() {
+        immediate.endBatch()
+    }
+
+    companion object {
+        private val immediate = MultiBufferSource.immediate(ByteBufferBuilder(2048))
+
+        private val DEBUG_FILLED_BOX_NO_CULL_PIPELINE = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
+                .withLocation("pipeline/nofrills_debug_filled_box_no_cull")
+                .withDepthStencilState(DepthStencilState(CompareOp.NOT_EQUAL, false))
                 .build()
         )
-        private val LINES_TRANSLUCENT_NO_CULL_PIPELINE: RenderPipeline = RenderPipelines.register(
-            RenderPipeline.builder(RenderPipelines.RENDERTYPE_LINES_SNIPPET)
-                .withDepthWrite(false)
-                .withDepthTestFunction(DepthTestFunction.NO_DEPTH_TEST)
-                .withLocation("pipeline/somefrills_lines_translucent_no_cull")
+        private val LINES_TRANSLUCENT_NO_CULL_PIPELINE = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.LINES_SNIPPET)
+                .withDepthStencilState(DepthStencilState(CompareOp.NOT_EQUAL, false))
+                .withLocation("pipeline/nofrills_lines_translucent_no_cull")
                 .build()
         )
-        private val DEBUG_FILLED_BOX_NO_CULL: RenderLayer = RenderLayer.of(
-            "somefrills_debug_filled_box_no_cull",
+        private val DEBUG_FILLED_BOX_NO_CULL = RenderType.create(
+            "nofrills_debug_filled_box_no_cull",
             RenderSetup.builder(DEBUG_FILLED_BOX_NO_CULL_PIPELINE)
-                .translucent()
-                .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                .build()
+                .sortOnUpload()
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .createRenderSetup()
         )
-        private val LINES_TRANSLUCENT_NO_CULL: RenderLayer = RenderLayer.of(
-            "somefrills_lines_translucent_no_cull",
+        private val LINES_TRANSLUCENT_NO_CULL = RenderType.create(
+            "nofrills_lines_translucent_no_cull",
             RenderSetup.builder(LINES_TRANSLUCENT_NO_CULL_PIPELINE)
-                .layeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                .outputTarget(OutputTarget.ITEM_ENTITY_TARGET)
-                .build()
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
+                .createRenderSetup()
         )
     }
 }

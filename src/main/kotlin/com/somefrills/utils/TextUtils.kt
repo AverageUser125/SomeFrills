@@ -1,15 +1,14 @@
 package com.somefrills.utils
-import at.hannibal2.skyhanni.utils.compat.value
 import com.google.common.base.Splitter
 import com.somefrills.misc.RenderColor
 import com.somefrills.misc.RenderColor.Companion.fromFormatting
 import com.somefrills.misc.RenderColor.Companion.fromHex
-import net.minecraft.text.PlainTextContent
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.text.TextColor
-import net.minecraft.text.TranslatableTextContent
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
+import net.minecraft.network.chat.contents.PlainTextContents
+import net.minecraft.network.chat.contents.TranslatableContents
 import org.apache.commons.lang3.StringUtils
 import java.text.DecimalFormat
 import java.util.*
@@ -32,8 +31,8 @@ object TextUtils {
     }
 
     fun colorToString(hex: Int): String {
-        for (f in Formatting.entries) {
-            if (f.isColor && f.colorValue == hex) {
+        for (f in ChatFormatting.entries) {
+            if (f.isColor && f.color == hex) {
                 return StringUtils.capitalize(f.name)
             }
         }
@@ -67,10 +66,10 @@ object TextUtils {
             }
         }
 
-        // Try formatting color
-        val formatting = colorStr.parseColor()
-        if (formatting != null) {
-            return fromFormatting(formatting)
+        // Try ChatFormatting color
+        val ChatFormatting = colorStr.parseColor()
+        if (ChatFormatting != null) {
+            return fromFormatting(ChatFormatting)
         }
 
         // Try RGB format (space-separated)
@@ -95,7 +94,7 @@ object TextUtils {
     }
 
     @JvmStatic
-    fun toPlain(content: Text): String {
+    fun toPlain(content: Component): String {
         return content.toPlain()
     }
 
@@ -130,27 +129,27 @@ fun String.toUpper(): String = uppercase(Locale.ROOT)
 
 fun String.toID(): String = toUpper().replace("'s", "").replace(" ", "_")
 
-fun String.parseColor(): Formatting? {
+fun String.parseColor(): ChatFormatting? {
     val normalized = lowercase(Locale.ROOT).replace(" ", "_")
     return when (normalized) {
-        "black" -> Formatting.BLACK
-        "dark_blue", "navy" -> Formatting.DARK_BLUE
-        "dark_green" -> Formatting.DARK_GREEN
-        "dark_aqua", "cyan" -> Formatting.DARK_AQUA
-        "dark_red" -> Formatting.DARK_RED
-        "dark_purple", "purple" -> Formatting.DARK_PURPLE
-        "gold", "orange" -> Formatting.GOLD
-        "gray", "grey" -> Formatting.GRAY
-        "dark_gray", "dark_grey" -> Formatting.DARK_GRAY
-        "blue" -> Formatting.BLUE
-        "green", "lime" -> Formatting.GREEN
-        "aqua", "light_aqua" -> Formatting.AQUA
-        "red" -> Formatting.RED
-        "light_purple", "pink" -> Formatting.LIGHT_PURPLE
-        "yellow" -> Formatting.YELLOW
-        "white" -> Formatting.WHITE
+        "black" -> ChatFormatting.BLACK
+        "dark_blue", "navy" -> ChatFormatting.DARK_BLUE
+        "dark_green" -> ChatFormatting.DARK_GREEN
+        "dark_aqua", "cyan" -> ChatFormatting.DARK_AQUA
+        "dark_red" -> ChatFormatting.DARK_RED
+        "dark_purple", "purple" -> ChatFormatting.DARK_PURPLE
+        "gold", "orange" -> ChatFormatting.GOLD
+        "gray", "grey" -> ChatFormatting.GRAY
+        "dark_gray", "dark_grey" -> ChatFormatting.DARK_GRAY
+        "blue" -> ChatFormatting.BLUE
+        "green", "lime" -> ChatFormatting.GREEN
+        "aqua", "light_aqua" -> ChatFormatting.AQUA
+        "red" -> ChatFormatting.RED
+        "light_purple", "pink" -> ChatFormatting.LIGHT_PURPLE
+        "yellow" -> ChatFormatting.YELLOW
+        "white" -> ChatFormatting.WHITE
         else -> try {
-            val f = Formatting.valueOf(uppercase(Locale.ROOT))
+            val f = ChatFormatting.valueOf(uppercase(Locale.ROOT))
             if (f.isColor) f else null
         } catch (_: IllegalArgumentException) {
             null
@@ -158,23 +157,23 @@ fun String.parseColor(): Formatting? {
     }
 }
 
-private val textColorLUT = Formatting.entries
-    .mapNotNull { formatting -> formatting.colorValue?.let { it to formatting } }
+private val textColorLUT = ChatFormatting.entries
+    .mapNotNull { ChatFormatting -> ChatFormatting.color?.let { it to ChatFormatting } }
     .toMap()
 
-fun Text?.formattedTextCompatLessResets(): String = this.formattedTextCompat(noExtraResets = true)
-fun Text?.formattedTextCompatLeadingWhite(): String = this.formattedTextCompat(leadingWhite = true)
-fun Text?.formattedTextCompatLeadingWhiteLessResets(): String =
+fun Component?.formattedTextCompatLessResets(): String = this.formattedTextCompat(noExtraResets = true)
+fun Component?.formattedTextCompatLeadingWhite(): String = this.formattedTextCompat(leadingWhite = true)
+fun Component?.formattedTextCompatLeadingWhiteLessResets(): String =
     this.formattedTextCompat(noExtraResets = true, leadingWhite = true)
 
 @JvmOverloads
 @Suppress("unused")
-fun Text?.formattedTextCompat(noExtraResets: Boolean = false, leadingWhite: Boolean = false): String {
+fun Component?.formattedTextCompat(noExtraResets: Boolean = false, leadingWhite: Boolean = false): String {
     this ?: return ""
     return computeFormattedTextCompat(noExtraResets, leadingWhite)
 }
 
-private fun Text?.computeFormattedTextCompat(noExtraResets: Boolean, leadingWhite: Boolean): String {
+private fun Component?.computeFormattedTextCompat(noExtraResets: Boolean, leadingWhite: Boolean): String {
     this ?: return ""
     val sb = StringBuilder(50)
     var wasFormatted = false
@@ -188,7 +187,7 @@ private fun Text?.computeFormattedTextCompat(noExtraResets: Boolean, leadingWhit
         if (!noExtraResets) {
             sb.append("§r")
             wasFormatted = true
-        } else if (component == Text.empty()) {
+        } else if (component == Component.empty()) {
             sb.append("§r")
             wasFormatted = true
         }
@@ -196,22 +195,22 @@ private fun Text?.computeFormattedTextCompat(noExtraResets: Boolean, leadingWhit
     return sb.removeSuffix("§r").removePrefix("§r").toString()
 }
 
-fun Text.unformattedTextForChatCompat(): String {
+fun Component.unformattedTextForChatCompat(): String {
     return computeUnformattedTextCompat()
 }
 
-private fun Text.computeUnformattedTextCompat(): String {
-    if (this.content is TranslatableTextContent) {
+private fun Component.computeUnformattedTextCompat(): String {
+    if (this.contents is TranslatableContents) {
         return this.string
     }
-    return (this.content as? PlainTextContent)?.string().orEmpty()
+    return (this.contents as? PlainTextContents)?.text().orEmpty()
 }
-fun Text.iterator(): Sequence<Text> {
+fun Component.iterator(): Sequence<Component> {
     return sequenceOf(this) + siblings.asSequence().flatMap { it.iterator() } // TODO: in theory we want to properly inherit styles here
 }
 
 fun Style.chatStyle() = buildString {
-    color?.let { append(it.toChatFormatting()?.toString() ?: "<${it.hexCode}>") }
+    color?.let { append(it.toChatFormatting()?.toString() ?: "<${it.value}>") }
     if (isBold) append("§l")
     if (isItalic) append("§o")
     if (isUnderlined) append("§n")
@@ -219,8 +218,8 @@ fun Style.chatStyle() = buildString {
     if (isObfuscated) append("§k")
 }
 
-fun TextColor.toChatFormatting(): Formatting? {
-    return textColorLUT[this.rgb]
+fun TextColor.toChatFormatting(): ChatFormatting? {
+    return textColorLUT[this.value]
 }
 
 fun String.stripPrefix(prefix: String): String =
@@ -296,11 +295,11 @@ private fun romanToInt(roman: Char): Int = when (Character.toUpperCase(roman)) {
     else -> 0
 }
 
-// ========== Text Extension Functions ==========
+// ========== Component Extension Functions ==========
 
-fun Text.toPlain(): String = Formatting.strip(string)!!
+fun Component.toPlain(): String = ChatFormatting.stripFormatting(string)!!
 
-fun Text.getStyle(predicate: Predicate<String>): Optional<Style> {
+fun Component.getStyle(predicate: Predicate<String>): Optional<Style> {
     return visit({ textStyle, textString ->
         if (predicate.test(textString)) Optional.of(textStyle) else Optional.empty()
     }, Style.EMPTY)
@@ -308,12 +307,12 @@ fun Text.getStyle(predicate: Predicate<String>): Optional<Style> {
 
 // ========== Style Extension Functions ==========
 
-fun Style.hasColor(color: Formatting): Boolean {
-    return color.colorValue != null && hasColor(color.colorValue!!)
+fun Style.hasColor(color: ChatFormatting): Boolean {
+    return color.color != null && hasColor(color.color!!)
 }
 
 fun Style.hasColor(hex: Int): Boolean {
-    return color != null && color!!.rgb == hex
+    return color != null && color!!.value == hex
 }
 
 // ========== Double & Float Extension Functions ==========

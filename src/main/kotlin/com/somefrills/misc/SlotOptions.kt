@@ -3,29 +3,29 @@ package com.somefrills.misc
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.utils.Symbols
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.screen.slot.Slot
-import net.minecraft.text.Text
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 import java.util.concurrent.ConcurrentHashMap
 
 object SlotOptions {
-    val BACKGROUND: ItemStack = stackWithName(Items.BLACK_STAINED_GLASS_PANE.defaultStack, " ")
-    val SOLID_BACKGROUND: ItemStack = stackWithName(Items.GRAY_CONCRETE.defaultStack, " ")
-    val FIRST: ItemStack = stackWithName(Items.LIME_CONCRETE.defaultStack, Symbols.format + "aClick here!")
+    val BACKGROUND: ItemStack = stackWithName(Items.BLACK_STAINED_GLASS_PANE.defaultInstance, " ")
+    val SOLID_BACKGROUND: ItemStack = stackWithName(Items.GRAY_CONCRETE.defaultInstance, " ")
+    val FIRST: ItemStack = stackWithName(Items.LIME_CONCRETE.defaultInstance, Symbols.format + "aClick here!")
     val SECOND: ItemStack =
-        stackWithName(Items.ORANGE_CONCRETE.defaultStack, Symbols.format + "9Click next.")
-    val THIRD: ItemStack = stackWithName(Items.RED_CONCRETE.defaultStack, Symbols.format + "cClick after.")
+        stackWithName(Items.ORANGE_CONCRETE.defaultInstance, Symbols.format + "9Click next.")
+    val THIRD: ItemStack = stackWithName(Items.RED_CONCRETE.defaultInstance, Symbols.format + "cClick after.")
     val slotFlags: ConcurrentHashMap<Slot, Flags> = ConcurrentHashMap<Slot, Flags>()
 
     fun stackWithName(stack: ItemStack, name: String): ItemStack {
-        stack.set(DataComponentTypes.CUSTOM_NAME, Text.of(name))
+        stack.set(DataComponents.CUSTOM_NAME, Component.literal(name))
         return stack
     }
 
-    fun stackWithName(stack: ItemStack, name: Text): ItemStack {
-        stack.set(DataComponentTypes.CUSTOM_NAME, name)
+    fun stackWithName(stack: ItemStack, name: Component): ItemStack {
+        stack.set(DataComponents.CUSTOM_NAME, name)
         return stack
     }
 

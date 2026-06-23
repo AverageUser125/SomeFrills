@@ -5,15 +5,14 @@ import com.somefrills.features.misc.glowmob.MatchInfo.GearFlag
 import com.somefrills.utils.getCustomData
 import com.somefrills.utils.setCustomData
 import com.somefrills.utils.setCustomName
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.AttributeModifiersComponent
-import net.minecraft.component.type.DyedColorComponent
-import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.text.Style
-import net.minecraft.text.TextColor
+import net.minecraft.core.component.DataComponents
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.DyedItemColor
 
 class ArmorSelectionMenu(previousScreen: ChestUI, info: MatchInfo) : ChestUI("Select Armor Type", previousScreen) {
     private val gear: MutableSet<GearFlag> = info.gear
@@ -103,12 +102,12 @@ class ArmorSelectionMenu(previousScreen: ChestUI, info: MatchInfo) : ChestUI("Se
             name + status
         )
 
-        val colorComponent = DyedColorComponent(color)
-        item.set(DataComponentTypes.DYED_COLOR, colorComponent)
-        item.remove(DataComponentTypes.ATTRIBUTE_MODIFIERS)
+        val colorComponent = DyedItemColor(color)
+        item[DataComponents.DYED_COLOR] = colorComponent
+        item.remove(DataComponents.ATTRIBUTE_MODIFIERS)
 
         if (flag != null) {
-            val data = NbtCompound()
+            val data = CompoundTag()
             data.putString("Flag", flag.name)
             item.setCustomData(data)
         }

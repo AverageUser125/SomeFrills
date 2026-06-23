@@ -1,10 +1,10 @@
 package com.somefrills.events
 
-import net.minecraft.item.ItemStack
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.world.item.ItemStack
 
 class InventoryUpdateEvent(
-    val packet: ScreenHandlerSlotUpdateS2CPacket,
+    val packet: ClientboundContainerSetSlotPacket,
     @JvmField val stack: ItemStack,
     @JvmField val slotId: Int
 ) : FrillsEvent()

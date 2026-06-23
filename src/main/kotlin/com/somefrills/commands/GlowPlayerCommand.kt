@@ -12,16 +12,16 @@ import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.TextUtils
 import com.somefrills.utils.isRealPlayer
 import com.somefrills.utils.playerName
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Component
 import java.util.concurrent.CompletableFuture
 
 object GlowPlayerCommand {
 
     fun getBuilder(): LiteralArgumentBuilder<FabricClientCommandSource> {
-        return ClientCommandManager.literal("glowplayer")
+        return ClientCommands.literal("glowplayer")
             .executes { ctx ->
                 if (!isGlowPlayerEnabled()) {
                     ChatUtils.info("GlowPlayer feature is disabled.")
@@ -33,7 +33,7 @@ object GlowPlayerCommand {
             }
 
             .then(
-                ClientCommandManager.literal("list")
+                ClientCommands.literal("list")
                     .executes { _ ->
                         if (!isGlowPlayerEnabled()) {
                             ChatUtils.info("GlowPlayer feature is disabled.")
@@ -46,9 +46,9 @@ object GlowPlayerCommand {
             )
 
             .then(
-                ClientCommandManager.literal("add")
+                ClientCommands.literal("add")
                     .then(
-                        ClientCommandManager.argument("player", StringArgumentType.word())
+                        ClientCommands.argument("player", StringArgumentType.word())
                             .suggests(::suggestOnlinePlayers)
 
                             .executes { ctx ->
@@ -57,7 +57,7 @@ object GlowPlayerCommand {
                                     return@executes 1
                                 }
 
-                                addGlow(ctx, Formatting.WHITE)
+                                addGlow(ctx, ChatFormatting.WHITE)
                             }
 
                             .then(
@@ -74,11 +74,11 @@ object GlowPlayerCommand {
             )
 
             .then(
-                ClientCommandManager.literal("listglowing")
+                ClientCommands.literal("listglowing")
                     .executes(::listGlowingPlayers)
 
                     .then(
-                        ClientCommandManager.argument("name", StringArgumentType.word())
+                        ClientCommands.argument("name", StringArgumentType.word())
                             .executes { ctx ->
                                 listGlowingPlayers(
                                     ctx,
@@ -89,9 +89,9 @@ object GlowPlayerCommand {
             )
 
             .then(
-                ClientCommandManager.literal("color")
+                ClientCommands.literal("color")
                     .then(
-                        ClientCommandManager.argument("player", StringArgumentType.word())
+                        ClientCommands.argument("player", StringArgumentType.word())
                             .suggests(::suggestOnlinePlayers)
 
                             .then(
@@ -108,7 +108,7 @@ object GlowPlayerCommand {
             )
 
             .then(
-                ClientCommandManager.literal("clear")
+                ClientCommands.literal("clear")
                     .executes {
                         if (!isGlowPlayerEnabled()) {
                            ChatUtils.info("GlowPlayer feature is disabled.")
@@ -122,9 +122,9 @@ object GlowPlayerCommand {
             )
 
             .then(
-                ClientCommandManager.literal("remove")
+                ClientCommands.literal("remove")
                     .then(
-                        ClientCommandManager.argument("player", StringArgumentType.word())
+                        ClientCommands.argument("player", StringArgumentType.word())
                             .suggests(::suggestGlowingPlayers)
 
                             .executes { ctx ->
@@ -152,7 +152,7 @@ object GlowPlayerCommand {
 
     private fun addGlow(
         ctx: CommandContext<FabricClientCommandSource>,
-        color: Formatting
+        color: ChatFormatting
     ): Int {
         val name = StringArgumentType.getString(ctx, "player")
 
@@ -198,7 +198,7 @@ object GlowPlayerCommand {
 
     private fun setColor(
         ctx: CommandContext<FabricClientCommandSource>,
-        color: Formatting
+        color: ChatFormatting
     ): Int {
         val name = StringArgumentType.getString(ctx, "player")
 
@@ -283,11 +283,11 @@ object GlowPlayerCommand {
         builder: SuggestionsBuilder
     ): CompletableFuture<Suggestions> {
 
-        val world = Main.mc.world ?: return builder.buildFuture()
+        val world = Main.mc.level ?: return builder.buildFuture()
 
         val remaining = builder.remaining.lowercase()
 
-        for (player in world.players) {
+        for (player in world.players()) {
             if (!player.isRealPlayer()) continue
             val name = player.playerName
 
@@ -304,7 +304,7 @@ object GlowPlayerCommand {
         builder: SuggestionsBuilder
     ): CompletableFuture<Suggestions> {
 
-        Main.mc.world ?: return builder.buildFuture()
+        Main.mc.level ?: return builder.buildFuture()
 
         val remaining = builder.remaining.lowercase()
 
@@ -320,9 +320,9 @@ object GlowPlayerCommand {
     /* ---------------- Utilities ---------------- */
 
     private fun applyGlowToOnlinePlayer(pureName: String) {
-        val world = Main.mc.world ?: return
+        val world = Main.mc.level ?: return
 
-        for (player in world.players) {
+        for (player in world.players()) {
             if (!player.isRealPlayer()) continue
 
             val playerPureName = player.playerName
@@ -348,13 +348,13 @@ object GlowPlayerCommand {
         name: String
     ): Int {
 
-        val world = Main.mc.world ?: return 1
+        val world = Main.mc.level ?: return 1
 
         val sb = StringBuilder("Currently glowing players:\n")
 
         val forcedNames = GlowPlayer.forcedNames
 
-        for (player in world.players) {
+        for (player in world.players()) {
             if (!player.isRealPlayer()) continue
             val playerPureName = player.playerName
             if (
@@ -380,7 +380,7 @@ object GlowPlayerCommand {
                 .append("]\n")
         }
 
-        ctx.source.sendFeedback(Text.literal(sb.toString()))
+        ctx.source.sendFeedback(Component.literal(sb.toString()))
 
         return 1
     }

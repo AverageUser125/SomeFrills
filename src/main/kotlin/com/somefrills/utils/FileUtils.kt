@@ -15,7 +15,7 @@ object FileUtils {
             TextUtils.format(
                 "{}-Temp-{}.{}",
                 fileName.substring(0, fileName.indexOf(".")),
-                Util.getMeasuringTimeMs(),
+                System.currentTimeMillis(),
                 fileName.substring(fileName.indexOf(".") + 1)
             )
         )

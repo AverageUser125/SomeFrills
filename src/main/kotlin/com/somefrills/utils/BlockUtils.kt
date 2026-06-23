@@ -1,11 +1,11 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
-import net.minecraft.block.Block
-import net.minecraft.block.BlockState
-import net.minecraft.block.StainedGlassBlock
-import net.minecraft.block.StainedGlassPaneBlock
-import net.minecraft.util.math.BlockPos
+import net.minecraft.core.BlockPos
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.StainedGlassBlock
+import net.minecraft.world.level.block.StainedGlassPaneBlock
+import net.minecraft.world.level.block.state.BlockState
 
 // ========== BlockState Extension Functions ==========
 
@@ -22,9 +22,9 @@ fun Block.isStainedGlass(): Boolean {
 
 fun BlockPos.findGround(maxDistance: Int = 256): BlockPos {
     val dist = maxDistance.coerceIn(0, 256)
-    val world = mc.world ?: return this
+    val world = mc.level ?: return this
     for (i in 0..dist) {
-        val below = down(i)
+        val below = below(i)
         if (!world.getBlockState(below).isAir) {
             return below
         }

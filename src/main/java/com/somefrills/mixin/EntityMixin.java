@@ -7,11 +7,11 @@ import com.somefrills.misc.RenderColor;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.mixininterface.EntityRendering;
 import com.somefrills.utils.NumberUtils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,7 +39,7 @@ public class EntityMixin implements EntityRendering {
         return glowRender;
     }
 
-    @ModifyReturnValue(method = "isGlowing", at = @At("RETURN"))
+    @ModifyReturnValue(method = "isCurrentlyGlowing", at = @At("RETURN"))
     private boolean isGlowing(boolean original) {
         if (glowRender) {
             return true;
@@ -47,7 +47,7 @@ public class EntityMixin implements EntityRendering {
         return original;
     }
 
-    @ModifyReturnValue(method = "getTeamColorValue", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getTeamColor", at = @At("RETURN"))
     private int getTeamColorValue(int original) {
         if (glowRender) {
             return glowColor.hex;
@@ -56,14 +56,14 @@ public class EntityMixin implements EntityRendering {
     }
 
     @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
-    private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
+    private void onIsInvisibleTo(Player player, CallbackInfoReturnable<Boolean> info) {
         if (player == null) info.setReturnValue(false);
     }
 
     @ModifyReturnValue(method = "isInvisible", at = @At("RETURN"))
     private boolean makeCreeperVisible(boolean original) {
         // Make invisible creepers fully visible (client-side) if config enabled
-        if ((Object) this instanceof CreeperEntity) {
+        if ((Object) this instanceof Creeper) {
             var cfg = GhostVision.getConfig();
 
             // Make all creepers visible if config enabled
@@ -86,7 +86,7 @@ public class EntityMixin implements EntityRendering {
         if (!cfg.enabled.get() && !cfg.creeperShowHP) {
             return;
         }
-        if ((Object) this instanceof CreeperEntity) {
+        if ((Object) this instanceof Creeper) {
             cir.setReturnValue(true);
         }
     }
@@ -97,18 +97,18 @@ public class EntityMixin implements EntityRendering {
         if (!cfg.enabled.get() && !cfg.creeperShowHP) {
             return;
         }
-        if ((Object) this instanceof CreeperEntity) {
+        if ((Object) this instanceof Creeper) {
             cir.setReturnValue(true);
         }
     }
 
     @Inject(method = "getCustomName", at = @At("HEAD"), cancellable = true)
-    private void giveCreeperName(CallbackInfoReturnable<Text> cir) {
+    private void giveCreeperName(CallbackInfoReturnable<Component> cir) {
         var cfg = GhostVision.getConfig();
         if (!cfg.enabled.get() || !cfg.creeperShowHP) {
             return;
         }
-        if ((Object) this instanceof CreeperEntity creeper) {
+        if ((Object) this instanceof Creeper creeper) {
             // Only show HP if creeper is not invisible and config enabled
             int currentHealth = (int) creeper.getHealth();
             int maxHealth = (int) creeper.getMaxHealth();
@@ -124,18 +124,18 @@ public class EntityMixin implements EntityRendering {
                 maxHealthText = "1.0m";
             }
 
-            Text healthDisplay = Text.literal(currentHealthText)
-                    .styled(style -> style.withColor(Formatting.GREEN))
-                    .append(Text.literal("/").styled(style -> style.withColor(Formatting.WHITE)))
-                    .append(Text.literal(maxHealthText).styled(style -> style.withColor(Formatting.GREEN)))
-                    .append(Text.literal("❤").styled(style -> style.withColor(Formatting.RED)));
+            Component healthDisplay = Component.literal(currentHealthText)
+                    .styled(style -> style.withColor(ChatFormatting.GREEN))
+                    .append(Component.literal("/").styled(style -> style.withColor(ChatFormatting.WHITE)))
+                    .append(Component.literal(maxHealthText).styled(style -> style.withColor(ChatFormatting.GREEN)))
+                    .append(Component.literal("❤").styled(style -> style.withColor(ChatFormatting.RED)));
 
             cir.setReturnValue(healthDisplay);
         }
     }
 
 
-    @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
     private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
         //noinspection ConstantValue
         if ((Object) this != mc.player) return;

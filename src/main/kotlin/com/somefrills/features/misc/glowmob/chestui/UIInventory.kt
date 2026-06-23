@@ -1,19 +1,21 @@
 package com.somefrills.features.misc.glowmob.chestui
 
-import net.minecraft.entity.player.PlayerEntity
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.ItemStack
-import net.minecraft.util.collection.DefaultedList
+import net.minecraft.core.NonNullList
+import net.minecraft.world.Container
+import net.minecraft.world.entity.player.Player
+import net.minecraft.world.item.ItemStack
 
-class UIInventory(private val size: Int) : Inventory {
-    val stacks: DefaultedList<ItemStack> = DefaultedList.ofSize(size, ItemStack.EMPTY)
+class UIInventory(private val size: Int) : Container {
 
-    override fun size(): Int {
-        return this.size
+    private val stacks: NonNullList<ItemStack> =
+        NonNullList.withSize(size, ItemStack.EMPTY)
+
+    override fun getContainerSize(): Int {
+        return size
     }
 
     override fun isEmpty(): Boolean {
-        for (stack in this.stacks) {
+        for (stack in stacks) {
             if (!stack.isEmpty) {
                 return false
             }
@@ -21,59 +23,64 @@ class UIInventory(private val size: Int) : Inventory {
         return true
     }
 
-    override fun getStack(slot: Int): ItemStack? {
-        if (slot < 0 || slot >= this.size) {
+    override fun getItem(slot: Int): ItemStack {
+        if (slot !in 0..<size) {
             return ItemStack.EMPTY
         }
-        return this.stacks.get(slot)
+        return stacks[slot]
     }
 
-    override fun removeStack(slot: Int, amount: Int): ItemStack? {
-        if (slot < 0 || slot >= this.size) {
+    override fun removeItem(slot: Int, amount: Int): ItemStack {
+        if (slot !in 0..<size) {
             return ItemStack.EMPTY
         }
-        val stack = this.stacks.get(slot)
+
+        val stack = stacks[slot]
         if (stack.isEmpty) {
             return ItemStack.EMPTY
         }
+
         val result = stack.split(amount)
+
         if (stack.isEmpty) {
-            this.stacks.set(slot, ItemStack.EMPTY)
+            stacks[slot] = ItemStack.EMPTY
         }
-        this.markDirty()
+
+        setChanged()
         return result
     }
 
-    override fun removeStack(slot: Int): ItemStack {
-        if (slot < 0 || slot >= this.size) {
+    override fun removeItemNoUpdate(slot: Int): ItemStack {
+        if (slot !in 0..<size) {
             return ItemStack.EMPTY
         }
-        val stack = this.stacks.get(slot)
-        this.stacks.set(slot, ItemStack.EMPTY)
+
+        val stack = stacks[slot]
+        stacks[slot] = ItemStack.EMPTY
+
         if (!stack.isEmpty) {
-            this.markDirty()
+            setChanged()
         }
+
         return stack
     }
 
-    override fun setStack(slot: Int, stack: ItemStack?) {
-        if (slot >= 0 && slot < this.size) {
-            this.stacks.set(slot, stack)
-            this.markDirty()
+    override fun setItem(slot: Int, stack: ItemStack) {
+        if (slot in 0..<size) {
+            stacks[slot] = stack
+            setChanged()
         }
     }
 
-    override fun markDirty() {
+    override fun setChanged() {
     }
 
-    override fun canPlayerUse(player: PlayerEntity?): Boolean {
+    override fun stillValid(player: Player): Boolean {
         return true
     }
 
-    override fun clear() {
-        this.stacks.clear()
-        this.markDirty()
+    override fun clearContent() {
+        stacks.clear()
+        setChanged()
     }
 }
-
-

@@ -1,6 +1,6 @@
 package com.somefrills.events
 
-import net.minecraft.block.Block
-import net.minecraft.item.ItemPlacementContext
+import net.minecraft.world.item.context.BlockPlaceContext
+import net.minecraft.world.level.block.Block
 
-class PlaceBlockEvent(@JvmField val context: ItemPlacementContext, val block: Block) : Cancellable()
+class PlaceBlockEvent(@JvmField val context: BlockPlaceContext, val block: Block) : Cancellable()

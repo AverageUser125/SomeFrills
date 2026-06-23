@@ -7,9 +7,10 @@ import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.tree.CommandNode
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.GuiUtils
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.command.CommandRegistryAccess
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
+import net.minecraft.commands.CommandBuildContext
 import java.util.function.Supplier
 
 object SomeFrillsCommand {
@@ -18,7 +19,7 @@ object SomeFrillsCommand {
             "settings",
             "Opens the settings GUI."
         ) {
-            ClientCommandManager.literal("settings")
+            ClientCommands.literal("settings")
                 .executes { obj: CommandContext<FabricClientCommandSource> -> executeSettings(obj) }
         },
         ModCommand(
@@ -45,11 +46,7 @@ object SomeFrillsCommand {
         ModCommand(
             "glowblock",
             "Manage glowing blocks."
-        ) { GlowBlockCommand.getBuilder() },
-        ModCommand(
-            "totalnetworth",
-            "Get the total networth of the current profile"
-        ) { TotalNetworthCommand.getBuilder()}
+        ) { GlowBlockCommand.getBuilder() }
     )
 
     /**
@@ -71,9 +68,9 @@ object SomeFrillsCommand {
         return Command.SINGLE_SUCCESS
     }
 
-    fun init(dispatcher: CommandDispatcher<FabricClientCommandSource>, registryAccess: CommandRegistryAccess?) {
+    fun init(dispatcher: CommandDispatcher<FabricClientCommandSource>, registryAccess: CommandBuildContext) {
         val helpArg =
-            ClientCommandManager.literal("help")
+            ClientCommands.literal("help")
                 .executes(Command { context: CommandContext<FabricClientCommandSource> ->
                     ChatUtils.info("§7Printing command list...")
                     for (command in commands) {
@@ -83,14 +80,14 @@ object SomeFrillsCommand {
                 })
 
         val commandMain =
-            ClientCommandManager.literal("somefrills")
+            ClientCommands.literal("somefrills")
                 .executes(Command { context: CommandContext<FabricClientCommandSource?>? ->
                     GuiUtils.showGui()
                     Command.SINGLE_SUCCESS
                 })
 
         val commandShort =
-            ClientCommandManager.literal("sf")
+            ClientCommands.literal("sf")
                 .executes(Command { context: CommandContext<FabricClientCommandSource?>? ->
                     GuiUtils.showGui()
                     Command.SINGLE_SUCCESS

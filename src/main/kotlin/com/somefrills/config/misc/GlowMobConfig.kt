@@ -6,7 +6,7 @@ import com.somefrills.misc.RenderColor
 import io.github.notenoughupdates.moulconfig.annotations.ConfigEditorBoolean
 import io.github.notenoughupdates.moulconfig.annotations.ConfigOption
 import io.github.notenoughupdates.moulconfig.observer.Property
-import net.minecraft.entity.LivingEntity
+import net.minecraft.world.entity.LivingEntity
 import java.util.function.Predicate
 
 class GlowMobConfig {

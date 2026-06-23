@@ -1,40 +1,40 @@
 package com.somefrills.utils
 
 import com.mojang.authlib.GameProfile
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.NbtComponent
-import net.minecraft.item.ItemStack
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.text.Style
-import net.minecraft.text.Text
 import com.somefrills.Main.mc
-import net.minecraft.item.Item
-import net.minecraft.registry.Registries
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.component.CustomData
 
 object ItemStackUtils {
-    fun getSkyblockId(customData: NbtCompound): String? {
+    fun getSkyblockId(customData: CompoundTag): String? {
         if (!customData.contains("id")) return null
         return customData.getString("id").orElse(null)
     }
 
     @JvmStatic
-    fun getCustomData(stack: ItemStack): NbtCompound? {
+    fun getCustomData(stack: ItemStack): CompoundTag? {
         if (!stack.isEmpty) {
-            val data = stack.get(DataComponentTypes.CUSTOM_DATA)
+            val data = stack.get(DataComponents.CUSTOM_DATA)
             if (data != null) {
-                return data.nbt
+                return data.tag
             }
         }
         return null
     }
 
     fun getTextures(stack: ItemStack): GameProfile? {
-        val profile = stack.components.get(DataComponentTypes.PROFILE)
-        return if (!stack.isEmpty && profile != null) profile.gameProfile else null
+        val profile = stack.components.get(DataComponents.PROFILE)
+        return if (!stack.isEmpty && profile != null) profile.partialProfile() else null
     }
 
     fun getTextureUrl(profile: GameProfile): String {
-        val service = mc.apiServices.sessionService()
+        val service = mc.services().sessionService()
         val property = service.getPackedTextures(profile)
         val textures = service.unpackTextures(property)
         return textures.skin()?.url ?: ""
@@ -44,10 +44,10 @@ object ItemStackUtils {
 // ========== ItemStack Extension Functions ==========
 
 
-fun ItemStack.getCustomData(): NbtCompound? = ItemStackUtils.getCustomData(this)
+fun ItemStack.getCustomData(): CompoundTag? = ItemStackUtils.getCustomData(this)
 
-fun ItemStack.setCustomData(data: NbtCompound) {
-    set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(data))
+fun ItemStack.setCustomData(data: CompoundTag) {
+    set(DataComponents.CUSTOM_DATA, CustomData.of(data))
 }
 
 val ItemStack.skyblockId: String?
@@ -56,7 +56,7 @@ val ItemStack.skyblockId: String?
 fun ItemStack.isFishingRod(): Boolean = skyblockId?.contains("ROD") ?: false
 
 fun ItemStack.hasItemQuantity(): Boolean {
-    return Regex(".* x[0-9]*").matches(name.toPlain())
+    return Regex(".* x[0-9]*").matches(displayName.toPlain())
 }
 
 fun ItemStack.getTextures(): GameProfile? = ItemStackUtils.getTextures(this)
@@ -72,8 +72,8 @@ fun ItemStack.isTextureEqual(textureId: String): Boolean {
     return url.endsWith("texture/$textureId")
 }
 
-fun ItemStack.getLoreText(): List<Text> {
-    val lore = components.get(DataComponentTypes.LORE)
+fun ItemStack.getLoreText(): List<Component> {
+    val lore = components.get(DataComponents.LORE)
     return lore?.lines() ?: emptyList()
 }
 
@@ -108,23 +108,21 @@ fun ItemStack.hasEitherStat(vararg stats: String): Boolean {
 
 val ItemStack.hasGlint: Boolean
     get() {
-        val component = componentChanges.get(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE)
-        return component != null && component.isPresent
+        val component: Boolean? = get(DataComponents.ENCHANTMENT_GLINT_OVERRIDE)
+        return component != null && component
     }
 
 fun ItemStack.setCustomName(style: Style, name: String) {
-    set(DataComponentTypes.CUSTOM_NAME, Text.literal(name).setStyle(style.withItalic(false)))
+    set(DataComponents.CUSTOM_NAME, Component.literal(name).setStyle(style.withItalic(false)))
 }
 
 fun Item.getIdentifierString(): String {
-    return Registries.ITEM.getKey(this).toString()
+    return BuiltInRegistries.ITEM.getId(this).toString()
 }
-
-val ItemStack.hoverName: Text get() = toHoverableText()
 
 val ItemStack.plainCustomName: String
     get() {
-        val name = get(DataComponentTypes.CUSTOM_NAME)
+        val name = get(DataComponents.CUSTOM_NAME)
         return name?.toPlain() ?: ""
     }
 

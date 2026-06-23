@@ -9,7 +9,7 @@ import com.somefrills.events.PlaceBlockEvent
 import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.block.BlockState
+import net.minecraft.world.level.block.state.BlockState
 
 @FrillsFeature
 object NoGhostBlocks : Feature(FrillsMod.config.tweaks.noGhostBlocks.enabled) {
@@ -19,11 +19,12 @@ object NoGhostBlocks : Feature(FrillsMod.config.tweaks.noGhostBlocks.enabled) {
 
     @EventHandler
     private fun onBreakBlock(event: BreakBlockEvent) {
-        val world = mc.world ?: return
-        if (mc.isInSingleplayer || !config.breaking) return
+        val world = mc.level ?: return
+        val player = mc.player ?: return
+        if (mc.isSingleplayer || !config.breaking) return
         event.cancel()
         val blockState: BlockState = world.getBlockState(event.blockPos)
-        blockState.block.onBreak(world, event.blockPos, blockState, mc.player)
+        blockState.block.playerWillDestroy(world, event.blockPos, blockState, player)
     }
 
     @EventHandler

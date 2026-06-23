@@ -14,8 +14,8 @@ object SkyblockUtils {
     )
 
     fun isOnHypixel(): Boolean {
-        val info = mc.currentServerEntry
-        return info != null && info.address.toLower().endsWith("hypixel.net")
+        val info = mc.currentServer
+        return info != null && info.ip.toLower().endsWith("hypixel.net")
     }
 
 

@@ -1,17 +1,22 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 package com.somefrills.utils
 
-import com.somefrills.Main.mc
 import com.somefrills.Main.config
-import com.somefrills.mixin.BossBarHudAccessor
-import com.somefrills.mixin.PlayerListHudAccessor
-import com.somefrills.mixininterface.TitleRendering
+import com.somefrills.Main.mc
 import com.somefrills.misc.RenderColor
+import com.somefrills.mixin.BossHealthOverlayAccessor
+import com.somefrills.mixin.PlayerTabOverlayAccessor
+import com.somefrills.mixininterface.TitleRendering
 import io.github.notenoughupdates.moulconfig.gui.GuiContext
 import io.github.notenoughupdates.moulconfig.gui.GuiElementComponent
 import io.github.notenoughupdates.moulconfig.platform.MoulConfigScreenComponent
-import net.minecraft.client.gui.hud.ClientBossBar
-import net.minecraft.client.gui.screen.Screen
-import net.minecraft.text.Text
+import net.minecraft.client.gui.components.LerpingBossEvent
+import net.minecraft.client.gui.screens.Screen
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+
+
+
 
 object GuiUtils {
     fun getGuiScreenInternal(): Screen {
@@ -21,10 +26,10 @@ object GuiUtils {
     fun getGuiScreenInternal(previous: Screen?): Screen {
         val editor = config.getEditor()
         val guiContext = GuiContext(GuiElementComponent(editor))
-        return object : MoulConfigScreenComponent(Text.empty(), guiContext, previous) {
-            override fun close() {
+        return object : MoulConfigScreenComponent(Component.empty(), guiContext, previous) {
+            override fun onClose() {
                 if (previous == null) {
-                    super.close()
+                    super.onClose()
                 } else {
                     setScreenInternal(previous)
                 }
@@ -33,17 +38,17 @@ object GuiUtils {
     }
 
     fun setScreenInternal(screen: Screen) {
-        mc.send { mc.setScreen(screen) }
+        mc.execute { mc.setScreen(screen) }
     }
 
-    fun getFooterLinesInternal(): List<String> {
-        val list = ArrayList<String>()
-        val footer = (mc.inGameHud.playerListHud as PlayerListHudAccessor).footer
+    fun getFooterLinesInternal(): MutableList<String> {
+        val list: MutableList<String> = ArrayList<String>()
+        val footer = (mc.gui.getTabList() as PlayerTabOverlayAccessor).getFooter()
         if (footer != null) {
-            val lines = footer.string.split("\n")
+            val lines = footer.getString().split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
             for (line in lines) {
-                val l = line.trim()
-                if (l.isNotEmpty()) {
+                val l = line.trim { it <= ' ' }
+                if (!l.isEmpty()) {
                     list.add(l)
                 }
             }
@@ -51,11 +56,9 @@ object GuiUtils {
         return list
     }
 
-    fun getBossBarsInternal(): List<ClientBossBar> {
-        val bossBars = (mc.inGameHud.bossBarHud as BossBarHudAccessor).bossBars
-        return bossBars.values.toList()
+    fun getBossBarsInternal(): MutableList<LerpingBossEvent> {
+        return (mc.gui.bossOverlay as BossHealthOverlayAccessor).getEvents().values.stream().toList()
     }
-
 
 
 // ========== Screen Extension Functions ==========
@@ -64,26 +67,36 @@ object GuiUtils {
 
 // ========== Title Rendering Extension Functions ==========
 
+    fun showTitle(
+        title: MutableComponent,
+        subtitle: MutableComponent,
+        fadeInTicks: Int,
+        stayTicks: Int,
+        fadeOutTicks: Int
+    ) {
+        mc.gui.setTitle(title)
+        mc.gui.setSubtitle(subtitle)
+        mc.gui.setTimes(fadeInTicks, stayTicks, fadeOutTicks)
+    }
+
     fun showTitle(title: String, subtitle: String, fadeInTicks: Int, stayTicks: Int, fadeOutTicks: Int) {
-        mc.inGameHud.setTitle(Text.of(title))
-        mc.inGameHud.setSubtitle(Text.of(subtitle))
-        mc.inGameHud.setTitleTicks(fadeInTicks, stayTicks, fadeOutTicks)
+        showTitle(Component.literal(title), Component.literal(subtitle), fadeInTicks, stayTicks, fadeOutTicks)
     }
 
     fun showTitleCustom(title: String, stayTicks: Int, yOffset: Int = 0, scale: Float = 1.0f, color: RenderColor? = null) {
         val c = color ?: RenderColor(255, 255, 255, 255)
-        (mc.inGameHud as TitleRendering).`somefrills$setRenderTitle`(title, stayTicks, yOffset, scale, c)
+        (mc.gui as TitleRendering).`somefrills$setRenderTitle`(title, stayTicks, yOffset, scale, c)
     }
 
     val isRenderingCustomTitle: Boolean
-        get() = (mc.inGameHud as TitleRendering).`somefrills$isRenderingTitle`()
+        get() = (mc.gui as TitleRendering).`somefrills$isRenderingTitle`()
 
 // ========== HUD Access Extension Functions ==========
 
     val footerLines: List<String>
         get() = GuiUtils.getFooterLinesInternal()
 
-    val bossBars: List<ClientBossBar>
+    val bossBars: List<LerpingBossEvent>
         get() = GuiUtils.getBossBarsInternal()
 
 // ========== GUI Screen Management ==========
@@ -98,8 +111,8 @@ object GuiUtils {
 
     val mousePos: org.joml.Vector2d
         get() = org.joml.Vector2d(
-            mc.mouse.getScaledX(mc.window),
-            mc.mouse.getScaledY(mc.window)
+            mc.mouseHandler.getScaledXPos(mc.window),
+            mc.mouseHandler.getScaledYPos(mc.window)
         )
 
 }

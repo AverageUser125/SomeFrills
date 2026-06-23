@@ -23,7 +23,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.client.MinecraftClient
+import net.minecraft.client.Minecraft
 import net.minecraft.util.Util
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,7 +37,7 @@ object Main : ClientModInitializer {
     val LOGGER: Logger = LoggerFactory.getLogger(MOD_ID)
 
     @JvmField
-    val mc: MinecraftClient = MinecraftClient.getInstance()
+    val mc: Minecraft = Minecraft.getInstance()
 
     @JvmField
     val eventBus: IEventBus = EventBus()
@@ -51,7 +51,7 @@ object Main : ClientModInitializer {
     }
 
     override fun onInitializeClient() {
-        val start = Util.getMeasuringTimeMs()
+        val start = System.currentTimeMillis()
 
         ClientCommandRegistrationCallback.EVENT.register(SomeFrillsCommand::init)
 
@@ -165,7 +165,7 @@ object Main : ClientModInitializer {
 
         LOGGER.info(
             "It's time to get real, SomeFrills mod initialized in {}ms.",
-            Util.getMeasuringTimeMs() - start
+            System.currentTimeMillis() - start
         )
     }
 }

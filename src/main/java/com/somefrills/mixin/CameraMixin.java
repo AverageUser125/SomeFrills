@@ -3,9 +3,9 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.features.misc.Freecam;
 import com.somefrills.features.tweaks.CameraTweaks;
-import net.minecraft.client.render.Camera;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.client.Camera;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,29 +19,29 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(Camera.class)
 public class CameraMixin {
     @Shadow
-    private boolean thirdPerson;
+    private boolean detached;
 
-    @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getMaxZoom", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(float desiredCameraDistance, CallbackInfoReturnable<Float> info) {
         if (CameraTweaks.INSTANCE.clip()) {
             info.setReturnValue(desiredCameraDistance);
         }
     }
 
-    @ModifyVariable(method = "clipToSpace", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    @ModifyVariable(method = "getMaxZoom", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private float modifyClipToSpace(float d) {
         if (Freecam.INSTANCE.isActive()) return 0;
         return d;
     }
 
-    @Inject(method = "update", at = @At("TAIL"))
-    private void onUpdateTail(World area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickProgress, CallbackInfo ci) {
+    @Inject(method = "setup", at = @At("TAIL"))
+    private void onUpdateTail(Level area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickProgress, CallbackInfo ci) {
         if (Freecam.INSTANCE.isActive()) {
-            this.thirdPerson = true;
+            this.detached = true;
         }
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))
+    @ModifyArgs(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setPosition(DDD)V"))
     private void onUpdateSetPosArgs(Args args, @Local(argsOnly = true) float tickDelta) {
         var freecam = Freecam.INSTANCE;
 
@@ -52,7 +52,7 @@ public class CameraMixin {
         }
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
+    @ModifyArgs(method = "setup", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;setRotation(FF)V"))
     private void onUpdateSetRotationArgs(Args args, @Local(argsOnly = true) float tickDelta) {
         var freecam = Freecam.INSTANCE;
 

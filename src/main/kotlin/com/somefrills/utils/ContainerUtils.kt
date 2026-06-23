@@ -1,26 +1,26 @@
 package com.somefrills.utils
 
 import com.somefrills.Main.mc
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen
-import net.minecraft.client.gui.screen.ingame.HandledScreen
-import net.minecraft.item.ItemStack
-import net.minecraft.screen.GenericContainerScreenHandler
-import net.minecraft.screen.slot.Slot
-import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
+import net.minecraft.client.gui.screens.inventory.ContainerScreen
+import net.minecraft.world.inventory.ChestMenu
+import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 object ContainerUtils {
     fun clickSlot(slotIdx: Int) {
-        val screen = mc.currentScreen as? HandledScreen<*> ?: return
-        screen.onMouseClick(null, slotIdx, 0, SlotActionType.PICKUP)
+        val screen = mc.screen as? AbstractContainerScreen<*> ?: return
+        screen.slotClicked(screen.menu.getSlot(slotIdx), slotIdx, 0, ContainerInput.PICKUP)
     }
 
-    fun getContainerSlotsInternal(handler: GenericContainerScreenHandler, inverse: Boolean): List<Slot> {
+    fun getContainerSlotsInternal(handler: ChestMenu, inverse: Boolean): List<Slot> {
         return if (inverse) {
-            handler.slots.filter { slot -> slot.id >= handler.rows * 9 }
+            handler.slots.filter { slot -> slot.index >= handler.rowCount * 9 }
         } else {
-            handler.slots.filter { slot -> slot.id < handler.rows * 9 }
+            handler.slots.filter { slot -> slot.index < handler.rowCount * 9 }
         }
     }
 
@@ -30,34 +30,38 @@ object ContainerUtils {
 
     fun clickSlotQuickMove(slotIdx: Int) {
         val player = mc.player ?: return
-        val interactionManager = mc.interactionManager ?: return
+        val interactionManager = mc.gameMode ?: return
+        val windowId = getWindowIdOrNull() ?: return
 
-        interactionManager.clickSlot(
-            player.currentScreenHandler.syncId,
+        interactionManager.handleContainerInput(
+            windowId,
             slotIdx,
             0,
-            SlotActionType.QUICK_MOVE,
+            ContainerInput.QUICK_MOVE,
             player
         )
     }
+
+    fun getWindowIdOrNull(): Int? =
+        currentlyOpenContainer?.containerId
 
     fun clickSlotSwap(slotIdx: Int, hotbarSlot: Int) {
         val player = mc.player ?: return
-        val interactionManager = mc.interactionManager ?: return
+        val interactionManager = mc.gameMode ?: return
+        val windowId = getWindowIdOrNull() ?: return
 
-        interactionManager.clickSlot(
-            player.currentScreenHandler.syncId,
+        interactionManager.handleContainerInput(
+            windowId,
             slotIdx,
             hotbarSlot,
-            SlotActionType.SWAP,
+            ContainerInput.SWAP,
             player
         )
     }
 
-    val currentlyOpenContainer: GenericContainerScreenHandler?
+    val currentlyOpenContainer: ChestMenu?
         get() {
-            val screenHandler = mc.player?.currentScreenHandler
-            return screenHandler as? GenericContainerScreenHandler
+            return (mc.screen as? ContainerScreen)?.menu
         }
 
     fun getItemsInOpenChest(): List<Slot> {
@@ -65,31 +69,31 @@ object ContainerUtils {
     }
 
     fun getItemsInOpenChestWithNull(): List<Slot> {
-        val guiChest = mc.currentScreen as? GenericContainerScreen ?: return emptyList()
-        return guiChest.screenHandler.slots
+        val guiChest = mc.screen as? ContainerScreen ?: return emptyList()
+        return guiChest.menu.slots
     }
 }
 
-// ========== GenericContainerScreenHandler Extension Functions ==========
+// ========== ChestMenu Extension Functions ==========
 
-val GenericContainerScreenHandler.containerSlots: List<Slot>
+val ChestMenu.containerSlots: List<Slot>
     get() = ContainerUtils.getContainerSlotsInternal(this, false)
 
-val GenericContainerScreenHandler.playerInventorySlots: List<Slot>
+val ChestMenu.playerInventorySlots: List<Slot>
     get() = ContainerUtils.getContainerSlotsInternal(this, true)
 
 // ========== Slot Access Extension Functions ==========
 
-fun GenericContainerScreenHandler.getSlot(index: Int): Slot? {
+fun ChestMenu.getSlot(index: Int): Slot? {
     return slots.getOrNull(index)
 }
 
-val GenericContainerScreenHandler.slotCount: Int
+val ChestMenu.slotCount: Int
     get() = slots.size
 
-fun GenericContainerScreenHandler.getContainerSlotAt(row: Int, col: Int): Slot? {
+fun ChestMenu.getContainerSlotAt(row: Int, col: Int): Slot? {
     val index = row * 9 + col
-    if (index >= rows * 9) return null
+    if (index >= rowCount * 9) return null
     return getSlot(index)
 }
 
@@ -102,4 +106,4 @@ fun ItemStack?.isNotEmpty(): Boolean {
     return !this.isEmpty
 }
 
-val Slot.item: ItemStack? get() = this.inventory.getStack(this.index)
+val Slot.item: ItemStack get() = this.container.getItem(this.index)

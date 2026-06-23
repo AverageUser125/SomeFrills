@@ -1,12 +1,23 @@
 package com.somefrills.events
 
-import net.minecraft.network.packet.s2c.play.ParticleS2CPacket
-import net.minecraft.particle.ParticleType
-import net.minecraft.util.math.Vec3d
+import net.minecraft.core.particles.ParticleType
+import net.minecraft.core.particles.ParticleTypes
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
+import net.minecraft.world.phys.Vec3
 
-class SpawnParticleEvent(val packet: ParticleS2CPacket) : Cancellable() {
-    val type: ParticleType<*> get() = packet.parameters.type
-    val pos: Vec3d get() = Vec3d(packet.x, packet.y, packet.z)
+
+class SpawnParticleEvent(packet: ClientboundLevelParticlesPacket) : Cancellable() {
+    var packet: ClientboundLevelParticlesPacket
+    var type: ParticleType<*>
+    var pos: Vec3?
+
+    init {
+        this.isCancelled = false
+        this.packet = packet
+        this.type = packet.particle.type
+        this.pos = Vec3(packet.x, packet.y, packet.z)
+    }
 
     fun matchParameters(
         type: ParticleType<*>?,
@@ -16,7 +27,15 @@ class SpawnParticleEvent(val packet: ParticleS2CPacket) : Cancellable() {
         offsetY: Double,
         offsetZ: Double
     ): Boolean {
-        return this.type == type && this.packet.count == count && this.packet.speed == speed.toFloat()
-                && this.packet.offsetX == offsetX.toFloat() && this.packet.offsetY == offsetY.toFloat() && this.packet.offsetZ == offsetZ.toFloat()
+        return this.type == type && this.packet.getCount() == count && this.packet.getMaxSpeed() == speed.toFloat() && this.packet.getXDist() == offsetX.toFloat() && this.packet.getYDist() == offsetY.toFloat() && this.packet.getZDist() == offsetZ.toFloat()
     }
+
+    val isCurveParticle: Boolean
+        get() = this.matchParameters(ParticleTypes.ENCHANT, 10, -2.0, 0.0, 0.0, 0.0)
+
+    val particleId: String
+        get() {
+            val identifier = BuiltInRegistries.PARTICLE_TYPE.getKey(this.type)
+            return identifier?.toString() ?: ""
+        }
 }

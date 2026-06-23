@@ -3,15 +3,15 @@ package com.somefrills.features.misc.glowmob.chestui
 import com.somefrills.utils.GuiUtils
 import com.somefrills.utils.plainCustomName
 import com.somefrills.utils.setCustomName
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.LoreComponent
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.text.TextColor
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.ItemLore
 import java.util.*
 import java.util.function.Consumer
 
@@ -30,36 +30,36 @@ class SearchAddon : UIAddon {
         }
     }
 
-    override fun drawDecoration(ui: ChestUI, inventory: Inventory) {
+    override fun drawDecoration(ui: ChestUI, inventory: Container) {
         // --- Search Compass ---
         val searchItem = ItemStack(Items.COMPASS)
-        searchItem.setCustomName(colorStyle(Formatting.AQUA).withItalic(false), "Search")
+        searchItem.setCustomName(colorStyle(ChatFormatting.AQUA).withItalic(false), "Search")
 
-        val lore: MutableList<Text?> = ArrayList<Text?>()
+        val lore: MutableList<Component> = ArrayList<Component>()
         lore.add(
-            Text.literal("Current Filter: ").setStyle(colorStyle(Formatting.GRAY))
+            Component.literal("Current Filter: ").setStyle(colorStyle(ChatFormatting.GRAY))
                 .append(
-                    Text.literal(if (searchQuery == null) "None" else searchQuery)
-                        .setStyle(colorStyle(if (searchQuery == null) Formatting.RED else Formatting.YELLOW))
+                    Component.literal(searchQuery ?: "None")
+                        .setStyle(colorStyle(if (searchQuery == null) ChatFormatting.RED else ChatFormatting.YELLOW))
                 )
         )
 
-        lore.add(Text.literal(""))
-        lore.add(Text.literal("Click to filter results").setStyle(colorStyle(Formatting.YELLOW)))
+        lore.add(Component.literal(""))
+        lore.add(Component.literal("Click to filter results").setStyle(colorStyle(ChatFormatting.YELLOW)))
 
-        searchItem.set<LoreComponent?>(DataComponentTypes.LORE, LoreComponent(lore, lore))
-        inventory.setStack(searchSlot, searchItem)
+        searchItem.set(DataComponents.LORE, ItemLore(lore, lore))
+        inventory.setItem(searchSlot, searchItem)
 
         // --- Clear Search (Oak Sign) ---
         if (searchQuery != null && !searchQuery!!.isEmpty()) {
             val clearItem = ItemStack(Items.OAK_SIGN)
-            clearItem.setCustomName(colorStyle(Formatting.RED).withItalic(false), "Clear Search")
+            clearItem.setCustomName(colorStyle(ChatFormatting.RED).withItalic(false), "Clear Search")
 
-            val clearLore: MutableList<Text?> = ArrayList<Text?>()
-            clearLore.add(Text.literal("Reset the search filter").setStyle(colorStyle(Formatting.GRAY)))
-            clearItem.set(DataComponentTypes.LORE, LoreComponent(clearLore, clearLore))
+            val clearLore: MutableList<Component> = ArrayList<Component>()
+            clearLore.add(Component.literal("Reset the search filter").setStyle(colorStyle(ChatFormatting.GRAY)))
+            clearItem.set(DataComponents.LORE, ItemLore(clearLore, clearLore))
 
-            inventory.setStack(clearSlot, clearItem)
+            inventory.setItem(clearSlot, clearItem)
         }
     }
 
@@ -88,8 +88,8 @@ class SearchAddon : UIAddon {
         return false
     }
 
-    private fun colorStyle(color: Formatting): Style {
-        val colorValue = color.colorValue
+    private fun colorStyle(color: ChatFormatting): Style {
+        val colorValue = color.color
         return if (colorValue == null) Style.EMPTY else Style.EMPTY.withColor(TextColor.fromRgb(colorValue))
     }
 }

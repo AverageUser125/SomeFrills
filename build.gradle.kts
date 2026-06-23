@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("fabric-loom") version "1.17.3"
+    id("net.fabricmc.fabric-loom") version "1.15-SNAPSHOT"
     id("org.jetbrains.kotlin.jvm") version "2.3.0"
     id("com.google.devtools.ksp") version "2.3.8"
     java
@@ -53,30 +53,20 @@ loom {
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.extra["minecraft_version"]}")
-    mappings("net.fabricmc:yarn:${project.extra["yarn_mappings"]}:v2")
-    modImplementation("net.fabricmc:fabric-loader:${project.extra["loader_version"]}")
+    implementation("net.fabricmc:fabric-loader:${project.extra["loader_version"]}")
 
     // Internal dependencies
-    modImplementation("meteordevelopment:orbit:${project.extra["orbit_version"]}")
+    implementation("meteordevelopment:orbit:${project.extra["orbit_version"]}")
     include("meteordevelopment:orbit:${project.extra["orbit_version"]}")
-    modImplementation("org.notenoughupdates.moulconfig:modern-1.21.11:${project.extra["moulconfig_version"]}")
-    include("org.notenoughupdates.moulconfig:modern-1.21.11:${project.extra["moulconfig_version"]}")
-    modImplementation("moe.nea:libautoupdate:${project.extra["libautoupdate_version"]}")
+    implementation("org.notenoughupdates.moulconfig:modern-26.1:${project.extra["moulconfig_version"]}")
+    include("org.notenoughupdates.moulconfig:modern-26.1:${project.extra["moulconfig_version"]}")
+    implementation("moe.nea:libautoupdate:${project.extra["libautoupdate_version"]}")
     include("moe.nea:libautoupdate:${project.extra["libautoupdate_version"]}")
 
-
-    // External mods we optionally modify
-    compileOnly(files("vendor/SkyHanni-7.19.0-mc1.21.11.jar"))
-    modCompileOnly(files("vendor/SkyHanni-7.19.0-mc1.21.11.jar"))
-    compileOnly(files("vendor/skyblock_enhancements-1.0.1+1.21.11.jar"))
-    modCompileOnly(files("vendor/skyblock_enhancements-1.0.1+1.21.11.jar"))
-    compileOnly(files("vendor/SkyOcean-1.21.11-1.16.1.jar"))
-    modCompileOnly(files("vendor/SkyOcean-1.21.11-1.16.1.jar"))
-
     // External dependencies
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabric_version"]}")
-    modImplementation("com.terraformersmc:modmenu:${project.extra["modmenu_version"]}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:${project.extra["fabric_kotlin_version"]}")
+    implementation("net.fabricmc.fabric-api:fabric-api:${project.extra["fabricapi_version"]}")
+    implementation("com.terraformersmc:modmenu:${project.extra["modmenu_version"]}")
+    implementation("net.fabricmc:fabric-language-kotlin:${project.extra["fabric_kotlin_version"]}")
 
     ksp(project(":processor"))
 }
@@ -94,7 +84,7 @@ tasks.processResources {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(21)
+    options.release.set(25)
     options.compilerArgs.add("-Xlint:all,-processing,-this-escape,-classfile")
 }
 
@@ -104,12 +94,12 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 tasks.jar {
@@ -123,11 +113,25 @@ tasks.jar {
 tasks.withType<KotlinCompile>().configureEach {
     dependsOn("kspKotlin")
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25)
         freeCompilerArgs.add("-jvm-default=enable")
     }
 }
 
+subprojects {
+    apply(plugin = "java")
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(25))
+        }
+    }
+
+    tasks.withType<JavaCompile>().configureEach {
+        // Force the Java compiler to use the toolchain version
+        options.release.set(25)
+    }
+}
 
 tasks.named("compileKotlin") {
     dependsOn("kspKotlin")

@@ -9,10 +9,9 @@ import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.EntityCache
 import com.somefrills.misc.RenderColor.Companion.fromChroma
-import com.somefrills.utils.EntityUtils
 import com.somefrills.utils.getLerpedBox
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.entity.mob.CreeperEntity
+import net.minecraft.world.entity.monster.Creeper
 
 @FrillsFeature
 object GhostVision : AreaFeature(FrillsMod.config.mining.ghostVision.enabled) {
@@ -23,9 +22,9 @@ object GhostVision : AreaFeature(FrillsMod.config.mining.ghostVision.enabled) {
     @EventHandler
     private fun onEntity(event: EntityUpdatedEvent) {
         val entity = event.entity
-        if (entity !is CreeperEntity) return
+        if (entity !is Creeper) return
         if (config.removeCharge) {
-            entity.getDataTracker().set(CreeperEntity.CHARGED, false)
+            entity.droppedSkulls = false
         }
         cache.add(entity)
     }

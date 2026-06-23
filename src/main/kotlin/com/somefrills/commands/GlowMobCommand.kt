@@ -10,11 +10,11 @@ import com.somefrills.misc.RenderColor
 import com.somefrills.utils.GuiUtils
 import com.somefrills.utils.TextUtils
 import com.somefrills.utils.toPlain
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.entity.LivingEntity
-import net.minecraft.text.Text
+import net.minecraft.network.chat.Component
+import net.minecraft.world.entity.LivingEntity
 
 object GlowMobCommand {
 
@@ -25,7 +25,7 @@ object GlowMobCommand {
 
                 if (!GlowMob.isActive()) {
                     ctx.source.sendError(
-                        Text.literal("GlowMob feature is not active.")
+                        Component.literal("GlowMob feature is not active.")
                     )
 
                     return@executes 0
@@ -66,7 +66,7 @@ object GlowMobCommand {
                         GlowMob.clearRules()
 
                         ctx.source.sendFeedback(
-                            Text.literal("Cleared all entity highlight rules.")
+                            Component.literal("Cleared all entity highlight rules.")
                         )
 
                         1
@@ -135,7 +135,7 @@ object GlowMobCommand {
 
         if (rules.isEmpty()) {
             ctx.source.sendFeedback(
-                Text.literal("No glow rules found.")
+                Component.literal("No glow rules found.")
             )
 
             return 1
@@ -143,7 +143,7 @@ object GlowMobCommand {
 
         if (ruleId != -1 && (ruleId < 1 || ruleId > rules.size)) {
             ctx.source.sendFeedback(
-                Text.literal("Invalid rule id.")
+                Component.literal("Invalid rule id.")
             )
 
             return 0
@@ -183,7 +183,7 @@ object GlowMobCommand {
                 sb.append("  - ")
                     .append(entity.name.toPlain())
                     .append(" (")
-                    .append(entity.type.name.string)
+                    .append(entity.type.toShortString())
                     .append(")")
                     .append(", MaxHP: ")
                     .append(String.format("%.1f", entity.maxHealth))
@@ -198,7 +198,7 @@ object GlowMobCommand {
         }
 
         ctx.source.sendFeedback(
-            Text.literal(sb.toString())
+            Component.literal(sb.toString())
         )
 
         return 1
@@ -215,7 +215,7 @@ object GlowMobCommand {
         if (addIndex != -1) {
 
             ctx.source.sendFeedback(
-                Text.literal(
+                Component.literal(
                     "Added rule $addIndex with color ${
                         TextUtils.colorToString(color)
                     } and matcher: ${matcher.serialize()}"
@@ -225,7 +225,7 @@ object GlowMobCommand {
         } else {
 
             ctx.source.sendError(
-                Text.literal("Some error")
+                Component.literal("Some error")
             )
         }
 
@@ -242,11 +242,11 @@ object GlowMobCommand {
 
         if (removed) {
             ctx.source.sendFeedback(
-                Text.literal("Removed rule '$id'.")
+                Component.literal("Removed rule '$id'.")
             )
         } else {
             ctx.source.sendError(
-                Text.literal("Rule '$id' not found.")
+                Component.literal("Rule '$id' not found.")
             )
         }
 
@@ -283,7 +283,7 @@ object GlowMobCommand {
         }
 
         ctx.source.sendFeedback(
-            Text.literal(sb.toString())
+            Component.literal(sb.toString())
         )
 
         return 1

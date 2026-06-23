@@ -10,14 +10,14 @@ import com.somefrills.utils.TextUtils
 import com.somefrills.utils.plainCustomName
 import com.somefrills.utils.setCustomName
 import com.somefrills.utils.wrapByDelimiter
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.LoreComponent
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.text.TextColor
-import net.minecraft.util.Formatting
+import net.minecraft.network.chat.Component
+import net.minecraft.ChatFormatting
+import net.minecraft.core.component.DataComponents
+import net.minecraft.network.chat.Style
+import net.minecraft.network.chat.TextColor
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.ItemLore
 import org.lwjgl.glfw.GLFW
 import java.util.*
 
@@ -37,101 +37,101 @@ class GlowMobRules : ChestUI("GlowMob Rules") {
             // Display the rule index (1-based) in the menu
             val displayId = "Rule " + (i + 1)
             stack.setCustomName(
-                colorStyle(if (rule.enabled()) Formatting.GREEN else Formatting.RED)!!.withItalic(false),
+                colorStyle(if (rule.enabled()) ChatFormatting.GREEN else ChatFormatting.RED)!!.withItalic(false),
                 displayId
             )
-            stack.set(DataComponentTypes.LORE, getRuleLore(rule))
+            stack.set(DataComponents.LORE, getRuleLore(rule))
             addItem(stack)
         }
 
         val createButton = ItemStack(Items.YELLOW_TERRACOTTA)
-        createButton.setCustomName(colorStyle(Formatting.GREEN)!!.withItalic(false), "Create Rule")
+        createButton.setCustomName(colorStyle(ChatFormatting.GREEN)!!.withItalic(false), "Create Rule")
 
-        val lore: MutableList<Text> = ArrayList<Text>()
+        val lore: MutableList<Component> = ArrayList<Component>()
         lore.add(
-            Text.literal("Setup a new ").setStyle(colorStyle(Formatting.GRAY))
-                .append(Text.literal("Glow").setStyle(colorStyle(Formatting.RED)))
-                .append(Text.literal(" rule.").setStyle(colorStyle(Formatting.GRAY)))
+            Component.literal("Setup a new ").setStyle(colorStyle(ChatFormatting.GRAY))
+                .append(Component.literal("Glow").setStyle(colorStyle(ChatFormatting.RED)))
+                .append(Component.literal(" rule.").setStyle(colorStyle(ChatFormatting.GRAY)))
         )
-        lore.add(Text.literal(""))
-        lore.add(Text.literal("Click to create!").setStyle(colorStyle(Formatting.YELLOW)))
-        createButton.set(DataComponentTypes.LORE, LoreComponent(lore, lore))
+        lore.add(Component.literal(""))
+        lore.add(Component.literal("Click to create!").setStyle(colorStyle(ChatFormatting.YELLOW)))
+        createButton.set(DataComponents.LORE, ItemLore(lore, lore))
 
         addItem(createButton)
     }
 
-    private fun getRuleLore(rule: GlowMobRule): LoreComponent {
+    private fun getRuleLore(rule: GlowMobRule): ItemLore {
         val matchInfo = rule.info()
 
-        val lines: MutableList<Text?> = ArrayList<Text?>()
+        val lines: MutableList<Component> = ArrayList<Component>()
 
-        lines.add(Text.literal("Conditions: ").setStyle(colorStyle(Formatting.GREEN)))
+        lines.add(Component.literal("Conditions: ").setStyle(colorStyle(ChatFormatting.GREEN)))
 
         if (!matchInfo.type.isEmpty()) {
             val typeLines: Array<String> =
                 matchInfo.type.toString().wrapByDelimiter(20, ",").split("\n".toRegex())
                     .dropLastWhile { it.isEmpty() }.toTypedArray()
             lines.add(
-                Text.literal("Type: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(typeLines[0]).setStyle(colorStyle(Formatting.YELLOW)))
+                Component.literal("Type: ").setStyle(colorStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(typeLines[0]).setStyle(colorStyle(ChatFormatting.YELLOW)))
             )
             for (i in 1..<typeLines.size) {
-                lines.add(Text.literal(typeLines[i]).setStyle(colorStyle(Formatting.YELLOW)))
+                lines.add(Component.literal(typeLines[i]).setStyle(colorStyle(ChatFormatting.YELLOW)))
             }
         }
 
         if (!matchInfo.name.isEmpty()) {
             lines.add(
-                Text.literal("Name: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(matchInfo.name).setStyle(colorStyle(Formatting.YELLOW)))
+                Component.literal("Name: ").setStyle(colorStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(matchInfo.name).setStyle(colorStyle(ChatFormatting.YELLOW)))
             )
         }
 
         if (matchInfo.area != null) {
             lines.add(
-                Text.literal("Island: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(matchInfo.area!!.displayName).setStyle(colorStyle(matchInfo.area!!.colorHex)))
+                Component.literal("Island: ").setStyle(colorStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(matchInfo.area!!.displayName).setStyle(colorStyle(matchInfo.area!!.colorHex)))
             )
         }
 
         if (!matchInfo.gear.isEmpty()) {
             val gearStr = matchInfo.gear.joinToString { obj: GearFlag -> obj.name }
             lines.add(
-                Text.literal("Gear: ").setStyle(colorStyle(Formatting.GRAY))
-                    .append(Text.literal(gearStr).setStyle(colorStyle(Formatting.YELLOW)))
+                Component.literal("Gear: ").setStyle(colorStyle(ChatFormatting.GRAY))
+                    .append(Component.literal(gearStr).setStyle(colorStyle(ChatFormatting.YELLOW)))
             )
         }
 
-        lines.add(Text.literal(""))
-        lines.add(Text.literal("Color: ").setStyle(colorStyle(Formatting.YELLOW)))
+        lines.add(Component.literal(""))
+        lines.add(Component.literal("Color: ").setStyle(colorStyle(ChatFormatting.YELLOW)))
 
         val colorDisplay = TextUtils.colorToString(rule.color())
-        lines.add(Text.literal(capitalize(colorDisplay)).setStyle(colorStyle(rule.color().hex)))
+        lines.add(Component.literal(capitalize(colorDisplay)).setStyle(colorStyle(rule.color().hex)))
 
-        lines.add(Text.literal(""))
+        lines.add(Component.literal(""))
         lines.add(
-            Text.literal("Enabled: ").setStyle(colorStyle(Formatting.YELLOW))
+            Component.literal("Enabled: ").setStyle(colorStyle(ChatFormatting.YELLOW))
                 .append(
-                    Text.literal(if (rule.enabled()) "On" else "Off")
-                        .setStyle(colorStyle(if (rule.enabled()) Formatting.GREEN else Formatting.RED))
+                    Component.literal(if (rule.enabled()) "On" else "Off")
+                        .setStyle(colorStyle(if (rule.enabled()) ChatFormatting.GREEN else ChatFormatting.RED))
                 )
         )
 
-        lines.add(Text.literal("Right-click to toggle!").setStyle(colorStyle(Formatting.YELLOW)))
-        lines.add(Text.literal("Left-click to configure!").setStyle(colorStyle(Formatting.YELLOW)))
+        lines.add(Component.literal("Right-click to toggle!").setStyle(colorStyle(ChatFormatting.YELLOW)))
+        lines.add(Component.literal("Left-click to configure!").setStyle(colorStyle(ChatFormatting.YELLOW)))
 
-        return LoreComponent(lines, lines)
+        return ItemLore(lines, lines)
     }
 
-    private fun colorStyle(color: Formatting): Style? {
-        val colorValue = color.colorValue
+    private fun colorStyle(color: ChatFormatting): Style {
+        val colorValue = color.color
         if (colorValue == null) {
             return Style.EMPTY
         }
         return colorStyle(colorValue)
     }
 
-    private fun colorStyle(colorHex: Int): Style? {
+    private fun colorStyle(colorHex: Int): Style {
         return Style.EMPTY.withColor(TextColor.fromRgb(colorHex))
     }
 

@@ -3,18 +3,14 @@ package com.somefrills.misc
 import com.somefrills.Main
 import com.somefrills.Main.mc
 import com.somefrills.events.*
-import com.somefrills.utils.ChatUtils
-import com.somefrills.utils.NetworkUtils
-import com.somefrills.utils.SkyblockUtils
-import com.somefrills.utils.Symbols
-import com.somefrills.utils.toPlain
+import com.somefrills.utils.*
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import net.minecraft.client.gui.hud.PlayerListHud
-import net.minecraft.network.packet.s2c.query.PingResultS2CPacket
-import net.minecraft.scoreboard.ScoreboardDisplaySlot
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket
+import net.minecraft.world.scores.DisplaySlot
 import java.util.regex.Pattern
+
 
 object SkyblockData {
     private val scoreRegex: Pattern = Pattern.compile("Team Score: [0-9]* (.*)")
@@ -64,11 +60,9 @@ object SkyblockData {
 
     private fun updateTabListIfDirty() {
         val lines: MutableList<String> = ArrayList()
-        if (mc.inGameHud == null || mc.player == null || mc.player?.networkHandler == null) return
-        val playerListHud: PlayerListHud = mc.inGameHud.playerListHud ?: return
-
-        for (entry in playerListHud.collectPlayerEntries()) {
-            val displayName = entry.displayName?.toPlain() ?: continue
+        if (mc.gui == null || mc.player == null ) return
+        for (entry in  mc.gui.tabList.playerInfos) {
+            val displayName = entry.tabListDisplayName?.toPlain() ?: continue
             val name = displayName.trim { it <= ' ' }
             if (name.isEmpty()) continue
 
@@ -97,8 +91,8 @@ object SkyblockData {
     @JvmStatic
     fun updateObjective() {
         if (mc.player == null) return
-        val scoreboard = mc.player?.networkHandler?.scoreboard ?: return
-        val objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.FROM_ID.apply(1))
+        val scoreboard = mc.player?.connection?.scoreboard() ?: return
+        val objective = scoreboard.getDisplayObjective(DisplaySlot.BY_ID.apply(1))
         if (objective != null) {
             isInSkyblock = objective.displayName.toPlain().contains("SKYBLOCK")
         }
@@ -112,14 +106,15 @@ object SkyblockData {
     private fun updateScoreboardIfDirty() {
         if (mc.player != null) {
             val currentLines = ArrayList<String>()
-            val scoreboard = mc.player?.networkHandler?.scoreboard ?: return
-            val objective = scoreboard.getObjectiveForSlot(ScoreboardDisplaySlot.FROM_ID.apply(1))
-            for (scoreHolder in scoreboard.knownScoreHolders) {
-                if (!scoreboard.getScoreHolderObjectives(scoreHolder).containsKey(objective)) continue
-                val team = scoreboard.getScoreHolderTeam(scoreHolder.nameForScoreboard)
+            val scoreboard = mc.player?.connection?.scoreboard() ?: return
+            val objective = scoreboard.getDisplayObjective(DisplaySlot.BY_ID.apply(1))
+            for (scoreHolder in scoreboard.trackedPlayers) {
+                if (!scoreboard.listPlayerScores(scoreHolder).containsKey(objective)) continue
+                val team = scoreboard.getPlayersTeam(scoreHolder.scoreboardName)
                 if (team != null) {
-                    val line = Formatting.strip(team.prefix.string + team.suffix.string)!!
-                        .trim { it <= ' ' }
+                    val line = ChatFormatting.stripFormatting(
+                        team.playerPrefix.string + team.playerSuffix.string
+                    )!!.trim { it <= ' ' }
                     if (!line.isEmpty()) {
                         if (line.startsWith(Symbols.zone) || line.startsWith(Symbols.zoneRift)) {
                             location = line
@@ -166,8 +161,8 @@ object SkyblockData {
     private fun onPing(event: ReceivePacketEvent) {
         if (!showPing) return
         event.packet.let {
-            if (it is PingResultS2CPacket) {
-                ChatUtils.infoFormat("§aPing: §f{}ms", it.startTime)
+            if (it is ClientboundPongResponsePacket) {
+                ChatUtils.infoFormat("§aPing: §f{}ms", it.time)
                 showPing = false
             }
         }

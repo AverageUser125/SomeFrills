@@ -1,19 +1,20 @@
+// TODO(Ravel): Failed to fully resolve file: null cannot be cast to non-null type com.intellij.psi.PsiClass
 package com.somefrills.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.events.*;
 import com.somefrills.misc.SkyblockData;
 import com.somefrills.utils.TextUtils;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.data.DataTracker;
-import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.network.packet.s2c.play.*;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -24,16 +25,16 @@ import java.util.Optional;
 import static com.somefrills.Main.eventBus;
 import static com.somefrills.Main.mc;
 
-@Mixin(ClientPlayNetworkHandler.class)
-public class ClientPlayNetworkHandlerMixin {
+@Mixin(ClientPacketListener.class)
+public class ClientPacketListenerMixin {
     @SuppressWarnings("unchecked")
-    @Inject(method = "onEntityTrackerUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/data/DataTracker;writeUpdatedEntries(Ljava/util/List;)V", shift = At.Shift.AFTER))
+    @Inject(method = "onEntityTrackerUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData;assignValues(Ljava/util/List;)V", shift = At.Shift.AFTER))
     private void onPostTrackerUpdate(EntityTrackerUpdateS2CPacket packet, CallbackInfo ci, @Local Entity ent) {
         if (ent instanceof LivingEntity || ent instanceof ItemEntity) {
-            if (ent instanceof ArmorStandEntity) {
-                for (DataTracker.SerializedEntry<?> entry : packet.trackedValues()) {
-                    if (entry.handler().equals(TrackedDataHandlerRegistry.OPTIONAL_TEXT_COMPONENT) && entry.value() != null) {
-                        ((Optional<Text>) entry.value()).ifPresent(value -> eventBus.post(new EntityNamedEvent(ent, value)));
+            if (ent instanceof ArmorStand) {
+                for (SynchedEntityData.DataValue<?> entry : packet.trackedValues()) {
+                    if (entry.handler().equals(EntityDataSerializers.OPTIONAL_TEXT_COMPONENT) && entry.value() != null) {
+                        ((Optional<Component>) entry.value()).ifPresent(value -> eventBus.post(new EntityNamedEvent(ent, value)));
                         break;
                     }
                 }
@@ -42,21 +43,21 @@ public class ClientPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onEntitySpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;playSpawnSound(Lnet/minecraft/entity/Entity;)V"))
+    @Inject(method = "onEntitySpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/ClientPacketListener;postAddEntitySoundInstance(Lnet/minecraft/world/entity/Entity;)V"))
     private void onEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo ci, @Local Entity ent) {
         eventBus.post(new EntityUpdatedEvent(ent));
     }
 
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
     private void onUpdateInventory(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
-        if (mc.currentScreen instanceof GenericContainerScreen container) {
+        if (mc.screen instanceof ContainerScreen container) {
             eventBus.post(new SlotUpdateEvent(packet, container, container.getScreenHandler(), packet.getSlot()));
-        } else if (mc.currentScreen == null) {
+        } else if (mc.screen == null) {
             eventBus.post(new InventoryUpdateEvent(packet, packet.getStack(), packet.getSlot()));
         }
     }
 
-    @Inject(method = "onParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/network/PacketApplyBatcher;)V", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "onParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V", shift = At.Shift.AFTER), cancellable = true)
     private void onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
         if (eventBus.post(new SpawnParticleEvent(packet)).isCancelled()) {
             ci.cancel();
@@ -83,7 +84,7 @@ public class ClientPlayNetworkHandlerMixin {
         eventBus.post(new ServerJoinEvent());
     }
 
-    @Inject(method = "onGameMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/message/MessageHandler;onGameMessage(Lnet/minecraft/text/Text;Z)V"), cancellable = true)
+    @Inject(method = "onGameMessage", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/chat/ChatListener;handleSystemMessage(Lnet/minecraft/network/chat/Component;Z)V"), cancellable = true)
     private void onGameMessage(GameMessageS2CPacket packet, CallbackInfo ci) {
         String msg = TextUtils.toPlain(packet.content());
         if (!packet.overlay()) {

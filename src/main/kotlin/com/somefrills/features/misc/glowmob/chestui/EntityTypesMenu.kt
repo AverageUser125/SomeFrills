@@ -7,17 +7,17 @@ import com.somefrills.utils.plainCustomName
 import com.somefrills.utils.setCustomData
 import com.somefrills.utils.setCustomName
 import com.somefrills.utils.stripPrefix
-import net.minecraft.component.DataComponentTypes
-import net.minecraft.component.type.LoreComponent
-import net.minecraft.entity.EntityType
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.item.SpawnEggItem
-import net.minecraft.nbt.NbtCompound
-import net.minecraft.registry.Registries
-import net.minecraft.text.Style
-import net.minecraft.text.Text
-import net.minecraft.util.Formatting
+import net.minecraft.network.chat.Component
+import net.minecraft.ChatFormatting
+import net.minecraft.core.component.DataComponents
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.network.chat.Style
+import net.minecraft.world.entity.EntityType
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import net.minecraft.world.item.SpawnEggItem
+import net.minecraft.world.item.component.ItemLore
 
 class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
     ChestUI("Select Entity Type", previousMenu) {
@@ -31,10 +31,10 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
         // Collect all entity entries (including special-case entries) then sort alphabetically by display name
         val entries: MutableList<ItemStack> = ArrayList()
 
-        for (entityType in Registries.ENTITY_TYPE) {
-            val id = Registries.ENTITY_TYPE.getId(entityType)
-            val spawnEggId = id.withSuffixedPath("_spawn_egg")
-            val spawnEggItem = Registries.ITEM.get(spawnEggId)
+        for (entityType in BuiltInRegistries.ENTITY_TYPE) {
+            val id = BuiltInRegistries.ENTITY_TYPE.getKey(entityType)
+            val spawnEggId = id.withSuffix("_spawn_egg")
+            val spawnEggItem = BuiltInRegistries.ITEM.get(spawnEggId)
 
             if (spawnEggItem !is SpawnEggItem) {
                 continue
@@ -62,9 +62,9 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
         }
     }
 
-    private fun createEntityItem(entityType: EntityType<*>?, eggStack: ItemStack): ItemStack {
+    private fun createEntityItem(entityType: EntityType<*>, eggStack: ItemStack): ItemStack {
         // Delegate to the ID-based helper to avoid duplication
-        val entityTypeId = Registries.ENTITY_TYPE.getId(entityType)
+        val entityTypeId = BuiltInRegistries.ENTITY_TYPE.getKey(entityType)
         return createEntityItemFromId(entityTypeId.path, eggStack)
     }
 
@@ -74,25 +74,25 @@ class EntityTypesMenu(previousMenu: ChestUI?, private val info: MatchInfo) :
     private fun createEntityItemFromId(entityTypeId: String, baseStack: ItemStack): ItemStack {
         val stack = baseStack.copy()
 
-        val nbt = NbtCompound()
+        val nbt = CompoundTag()
         nbt.putString("EntityType", entityTypeId)
         stack.setCustomData(nbt)
 
         val displayName = TextUtils.capitalizeType(entityTypeId)
-        stack.setCustomName(Style.EMPTY.withColor(Formatting.GREEN).withItalic(false), displayName)
+        stack.setCustomName(Style.EMPTY.withColor(ChatFormatting.GREEN).withItalic(false), displayName)
         setLore(stack, entityTypeId)
         return stack
     }
 
     private fun setLore(stack: ItemStack, typeId: String?) {
-        val lore: MutableList<Text?> = ArrayList<Text?>()
+        val lore: MutableList<Component> = ArrayList<Component>()
         if (info.type.contains(typeId)) {
-            lore.add(Text.literal("✓ Currently selected").setStyle(Style.EMPTY.withColor(Formatting.YELLOW)))
-            stack.set(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, true)
+            lore.add(Component.literal("✓ Currently selected").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
+            stack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
         } else {
-            lore.add(Text.literal("Click to select").setStyle(Style.EMPTY.withColor(Formatting.GRAY)))
+            lore.add(Component.literal("Click to select").setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)))
         }
-        stack.set(DataComponentTypes.LORE, LoreComponent(lore, lore))
+        stack.set(DataComponents.LORE, ItemLore(lore, lore))
     }
 
     override fun onItemClick(stack: ItemStack?, button: Int) {

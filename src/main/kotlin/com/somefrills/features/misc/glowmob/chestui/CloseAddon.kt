@@ -1,11 +1,11 @@
 package com.somefrills.features.misc.glowmob.chestui
 
 import com.somefrills.utils.setCustomName
-import net.minecraft.inventory.Inventory
-import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
-import net.minecraft.text.Style
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
+import net.minecraft.network.chat.Style
+import net.minecraft.world.Container
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
 
 class CloseAddon : UIAddon {
     // Default slot is middle-bottom (Index 49 for a 9x6 chest)
@@ -15,19 +15,19 @@ class CloseAddon : UIAddon {
         // This addon doesn't filter or modify the content list
     }
 
-    override fun drawDecoration(ui: ChestUI, inventory: Inventory) {
+    override fun drawDecoration(ui: ChestUI, inventory: Container) {
         if (ui.previousScreen == null) return  // Don't show close button if there's no previous screen to go back to
 
         val closeButton = ItemStack(Items.BARRIER)
-        val barrierStyle = Style.EMPTY.withColor(Formatting.GRAY).withItalic(false)
+        val barrierStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false)
         closeButton.setCustomName(barrierStyle, "Close")
 
-        inventory.setStack(closeSlot, closeButton)
+        inventory.setItem(closeSlot, closeButton)
     }
 
     override fun onClick(ui: ChestUI, stack: ItemStack, name: String, button: Int): Boolean {
         if (name == "Close") {
-            ui.close()
+            ui.onClose()
             return true
         }
         return false

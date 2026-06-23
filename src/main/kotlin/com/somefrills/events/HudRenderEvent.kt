@@ -1,8 +1,8 @@
 package com.somefrills.events
 
-import net.minecraft.client.font.TextRenderer
-import net.minecraft.client.gui.DrawContext
-import net.minecraft.client.render.RenderTickCounter
+import net.minecraft.client.DeltaTracker
+import net.minecraft.client.gui.Font
+import net.minecraft.client.gui.GuiGraphicsExtractor
 
-class HudRenderEvent(val context: DrawContext, val textRenderer: TextRenderer, val tickCounter: RenderTickCounter) :
+class HudRenderEvent(val context: GuiGraphicsExtractor, val textRenderer: Font, val tickCounter: DeltaTracker) :
     FrillsEvent()

@@ -8,9 +8,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.misc.RenderColor
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.TextUtils
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.util.Formatting
+import net.minecraft.ChatFormatting
 import java.util.concurrent.CompletableFuture
 
 /**
@@ -28,7 +28,7 @@ object CommandColorUtils {
 
         val remaining = builder.remaining.lowercase()
 
-        for (formatting in Formatting.entries) {
+        for (formatting in ChatFormatting.entries) {
 
             if (
                 formatting.isColor &&

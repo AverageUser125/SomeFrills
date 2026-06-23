@@ -11,14 +11,14 @@ import com.somefrills.utils.Symbols
 import com.somefrills.utils.TextUtils
 import com.somefrills.utils.getLoreLines
 import com.somefrills.utils.skyblockId
-import net.minecraft.item.ItemStack
-import net.minecraft.screen.slot.Slot
-import net.minecraft.screen.slot.SlotActionType
+import net.minecraft.world.inventory.ContainerInput
+import net.minecraft.world.inventory.Slot
+import net.minecraft.world.item.ItemStack
 import org.lwjgl.glfw.GLFW
 
 @FrillsFeature
 object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverrideEnabled) {
-    private val matchBlacklist = Sets.newHashSet<String?>(
+    private val matchBlacklist = Sets.newHashSet<String>(
         "Attribute Fusion",
         "Beacon",
         "Chest",
@@ -66,8 +66,8 @@ object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverride
         "Bits Shop"
     )
 
-    private fun isLeftClick(button: Int, actionType: SlotActionType): Boolean {
-        return button == GLFW.GLFW_MOUSE_BUTTON_LEFT && actionType == SlotActionType.PICKUP
+    private fun isLeftClick(button: Int, actionType: ContainerInput): Boolean {
+        return button == GLFW.GLFW_MOUSE_BUTTON_LEFT && actionType == ContainerInput.PICKUP
     }
 
     private fun isBlacklisted(title: String): Boolean {
@@ -86,14 +86,14 @@ object MiddleClickOverride : Feature(FrillsMod.config.tweaks.middleClickOverride
     }
 
     @JvmStatic
-    fun shouldOverride(slot: Slot?, button: Int, actionType: SlotActionType): Boolean {
+    fun shouldOverride(slot: Slot?, button: Int, actionType: ContainerInput): Boolean {
         if (!FrillsMod.config.tweaks.middleClickOverrideEnabled.get()) return false
-        val currentScreen = mc.currentScreen ?: return false
+        val currentScreen = mc.screen ?: return false
         if (slot == null) return false
         if (!isLeftClick(button, actionType)) return false
 
         val title: String = currentScreen.getTitle().string
-        val stack = slot.stack
+        val stack = slot.item
 
         if (stack.isEmpty) return false
         if (isBlacklisted(title)) return false

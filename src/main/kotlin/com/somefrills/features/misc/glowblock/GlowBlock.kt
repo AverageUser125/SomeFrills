@@ -9,8 +9,8 @@ import com.somefrills.features.core.Feature
 import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.RenderColor
 import meteordevelopment.orbit.EventHandler
-import net.minecraft.block.Block
-import net.minecraft.util.math.Box
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.phys.AABB
 
 @FrillsFeature
 object GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
@@ -59,12 +59,12 @@ object GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
 
     @EventHandler
     fun onWorldRender(event: WorldRenderEvent) {
-        if (mc.world == null) return
+        if (mc.level == null) return
         if (targetBlocks.isEmpty()) return
 
         val glowingBlocks = blockScanner?.scanRenderedChunks(targetBlocks) ?: return
         for (pos in glowingBlocks) {
-            val box = Box(pos)
+            val box = AABB(pos)
             event.drawOutline(box, true, RenderColor(255, 255, 0, 128))
         }
     }

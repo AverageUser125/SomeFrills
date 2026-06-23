@@ -11,15 +11,14 @@ import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.set
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import net.minecraft.client.option.Perspective
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket
-import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket
-import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket
-import net.minecraft.util.math.MathHelper
-import net.minecraft.util.math.Vec3d
+import net.minecraft.client.CameraType
+import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket
+import net.minecraft.network.protocol.game.ClientboundSetHealthPacket
+import net.minecraft.util.Mth
+import net.minecraft.world.phys.Vec3
 import org.joml.Vector3d
 import org.lwjgl.glfw.GLFW
-import java.awt.event.KeyEvent
 import kotlin.math.sqrt
 
 @FrillsFeature
@@ -32,7 +31,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     @JvmField
     val prevPos: Vector3d = Vector3d()
 
-    private var perspective: Perspective? = null
+    private var perspective: CameraType? = null
 
     @JvmField
     var yaw: Float = 0f
@@ -59,28 +58,29 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     public override fun onActivate() {
         super.onActivate()
         val player = mc.player ?: return
-        if (mc.options == null || mc.gameRenderer == null || mc.gameRenderer.camera == null) {
+        if (mc.options == null || mc.gameRenderer == null || mc.gameRenderer.mainCamera == null) {
             return
         }
 
-        fovScale = mc.options.fovEffectScale.getValue()
-        bobView = mc.options.bobView.getValue()
+        fovScale = mc.options.fovEffectScale.get()
+        bobView = mc.options.bobView.get()
         if (config.staticView) {
-            mc.options.fovEffectScale.value = 0.0
-            mc.options.bobView.value = false
+            mc.options.fovEffectScale.set(0.0)
+            mc.options.bobView.set(false)
         }
-        yaw = player.yaw
-        pitch = player.pitch
 
-        perspective = mc.options.perspective
+        yaw =  mc.gameRenderer.mainCamera.yaw()
+        pitch =  Mth.wrapDegrees(mc.gameRenderer.mainCamera.yRot())
+
+        perspective = mc.options.cameraType
 
         // FIXME: why is this here?
         //config.speed = config.speed
 
-        pos.set(mc.gameRenderer.camera.cameraPos)
-        prevPos.set(mc.gameRenderer.camera.cameraPos)
+        pos.set(mc.gameRenderer.mainCamera.position())
+        prevPos.set(mc.gameRenderer.mainCamera.position())
 
-        if (mc.options.perspective == Perspective.THIRD_PERSON_FRONT) {
+        if (mc.options.cameraType == CameraType.THIRD_PERSON_FRONT) {
             yaw += 180f
             pitch *= -1f
         }
@@ -89,29 +89,28 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         lastPitch = pitch
 
         // isSneaking = mc.options.sneakKey.isPressed;
-        forward = mc.options.forwardKey.isPressed
-        backward = mc.options.backKey.isPressed
-        right = mc.options.rightKey.isPressed
-        left = mc.options.leftKey.isPressed
-        up = mc.options.jumpKey.isPressed
-        down = mc.options.sneakKey.isPressed
+        forward = mc.options.keyUp.isDown
+        backward = mc.options.keyDown.isDown
+        right = mc.options.keyRight.isDown
+        left = mc.options.keyLeft.isDown
+        up = mc.options.keyJump.isDown
+        down = mc.options.keyShift.isDown
 
         unpress()
-        if (config.reloadChunks) mc.worldRenderer.reload()
+        if (config.reloadChunks) mc.levelRenderer.allChanged()
     }
 
     public override fun onDeactivate() {
         super.onDeactivate()
-        if (perspective == null) return
         if (config.reloadChunks) {
-            mc.execute { mc.worldRenderer.reload() }
+            mc.execute { mc.levelRenderer.allChanged() }
         }
 
-        mc.options.perspective = perspective
+        mc.options.cameraType = perspective ?: return
 
         if (config.staticView) {
-            mc.options.fovEffectScale.value = fovScale
-            mc.options.bobView.value = bobView
+            mc.options.fovEffectScale.set(fovScale)
+            mc.options.bobView.set(bobView)
         }
 
         perspective = null
@@ -119,12 +118,12 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     }
 
     private fun unpress() {
-        mc.options.forwardKey.isPressed = false
-        mc.options.backKey.isPressed = false
-        mc.options.rightKey.isPressed = false
-        mc.options.leftKey.isPressed = false
-        mc.options.jumpKey.isPressed = false
-        mc.options.sneakKey.isPressed = false
+        mc.options.keyUp.isDown = false
+        mc.options.keyDown.isDown = false
+        mc.options.keyRight.isDown = false
+        mc.options.keyLeft.isDown = false
+        mc.options.keyJump.isDown = false
+        mc.options.keyShift.isDown = false
     }
 
     @EventHandler
@@ -139,18 +138,18 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     @EventHandler
     private fun onTick(event: TickEventPost) {
         val cameraEntity = mc.cameraEntity ?: return
-        if (cameraEntity.isInsideWall) cameraEntity.noClip = true
+        if (cameraEntity.isInWall) cameraEntity.noPhysics = true
         if (perspective == null) return
-        if (!perspective!!.isFirstPerson) mc.options.perspective = Perspective.FIRST_PERSON
+        if (!perspective!!.isFirstPerson) mc.options.cameraType = CameraType.FIRST_PERSON
 
-        val forward = Vec3d.fromPolar(0f, yaw)
-        val right = Vec3d.fromPolar(0f, yaw + 90)
+        val forward = Vec3.directionFromRotation(0f, yaw)
+        val right = Vec3.directionFromRotation(0f, yaw + 90)
         var velX = 0.0
         var velY = 0.0
         var velZ = 0.0
 
         var s = 0.5
-        if (mc.options.sprintKey.isPressed) s = 1.0
+        if (mc.options.keySprint.isDown) s = 1.0
 
         var a = false
         if (this.forward) {
@@ -214,34 +213,34 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     private fun onInput(key: Int, action: KeyAction): Boolean {
         when (key) {
-           mc.options.forwardKey.boundKey.code -> {
+           mc.options.keyUp.key.numericKeyValue.asInt -> {
                 forward = action != KeyAction.Release
-                mc.options.forwardKey.isPressed = false
+                mc.options.keyUp.isDown = false
             }
 
-            mc.options.backKey.boundKey.code -> {
+            mc.options.keyDown.key.numericKeyValue.asInt -> {
                 backward = action != KeyAction.Release
-                mc.options.backKey.isPressed = false
+                mc.options.keyDown.isDown = false
             }
 
-            mc.options.rightKey.boundKey.code -> {
+            mc.options.keyRight.key.numericKeyValue.asInt -> {
                 right = action != KeyAction.Release
-                mc.options.rightKey.isPressed = false
+                mc.options.keyRight.isDown = false
             }
 
-            mc.options.leftKey.boundKey.code -> {
+            mc.options.keyLeft.key.numericKeyValue.asInt -> {
                 left = action != KeyAction.Release
-                mc.options.leftKey.isPressed = false
+                mc.options.keyLeft.isDown = false
             }
 
-            mc.options.jumpKey.boundKey.code -> {
+            mc.options.keyJump.key.numericKeyValue.asInt -> {
                 up = action != KeyAction.Release
-                mc.options.jumpKey.isPressed = false
+                mc.options.keyJump.isDown = false
             }
 
-            mc.options.sneakKey.boundKey.code -> {
+            mc.options.keyShift.key.numericKeyValue.asInt -> {
                 down = action != KeyAction.Release
-                mc.options.sneakKey.isPressed = false
+                mc.options.keyShift.isDown = false
             }
 
             else -> {
@@ -254,7 +253,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     @EventHandler(priority = EventPriority.LOW)
     private fun onMouseScroll(event: MouseScrollEvent) {
-        if (config.speedScrollSensitivity > 0 && mc.currentScreen == null) {
+        if (config.speedScrollSensitivity > 0 && mc.screen == null) {
             config.speed += event.value * 0.25 * (config.speedScrollSensitivity * config.speed)
             if (config.speed < 0.1) config.speed = 0.1
 
@@ -276,19 +275,19 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     @EventHandler
     private fun onPacketReceive(event: ReceivePacketEvent) {
         val packet = event.packet
-        if (packet is DeathMessageS2CPacket) {
-            val entity = mc.world?.getEntityById(packet.playerId()) ?: return
+        if (packet is ClientboundPlayerCombatKillPacket) {
+            val entity = mc.level?.getEntity(packet.playerId()) ?: return
             if (entity === mc.player && config.toggleOnDeath) {
                 toggle()
                 ChatUtils.info("Toggled off because you died.")
             }
-        } else if (packet is HealthUpdateS2CPacket) {
+        } else if (packet is ClientboundSetHealthPacket) {
             val player = mc.player ?: return
             if (player.health - packet.health > 0 && config.toggleOnDamage) {
                 toggle()
                 ChatUtils.info("Toggled off because you took damage.")
             }
-        } else if (packet is PlayerRespawnS2CPacket) {
+        } else if (packet is ClientboundRespawnPacket) {
             toggle()
             ChatUtils.info("Toggled off because you changed dimensions.")
         }
@@ -315,23 +314,23 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     }
 
     fun getX(tickDelta: Float): Double {
-        return MathHelper.lerp(tickDelta.toDouble(), prevPos.x, pos.x)
+        return Mth.lerp(tickDelta.toDouble(), prevPos.x, pos.x)
     }
 
     fun getY(tickDelta: Float): Double {
-        return MathHelper.lerp(tickDelta.toDouble(), prevPos.y, pos.y)
+        return Mth.lerp(tickDelta.toDouble(), prevPos.y, pos.y)
     }
 
     fun getZ(tickDelta: Float): Double {
-        return MathHelper.lerp(tickDelta.toDouble(), prevPos.z, pos.z)
+        return Mth.lerp(tickDelta.toDouble(), prevPos.z, pos.z)
     }
 
     fun getYaw(tickDelta: Float): Double {
-        return MathHelper.lerp(tickDelta, lastYaw, yaw).toDouble()
+        return Mth.lerp(tickDelta, lastYaw, yaw).toDouble()
     }
 
     fun getPitch(tickDelta: Float): Double {
-        return MathHelper.lerp(tickDelta, lastPitch, pitch).toDouble()
+        return Mth.lerp(tickDelta, lastPitch, pitch).toDouble()
     }
 
     @JvmStatic
@@ -346,6 +345,6 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         yaw += deltaX.toFloat()
         pitch += deltaY.toFloat()
 
-        pitch = MathHelper.clamp(pitch, -90f, 90f)
+        pitch = Mth.clamp(pitch, -90f, 90f)
     }
 }

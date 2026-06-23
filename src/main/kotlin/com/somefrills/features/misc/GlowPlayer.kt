@@ -12,16 +12,14 @@ import com.somefrills.utils.playerName
 import com.somefrills.utils.setGlowing
 import meteordevelopment.orbit.EventHandler
 import meteordevelopment.orbit.EventPriority
-import net.minecraft.client.network.AbstractClientPlayerEntity
-import net.minecraft.entity.Entity
-import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.world.entity.player.Player
 import java.util.concurrent.ConcurrentHashMap
 
 @FrillsFeature
 object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     private val forcedGlows = ConcurrentHashMap<String, RenderColor>()
 
-    private fun applyHighlight(entity: PlayerEntity) {
+    private fun applyHighlight(entity: Player) {
         val pureName = entity.playerName
         val color = getColor(pureName)
         if (color != null) {
@@ -66,7 +64,7 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     val forcedNames: MutableSet<String>
         get() = forcedGlows.keys
 
-    fun setGlowImmediately(player: PlayerEntity, color: RenderColor) {
+    fun setGlowImmediately(player: Player, color: RenderColor) {
         player.setGlowing(true, color)
     }
 
@@ -80,7 +78,7 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
     @EventHandler(priority = EventPriority.HIGH)
     fun onEntityUpdate(event: EntityUpdatedEvent) {
         val entity = event.entity
-        if (entity !is AbstractClientPlayerEntity) return
+        if (entity !is Player) return
         applyHighlight(entity)
     }
 }

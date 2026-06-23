@@ -7,13 +7,13 @@ import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import com.somefrills.Main.mc
 import com.somefrills.features.misc.glowblock.GlowBlock
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument
+import net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
-import net.minecraft.command.argument.BlockArgumentParser
-import net.minecraft.registry.Registries
-import net.minecraft.registry.RegistryKeys
-import net.minecraft.text.Text
+import net.minecraft.commands.arguments.blocks.BlockStateParser
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.core.registries.Registries
+import net.minecraft.network.chat.Component
 import java.util.concurrent.CompletableFuture
 
 object GlowBlockCommand {
@@ -33,14 +33,13 @@ object GlowBlockCommand {
 
                             .suggests { _, builder ->
 
-                                val world = mc.world
+                                val world = mc.level
 
-                                if (world == null || world.registryManager == null) {
+                                if (world == null) {
                                     return@suggests builder.buildFuture()
                                 }
-
-                                BlockArgumentParser.getSuggestions(
-                                    world.registryManager.getOrThrow(RegistryKeys.BLOCK),
+                                BlockStateParser.fillSuggestions(
+                                    world.registryAccess().lookupOrThrow(Registries.BLOCK),
                                     builder,
                                     false,
                                     false
@@ -49,17 +48,17 @@ object GlowBlockCommand {
 
                             .executes { ctx ->
 
-                                val world = mc.world
+                                val world = mc.level
 
-                                if (world == null || world.registryManager == null) {
+                                if (world == null) {
                                     ctx.source.sendError(
-                                        Text.literal("World or RegistryManager is unavailable.")
+                                        Component.literal("World or RegistryManager is unavailable.")
                                     )
                                     return@executes 0
                                 }
 
-                                val result = BlockArgumentParser.block(
-                                    world.registryManager.getOrThrow(RegistryKeys.BLOCK),
+                                val result = BlockStateParser.parseForBlock(
+                                    world.registryAccess().lookupOrThrow(Registries.BLOCK),
                                     StringArgumentType.getString(ctx, "block"),
                                     false
                                 )
@@ -78,7 +77,7 @@ object GlowBlockCommand {
                         GlowBlock.clear()
 
                         ctx.source.sendFeedback(
-                            Text.literal("Cleared all glow blocks.")
+                            Component.literal("Cleared all glow blocks.")
                         )
 
                         1
@@ -93,18 +92,18 @@ object GlowBlockCommand {
 
                             .executes { ctx ->
 
-                                val world = mc.world
+                                val world = mc.level
 
-                                if (world == null || world.registryManager == null) {
+                                if (world == null) {
                                     ctx.source.sendError(
-                                        Text.literal("World or RegistryManager is unavailable.")
+                                        Component.literal("World or RegistryManager is unavailable.")
                                     )
 
                                     return@executes 0
                                 }
 
-                                val result = BlockArgumentParser.block(
-                                    world.registryManager.getOrThrow(RegistryKeys.BLOCK),
+                                val result = BlockStateParser.parseForBlock(
+                                    world.registryAccess().lookupOrThrow(Registries.BLOCK),
                                     StringArgumentType.getString(ctx, "block"),
                                     false
                                 )
@@ -112,7 +111,7 @@ object GlowBlockCommand {
                                 GlowBlock.removeBlock(result.blockState().block)
 
                                 ctx.source.sendFeedback(
-                                    Text.literal("Removed glow block.")
+                                    Component.literal("Removed glow block.")
                                 )
 
                                 1
@@ -125,19 +124,22 @@ object GlowBlockCommand {
                     .executes { ctx ->
                         if (GlowBlock.targetBlocks.isEmpty()) {
                             ctx.source.sendFeedback(
-                                Text.literal("No tracked glow blocks.")
+                                Component.literal("No tracked glow blocks.")
                             )
 
                             return@executes 1
                         }
 
-                        val blocks = GlowBlock.targetBlocks
-                            .joinToString(", ") {
-                                Registries.BLOCK.getId(it).toString()
-                            }
+                        val sb = StringBuilder()
+                        for (block in GlowBlock.targetBlocks) {
+                            sb.append(
+                                BuiltInRegistries.BLOCK.getKey(block).toString()
+                            ).append(", ")
+                        }
+                        sb.setLength(sb.length - 2) // Remove last comma and space
 
                         ctx.source.sendFeedback(
-                            Text.literal("Tracked glow blocks: $blocks")
+                            Component.literal("Tracked glow blocks: $sb")
                         )
 
                         1
@@ -152,7 +154,7 @@ object GlowBlockCommand {
 
         for (block in GlowBlock.targetBlocks) {
             builder.suggest(
-                Registries.BLOCK.getId(block).toString()
+                BuiltInRegistries.BLOCK.getKey(block).toString()
             )
         }
 

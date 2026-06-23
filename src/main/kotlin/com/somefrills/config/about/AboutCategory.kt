@@ -68,8 +68,8 @@ class AboutCategory {
         var meteorClient: Runnable = Runnable { openBrowser("https://github.com/MeteorDevelopment/meteor-client") }
 
         companion object {
-            private fun openBrowser(url: String?) {
-                Util.getOperatingSystem().open(url)
+            private fun openBrowser(url: String) {
+                Util.getPlatform().openUri(url)
             }
         }
     }
