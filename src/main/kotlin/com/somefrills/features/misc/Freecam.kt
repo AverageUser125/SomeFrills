@@ -59,10 +59,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     public override fun onActivate() {
         super.onActivate()
-        if ( mc.player == null) {
-            return
-        }
-
+        val player = mc.player ?: return
         fovScale = mc.options.fovEffectScale.get()
         bobView = mc.options.bobView.get()
         if (config.staticView) {
@@ -70,8 +67,8 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
             mc.options.bobView.set(false)
         }
 
-        yaw =  mc.gameRenderer.mainCamera.yaw()
-        pitch =  Mth.wrapDegrees(mc.gameRenderer.mainCamera.yRot())
+        yaw = player.getYRot();
+        pitch = player.getXRot();
 
         perspective = mc.options.cameraType
 
