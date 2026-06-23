@@ -17,6 +17,6 @@ public class DyedItemColorMixin {
      * @reason I don't want it.
      */
     @Overwrite
-    public void appendTooltip(Item.TooltipContext context, Consumer<Component> textConsumer, TooltipFlag type, DataComponentGetter components) {
+    public void addToTooltip(final Item.TooltipContext context, final Consumer<Component> consumer, final TooltipFlag flag, final DataComponentGetter components) {
     }
 }
