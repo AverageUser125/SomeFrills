@@ -16,6 +16,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -134,15 +135,14 @@ public class EntityMixin implements EntityRendering {
         }
     }
 
-
     @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
-    private void updateChangeLookDirection(double cursorDeltaX, double cursorDeltaY, CallbackInfo ci) {
+    private void updateTurn(double xo, double yo, CallbackInfo ci) {
         //noinspection ConstantValue
         if ((Object) this != mc.player) return;
 
         var freecam = Freecam.INSTANCE;
         if (freecam.isActive()) {
-            freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+            freecam.changeLookDirection(xo * 0.15, yo * 0.15);
             ci.cancel();
         }
     }

@@ -20,15 +20,10 @@ public abstract class CameraMixin {
     @Shadow
     private boolean detached;
 
-    @Inject(
-            method = "getMaxZoom",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private void onClipToSpace(float cameraDist, CallbackInfoReturnable<Float> cir) {
-        if (CameraTweaks.INSTANCE.clip()) {
-            cir.setReturnValue(cameraDist);
-        }
+    @ModifyVariable(method = "getMaxZoom", at = @At("HEAD"), argsOnly = true, name = "cameraDist")
+    private float modifyGetMaxZoom(float cameraDist) {
+        if (Freecam.INSTANCE.isActive()) return 0;
+        return cameraDist;
     }
 
     /*

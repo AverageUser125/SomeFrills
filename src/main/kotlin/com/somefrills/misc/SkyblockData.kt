@@ -170,7 +170,7 @@ object SkyblockData {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     @JvmStatic
-    private fun onWorldTick(event: TickEventPost?) {
+    private fun onWorldTick(event: TickEventPost) {
         updateTabList()
         updateScoreboard()
     }

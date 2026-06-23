@@ -18,7 +18,8 @@ public abstract class ChunkBorderRendererMixin {
     @Final
     private Minecraft minecraft;
 
-    @ModifyExpressionValue(method = "emitGizmos", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/SectionPos;of(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/SectionPos;"))    private SectionPos render$getChunkPos(SectionPos original) {
+    @ModifyExpressionValue(method = "emitGizmos", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/SectionPos;of(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/core/SectionPos;"))
+    private SectionPos emitGizmos$getChunkPos(SectionPos original) {
         var freecam = Freecam.INSTANCE;
         if (!freecam.isActive()) return original;
 
