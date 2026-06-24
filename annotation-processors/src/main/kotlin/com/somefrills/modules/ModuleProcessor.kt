@@ -97,7 +97,7 @@ class ModuleProcessor(
                     val firstParam = function.parameters.firstOrNull()?.type?.resolve()
                     val eventType = function.annotations.find { it.shortName.asString() == "EventHandle" }
                         ?.arguments?.find { it.name?.asString() == "eventType" }?.value
-                    if ((firstParam == null && eventType == null) || (firstParam != null && !event.isAssignableFrom(firstParam)))
+                    if ((firstParam != null && !event.isAssignableFrom(firstParam)))
                         warnings.add("Function in $className must have an event assignable from $event because it is annotated with @EventHandle")
                 }
             }

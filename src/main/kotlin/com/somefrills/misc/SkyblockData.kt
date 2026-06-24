@@ -62,7 +62,7 @@ object SkyblockData {
 
     private fun updateTabListIfDirty() {
         val lines: MutableList<String> = ArrayList()
-        if (mc.gui == null || mc.player == null ) return
+        if (mc.player == null) return
         for (entry in  mc.gui.tabList.playerInfos) {
             val displayName = entry.tabListDisplayName?.toPlain() ?: continue
             val name = displayName.trim { it <= ' ' }
@@ -148,7 +148,7 @@ object SkyblockData {
     }
 
     @EventHandle
-    private fun onJoinServer(event: ServerJoinEvent) {
+    private fun onServerJoin() {
         isInstanceOver = false
         isInSkyblock = false
         location = ""

@@ -12,7 +12,9 @@ class EventHandler<T : FrillsEvent> private constructor(
     constructor(event: Class<T>, listeners: List<EventListeners.Listener>) : this(
         (event.name.split(".").lastOrNull() ?: event.name).replace("$", "."),
         listeners.sortedBy { it.priority }.toList(),
-    )
+    ) {
+        Main.LOGGER.warn("Registered event handler for $name with ${listeners.size} listeners")
+    }
 
     fun post(event: T, onError: ((Throwable) -> Unit)? = null): Boolean {
         if (this.listeners.isEmpty()) return false

@@ -1,5 +1,6 @@
 package com.somefrills.features.core
 
+import com.somefrills.Main
 import com.somefrills.events.core.FrillsEvents
 import io.github.notenoughupdates.moulconfig.observer.Property
 
@@ -38,21 +39,27 @@ abstract class AbstractFeature protected constructor(private val enabledProperty
     }
 
     private fun setActive(value: Boolean) {
+        Main.LOGGER.warn("SET ACTIVE $active -> $value")
+
         if (!this.enabled && value) return
 
         if (value == active) return
         active = value
 
         if (value) {
+            Main.LOGGER.warn("ACTIVATED")
             onActivate()
             FrillsEvents.register(this)
         } else {
+            Main.LOGGER.warn("DEACTIVATED")
             FrillsEvents.unregister(this)
             onDeactivate()
         }
     }
 
     fun sync() {
+        Main.LOGGER.warn("SYNC enabled=$enabled evaluate=${evaluate()}")
+
         if (!this.enabled) {
             setActive(false)
             return

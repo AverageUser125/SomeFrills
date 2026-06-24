@@ -1,5 +1,6 @@
 package com.somefrills.features.misc
 
+import com.somefrills.Main
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 import com.somefrills.events.*
@@ -135,6 +136,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
 
     @EventHandle
     private fun onTick(event: TickEventPost) {
+        Main.LOGGER.warn("Freecam onTick called")
         val cameraEntity = mc.cameraEntity ?: return
         if (cameraEntity.isInWall) cameraEntity.noPhysics = true
         if (perspective == null) return

@@ -26,3 +26,4 @@ Thumbs.db
 src/main/java/com/somefrills/features/core/FeaturesRegistry.java
 !vendor/*
 /.kotlin
+/run

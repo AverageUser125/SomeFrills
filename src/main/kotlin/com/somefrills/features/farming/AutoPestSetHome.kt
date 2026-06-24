@@ -24,7 +24,7 @@ object AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEna
     private var lastServerJoinTime = 0L
 
     @EventHandle
-    private fun onServerJoin(event: ServerJoinEvent) {
+    private fun onServerJoin() {
         lastServerJoinTime = System.currentTimeMillis()
     }
 

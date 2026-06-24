@@ -1,5 +1,6 @@
 package com.somefrills.features.core
 
+import com.somefrills.Main
 import com.somefrills.misc.KeybindManager
 import com.somefrills.misc.KeybindManager.register
 import io.github.notenoughupdates.moulconfig.observer.Property
@@ -16,6 +17,7 @@ abstract class ToggleFeature(
     }
 
     override fun toggle() {
+        Main.LOGGER.warn("TOGGLE CALLED enabled=$enabled active=$keybindActive")
         if (!isEnabled()) return
 
         keybindActive = !keybindActive

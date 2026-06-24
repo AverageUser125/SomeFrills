@@ -152,10 +152,6 @@ object Main : ClientModInitializer {
         }
          */
 
-        //eventBus.subscribe(SkyblockData::class.java)
-        //eventBus.subscribe(EntityCache::class.java)
-        //eventBus.subscribe(Main::class.java)
-
         val modules = LoadedModules.modules
 
         modules.forEach {
