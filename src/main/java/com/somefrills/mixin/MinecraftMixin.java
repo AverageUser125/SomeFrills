@@ -24,8 +24,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static com.somefrills.Main.eventBus;
-
 @Mixin(value = Minecraft.class, priority = 999)
 public abstract class MinecraftMixin {
     @Shadow
@@ -50,54 +48,54 @@ public abstract class MinecraftMixin {
     private void onOpenScreen(Screen screen, CallbackInfo ci) {
         if (this.level == null) return;
         if (screen != null) {
-            eventBus.post(new ScreenOpenEvent(screen));
+            new ScreenOpenEvent(screen).post();
         } else {
-            eventBus.post(new ScreenCloseEvent());
+            new ScreenCloseEvent().post();
         }
     }
 
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/EntityHitResult;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     private void onInteractEntity(CallbackInfo ci, @Local(name = "entity") Entity entity, @Local(name = "entityHit") EntityHitResult entityHit) {
-        if (eventBus.post(new InteractEntityEvent(entity, entityHit)).isCancelled()) {
+        if ((new InteractEntityEvent(entity, entityHit)).post().isCancelled()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;useItemOn(Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     private void onInteractBlock(CallbackInfo ci, @Local(name = "blockHit") BlockHitResult blockHit) {
-        if (eventBus.post(new InteractBlockEvent(blockHit)).isCancelled()) {
+        if ((new InteractBlockEvent(blockHit)).post().isCancelled()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "startUseItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;useItem(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     private void onInteractItem(CallbackInfo ci) {
-        if (eventBus.post(new InteractItemEvent()).isCancelled()) {
+        if ((new InteractItemEvent()).post().isCancelled()) {
             ci.cancel();
         }
     }
 
     @Inject(method = "startAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;startDestroyBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/Direction;)Z"))
     private void onAttackBlock(CallbackInfoReturnable<Boolean> cir, @Local(name = "blockHit") BlockHitResult blockHit, @Local(name = "pos") BlockPos pos) {
-        eventBus.post(new AttackBlockEvent(blockHit, pos));
+        new AttackBlockEvent(blockHit, pos).post();
     }
 
     @Inject(method = "destroy", at = @At("HEAD"))
     private void beforeStop(CallbackInfo ci) {
-        eventBus.post(new GameStopEvent());
+        new GameStopEvent().post();
     }
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void onPreTick(CallbackInfo info) {
         Profiler.get().push(Main.MOD_ID + "_pre_update");
-        eventBus.post(new TickEventPre());
+        new TickEventPre().post();
         Profiler.get().pop();
     }
 
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
         Profiler.get().push(Main.MOD_ID + "_post_update");
-        eventBus.post(new TickEventPost());
+        new TickEventPost().post();
         Profiler.get().pop();
     }
 

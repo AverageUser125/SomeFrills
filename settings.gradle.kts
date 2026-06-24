@@ -21,4 +21,4 @@ plugins {
 
 rootProject.name = "SomeFrills"
 
-include(":processor")
+include(":annotation-processors")

@@ -3,15 +3,17 @@ package com.somefrills.misc
 import com.somefrills.Main
 import com.somefrills.Main.mc
 import com.somefrills.events.*
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.utils.*
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
+import com.somefrills.events.core.EventHandle
+import com.somefrills.events.core.EventPriority
 import net.minecraft.ChatFormatting
 import net.minecraft.network.protocol.ping.ClientboundPongResponsePacket
 import net.minecraft.world.scores.DisplaySlot
 import java.util.regex.Pattern
 
 
+@FrillsFeature
 object SkyblockData {
     private val scoreRegex: Pattern = Pattern.compile("Team Score: [0-9]* (.*)")
 
@@ -137,7 +139,7 @@ object SkyblockData {
         }
     }
 
-    @EventHandler
+    @EventHandle
     @JvmStatic
     private fun onChat(event: ChatMsgEvent) {
         if (!SkyblockUtils.isInDungeons()) return
@@ -146,7 +148,7 @@ object SkyblockData {
         }
     }
 
-    @EventHandler
+    @EventHandle
     @JvmStatic
     private fun onJoinServer(event: ServerJoinEvent) {
         isInstanceOver = false
@@ -156,7 +158,7 @@ object SkyblockData {
         lines.clear()
     }
 
-    @EventHandler
+    @EventHandle
     @JvmStatic
     private fun onPing(event: ReceivePacketEvent) {
         if (!showPing) return
@@ -168,7 +170,7 @@ object SkyblockData {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandle(priority = EventPriority.HIGHEST)
     @JvmStatic
     private fun onWorldTick(event: TickEventPost) {
         updateTabList()

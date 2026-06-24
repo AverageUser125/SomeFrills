@@ -7,9 +7,9 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.ScreenCloseEvent
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.features.misc.glowmob.chestui.ChestUI
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.client.Minecraft
 import kotlin.math.abs
 
@@ -43,12 +43,12 @@ object SaveCursorPosition : Feature(FrillsMod.config.misc.saveCursorPosition.ena
         )
     }
 
-    @EventHandler
+    @EventHandle
     fun onScreen(event: ScreenOpenEvent) {
         loadCursor(mc.mouseHandler.xpos(), mc.mouseHandler.ypos())
     }
 
-    @EventHandler
+    @EventHandle
     fun onScreen(event: ScreenCloseEvent) {
         savedPosition = null
     }

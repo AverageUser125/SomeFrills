@@ -17,9 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.somefrills.Main.eventBus;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
-
 @Mixin(MouseHandler.class)
 public abstract class MouseHandlerMixin {
     @Shadow
@@ -49,7 +46,7 @@ public abstract class MouseHandlerMixin {
 
             MouseButtonEvent click = new MouseButtonEvent(getScaledXPos(minecraft.getWindow()), getScaledYPos(minecraft.getWindow()), mouseInput);
 
-            if (eventBus.post(new MouseClickEvent(click, KeyAction.get(action))).isCancelled()) {
+            if (new MouseClickEvent(click, KeyAction.get(action)).post().isCancelled()) {
                 ci.cancel();
             }
         } catch (Exception ignored) {
@@ -85,6 +82,6 @@ public abstract class MouseHandlerMixin {
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
     private void onMouseScroll(long window, double horizontal, double vertical, CallbackInfo info) {
-        if (eventBus.post(new MouseScrollEvent(vertical)).isCancelled()) info.cancel();
+        if (new MouseScrollEvent(vertical).post().isCancelled()) info.cancel();
     }
 }

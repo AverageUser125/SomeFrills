@@ -5,13 +5,13 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.EntityUpdatedEvent
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.RenderColor
 import com.somefrills.utils.EntityUtils
 import com.somefrills.utils.playerName
 import com.somefrills.utils.setGlowing
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
+import com.somefrills.events.core.EventHandle
+import com.somefrills.events.core.EventPriority
 import net.minecraft.world.entity.player.Player
 import java.util.concurrent.ConcurrentHashMap
 
@@ -68,14 +68,14 @@ object GlowPlayer : Feature(FrillsMod.config.misc.glowPlayer.enabled) {
         player.setGlowing(true, color)
     }
 
-    @EventHandler
+    @EventHandle
     private fun onServerJoin(event: ServerJoinEvent) {
         for (entity in EntityUtils.getPlayers()) {
             applyHighlight(entity)
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandle(priority = EventPriority.HIGH)
     fun onEntityUpdate(event: EntityUpdatedEvent) {
         val entity = event.entity
         if (entity !is Player) return

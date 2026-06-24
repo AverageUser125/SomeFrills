@@ -6,17 +6,17 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.InteractBlockEvent
 import com.somefrills.events.InteractItemEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.utils.PlayerUtils
 import com.somefrills.utils.getRightClickAbility
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.item.Items
 import net.minecraft.world.phys.HitResult
 
 @FrillsFeature
 object DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
-    @EventHandler
+    @EventHandle
     private fun onUseItem(event: InteractItemEvent) {
         val hitResult = mc.hitResult ?: return
         if (hitResult.type == HitResult.Type.BLOCK && disableType == Type.Dagger) {
@@ -24,7 +24,7 @@ object DoubleUseFix : Feature(FrillsMod.config.tweaks.doubleUseFixEnabled) {
         }
     }
 
-    @EventHandler
+    @EventHandle
     private fun onUseBlock(event: InteractBlockEvent) {
         if (disableType != Type.Rod) return
         val player = mc.player ?: return

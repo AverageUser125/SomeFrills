@@ -5,15 +5,14 @@ import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket
 import net.minecraft.world.phys.Vec3
+import com.somefrills.events.FrillsEvent.Cancellable
 
-
-class SpawnParticleEvent(packet: ClientboundLevelParticlesPacket) : Cancellable() {
+class SpawnParticleEvent(packet: ClientboundLevelParticlesPacket) : FrillsEvent(), Cancellable {
     var packet: ClientboundLevelParticlesPacket
     var type: ParticleType<*>
     var pos: Vec3?
 
     init {
-        this.isCancelled = false
         this.packet = packet
         this.type = packet.particle.type
         this.pos = Vec3(packet.x, packet.y, packet.z)

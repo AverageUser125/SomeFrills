@@ -3,7 +3,7 @@ package com.somefrills.events
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.ContainerInput
 import net.minecraft.world.inventory.Slot
-
+import com.somefrills.events.FrillsEvent.Cancellable
 
 class SlotClickEvent(
     val slot: Slot?,
@@ -12,4 +12,4 @@ class SlotClickEvent(
     val actionType: ContainerInput,
     val title: String,
     val handler: AbstractContainerMenu
-) : Cancellable()
+) : FrillsEvent(), Cancellable

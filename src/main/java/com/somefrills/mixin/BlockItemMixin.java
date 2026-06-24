@@ -14,8 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static com.somefrills.Main.eventBus;
-
 @Mixin(BlockItem.class)
 public abstract class BlockItemMixin {
     @Shadow
@@ -26,7 +24,7 @@ public abstract class BlockItemMixin {
     private void onPlaceBlock(BlockPlaceContext context, BlockState state, CallbackInfoReturnable<Boolean> cir) {
         if (!context.getLevel().isClientSide()) return;
 
-        if (eventBus.post(new PlaceBlockEvent(context, state.getBlock())).isCancelled()) {
+        if ((new PlaceBlockEvent(context, state.getBlock())).post().isCancelled()) {
             cir.setReturnValue(true);
         }
     }

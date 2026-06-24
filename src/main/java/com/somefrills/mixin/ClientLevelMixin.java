@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.somefrills.Main.eventBus;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin extends Level {
@@ -25,6 +24,6 @@ public abstract class ClientLevelMixin extends Level {
     }
     @Inject(method = "removeEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;setRemoved(Lnet/minecraft/world/entity/Entity$RemovalReason;)V"))
     private void onBeforeRemoveEntity(int id, Entity.RemovalReason reason, CallbackInfo ci, @Local(name = "entity") Entity entity) {
-        eventBus.post(new EntityRemovedEvent(entity, reason));
+        (new EntityRemovedEvent(entity, reason)).post();
     }
 }

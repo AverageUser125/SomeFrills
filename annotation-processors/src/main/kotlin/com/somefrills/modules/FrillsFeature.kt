@@ -1,4 +1,4 @@
-package com.somefrills.features.core
+package com.somefrills.modules
 
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)

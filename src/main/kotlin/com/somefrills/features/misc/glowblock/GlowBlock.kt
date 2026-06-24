@@ -6,9 +6,9 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.RenderColor
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.phys.AABB
 
@@ -30,7 +30,7 @@ object GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
         blockScanner?.clearResultsOnly()
     }
 
-    @EventHandler
+    @EventHandle
     fun onServerJoin(event: ServerJoinEvent) {
         enabled = false
     }
@@ -57,7 +57,7 @@ object GlowBlock : Feature(FrillsMod.config.misc.glowBlock.enabled) {
         blockScanner?.clearResultsOnly()
     }
 
-    @EventHandler
+    @EventHandle
     fun onWorldRender(event: WorldRenderEvent) {
         if (mc.level == null) return
         if (targetBlocks.isEmpty()) return

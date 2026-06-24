@@ -50,14 +50,20 @@ loom {
     accessWidenerPath.set(file("src/main/resources/somefrills.accesswidener"))
 }
 
+afterEvaluate {
+    ksp {
+        arg("somefrills.modver", version.toString())
+        arg("somefrills.mcver", "26.1")
+        arg("somefrills.cachedir", layout.buildDirectory.get().asFile.absolutePath)
+    }
+}
+
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft("com.mojang:minecraft:${project.extra["minecraft_version"]}")
     implementation("net.fabricmc:fabric-loader:${project.extra["loader_version"]}")
 
     // Internal dependencies
-    implementation("meteordevelopment:orbit:${project.extra["orbit_version"]}")
-    include("meteordevelopment:orbit:${project.extra["orbit_version"]}")
     implementation("org.notenoughupdates.moulconfig:modern-26.1:${project.extra["moulconfig_version"]}")
     include("org.notenoughupdates.moulconfig:modern-26.1:${project.extra["moulconfig_version"]}")
     implementation("moe.nea:libautoupdate:${project.extra["libautoupdate_version"]}")
@@ -68,7 +74,8 @@ dependencies {
     implementation("com.terraformersmc:modmenu:${project.extra["modmenu_version"]}")
     implementation("net.fabricmc:fabric-language-kotlin:${project.extra["fabric_kotlin_version"]}")
 
-    ksp(project(":processor"))
+    compileOnly(project(":annotation-processors"))
+    ksp(project(":annotation-processors"))
 }
 
 ksp {

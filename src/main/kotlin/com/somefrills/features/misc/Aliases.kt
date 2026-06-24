@@ -4,7 +4,7 @@ import com.google.gson.JsonObject
 import com.somefrills.config.FrillsMod
 
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 
 @FrillsFeature
 object Aliases : Feature(FrillsMod.config.misc.commandAliases.enabled) {

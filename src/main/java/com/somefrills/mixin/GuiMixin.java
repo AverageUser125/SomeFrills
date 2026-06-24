@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.somefrills.Main.eventBus;
 import static com.somefrills.Main.mc;
 
 @Mixin(Gui.class)
@@ -37,13 +36,13 @@ public abstract class GuiMixin implements TitleRendering {
         if (titleTicks > 0) {
             titleTicks--;
         }
-        eventBus.post(new HudTickEvent());
+        (new HudTickEvent()).post();
     }
 
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void onRender(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (!mc.options.hideGui) {
-            eventBus.post(new HudRenderEvent(graphics, this.getFont(), deltaTracker));
+            (new HudRenderEvent(graphics, this.getFont(), deltaTracker)).post();
         }
     }
 

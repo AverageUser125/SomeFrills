@@ -30,6 +30,11 @@ object TextUtils {
         return builder.toString()
     }
 
+    fun optionalAn(string: String): String {
+        if (string.isEmpty()) return ""
+        return if (string[0] in "aeiou") "an" else "a"
+    }
+
     fun colorToString(hex: Int): String {
         for (f in ChatFormatting.entries) {
             if (f.isColor && f.color == hex) {

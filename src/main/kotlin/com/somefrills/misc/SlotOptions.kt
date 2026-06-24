@@ -2,7 +2,7 @@ package com.somefrills.misc
 
 import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.utils.Symbols
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.core.component.DataComponents
 import net.minecraft.network.chat.Component
 import net.minecraft.world.inventory.Slot
@@ -155,7 +155,7 @@ object SlotOptions {
         }
     }
 
-    @EventHandler
+    @EventHandle
     private fun onScreen(event: ScreenOpenEvent) {
         slotFlags.clear()
     }

@@ -5,10 +5,10 @@ import com.somefrills.config.FrillsMod
 
 import com.somefrills.events.PlaceBlockEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.utils.hasRightClickAbility
 import com.somefrills.utils.skyblockId
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.item.BlockItem
 import net.minecraft.world.item.context.BlockPlaceContext
 
@@ -25,7 +25,7 @@ object NoAbilityPlace : Feature(FrillsMod.config.tweaks.noAbilityPlaceEnabled) {
         "SNOW_HOWITZER"
     )
 
-    @EventHandler
+    @EventHandle
     fun onPlaceBlock(event: PlaceBlockEvent): Boolean {
         return hasAbility(event.context)
     }

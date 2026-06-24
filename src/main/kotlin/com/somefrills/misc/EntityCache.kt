@@ -3,8 +3,9 @@ package com.somefrills.misc
 import com.somefrills.events.EntityRemovedEvent
 import com.somefrills.events.EntityUpdatedEvent
 import com.somefrills.events.ServerJoinEvent
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
+import com.somefrills.modules.FrillsFeature
+import com.somefrills.events.core.EventHandle
+import com.somefrills.events.core.EventPriority
 import net.minecraft.world.entity.Entity
 
 /**
@@ -54,17 +55,18 @@ class EntityCache {
     val first: Entity?
         get() = this.entities.stream().findFirst().orElse(null)
 
+    @FrillsFeature
     companion object {
         private val instances: MutableList<EntityCache> = ArrayList()
 
-        @EventHandler(priority = EventPriority.LOW)
+        @EventHandle(priority = EventPriority.LOW)
         private fun onRemoved(event: EntityRemovedEvent) {
             for (instance in instances) {
                 instance.remove(event.entity)
             }
         }
 
-        @EventHandler(priority = EventPriority.LOW)
+        @EventHandle(priority = EventPriority.LOW)
         private fun onUpdated(event: EntityUpdatedEvent) {
             if (event.entity.isRemoved) {
                 for (instance in instances) {
@@ -73,7 +75,7 @@ class EntityCache {
             }
         }
 
-        @EventHandler(priority = EventPriority.LOW)
+        @EventHandle(priority = EventPriority.LOW)
         private fun onJoin(event: ServerJoinEvent) {
             for (instance in instances) {
                 instance.clear()

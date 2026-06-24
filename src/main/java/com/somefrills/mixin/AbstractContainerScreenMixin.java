@@ -31,12 +31,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
-
-import static com.somefrills.Main.eventBus;
-
 
 @Mixin(AbstractContainerScreen.class)
 public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMenu> extends Screen {
@@ -95,16 +91,14 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
             ContainerInput actionType,
             CallbackInfo ci
     ) {
-        if (eventBus.post(
-                new SlotClickEvent(
+        if (new SlotClickEvent(
                         slot,
                         slotId,
                         button,
                         actionType,
                         title.getString(),
                         menu
-                )
-        ).isCancelled()) {
+                ).post().isCancelled()) {
             ci.cancel();
         }
     }
@@ -139,14 +133,12 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
             @Local ItemStack itemStack
     ) {
         if (!itemStack.isEmpty()) {
-            eventBus.post(
-                    new TooltipRenderEvent(
-                            original,
-                            itemStack,
-                            ItemStackUtils.getCustomData(itemStack),
-                            title.getString()
-                    )
-            );
+            new TooltipRenderEvent(
+                    original,
+                    itemStack,
+                    ItemStackUtils.getCustomData(itemStack),
+                    title.getString()
+            ).post();
         }
 
         return original;
@@ -240,17 +232,15 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
             float delta,
             CallbackInfo ci
     ) {
-        eventBus.post(
-                new ScreenRenderEvent.Before(
-                        graphics,
-                        mouseX,
-                        mouseY,
-                        delta,
-                        title.getString(),
-                        menu,
-                        hoveredSlot
-                )
-        );
+            new ScreenRenderEvent.Before(
+                    graphics,
+                    mouseX,
+                    mouseY,
+                    delta,
+                    title.getString(),
+                    menu,
+                    hoveredSlot
+            ).post();
     }
 
 
@@ -268,17 +258,15 @@ public abstract class AbstractContainerScreenMixin<T extends AbstractContainerMe
             float delta,
             CallbackInfo ci
     ) {
-        eventBus.post(
-                new ScreenRenderEvent.After(
-                        graphics,
-                        mouseX,
-                        mouseY,
-                        delta,
-                        title.getString(),
-                        menu,
-                        hoveredSlot
-                )
-        );
+            new ScreenRenderEvent.After(
+                    graphics,
+                    mouseX,
+                    mouseY,
+                    delta,
+                    title.getString(),
+                    menu,
+                    hoveredSlot
+            ).post();
     }
 
 

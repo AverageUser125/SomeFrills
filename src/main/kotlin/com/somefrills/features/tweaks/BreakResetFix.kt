@@ -6,13 +6,13 @@ import com.somefrills.config.FrillsMod
 
 import com.somefrills.events.InventoryUpdateEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.mixin.MultiPlayerGameModeAccessor
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 
 @FrillsFeature
 object BreakResetFix : Feature(FrillsMod.config.tweaks.breakResetFixEnabled) {
-    @EventHandler
+    @EventHandle
     fun onBreakReset(event: InventoryUpdateEvent) {
         if (mc.player == null || mc.gameMode == null) return
         if (event.slotId in 36..44 && mc.player?.getInventory()

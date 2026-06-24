@@ -5,12 +5,12 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.events.TabListUpdateEvent
 import com.somefrills.features.core.AreaFeature
-import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.PlayerUtils
 import com.somefrills.utils.SkyblockUtils
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 
 @FrillsFeature
 object AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) {
@@ -25,7 +25,7 @@ object AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) 
         return PestStatus.UNKNOWN
     }
 
-    @EventHandler
+    @EventHandle
     private fun onWorldTick(event: TabListUpdateEvent) {
         val status: PestStatus = checkAliveState(event.lines)
         if (status == PestStatus.UNKNOWN) return
@@ -45,7 +45,7 @@ object AutoWarpHome : AreaFeature(FrillsMod.config.farming.autoWarpHomeEnabled) 
         lastStatus = status
     }
 
-    @EventHandler
+    @EventHandle
     private fun onJoin(event: ServerJoinEvent) {
         lastStatus = PestStatus.UNKNOWN
     }

@@ -8,13 +8,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.somefrills.Main.eventBus;
-
 @Mixin(VisGraph.class)
 public class VisGraphMixin {
     @Inject(method = "setOpaque", at = @At("HEAD"), cancellable = true)
     private void onMarkClosed(BlockPos pos, CallbackInfo info) {
-        ChunkOcclusionEvent event = eventBus.post(new ChunkOcclusionEvent());
+        ChunkOcclusionEvent event = new ChunkOcclusionEvent();
+        event.post();
         if (event.isCancelled()) info.cancel();
     }
 }

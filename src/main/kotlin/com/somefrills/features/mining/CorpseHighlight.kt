@@ -8,7 +8,7 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.config.mining.MiningCategory.CorpseHighlightConfig
 import com.somefrills.events.TickEventPre
 import com.somefrills.features.core.AreaFeature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.RenderColor.Companion.fromChroma
 import com.somefrills.utils.EntityUtils
@@ -16,7 +16,7 @@ import com.somefrills.utils.getEquippedArmor
 import com.somefrills.utils.setGlowing
 import com.somefrills.utils.toPlain
 import io.github.notenoughupdates.moulconfig.ChromaColour
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.entity.decoration.ArmorStand
 import net.minecraft.world.item.ItemStack
 import java.util.function.Predicate
@@ -39,8 +39,8 @@ object CorpseHighlight : AreaFeature(FrillsMod.config.mining.corpseHighlight.ena
     }
 
 
-    @EventHandler
-    private fun onTick(event: TickEventPre?) {
+    @EventHandle
+    private fun onTick(event: TickEventPre) {
         val stands = EntityUtils.getStreamEntities(ArmorStand::class.java)
             .filter { stand: ArmorStand ->
                 if (stand.isInvisible) return@filter false

@@ -5,12 +5,12 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.ChatMsgEvent
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.features.core.AreaFeature
-import com.somefrills.features.core.FrillsFeature
 import com.somefrills.misc.Area
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.PlayerUtils
 import com.somefrills.utils.SkyblockUtils
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -23,12 +23,12 @@ object AutoPestSetHome : AreaFeature(FrillsMod.config.farming.autoPestSetHomeEna
     )
     private var lastServerJoinTime = 0L
 
-    @EventHandler
+    @EventHandle
     private fun onServerJoin(event: ServerJoinEvent) {
         lastServerJoinTime = System.currentTimeMillis()
     }
 
-    @EventHandler
+    @EventHandle
     private fun onChatMessage(event: ChatMsgEvent) {
         val msg = event.plainMessage
         if (msg.isEmpty()) return

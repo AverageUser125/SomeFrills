@@ -1,6 +1,6 @@
 package com.somefrills.features.core
 
-import com.somefrills.Main.eventBus
+import com.somefrills.events.core.FrillsEvents
 import io.github.notenoughupdates.moulconfig.observer.Property
 
 // Invariant: enabled = false && active = true cannot happen
@@ -45,9 +45,9 @@ abstract class AbstractFeature protected constructor(private val enabledProperty
 
         if (value) {
             onActivate()
-            eventBus.subscribe(this)
+            FrillsEvents.register(this)
         } else {
-            eventBus.unsubscribe(this)
+            FrillsEvents.unregister(this)
             onDeactivate()
         }
     }

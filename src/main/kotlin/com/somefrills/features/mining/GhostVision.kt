@@ -5,12 +5,12 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.EntityUpdatedEvent
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.AreaFeature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.EntityCache
 import com.somefrills.misc.RenderColor.Companion.fromChroma
 import com.somefrills.utils.getLerpedBox
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.entity.monster.Creeper
 
 @FrillsFeature
@@ -19,7 +19,7 @@ object GhostVision : AreaFeature(FrillsMod.config.mining.ghostVision.enabled) {
     val config get() = FrillsMod.config.mining.ghostVision
     private val cache = EntityCache()
 
-    @EventHandler
+    @EventHandle
     private fun onEntity(event: EntityUpdatedEvent) {
         val entity = event.entity
         if (entity !is Creeper) return
@@ -29,7 +29,7 @@ object GhostVision : AreaFeature(FrillsMod.config.mining.ghostVision.enabled) {
         cache.add(entity)
     }
 
-    @EventHandler
+    @EventHandle
     private fun onRender(event: WorldRenderEvent) {
         for (ent in cache.get()) {
             if (!ent.isAlive) continue

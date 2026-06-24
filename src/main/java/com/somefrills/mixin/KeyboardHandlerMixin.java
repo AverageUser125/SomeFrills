@@ -18,9 +18,9 @@ public abstract class KeyboardHandlerMixin {
         int key = input.key();
         if (key == GLFW.GLFW_KEY_UNKNOWN) return;
 
-        if (action == 0) if(new KeyUpEvent(key).post()) ci.cancel();
+        if (action == 0) if(new KeyUpEvent(key).post().isCancelled()) ci.cancel();
         if (action == 1) {
-            if(new KeyDownEvent(key).post()) {
+            if(new KeyDownEvent(key).post().isCancelled()) {
                 ci.cancel();
                 return;
             }

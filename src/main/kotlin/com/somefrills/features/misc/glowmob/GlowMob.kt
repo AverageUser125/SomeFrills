@@ -6,14 +6,14 @@ import com.somefrills.config.misc.GlowMobConfig.GlowMobRule
 import com.somefrills.events.GameStopEvent
 import com.somefrills.events.TickEventPost
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.RenderColor
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.EntityUtils
 import com.somefrills.utils.isMob
 import com.somefrills.utils.setGlowing
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
+import com.somefrills.events.core.EventHandle
+import com.somefrills.events.core.EventPriority
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.LivingEntity
 import java.util.function.Consumer
@@ -83,13 +83,13 @@ object GlowMob : Feature(FrillsMod.config.misc.glowMob.enabled) {
         }
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandle(priority = EventPriority.LOW)
     private fun onWorldTick(event: TickEventPost) {
         updateEntities()
         this.entities.forEach(Consumer { living: LivingEntity -> this.applyHighlight(living) })
     }
 
-    @EventHandler
+    @EventHandle
     private fun onGameClose(event: GameStopEvent) {
         if (config.saveRules) return
         clearRules()

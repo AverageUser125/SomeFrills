@@ -7,10 +7,10 @@ import com.somefrills.events.ScreenOpenEvent
 import com.somefrills.events.ServerJoinEvent
 import com.somefrills.events.TickEventPost
 import com.somefrills.features.core.AreaToggleFeature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.KeybindManager
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.core.BlockPos
 
 @FrillsFeature
@@ -80,14 +80,14 @@ object AutoFarmer :
         stopFarming()
     }
 
-    @EventHandler
+    @EventHandle
     fun onServerSwitch(event: ServerJoinEvent) {
         savedState = null
         savedPosition = null
     }
 
-    @EventHandler
-    fun onTick(event: TickEventPost?) {
+    @EventHandle
+    fun onTick(event: TickEventPost) {
         // Apply movement inputs
         mc.options.keySprint.isDown = currentState.isSprinting
         mc.options.keyAttack.isDown = currentState.isAttacking
@@ -97,7 +97,7 @@ object AutoFarmer :
         mc.options.keyRight.isDown = currentState.isRight
     }
 
-    @EventHandler
+    @EventHandle
     fun onScreen(event: ScreenOpenEvent) {
         toggleActive()
     }

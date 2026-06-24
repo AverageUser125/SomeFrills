@@ -5,7 +5,7 @@ import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.utils.SkyblockUtils
 import com.somefrills.utils.Symbols
 import com.somefrills.utils.TextUtils

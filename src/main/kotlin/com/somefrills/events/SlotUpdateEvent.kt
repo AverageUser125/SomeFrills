@@ -15,7 +15,7 @@ class SlotUpdateEvent(
     val inventory: Container,
     val slot: Slot?,
     val stack: ItemStack,
-) {
+) : FrillsEvent() {
     val title: String get() = screen.getTitle().string
     val isInventory: Boolean get() = this.stack == ItemStack.EMPTY
 }

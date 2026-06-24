@@ -1,63 +1,54 @@
 package com.somefrills.features.core
 
-import com.somefrills.Main
-import meteordevelopment.orbit.listeners.IListener
+import com.somefrills.events.FrillsEvent
+import com.somefrills.events.core.EventListeners.Listener
+import com.somefrills.events.core.FrillsEvents
 import java.util.function.Consumer
 
 object EventSubscriptions {
-    private val listeners: MutableMap<Any, IListener> = HashMap()
+
+    data class Subscription(
+        val eventClass: Class<Any>,
+        val listener: Listener
+    )
+    private val listeners: MutableMap<Any, Subscription> = HashMap()
 
     /**
      * Register callback for event type.
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T> register(owner: Any, eventClass: Class<T>, action: Consumer<T>) {
+    fun <T : FrillsEvent> register(owner: Any, eventClass: Class<T>, action: Consumer<T>) {
         unregister(owner)
 
-        val listener: IListener = object : IListener {
-            override fun call(event: Any) {
-                action.accept(event as T)
-            }
+        val listener = Listener("onEvent", action as Consumer<Any>, 0)
 
-            override fun getTarget(): Class<*> {
-                return eventClass
-            }
-
-            override fun getPriority(): Int {
-                return 0
-            }
-
-            @Deprecated("")
-            override fun isStatic(): Boolean {
-                return false
-            }
-        }
-
-        listeners[owner] = listener
-        Main.eventBus.subscribe(listener)
+        listeners[owner] = Subscription(eventClass as Class<Any>, listener)
+        FrillsEvents.registerListener(eventClass, listener)
     }
 
     /**
      * Convenience overload for no event usage.
      */
-    fun <T> register(owner: Any, eventClass: Class<T>, action: Runnable) {
+    fun <T : FrillsEvent> register(owner: Any, eventClass: Class<T>, action: Runnable) {
         register(owner, eventClass) { e: T -> action.run() }
     }
 
-    fun <T> register(feature: AbstractFeature, eventClass: Class<T>) {
+    fun <T : FrillsEvent> register(feature: AbstractFeature, eventClass: Class<T>) {
         register(feature, eventClass) { e: T -> feature.sync() }
     }
 
+    @Suppress("UNCHECKED_CAST")
     fun unregister(owner: Any) {
         val listener = listeners.remove(owner)
         if (listener != null) {
-            Main.eventBus.unsubscribe(listener)
+            FrillsEvents.unregisterListener(listener.eventClass as Class<out FrillsEvent>, listener.listener)
         }
     }
 
     fun clear() {
-        for (listener in listeners.values) {
-            Main.eventBus.unsubscribe(listener)
+        val owners = listeners.keys.toList()
+        for (owner in owners) {
+            unregister(owner)
         }
         listeners.clear()
     }

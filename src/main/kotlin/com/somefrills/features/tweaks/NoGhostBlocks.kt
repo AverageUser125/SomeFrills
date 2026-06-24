@@ -7,8 +7,8 @@ import com.somefrills.config.tweaks.TweaksCategory.NoGhostBlocksConfig
 import com.somefrills.events.BreakBlockEvent
 import com.somefrills.events.PlaceBlockEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.modules.FrillsFeature
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.level.block.state.BlockState
 
 @FrillsFeature
@@ -17,7 +17,7 @@ object NoGhostBlocks : Feature(FrillsMod.config.tweaks.noGhostBlocks.enabled) {
     val config: NoGhostBlocksConfig
         get() = FrillsMod.config.tweaks.noGhostBlocks
 
-    @EventHandler
+    @EventHandle
     private fun onBreakBlock(event: BreakBlockEvent) {
         val world = mc.level ?: return
         val player = mc.player ?: return
@@ -27,7 +27,7 @@ object NoGhostBlocks : Feature(FrillsMod.config.tweaks.noGhostBlocks.enabled) {
         blockState.block.playerWillDestroy(world, event.blockPos, blockState, player)
     }
 
-    @EventHandler
+    @EventHandle
     private fun onPlaceBlock(event: PlaceBlockEvent) {
         if (!config.placing) return
         event.cancel()

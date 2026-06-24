@@ -26,7 +26,7 @@ open class ScreenRenderEvent(
     var title: String?,
     var handler: AbstractContainerMenu,
     var focusedSlot: Slot?
-) {
+) : FrillsEvent() {
     private fun getSlot(slotId: Int): Optional<Slot> {
         if (slotId < 0 || slotId >= this.handler.slots.size) {
             return Optional.empty<Slot>()

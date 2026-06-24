@@ -4,8 +4,8 @@ import com.somefrills.config.FrillsMod
 
 import com.somefrills.events.ChatMsgEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.modules.FrillsFeature
+import com.somefrills.events.core.EventHandle
 import java.util.regex.Pattern
 
 @FrillsFeature
@@ -20,7 +20,7 @@ object FilterMessages : Feature(FrillsMod.config.misc.chatFilter.enabled) {
         return IMPLOSION_PATTERN.matcher(msg).matches()
     }
 
-    @EventHandler
+    @EventHandle
     private fun onChatMessage(event: ChatMsgEvent) {
         if (shouldFilter(event.plainMessage)) {
             event.cancel()

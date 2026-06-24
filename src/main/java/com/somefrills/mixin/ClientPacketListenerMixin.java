@@ -3,9 +3,7 @@ package com.somefrills.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.somefrills.events.*;
 import com.somefrills.misc.SkyblockData;
-import com.somefrills.utils.TextUtils;
 
-import kotlin.Suppress;
 import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.chat.Component;
@@ -24,9 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Optional;
 
-import static com.somefrills.Main.eventBus;
 import static com.somefrills.Main.mc;
-
 
 @Mixin(ClientPacketListener.class)
 public class ClientPacketListenerMixin {
@@ -39,6 +35,7 @@ public class ClientPacketListenerMixin {
             )
     )
 
+    @SuppressWarnings("unchecked")
     private void onPostTrackerUpdate(
             ClientboundSetEntityDataPacket packet,
             CallbackInfo ci,
@@ -55,9 +52,7 @@ public class ClientPacketListenerMixin {
                         //noinspection unchecked
                         ((Optional<Component>) entry.value())
                                 .ifPresent(value ->
-                                        eventBus.post(
-                                                new EntityNamedEvent(ent, value)
-                                        )
+                                        new EntityNamedEvent(ent, value).post()
                                 );
 
                         break;
@@ -65,7 +60,7 @@ public class ClientPacketListenerMixin {
                 }
             }
 
-            eventBus.post(new EntityUpdatedEvent(ent));
+            new EntityUpdatedEvent(ent).post();
         }
     }
 
@@ -82,7 +77,7 @@ public class ClientPacketListenerMixin {
             CallbackInfo ci,
             @Local Entity ent
     ) {
-        eventBus.post(new EntityUpdatedEvent(ent));
+        new EntityUpdatedEvent(ent).post();
     }
 
 
@@ -97,26 +92,22 @@ public class ClientPacketListenerMixin {
 
         if (mc.screen instanceof ContainerScreen container) {
 
-            eventBus.post(
-                    new SlotUpdateEvent(
-                            packet,
-                            container,
-                            container.getMenu(),
-                            container.getMenu().getContainer(),
-                            container.getMenu().getSlot(packet.getSlot()),
-                            packet.getItem()
-                    )
-            );
+            new SlotUpdateEvent(
+                    packet,
+                    container,
+                    container.getMenu(),
+                    container.getMenu().getContainer(),
+                    container.getMenu().getSlot(packet.getSlot()),
+                    packet.getItem()
+            ).post();
 
         } else if (mc.screen == null) {
 
-            eventBus.post(
-                    new InventoryUpdateEvent(
-                            packet,
-                            packet.getItem(),
-                            packet.getSlot()
-                    )
-            );
+            new InventoryUpdateEvent(
+                    packet,
+                    packet.getItem(),
+                    packet.getSlot()
+            ).post();
         }
     }
 
@@ -134,7 +125,7 @@ public class ClientPacketListenerMixin {
             ClientboundLevelParticlesPacket packet,
             CallbackInfo ci
     ) {
-        if (eventBus.post(new SpawnParticleEvent(packet)).isCancelled()) {
+        if ((new SpawnParticleEvent(packet)).post().isCancelled()) {
             ci.cancel();
         }
     }
@@ -184,6 +175,6 @@ public class ClientPacketListenerMixin {
             ClientboundLoginPacket packet,
             CallbackInfo ci
     ) {
-        eventBus.post(new ServerJoinEvent());
+        new ServerJoinEvent().post();
     }
 }

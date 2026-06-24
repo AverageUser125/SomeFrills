@@ -3,14 +3,14 @@ package com.somefrills.features.misc
 import com.somefrills.Main.mc
 import com.somefrills.config.FrillsMod
 import com.somefrills.events.*
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.features.core.ToggleFeature
 import com.somefrills.misc.KeyAction
 import com.somefrills.mixin.KeyMappingAccessor
 import com.somefrills.utils.ChatUtils
 import com.somefrills.utils.set
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
+import com.somefrills.events.core.EventHandle
+import com.somefrills.events.core.EventPriority
 import net.minecraft.client.CameraType
 import net.minecraft.client.KeyMapping
 import net.minecraft.network.protocol.game.ClientboundPlayerCombatKillPacket
@@ -124,8 +124,8 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         mc.options.keyShift.isDown = false
     }
 
-    @EventHandler
-    private fun onOpenScreen(event: ScreenOpenEvent?) {
+    @EventHandle
+    private fun onOpenScreen(event: ScreenOpenEvent) {
         unpress()
 
         prevPos.set(pos)
@@ -134,7 +134,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     }
 
     @JvmStatic
-    @EventHandler
+    @EventHandle
     private fun onTick(event: TickEventPost) {
         val cameraEntity = mc.cameraEntity ?: return
         if (cameraEntity.isInWall) cameraEntity.noPhysics = true
@@ -191,21 +191,21 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         pos.set(pos.x + velX, pos.y + velY, pos.z + velZ)
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandle(priority = EventPriority.HIGH)
     fun onKey(event: KeyDownEvent) {
         if (event.keyCode == GLFW.GLFW_KEY_F3) return
 
         if (onInput(event.keyCode, KeyAction.Press)) event.cancel()
     }
 
-    @EventHandler
+    @EventHandle
     fun onKey(event: KeyUpEvent) {
         if (event.keyCode == GLFW.GLFW_KEY_F3) return
 
         if (onInput(event.keyCode, KeyAction.Release)) event.cancel()
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandle(priority = EventPriority.HIGH)
     private fun onMouseClick(event: MouseClickEvent) {
         if (onInput(event.button(), event.action)) event.cancel()
     }
@@ -254,7 +254,7 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         return true
     }
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandle(priority = EventPriority.LOW)
     private fun onMouseScroll(event: MouseScrollEvent) {
         if (config.speedScrollSensitivity > 0 && mc.screen == null) {
             config.speed += event.value * 0.25 * (config.speedScrollSensitivity * config.speed)
@@ -265,17 +265,17 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
     }
 
 
-    @EventHandler
+    @EventHandle
     private fun onChunkOcclusion(event: ChunkOcclusionEvent) {
         event.cancel()
     }
 
-    @EventHandler
+    @EventHandle
     private fun onGameLeft(event: GameStopEvent) {
         toggle()
     }
 
-    @EventHandler
+    @EventHandle
     private fun onPacketReceive(event: ReceivePacketEvent) {
         val packet = event.packet
         if (packet is ClientboundPlayerCombatKillPacket) {
@@ -296,22 +296,22 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         }
     }
 
-    @EventHandler
+    @EventHandle
     fun onInteractBlock(event: InteractBlockEvent) {
         event.cancel()
     }
 
-    @EventHandler
+    @EventHandle
     fun onInteractEntity(event: InteractEntityEvent) {
         event.cancel()
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandle(priority = EventPriority.HIGH)
     fun onAttackEntity(event: AttackEntityEvent) {
         event.cancel()
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandle(priority = EventPriority.HIGH)
     private fun onStartBreakingBlockEvent(event: StartBreakingBlockEvent) {
         event.cancel()
     }

@@ -2,7 +2,7 @@ package com.somefrills.features.solvers
 
 import com.somefrills.config.FrillsMod
 import com.somefrills.features.core.AreaFeature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.utils.*
 

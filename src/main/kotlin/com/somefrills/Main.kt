@@ -6,29 +6,30 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.config.about.ConfigVersionDisplay
 import com.somefrills.config.about.GuiOptionEditorUpdateCheck
 import com.somefrills.events.*
-import com.somefrills.features.core.Features
+import com.somefrills.events.core.EventHandle
+import com.somefrills.events.core.EventPriority
+import com.somefrills.events.core.FrillsEvents
+import com.somefrills.features.core.AbstractFeature
 import com.somefrills.features.misc.Aliases
 import com.somefrills.features.misc.glowmob.MatchInfo
 import com.somefrills.misc.*
+import com.somefrills.modules.FrillsFeature
+import com.somefrills.modules.LoadedModules
 import com.somefrills.utils.toPlain
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfig
 import io.github.notenoughupdates.moulconfig.managed.ManagedConfigBuilder
-import meteordevelopment.orbit.EventBus
-import meteordevelopment.orbit.EventHandler
-import meteordevelopment.orbit.EventPriority
-import meteordevelopment.orbit.IEventBus
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.client.Minecraft
-import net.minecraft.util.Util
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.lang.invoke.MethodHandles
 
+@FrillsFeature
 object Main : ClientModInitializer {
 
     const val MOD_ID = "somefrills"
@@ -40,12 +41,11 @@ object Main : ClientModInitializer {
     val mc: Minecraft = Minecraft.getInstance()
 
     @JvmField
-    val eventBus: IEventBus = EventBus()
+    var totalTicks: Int = 0
 
     lateinit var config: ManagedConfig<FrillsConfig>
 
-    @EventHandler(priority = EventPriority.LOWEST)
-    @JvmStatic
+    @EventHandle(priority = EventPriority.LOWEST)
     fun onGameStop(event: GameStopEvent) {
         config.saveToFile()
     }
@@ -54,19 +54,20 @@ object Main : ClientModInitializer {
         val start = System.currentTimeMillis()
 
         ClientCommandRegistrationCallback.EVENT.register(SomeFrillsCommand::init)
+        ClientTickEvents.END_CLIENT_TICK.register {
+            if (mc.player == null) return@register
+            if (mc.level == null) return@register
+            totalTicks++
+        }
 
         ClientReceiveMessageEvents.ALLOW_GAME.register { message, overlay ->
             val msg = message.toPlain()
 
             if (overlay) {
-                return@register !eventBus.post(
-                    OverlayMsgEvent(message, msg)
-                ).isCancelled
+                return@register !OverlayMsgEvent(message, msg).post().isCancelled
             }
 
-            var cancelled = eventBus.post(
-                ChatMsgEvent(message, msg)
-            ).isCancelled
+            var cancelled = ChatMsgEvent(message, msg).post().isCancelled
 
             if (msg.startsWith("Party > ") && msg.contains(": ")) {
                 val nameStart =
@@ -83,16 +84,14 @@ object Main : ClientModInitializer {
                 val author = clean[0].trim()
                 val content = clean[1].trim()
 
-                cancelled = eventBus.post(
-                    PartyChatMsgEvent(content, author)
-                ).isCancelled || cancelled
+                cancelled = PartyChatMsgEvent(content, author).post().isCancelled || cancelled
             }
 
             !cancelled
         }
 
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
-            eventBus.post(ClientDisconnectEvent())
+            ClientDisconnectEvent().post()
         }
 
         val file = FabricLoader.getInstance()
@@ -143,6 +142,7 @@ object Main : ClientModInitializer {
         config = ManagedConfig(builder)
         FrillsMod.bind(config.instance)
 
+        /*
         eventBus.registerLambdaFactory("com.somefrills") { lookupInMethod, klass ->
             lookupInMethod.invoke(
                 null,
@@ -150,14 +150,23 @@ object Main : ClientModInitializer {
                 MethodHandles.lookup()
             ) as MethodHandles.Lookup
         }
+         */
 
-        eventBus.subscribe(SkyblockData::class.java)
-        eventBus.subscribe(EntityCache::class.java)
-        eventBus.subscribe(Main::class.java)
+        //eventBus.subscribe(SkyblockData::class.java)
+        //eventBus.subscribe(EntityCache::class.java)
+        //eventBus.subscribe(Main::class.java)
 
-        Features.init()
+        val modules = LoadedModules.modules
 
-        eventBus.post(GameStartEvent())
+        modules.forEach {
+            if (it is AbstractFeature) {
+                it.initialize()
+            } else {
+                FrillsEvents.register(it)
+            }
+        }
+
+        GameStartEvent().post()
 
         ClientSendMessageEvents.MODIFY_COMMAND.register(
             Aliases::convertCommand
@@ -167,5 +176,10 @@ object Main : ClientModInitializer {
             "It's time to get real, SomeFrills mod initialized in {}ms.",
             System.currentTimeMillis() - start
         )
+    }
+
+    @JvmStatic
+    fun isInitialized(): Boolean {
+        return ::config.isInitialized
     }
 }

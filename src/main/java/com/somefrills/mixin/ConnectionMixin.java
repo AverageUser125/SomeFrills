@@ -17,16 +17,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import static com.somefrills.Main.LOGGER;
-import static com.somefrills.Main.eventBus;
 
 @Mixin(Connection.class)
 public abstract class ConnectionMixin {
     @Inject(method = "genericsFtw", at = @At("HEAD"), cancellable = true)
     private static void onPacketReceive(Packet<?> packet, PacketListener listener, CallbackInfo ci) {
         if (packet instanceof ClientboundPingPacket pingPacket && pingPacket.getId() != 0) {
-            eventBus.post(new ServerTickEvent());
+            (new ServerTickEvent()).post();
         }
-        if (eventBus.post(new ReceivePacketEvent(packet)).isCancelled()) {
+        if ((new ReceivePacketEvent(packet)).post().isCancelled()) {
             ci.cancel();
         }
     }
@@ -42,7 +41,7 @@ public abstract class ConnectionMixin {
             }
         }
 
-        if (eventBus.post(new SendPacketEvent(packet)).isCancelled()) {
+        if ((new SendPacketEvent(packet)).post().isCancelled()) {
             ci.cancel();
         }
     }

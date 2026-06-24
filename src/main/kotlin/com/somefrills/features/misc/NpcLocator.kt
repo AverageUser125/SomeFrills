@@ -7,13 +7,13 @@ import com.somefrills.config.FrillsMod
 import com.somefrills.events.TickEventPost
 import com.somefrills.events.WorldRenderEvent
 import com.somefrills.features.core.Feature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.misc.RenderColor
 import com.somefrills.misc.SkyblockData
 import com.somefrills.utils.ChatUtils
 import io.github.notenoughupdates.moulconfig.ChromaColour
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.world.phys.AABB
 import net.minecraft.world.phys.Vec3
@@ -39,8 +39,8 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         onColorConfigChanged(config.color.get())
     }
 
-    @EventHandler
-    fun onWorldTick(event: TickEventPost?) {
+    @EventHandle
+    fun onWorldTick(event: TickEventPost) {
         if (!config.autoRemoveWaypoint) return
         val player = mc.player ?: return
         if (npcLocations.isEmpty()) return
@@ -53,7 +53,7 @@ object NpcLocator : Feature(FrillsMod.config.misc.npcLocator.enabled) {
         }
     }
 
-    @EventHandler
+    @EventHandle
     fun onRenderEvent(event: WorldRenderEvent) {
         for (npc in npcLocations.values) {
             val center = npc.position.add(0.5, 0.0, 0.5)

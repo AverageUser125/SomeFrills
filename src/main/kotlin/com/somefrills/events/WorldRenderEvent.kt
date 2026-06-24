@@ -24,7 +24,7 @@ import org.joml.Matrix4f
 import org.joml.Vector4f
 import kotlin.math.max
 
-class WorldRenderEvent(val camera: CameraRenderState, val matrices: PoseStack, val state: LevelRenderState?) {
+class WorldRenderEvent(val camera: CameraRenderState, val matrices: PoseStack, val state: LevelRenderState?) : FrillsEvent() {
     val tickCounter: DeltaTracker = mc.getDeltaTracker()
 
     fun drawQuad(first: Vec3, second: Vec3, third: Vec3, fourth: Vec3, consumer: VertexConsumer, color: RenderColor) {

@@ -26,8 +26,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static com.somefrills.Main.eventBus;
-
 @Mixin(LevelRenderer.class)
 public abstract class LevelRendererMixin {
 
@@ -44,7 +42,12 @@ public abstract class LevelRendererMixin {
         FramePass pass = frame.addPass("somefrills$world_render");
         this.targets.main = pass.readsAndWrites(this.targets.main);
 
-        pass.executes(() -> eventBus.post(new WorldRenderEvent(cameraState, new PoseStack(), this.levelRenderState)).draw());
+        pass.executes(() -> {
+            var event = new WorldRenderEvent(cameraState, new PoseStack(), this.levelRenderState);
+            event.post();
+            event.draw();
+        }
+        );
     }
 
     @ModifyArg(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;cullTerrain(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/culling/Frustum;Z)V"))

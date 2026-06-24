@@ -5,17 +5,17 @@ import com.somefrills.config.FrillsMod
 
 import com.somefrills.events.BlockUpdateEvent
 import com.somefrills.features.core.AreaFeature
-import com.somefrills.features.core.FrillsFeature
+import com.somefrills.modules.FrillsFeature
 import com.somefrills.misc.Area
 import com.somefrills.utils.isStainedGlass
-import meteordevelopment.orbit.EventHandler
+import com.somefrills.events.core.EventHandle
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.block.CrossCollisionBlock.*
 
 @FrillsFeature
 object GemstoneDesyncFix : AreaFeature(FrillsMod.config.mining.gemstoneDesyncFixEnabled) {
-    @EventHandler
+    @EventHandle
     private fun onBlock(event: BlockUpdateEvent) {
         val level = mc.level ?: return
         if (event.newState.isAir && event.oldState.isStainedGlass()) {
