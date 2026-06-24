@@ -140,7 +140,6 @@ object SkyblockData {
     }
 
     @EventHandle
-    @JvmStatic
     private fun onChat(event: ChatMsgEvent) {
         if (!SkyblockUtils.isInDungeons()) return
         if (!isInstanceOver && scoreRegex.matcher(event.plainMessage.trim { it <= ' ' }).matches()) {
@@ -149,7 +148,6 @@ object SkyblockData {
     }
 
     @EventHandle
-    @JvmStatic
     private fun onJoinServer(event: ServerJoinEvent) {
         isInstanceOver = false
         isInSkyblock = false
@@ -159,7 +157,6 @@ object SkyblockData {
     }
 
     @EventHandle
-    @JvmStatic
     private fun onPing(event: ReceivePacketEvent) {
         if (!showPing) return
         event.packet.let {
@@ -171,7 +168,6 @@ object SkyblockData {
     }
 
     @EventHandle(priority = EventPriority.HIGHEST)
-    @JvmStatic
     private fun onWorldTick(event: TickEventPost) {
         updateTabList()
         updateScoreboard()

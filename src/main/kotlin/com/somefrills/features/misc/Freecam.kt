@@ -133,7 +133,6 @@ object Freecam : ToggleFeature(FrillsMod.config.misc.freecam.enabled, FrillsMod.
         lastPitch = pitch
     }
 
-    @JvmStatic
     @EventHandle
     private fun onTick(event: TickEventPost) {
         val cameraEntity = mc.cameraEntity ?: return
